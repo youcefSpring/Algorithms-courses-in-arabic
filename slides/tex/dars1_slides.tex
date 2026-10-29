@@ -1,0 +1,276 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{مدخل إلى الخوارزميات}
+
+\begin{document}
+
+\cover{درس الفصل الأول}
+{مدخل إلى الخوارزميات}
+{المتغيرات والثوابت والعمليات الأساسية بلغة \textenglish{C}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تعرّف الخوارزمية وتكتب هيكل برنامج بلغة \textenglish{C}.
+            \item تصرّح بالمتغيرات والثوابت بلغة \textenglish{C}.
+            \item تستعمل التعيين والقراءة والكتابة والعمليات الحسابية.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{ما الخوارزمية؟}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{الخوارزمية}: مجموعة منتهية ومرتبة من التعليمات الواضحة،
+        تحل مشكلة انطلاقًا من \textbf{معطيات} للوصول إلى \textbf{نتائج}.
+    \end{tbox}
+    يُنسب اسمها إلى العالم المسلم \textbf{محمد بن موسى الخوارزمي}.
+\end{frame}
+
+\begin{frame}{خصائص الخوارزمية}
+    \vspace{0.6cm}
+    \begin{columns}[T]
+        \column{0.3\textwidth}
+        \begin{card}{منتهية}
+            تتوقف بعد عدد محدود من الخطوات.
+        \end{card}
+        \column{0.3\textwidth}
+        \begin{card}{دقيقة}
+            لكل تعليمة معنى واحد فقط.
+        \end{card}
+        \column{0.3\textwidth}
+        \begin{card}{صحيحة}
+            تعطي النتيجة الصحيحة دائمًا.
+        \end{card}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{من المشكلة إلى البرنامج}
+    \vspace{0.8cm}
+    \begin{center}
+        \flow[2.0cm]{{المشكلة}, {التحليل}, {الخوارزمية}, {البرنامج\\بلغة \textenglish{C}}, {التنفيذ}}
+    \end{center}
+    \vspace{0.4cm}
+    نحلل المشكلة، ثم نكتب الخوارزمية، ثم نترجمها إلى برنامج يفهمه الحاسوب.
+\end{frame}
+
+\begin{frame}{هيكل برنامج بلغة \textenglish{C}}
+    \begin{columns}[T]
+        \column{0.45\textwidth}
+        \ccode{d1/skeleton.c}
+        \column{0.5\textwidth}
+        \begin{itemize}
+            \item \code{stdio.h}: مكتبة الإدخال والإخراج.
+            \item \code{main}: نقطة بداية البرنامج.
+            \item \code{return 0}: انتهى البرنامج بنجاح.
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{المتغير}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{المتغير}: مكان في الذاكرة له \textbf{اسم} و\textbf{نوع} و\textbf{قيمة}
+        يمكن أن تتغير أثناء التنفيذ.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{المتغير في الذاكرة}
+    \vspace{0.5cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        khana/.style={draw=brandTeal, fill=white, very thick, minimum width=2.2cm,
+            minimum height=1cm, font=\Large\bfseries},
+        lafta/.style={font=\small, lawn=brandMuted}]
+        \node[khana] (a) at (0,0) {\textenglish{19}};
+        \node[khana] (b) at (-3.2,0) {\textenglish{1.75}};
+        \node[khana] (c) at (-6.4,0) {\textenglish{'A'}};
+        \node[above=2pt of a] {\code{age}};
+        \node[above=2pt of b] {\code{height}};
+        \node[above=2pt of c] {\code{letter}};
+        \node[lafta, below=2pt of a] {عدد صحيح};
+        \node[lafta, below=2pt of b] {عدد حقيقي};
+        \node[lafta, below=2pt of c] {حرف};
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.3cm}
+    المتغير \textbf{علبة} لها اسم. عند وضع قيمة جديدة فيها، \textbf{تُمحى القيمة القديمة}.
+\end{frame}
+
+\begin{frame}{أنواع المعطيات الأساسية}
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \ras{النوع} & \ras{\textenglish{C}} & \ras{الصيغة} & \ras{مثال} \\ \hline
+        عدد صحيح  & \code{int}    & \code{\%d}  & \textenglish{-3, 25} \\ \hline
+        عدد حقيقي & \code{float}  & \code{\%f}  & \textenglish{3.14} \\ \hline
+        حرف       & \code{char}   & \code{\%c}  & \textenglish{'a'} \\ \hline
+        منطقي     & \code{int}    & \code{\%d}  & \textenglish{0, 1} \\ \hline
+    \end{tabular}
+    \end{center}
+    في لغة \textenglish{C}: القيمة \textenglish{0} تعني \textbf{خطأ}، وكل قيمة أخرى تعني \textbf{صحيح}.
+\end{frame}
+
+\begin{frame}{التصريح بالمتغيرات}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d1/decl.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    في \textenglish{C}: \textbf{النوع} ثم \textbf{الاسم} ثم الفاصلة المنقوطة \code{;}.
+\end{frame}
+
+\begin{frame}{قواعد تسمية المتغيرات}
+    \begin{columns}[T]
+        \column{0.47\textwidth}
+        \begin{tbox}{\faCheckCircle\quad صحيح}
+            \code{age}\quad \code{note1}\quad \code{total\_price}
+        \end{tbox}
+        \column{0.47\textwidth}
+        \begin{obox}{\faTimesCircle\quad خطأ}
+            \code{1note}\quad \code{total price}\quad \code{int}
+        \end{obox}
+    \end{columns}
+    \vspace{0.3cm}
+    يبدأ الاسم بحرف لاتيني، دون فراغ، وليس كلمة محجوزة.\\
+    \code{Age} و\code{age} متغيران مختلفان.
+\end{frame}
+
+\begin{frame}{الثوابت}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d1/const.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \textbf{الثابت}: قيمة لها اسم و\textbf{لا تتغير} أثناء التنفيذ.
+\end{frame}
+
+\begin{frame}{التعيين}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d1/assign.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نحسب الطرف الأيمن أولًا، ثم نضع النتيجة في المتغير.\\
+    \code{x = x + 1} ليست معادلة، بل تعني: زِد \code{x} بواحد.
+\end{frame}
+
+\begin{frame}{اختصارات التعيين في \textenglish{C}}
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \ccode{d1/short.c}
+        \column{0.45\textwidth}
+        هذه الاختصارات كثيرة الاستعمال، خاصة في الحلقات.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{الكتابة على الشاشة}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d1/write.c}
+        \out{d1/write.out}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{\%d} تُستبدل بقيمة المتغير، و\code{\textbackslash n} تعني سطرًا جديدًا.
+\end{frame}
+
+\begin{frame}{القراءة من لوحة المفاتيح}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d1/read.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \begin{obox}{\faExclamationTriangle\quad انتبه}
+        في \code{scanf} نضع \code{\&} قبل اسم المتغير.
+    \end{obox}
+\end{frame}
+
+\begin{frame}{العمليات الحسابية}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{العملية} & \ras{\textenglish{C}} & \ras{مثال} \\ \hline
+        جمع، طرح، ضرب & \code{+ - *} & \code{7 * 2} $\to$ \textenglish{14} \\ \hline
+        القسمة        & \code{/}     & \code{7.0 / 2} $\to$ \textenglish{3.5} \\ \hline
+        القسمة الصحيحة & \code{/}     & \code{7 / 2} $\to$ \textenglish{3} \\ \hline
+        باقي القسمة   & \code{\%}    & \code{7 \% 2} $\to$ \textenglish{1} \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{القسمة بين عددين صحيحين}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d1/div.c}
+        \column{0.4\textwidth}
+        \out{d1/div.out}
+    \end{columns}
+    \vspace{0.3cm}
+    \code{int / int} تحذف الجزء العشري. نكتب \code{(float)} للحصول على نتيجة حقيقية.
+\end{frame}
+
+\begin{frame}{مثال كامل: مساحة دائرة}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d1/circle.c}
+    \end{minipage}
+    \end{center}
+\end{frame}
+
+\begin{frame}{تنفيذ البرنامج}
+    \vspace{0.5cm}
+    \begin{center}
+        \begin{minipage}{0.5\textwidth}
+            \out{d1/circle.out}
+        \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    يكتب المستخدم \textenglish{2}، فيعرض البرنامج المساحة برقمين بعد الفاصلة (\code{\%.2f}).
+\end{frame}
+
+\begin{frame}{جدول التتبع: تبديل قيمتين}
+    \begin{columns}[T]
+        \column{0.38\textwidth}
+        \ccode{d1/swap.c}
+        \column{0.55\textwidth}
+        \begin{center}
+        \begin{tabular}{|c|c|c|c|}
+            \hline
+            \ras{السطر} & \ras{\code{a}} & \ras{\code{b}} & \ras{\code{t}} \\ \hline
+            1 & 5 & 8 & -- \\ \hline
+            2 & 5 & 8 & \cell{tealDeep}{\textbf{5}} \\ \hline
+            3 & \cell{tealDeep}{\textbf{8}} & 8 & 5 \\ \hline
+            4 & 8 & \cell{tealDeep}{\textbf{5}} & 5 \\ \hline
+        \end{tabular}
+        \end{center}
+    \end{columns}
+    \vspace{0.2cm}
+    نحتاج إلى متغير مساعد \code{t}، لأن التعيين يمحو القيمة القديمة.
+\end{frame}
+
+\input{examples_d1}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item نسيان الفاصلة المنقوطة \code{;} أو الرمز \code{\&} في \code{scanf}.
+            \item صيغة لا توافق النوع: قراءة \code{float} بالصيغة \code{\%d}.
+            \item استعمال متغير قبل إعطائه قيمة.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item الخوارزمية تعليمات منتهية ومرتبة ودقيقة.
+            \item المتغير قيمته تتغير، والثابت قيمته لا تتغير.
+            \item التعيين \code{=}، القراءة \code{scanf}، الكتابة \code{printf}.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,302 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{الدوال}
+
+\begin{document}
+
+\cover{درس الفصل السابع}
+{الدوال}
+{التعريف، الاستدعاء، المعاملات، والقيمة المعادة}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تعرّف دالة وتستدعيها من الدالة الرئيسية.
+            \item تستعمل المعاملات والقيمة المعادة \code{return}.
+            \item تفرّق بين المتغير المحلي والمتغير العام، وبين التمرير بالقيمة والتمرير بالعنوان.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{الدالة}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{الدالة}: مجموعة من التعليمات لها اسم، تأخذ \textbf{معاملات}، وقد تعيد \textbf{نتيجة}. نكتبها مرة واحدة ونستدعيها عدة مرات.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{لماذا الدوال؟}
+    \vspace{0.6cm}
+    \begin{columns}[T]
+        \column{0.3\textwidth}
+        \begin{card}{إعادة الاستعمال}
+            نكتب الكود مرة، ونستعمله عدة مرات.
+        \end{card}
+        \column{0.3\textwidth}
+        \begin{card}{التنظيم}
+            نقسّم المشكلة الكبيرة إلى أجزاء صغيرة.
+        \end{card}
+        \column{0.3\textwidth}
+        \begin{card}{التصحيح}
+            نختبر كل دالة وحدها.
+        \end{card}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أجزاء الدالة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d7/l01.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{int} نوع النتيجة، \code{square} اسم الدالة، \code{x} المعامل.
+\end{frame}
+
+\begin{frame}[t]{استدعاء دالة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l02.c}
+        \column{0.41\textwidth}
+        {\small عند الاستدعاء، تأخذ \code{x} قيمة المعامل الفعلي.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{مسار التنفيذ عند الاستدعاء}
+    \vspace{0.6cm}
+    \begin{center}
+        \flow[2.3cm]{{\code{main}}, {استدعاء\\\code{square(5)}}, {تنفيذ\\\code{return 25}}, {العودة إلى\\\code{main}}}
+    \end{center}
+    \vspace{0.3cm}
+    يتوقف \code{main} مؤقتًا، تُنفذ الدالة، ثم نعود بالنتيجة.
+\end{frame}
+
+\begin{frame}[t]{دالة دون نتيجة: \textenglish{void}}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l03.c}
+        \column{0.41\textwidth}
+        {\small \code{void}: الدالة تنفذ عملًا ولا تعيد قيمة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{عدة معاملات}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l04.c}
+        \column{0.41\textwidth}
+        {\small نفصل بين المعاملات بفاصلة، ولكل معامل نوعه.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{النموذج الأولي للدالة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l05.c}
+        \column{0.41\textwidth}
+        {\small نصرّح بالدالة قبل \code{main}، ونكتب تعريفها بعده.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المتغيرات المحلية}
+    \begin{columns}[T]
+        \column{0.63\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l06.c}
+        \column{0.34\textwidth}
+        {\small المتغير المحلي يعيش داخل الدالة فقط. نتجنب المتغيرات العامة قدر الإمكان.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{التمرير بالقيمة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l07.c}
+        \column{0.41\textwidth}
+        {\small الدالة تعمل على \textbf{نسخة} من \code{a}، فلا تتغير \code{a}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{دالة تعيد صحيح أو خطأ}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l08.c}
+        \column{0.41\textwidth}
+        {\small \code{return} توقف الدالة فورًا.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{جدول كمعامل}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/l09.c}
+        \column{0.41\textwidth}
+        {\small نمرر الجدول وحجمه. الجدول يُمرَّر بعنوانه، فتعديله داخل الدالة يظهر في \code{main}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/l09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{دوال جاهزة: \textenglish{math.h}}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{الدالة} & \ras{دورها} & \ras{مثال} \\ \hline
+        \code{sqrt(x)} & الجذر التربيعي & \code{sqrt(16)} $\to$ \textenglish{4} \\ \hline
+        \code{pow(x, y)} & القوة & \code{pow(2, 10)} $\to$ \textenglish{1024} \\ \hline
+        \code{fabs(x)} & القيمة المطلقة & \code{fabs(-3.5)} $\to$ \textenglish{3.5} \\ \hline
+    \end{tabular}
+    \end{center}
+    نترجم البرنامج مع \code{-lm}: \code{gcc prog.c -lm}.
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الصحة، الرياضة، الطقس، النقل، التجارة الإلكترونية، ألعاب الفيديو، الطاقة، الأمن السيبراني، الملاحة \textenglish{GPS}، البيئة.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الصحة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex01.c}
+        \column{0.41\textwidth}
+        {\small \textbf{مؤشر كتلة الجسم}: دالة تحسب المؤشر، ودالة أخرى تعطي التصنيف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الرياضة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex02.c}
+        \column{0.41\textwidth}
+        {\small \textbf{نقاط المباراة}: دالة تعيد نقاط الفريق حسب النتيجة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: الطقس}
+    \begin{columns}[T]
+        \column{0.67\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex03.c}
+        \column{0.30\textwidth}
+        {\small \textbf{جدول تحويل}: نستدعي دالة التحويل داخل حلقة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: النقل}
+    \begin{columns}[T]
+        \column{0.67\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex04.c}
+        \column{0.30\textwidth}
+        {\small \textbf{مدة الرحلة}: دالة تحسب المدة بالدقائق، ودالة تعرضها بالساعات والدقائق.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex05.c}
+        \column{0.41\textwidth}
+        {\small \textbf{السعر النهائي}: دالتان: التخفيض ثم إضافة الرسم على القيمة المضافة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.59\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex06.c}
+        \column{0.38\textwidth}
+        {\small \textbf{رمي النرد}: دالة ترجع عددًا عشوائيًا بين 1 و6 باستعمال \code{rand}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: الطاقة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex07.c}
+        \column{0.41\textwidth}
+        {\small \textbf{فاتورة بالشرائح}: سعر الكيلوواط الساعي يرتفع بعد 125 كيلوواط ساعي.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: الأمن السيبراني}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex08.c}
+        \column{0.41\textwidth}
+        {\small \textbf{كلمة مرور قوية}: دالة تعيد 1 إذا كانت كلمة المرور قوية.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: الملاحة \textenglish{GPS}}
+    \begin{columns}[T]
+        \column{0.67\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex09.c}
+        \column{0.30\textwidth}
+        {\small \textbf{المسافة بين نقطتين}: دالة تحسب المسافة بين نقطتين على خريطة باستعمال \code{sqrt}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: البيئة}
+    \begin{columns}[T]
+        \column{0.60\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d7/ex10.c}
+        \column{0.37\textwidth}
+        {\small \textbf{انبعاثات حسب الوسيلة}: دالة فيها \code{switch} تعيد كمية ثاني أكسيد الكربون.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d7/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item نسيان \code{return} في دالة ليست \code{void}.
+            \item استدعاء دالة قبل التصريح بها دون نموذج أولي.
+            \item عدد المعاملات أو أنواعها لا يوافق تعريف الدالة.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item الدالة: اسم، معاملات، ونوع النتيجة.
+            \item \code{return} تعيد النتيجة، و\code{void} لدالة دون نتيجة.
+            \item المعاملات العادية تُمرَّر بالقيمة، والجداول تُمرَّر بالعنوان.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

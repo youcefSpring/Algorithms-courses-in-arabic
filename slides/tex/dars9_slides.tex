@@ -1,0 +1,292 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{الهياكل}
+
+\begin{document}
+
+\cover{درس الفصل التاسع}
+{الهياكل}
+{تجميع معطيات مختلفة الأنواع: \textenglish{struct} و\textenglish{typedef}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تعرّف هيكلًا بـ\code{struct} وتصل إلى حقوله.
+            \item تستعمل جدولًا من الهياكل.
+            \item تمرر هيكلًا إلى دالة وتعيده منها.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{الهيكل}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{الهيكل} \textenglish{(struct)}: نوع جديد يجمع عدة \textbf{حقول} قد تكون من أنواع مختلفة، تحت اسم واحد.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{لماذا الهياكل؟}
+    \vspace{0.4cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        haql/.style={draw=brandTeal, fill=white, thick, minimum width=3.2cm,
+            minimum height=0.6cm, font=\small},
+        ism/.style={font=\small, lawn=brandMuted}]
+        \node[draw=brandOrange, very thick, rounded corners=4pt, fill=brandOrange!10,
+            minimum width=3.8cm, minimum height=2.7cm] (s) at (0, -0.9) {};
+        \node[font=\bfseries] at (0, 0.75) {\code{Student s}};
+        \node[haql] (a) at (0, 0)    {\textenglish{"Amina"}};
+        \node[haql] (b) at (0, -0.85) {\textenglish{19}};
+        \node[haql] (c) at (0, -1.7) {\textenglish{14.5}};
+        \node[ism, left=0.5cm of a] {\code{name} \quad \code{char[30]}};
+        \node[ism, left=0.5cm of b] {\code{age} \quad \code{int}};
+        \node[ism, left=0.5cm of c] {\code{avg} \quad \code{float}};
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.2cm}
+    معلومات الطالب مختلفة الأنواع، لكنها تبقى معًا في متغير واحد.
+\end{frame}
+
+\begin{frame}{تعريف هيكل}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d9/l01.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نعرّف الهيكل خارج \code{main}، عادة في بداية البرنامج.
+\end{frame}
+
+\begin{frame}[t]{التصريح والوصول إلى الحقول}
+    \begin{columns}[T]
+        \column{0.62\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/l02.c}
+        \column{0.35\textwidth}
+        {\small نصل إلى الحقل بالنقطة: \code{s.age}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/l02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{التهيئة عند التصريح}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d9/l03.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    يمكن نسخ هيكل كاملًا بالتعيين، لكن لا يمكن مقارنته بـ\code{==}.
+\end{frame}
+
+\begin{frame}{تبسيط الاسم بـ\textenglish{typedef}}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d9/l04.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{typedef} تعطي اسمًا قصيرًا للنوع الجديد.
+\end{frame}
+
+\begin{frame}{قراءة حقول هيكل}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d9/l05.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نضع \code{\&} قبل الحقل، كما نفعل مع أي متغير.
+\end{frame}
+
+\begin{frame}[t]{جدول من الهياكل}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/l06.c}
+        \column{0.33\textwidth}
+        {\small \code{c[i].avg}: حقل \code{avg} للعنصر \code{i}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/l06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{هيكل كمعامل لدالة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/l07.c}
+        \column{0.41\textwidth}
+        {\small الهيكل يُمرَّر بالقيمة: الدالة تعمل على نسخة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/l07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{دالة تعيد هيكلًا}
+    \begin{columns}[T]
+        \column{0.59\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/l08.c}
+        \column{0.38\textwidth}
+        {\small نعيد عدة قيم مرة واحدة داخل هيكل.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/l08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{هيكل داخل هيكل}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/l09.c}
+        \column{0.33\textwidth}
+        {\small نستعمل نقطتين: \code{p.birth.y}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/l09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{أفضل طالب}
+    \begin{columns}[T]
+        \column{0.66\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/l10.c}
+        \column{0.31\textwidth}
+        {\small نحفظ فهرس الأفضل، ونقارن حقل \code{avg}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/l10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الصحة، الرياضة، الطقس، النقل، التجارة الإلكترونية، ألعاب الفيديو، الهواتف الذكية، الملاحة \textenglish{GPS}، التعليم الإلكتروني، البيئة.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الصحة}
+    \begin{columns}[T]
+        \column{0.72\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex01.c}
+        \column{0.25\textwidth}
+        {\small \textbf{حرارة المرضى}: نعرض المرضى الذين لديهم حمى (أكثر من 38).\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الرياضة}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex02.c}
+        \column{0.33\textwidth}
+        {\small \textbf{هداف الفريق}: نبحث عن اللاعب صاحب أكبر عدد من الأهداف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: الطقس}
+    \begin{columns}[T]
+        \column{0.71\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex03.c}
+        \column{0.26\textwidth}
+        {\small \textbf{محطات الرصد}: نحسب الفرق بين الحرارة العظمى والصغرى في كل مدينة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: النقل}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex04.c}
+        \column{0.41\textwidth}
+        {\small \textbf{وقت وصول الرحلة}: دالة تحسب وقت الوصول من وقت الإقلاع والمدة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.69\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex05.c}
+        \column{0.28\textwidth}
+        {\small \textbf{إدارة المخزون}: نحسب قيمة المخزون وننبه للمنتجات التي قاربت النفاد.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.66\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex06.c}
+        \column{0.31\textwidth}
+        {\small \textbf{جولة قتال}: دالة تعدّل نقاط حياة الشخصية بعد الهجوم وتعيدها.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: الهواتف الذكية}
+    \begin{columns}[T]
+        \column{0.67\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex07.c}
+        \column{0.30\textwidth}
+        {\small \textbf{أفضل تطبيق}: نبحث عن التطبيق صاحب أعلى تقييم، ونحسب معدل التقييمات.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: الملاحة \textenglish{GPS}}
+    \begin{columns}[T]
+        \column{0.62\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex08.c}
+        \column{0.35\textwidth}
+        {\small \textbf{المسافة بين مدينتين}: كل مدينة هيكل فيه إحداثيات، ودالة تحسب المسافة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: التعليم الإلكتروني}
+    \begin{columns}[T]
+        \column{0.70\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex09.c}
+        \column{0.27\textwidth}
+        {\small \textbf{تقدّم الدروس}: نحسب نسبة إنجاز كل دورة على منصة تعليمية.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: البيئة}
+    \begin{columns}[T]
+        \column{0.68\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d9/ex10.c}
+        \column{0.29\textwidth}
+        {\small \textbf{انبعاثات الأسطول}: مجموع انبعاثات سيارات شركة خلال سنة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d9/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item نسيان الفاصلة المنقوطة بعد \code{\}} في تعريف الهيكل.
+            \item مقارنة هيكلين بـ\code{==}: نقارن الحقول واحدًا واحدًا.
+            \item \code{s.name = \"Ali\"}: نستعمل \code{strcpy} للحقل من نوع سلسلة.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item الهيكل يجمع حقولًا مختلفة الأنواع في متغير واحد.
+            \item نصل إلى الحقل بالنقطة \code{s.field}، و\code{typedef} تبسط الاسم.
+            \item يمكن إنشاء جداول من الهياكل، وتمريرها إلى الدوال وإعادتها منها.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

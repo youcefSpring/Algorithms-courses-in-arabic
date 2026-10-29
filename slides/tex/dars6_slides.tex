@@ -1,0 +1,281 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{السلاسل النصية}
+
+\begin{document}
+
+\cover{درس الفصل السادس}
+{السلاسل النصية}
+{الحروف، السلاسل، ودوال المكتبة \textenglish{string.h}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تصرّح بسلسلة نصية وتعرف دور الحرف \code{'\textbackslash 0'}.
+            \item تقرأ سلسلة وتعرضها، وتمر على حروفها بحلقة.
+            \item تستعمل \code{strlen} و\code{strcpy} و\code{strcat} و\code{strcmp}.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{السلسلة النصية}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{السلسلة}: جدول من الحروف \code{char}، ينتهي بالحرف الخاص \code{'\textbackslash 0'} الذي يدل على نهايتها.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{السلسلة في الذاكرة}
+    \vspace{0.5cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        khana/.style={draw=brandTeal, fill=white, very thick, minimum width=1.3cm,
+            minimum height=0.9cm, font=\large\bfseries},
+        nihaya/.style={khana, draw=brandOrange, fill=brandOrange!15},
+        fahras/.style={font=\small, lawn=brandMuted}]
+        \foreach \c [count=\i from 0] in {H, e, l, l, o} {
+            \node[khana] (k\i) at (1.3*\i, 0) {\textenglish{\c}};
+            \node[fahras, below=3pt of k\i] {\code{s[\i]}};
+        }
+        \node[nihaya] (k5) at (6.5, 0) {\code{\textbackslash 0}};
+        \node[fahras, below=3pt of k5] {\code{s[5]}};
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.3cm}
+    السلسلة \code{"Hello"} فيها 5 حروف، لكنها تحتاج إلى 6 خانات.
+\end{frame}
+
+\begin{frame}{التصريح بسلسلة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d6/l01.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نترك دائمًا خانة إضافية للحرف \code{'\textbackslash 0'}.
+\end{frame}
+
+\begin{frame}{عرض سلسلة وقراءتها}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d6/l02.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{scanf} تتوقف عند أول فراغ. لقراءة سطر كامل نستعمل \code{fgets}.
+\end{frame}
+
+\begin{frame}{قراءة سطر كامل}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d6/l03.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{fgets} تقرأ 99 حرفًا على الأكثر، ولا تتجاوز حجم الجدول.
+\end{frame}
+
+\begin{frame}[t]{المرور على حروف السلسلة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/l04.c}
+        \column{0.41\textwidth}
+        {\small نتوقف عند الحرف \code{'\textbackslash 0'}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/l04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{دوال المكتبة \textenglish{string.h}}
+    \begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        \ras{الدالة} & \ras{دورها} \\ \hline
+        \code{strlen(s)} & طول السلسلة دون \code{'\textbackslash 0'} \\ \hline
+        \code{strcpy(d, s)} & نسخ \code{s} في \code{d} \\ \hline
+        \code{strcat(d, s)} & إلحاق \code{s} بنهاية \code{d} \\ \hline
+        \code{strcmp(a, b)} & مقارنة: \textenglish{0} إذا كانتا متساويتين \\ \hline
+    \end{tabular}
+    \end{center}
+    نضيف \code{\#include <string.h>} في بداية البرنامج.
+\end{frame}
+
+\begin{frame}[t]{\textenglish{strlen} و\textenglish{strcpy} و\textenglish{strcat}}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/l05.c}
+        \column{0.41\textwidth}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/l05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المقارنة بـ\textenglish{strcmp}}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/l06.c}
+        \column{0.41\textwidth}
+        {\small نتيجة سالبة: الأولى قبل الثانية في الترتيب الأبجدي.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/l06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{تحويل الحروف: \textenglish{ctype.h}}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/l07.c}
+        \column{0.41\textwidth}
+        {\small \code{toupper}، \code{tolower}، \code{isdigit}، \code{isalpha}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/l07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{لا نستعمل = ولا == مع السلاسل}
+    \begin{center}
+    \begin{minipage}{0.7\textwidth}
+        \ccode{d6/l08.c}
+    \end{minipage}
+    \end{center}
+    \begin{obox}{\faExclamationTriangle\quad انتبه}
+        السلسلة جدول: ننسخها بـ\code{strcpy} ونقارنها بـ\code{strcmp}.
+    \end{obox}
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الأمن السيبراني، الشبكات الاجتماعية، التجارة الإلكترونية، الصحة، البريد الإلكتروني، النقل، الذكاء الاصطناعي، ألعاب الفيديو، علم الوراثة، الهواتف الذكية.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الأمن السيبراني}
+    \begin{columns}[T]
+        \column{0.60\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex01.c}
+        \column{0.37\textwidth}
+        {\small \textbf{فحص كلمة المرور}: نعدّ الحروف الكبيرة والأرقام ونتحقق من الطول.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الشبكات الاجتماعية}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex02.c}
+        \column{0.41\textwidth}
+        {\small \textbf{عدّ الوسوم}: نعدّ الوسوم (\code{\#}) في منشور.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex03.c}
+        \column{0.41\textwidth}
+        {\small \textbf{رقم الطلبية}: نبني مرجع الطلبية بإلحاق سلاسل بـ\code{strcat}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: الصحة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex04.c}
+        \column{0.41\textwidth}
+        {\small \textbf{بطاقة مريض}: نكتب اسم المريض بحروف كبيرة في البطاقة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: البريد الإلكتروني}
+    \begin{columns}[T]
+        \column{0.58\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex05.c}
+        \column{0.39\textwidth}
+        {\small \textbf{صحة العنوان}: العنوان صحيح إذا احتوى على \code{@} واحدة، ثم نقطة بعدها.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: النقل}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex06.c}
+        \column{0.41\textwidth}
+        {\small \textbf{لوحة الترقيم}: الرقمان الأخيران في لوحة الترقيم يدلان على الولاية.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: الذكاء الاصطناعي}
+    \begin{columns}[T]
+        \column{0.61\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex07.c}
+        \column{0.36\textwidth}
+        {\small \textbf{عدّ الكلمات}: أول خطوة في معالجة اللغات: تقسيم الجملة إلى كلمات.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.57\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex08.c}
+        \column{0.40\textwidth}
+        {\small \textbf{لعبة الكلمات المتناظرة}: الكلمة متناظرة إذا قُرئت من اليمين ومن اليسار بالطريقة نفسها.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: علم الوراثة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex09.c}
+        \column{0.41\textwidth}
+        {\small \textbf{تحليل الحمض النووي}: نسبة الحرفين \code{G} و\code{C} في سلسلة \textenglish{DNA}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: الهواتف الذكية}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d6/ex10.c}
+        \column{0.41\textwidth}
+        {\small \textbf{إخفاء رقم الهاتف}: نخفي الأرقام الوسطى لحماية الخصوصية.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d6/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item نسيان الخانة الإضافية للحرف \code{'\textbackslash 0'}.
+            \item استعمال \code{=} بدل \code{strcpy}، أو \code{==} بدل \code{strcmp}.
+            \item وضع \code{\&} قبل اسم السلسلة في \code{scanf}.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item السلسلة جدول حروف ينتهي بـ\code{'\textbackslash 0'}.
+            \item نمر على الحروف بحلقة حتى \code{'\textbackslash 0'}.
+            \item \code{string.h}: \code{strlen}، \code{strcpy}، \code{strcat}، \code{strcmp}.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

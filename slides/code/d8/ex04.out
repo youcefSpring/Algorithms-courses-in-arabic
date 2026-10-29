@@ -1,0 +1,7 @@
+Disk 1: A -> C
+Disk 2: A -> B
+Disk 1: C -> B
+Disk 3: A -> C
+Disk 1: B -> A
+Disk 2: B -> C
+Disk 1: A -> C

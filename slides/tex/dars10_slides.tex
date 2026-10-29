@@ -1,0 +1,284 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{المؤشرات}
+
+\begin{document}
+
+\cover{درس الفصل العاشر}
+{المؤشرات}
+{العناوين، التمرير بالعنوان، الجداول، والحجز الديناميكي \textenglish{malloc}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تستعمل العاملين \code{\&} و\code{*} مع المؤشرات.
+            \item تكتب دالة تعدّل متغيرات الدالة المستدعية.
+            \item تحجز ذاكرة ديناميكيًا بـ\code{malloc} وتحررها بـ\code{free}.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{المؤشر}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{المؤشر}: متغير يحتوي على \textbf{عنوان} متغير آخر في الذاكرة، بدل أن يحتوي على قيمة عادية.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{المؤشر في الذاكرة}
+    \vspace{0.4cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        khana/.style={draw=brandTeal, fill=white, very thick, minimum width=2.4cm,
+            minimum height=0.9cm, font=\bfseries},
+        mu/.style={khana, draw=brandOrange, fill=brandOrange!12},
+        lafta/.style={font=\small, lawn=brandMuted}]
+        \node[khana] (x) at (0, 0)  {\textenglish{5}};
+        \node[mu]    (p) at (-6, 0) {\textenglish{0x7ff0}};
+        \node[above=3pt of x] {\code{int x}};
+        \node[above=3pt of p] {\code{int *p}};
+        \node[lafta, below=3pt of x] {العنوان \textenglish{0x7ff0}};
+        \node[lafta, below=3pt of p] {يحتوي على عنوان \code{x}};
+        \draw[-{Stealth[length=3mm]}, very thick, brandOrange] (p) -- (x);
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.3cm}
+    نقول: المؤشر \code{p} \textbf{يشير} إلى المتغير \code{x}.
+\end{frame}
+
+\begin{frame}{عاملا المؤشرات}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{العامل} & \ras{المعنى} & \ras{مثال} \\ \hline
+        \code{\&} & عنوان المتغير & \code{p = \&x;} \\ \hline
+        \code{*} & القيمة الموجودة في العنوان & \code{*p = 10;} \\ \hline
+        \code{int *p} & التصريح بمؤشر نحو \code{int} & \code{int *p = NULL;} \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}[t]{أول مؤشر}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/l01.c}
+        \column{0.41\textwidth}
+        {\small \code{*p} و\code{x} هما الخانة نفسها في الذاكرة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/l01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{التمرير بالعنوان: التبديل}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/l02.c}
+        \column{0.41\textwidth}
+        {\small نمرر \textbf{العنوان}، فتستطيع الدالة تغيير \code{x} و\code{y}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/l02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{لماذا \textenglish{\&} في \textenglish{scanf}؟}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d10/l03.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{scanf} تكتب في المتغير، لذلك تحتاج إلى عنوانه.
+\end{frame}
+
+\begin{frame}[t]{دالة تعيد نتيجتين}
+    \begin{columns}[T]
+        \column{0.60\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/l04.c}
+        \column{0.37\textwidth}
+        {\small المؤشرات تسمح لدالة بإعادة عدة نتائج.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/l04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المؤشرات والجداول}
+    \begin{columns}[T]
+        \column{0.57\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/l05.c}
+        \column{0.40\textwidth}
+        {\small اسم الجدول هو عنوان أول عنصر. \code{*(p + i)} تساوي \code{T[i]}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/l05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{مؤشر نحو هيكل: \textenglish{->}}
+    \begin{columns}[T]
+        \column{0.62\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/l06.c}
+        \column{0.35\textwidth}
+        {\small \code{p->age} اختصار لـ\code{(*p).age}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/l06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{الحجز الديناميكي: \textenglish{malloc}}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/l07.c}
+        \column{0.41\textwidth}
+        {\small الحجم يُحدد أثناء التنفيذ. نحرر الذاكرة بـ\code{free}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/l07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{مؤشرات خطيرة}
+    \begin{center}
+    \begin{minipage}{0.7\textwidth}
+        \ccode{d10/l08.c}
+    \end{minipage}
+    \end{center}
+    \begin{obox}{\faExclamationTriangle\quad انتبه}
+        نهيئ كل مؤشر، ونتحقق من \code{NULL} قبل استعماله.
+    \end{obox}
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الصحة، الرياضة، الطقس، ألعاب الفيديو، التجارة الإلكترونية، الهواتف الذكية، البيانات الضخمة، معالجة النصوص، النقل، الطاقة.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الصحة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex01.c}
+        \column{0.41\textwidth}
+        {\small \textbf{تحديث حرارة مريض}: دالة تعدّل الحرارة وتعيد 1 إذا ظهرت الحمى.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الرياضة}
+    \begin{columns}[T]
+        \column{0.72\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex02.c}
+        \column{0.25\textwidth}
+        {\small \textbf{إحصائيات السباق}: دالة واحدة تعيد أفضل زمن والمعدل.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: الطقس}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex03.c}
+        \column{0.41\textwidth}
+        {\small \textbf{تحويل جدول في مكانه}: نمر على الجدول بمؤشر ونحوّل كل قيمة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex04.c}
+        \column{0.41\textwidth}
+        {\small \textbf{تحريك اللاعب}: دالة تغيّر الإحداثيين معًا عبر مؤشرين.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex05.c}
+        \column{0.41\textwidth}
+        {\small \textbf{كوبون التخفيض}: الدالة تعدّل السعر مباشرة عبر عنوانه.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: الهواتف الذكية}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex06.c}
+        \column{0.32\textwidth}
+        {\small \textbf{استهلاك البطارية}: مؤشر نحو هيكل الهاتف واستعمال \code{->}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: البيانات الضخمة}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex07.c}
+        \column{0.32\textwidth}
+        {\small \textbf{جدول بحجم متغير}: عدد القياسات يُعرف أثناء التنفيذ، فنستعمل \code{malloc}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: معالجة النصوص}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex08.c}
+        \column{0.41\textwidth}
+        {\small \textbf{طول نص بمؤشر}: نتقدم بالمؤشر حرفًا حرفًا حتى نهاية السلسلة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: النقل}
+    \begin{columns}[T]
+        \column{0.72\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex09.c}
+        \column{0.25\textwidth}
+        {\small \textbf{أسرع مركبة}: دالة تعيد مؤشرًا نحو المركبة الأسرع في الجدول.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: الطاقة}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d10/ex10.c}
+        \column{0.32\textwidth}
+        {\small \textbf{ذروة الاستهلاك}: دالة تحسب المجموع وساعة الذروة عبر مؤشرين.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d10/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item استعمال مؤشر غير مهيأ، أو مؤشر يساوي \code{NULL}.
+            \item نسيان \code{\&} عند تمرير متغير إلى دالة تنتظر مؤشرًا.
+            \item نسيان \code{free} بعد \code{malloc}، أو استعمال الذاكرة بعد تحريرها.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item المؤشر يحتوي على عنوان: \code{\&x} العنوان، و\code{*p} القيمة.
+            \item التمرير بالعنوان يسمح للدالة بتعديل متغيرات المستدعي.
+            \item \code{malloc} تحجز الذاكرة أثناء التنفيذ، و\code{free} تحررها.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

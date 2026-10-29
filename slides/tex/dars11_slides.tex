@@ -1,0 +1,261 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{الملفات}
+
+\begin{document}
+
+\cover{درس الفصل الحادي عشر}
+{الملفات}
+{حفظ المعطيات وقراءتها: \textenglish{fopen}، \textenglish{fprintf}، \textenglish{fscanf}، \textenglish{fgets}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تفتح ملفًا بالنمط المناسب وتغلقه بـ\code{fclose}.
+            \item تكتب في ملف نصي بـ\code{fprintf} وتقرأ منه بـ\code{fscanf} و\code{fgets}.
+            \item تتحقق من نجاح فتح الملف قبل استعماله.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{لماذا الملفات؟}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        المتغيرات تُمحى عندما ينتهي البرنامج. \textbf{الملف} يحفظ المعطيات على القرص، فنجدها في التنفيذ التالي.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{مراحل العمل مع ملف}
+    \vspace{0.8cm}
+    \begin{center}
+        \flow[3cm]{{الفتح\\\code{fopen}}, {القراءة أو الكتابة\\\code{fprintf / fscanf}}, {الإغلاق\\\code{fclose}}}
+    \end{center}
+    \vspace{0.4cm}
+    نتعامل مع الملف عبر مؤشر من النوع \code{FILE *}.
+\end{frame}
+
+\begin{frame}{أنماط الفتح}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{النمط} & \ras{المعنى} & \ras{إذا لم يوجد الملف} \\ \hline
+        \code{"r"} & القراءة & تعيد \code{NULL} \\ \hline
+        \code{"w"} & الكتابة (يمحو المحتوى) & يُنشأ ملف جديد \\ \hline
+        \code{"a"} & الإضافة في نهاية الملف & يُنشأ ملف جديد \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{فتح ملف وإغلاقه}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d11/l01.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نتحقق دائمًا من \code{NULL}: قد لا يوجد الملف.
+\end{frame}
+
+\begin{frame}[t]{الكتابة بـ\textenglish{fprintf}}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/l02.c}
+        \column{0.41\textwidth}
+        {\small \code{fprintf} مثل \code{printf}، لكنها تكتب في الملف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/l02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{القراءة بـ\textenglish{fscanf}}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/l03.c}
+        \column{0.32\textwidth}
+        {\small \code{fscanf} تعيد عدد القيم المقروءة: نتوقف عندما لا تعيد 2.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/l03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{قراءة سطر بسطر بـ\textenglish{fgets}}
+    \begin{columns}[T]
+        \column{0.68\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/l04.c}
+        \column{0.29\textwidth}
+        {\small \code{fgets} تعيد \code{NULL} عند نهاية الملف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/l04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{الإضافة في نهاية ملف}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/l05.c}
+        \column{0.41\textwidth}
+        {\small النمط \code{"a"} يحفظ المحتوى القديم ويضيف بعده.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/l05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{حرفًا حرفًا: \textenglish{fgetc} و\textenglish{fputc}}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/l06.c}
+        \column{0.33\textwidth}
+        {\small \code{EOF}: قيمة خاصة تعني نهاية الملف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/l06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{لا ننسى التحقق والإغلاق}
+    \begin{center}
+    \begin{minipage}{0.7\textwidth}
+        \ccode{d11/l07.c}
+    \end{minipage}
+    \end{center}
+    \begin{obox}{\faExclamationTriangle\quad انتبه}
+        نتحقق من \code{NULL} بعد كل \code{fopen}، ونغلق كل ملف بـ\code{fclose}.
+    \end{obox}
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الصحة، الرياضة، الطقس، النقل، التجارة الإلكترونية، ألعاب الفيديو، الأمن السيبراني، الشبكات الاجتماعية، الطاقة، البيئة.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الصحة}
+    \begin{columns}[T]
+        \column{0.69\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex01.c}
+        \column{0.28\textwidth}
+        {\small \textbf{سجل الحرارة}: نحفظ قياسات الحرارة في ملف، ثم نقرؤها ونحسب المعدل.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الرياضة}
+    \begin{columns}[T]
+        \column{0.72\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex02.c}
+        \column{0.25\textwidth}
+        {\small \textbf{أفضل نتيجة}: نقرأ نتائج اللاعبين من ملف ونبحث عن الأفضل.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: الطقس}
+    \begin{columns}[T]
+        \column{0.57\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex03.c}
+        \column{0.40\textwidth}
+        {\small \textbf{ملف \textenglish{CSV}}: نكتب الحرارة اليومية بصيغة \textenglish{CSV} ثم نعدّ الأيام الحارة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: النقل}
+    \begin{columns}[T]
+        \column{0.62\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex04.c}
+        \column{0.35\textwidth}
+        {\small \textbf{سجل الرحلات}: كل رحلة جديدة تُضاف في نهاية الملف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex05.c}
+        \column{0.32\textwidth}
+        {\small \textbf{إنشاء فاتورة}: نكتب الفاتورة في ملف نصي جاهز للطباعة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.70\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex06.c}
+        \column{0.27\textwidth}
+        {\small \textbf{حفظ اللعبة}: نحفظ المستوى ونقاط الحياة، ثم نحمّلهما في جلسة جديدة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: الأمن السيبراني}
+    \begin{columns}[T]
+        \column{0.62\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex07.c}
+        \column{0.35\textwidth}
+        {\small \textbf{محاولات الدخول}: نعدّ سطور الفشل \code{FAIL} في سجل الدخول.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: الشبكات الاجتماعية}
+    \begin{columns}[T]
+        \column{0.63\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex08.c}
+        \column{0.34\textwidth}
+        {\small \textbf{إحصاء المنشورات}: نعدّ المنشورات (السطور) والكلمات (الفراغات + السطور).\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: الطاقة}
+    \begin{columns}[T]
+        \column{0.63\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex09.c}
+        \column{0.34\textwidth}
+        {\small \textbf{قراءات العداد}: نقرأ قراءات العداد الشهرية ونحسب استهلاك كل شهر.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: البيئة}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d11/ex10.c}
+        \column{0.32\textwidth}
+        {\small \textbf{نسخة احتياطية}: ننسخ ملفًا حرفًا حرفًا في ملف جديد.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d11/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item استعمال الملف دون التحقق من أن \code{fopen} لم تعد \code{NULL}.
+            \item فتح ملف مهم بالنمط \code{"w"} بالخطأ: يُمحى محتواه.
+            \item نسيان \code{fclose}: قد لا تُحفظ المعطيات.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item \code{fopen} ثم القراءة أو الكتابة ثم \code{fclose}.
+            \item الأنماط: \code{"r"} للقراءة، \code{"w"} للكتابة، \code{"a"} للإضافة.
+            \item \code{fprintf} و\code{fscanf} و\code{fgets} و\code{fgetc} مثل نظيراتها في الشاشة.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

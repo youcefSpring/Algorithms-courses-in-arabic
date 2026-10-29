@@ -1,0 +1,244 @@
+% Shared style for the algorithmics course slides (same template as the
+% ENSB generative-AI course), with C code listings added.
+% Dark blue removed: every slide (cover included) uses the light background
+% of the template's content slides, with teal + orange as accents.
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage[skins]{tcolorbox}
+\usepackage{fontawesome5}
+\usepackage{listings}
+\usepackage{polyglossia}
+
+\usetikzlibrary{positioning, calc, arrows.meta, shapes.geometric}
+
+%------------------------------------------------
+% Languages and fonts (compile from slides/ with XeLaTeX or tectonic)
+%------------------------------------------------
+\setdefaultlanguage[numerals=maghrib]{arabic}
+\setotherlanguage{english}
+\usefonttheme{serif}
+
+\newfontfamily\arabicfont[
+    Script=Arabic, Scale=0.98, Path=../../fonts/, Extension=.ttf,
+    UprightFont=*-Regular, BoldFont=*-Bold,
+    ItalicFont=*-Italic, SlantedFont=*-Italic,
+    BoldItalicFont=*-BoldItalic, BoldSlantedFont=*-BoldItalic]{Amiri}
+\newfontfamily\arabicfontsf[
+    Script=Arabic, Scale=0.98, Path=../../fonts/, Extension=.ttf,
+    UprightFont=*-Regular, BoldFont=*-Bold,
+    ItalicFont=*-Italic, SlantedFont=*-Italic,
+    BoldItalicFont=*-BoldItalic, BoldSlantedFont=*-BoldItalic]{Amiri}
+% Arabic fallback for \ttfamily (needed by the C listings)
+\newfontfamily\arabicfonttt[Script=Arabic, Scale=0.98, Path=../../fonts/,
+    Extension=.ttf, UprightFont=*-Regular, BoldFont=*-Bold,
+    ItalicFont=*-Italic, SlantedFont=*-Italic,
+    BoldItalicFont=*-BoldItalic, BoldSlantedFont=*-BoldItalic]{Amiri}
+% Latin monospace font for C code (selected directly, so polyglossia
+% does not swap it for the Arabic fallback above)
+\newfontfamily\codefont[Scale=0.95, BoldFont=lmmonolt10-bold.otf,
+    ItalicFont=lmmono10-italic.otf]{lmmono10-regular.otf}
+% Heading font
+\newfontfamily\khatt[Script=Arabic, Scale=1.05, Path=../../fonts/,
+    BoldFont=ae_AlBattar.ttf]{ae_AlBattar.ttf}
+
+%------------------------------------------------
+% Colors (template palette without the navy tones)
+%------------------------------------------------
+\definecolor{brandTeal}{HTML}{5CC8E6}
+\definecolor{brandOrange}{HTML}{FFA27F}
+\definecolor{brandLight}{HTML}{F8F9FA}
+\definecolor{brandDark}{HTML}{263238}
+\definecolor{brandMuted}{HTML}{6C757D}
+\colorlet{tealDeep}{brandTeal!60!black}
+\definecolor{codeGrey}{HTML}{F1F3F5}
+
+\setbeamercolor{background canvas}{bg=brandLight}
+\setbeamercolor{normal text}{fg=brandDark}
+\setbeamercolor{structure}{fg=brandTeal}
+\setbeamertemplate{navigation symbols}{}
+
+% beamer.cls sets \raggedright globally; under RTL that centers short lines
+% or pushes them left, so go back to justified text (flush right).
+\rightskip=0pt\relax
+% Lists call \raggedright too; make it a no-op for RTL slides.
+\AtBeginDocument{\renewcommand{\raggedright}{\rightskip=0pt\relax}}
+
+%------------------------------------------------
+% Frame title, footer, lists
+%------------------------------------------------
+\setbeamertemplate{frametitle}{%
+    \vspace{0.35cm}
+    \noindent{\khatt\bfseries\Large\color{brandDark}\insertframetitle}
+    \par
+    \vskip-2pt
+    \noindent{\color{brandTeal}\rule{\textwidth}{1.5pt}}
+    \vspace{0.05cm}
+}
+
+% Footer: page number only
+\setbeamertemplate{footline}{%
+    \hbox to \paperwidth{\hfill
+        {\color{brandMuted}\scriptsize\LR{\insertframenumber\,/\,\inserttotalframenumber}}%
+        \hspace{0.6cm}}%
+    \vspace{0.25cm}}
+
+\setbeamertemplate{itemize item}{\color{brandTeal}\small\faChevronLeft}
+\setbeamertemplate{itemize subitem}{\color{brandMuted}\small\faAngleLeft}
+\setbeamertemplate{enumerate item}{\color{tealDeep}\bfseries\insertenumlabel)}
+
+% Tables: every cell framed by a visible border
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcommand{\ras}[1]{\cellcolor{brandTeal!20}\textbf{#1}}
+% Colored text inside a table cell (\leavevmode keeps it on the row baseline)
+\newcommand{\cell}[2]{\leavevmode\textcolor{#1}{#2}}
+\renewcommand{\arraystretch}{1.35}
+\setlength{\arrayrulewidth}{0.6pt}
+\arrayrulecolor{brandMuted!70}
+
+%------------------------------------------------
+% Boxes (the two boxes of the template's 2nd slide)
+%------------------------------------------------
+\tcbset{
+    brandbox/.style={
+        enhanced, arc=4pt, outer arc=4pt, boxrule=1.5pt,
+        coltitle=white, coltext=brandDark, fonttitle=\khatt\bfseries,
+        toptitle=0.8mm, bottomtitle=0.8mm,
+        top=1.2mm, bottom=1.2mm, left=3mm, right=3mm,
+        before skip=4pt, after skip=4pt}
+}
+% Teal box: definitions, objectives, summaries
+\newtcolorbox{tbox}[2][]{brandbox, colback=brandTeal!10,
+    colframe=brandTeal, title={#2}, #1}
+% Orange box: warnings
+\newtcolorbox{obox}[2][]{brandbox, colback=brandOrange!10,
+    colframe=brandOrange, title={#2}, #1}
+% Card (template's 3rd slide, in teal)
+\newtcolorbox{card}[2][]{enhanced, colback=brandTeal!6, colframe=brandTeal,
+    arc=6pt, boxrule=1.2pt, halign=center, halign title=center,
+    coltitle=white, coltext=brandDark, fonttitle=\khatt\bfseries,
+    top=1.5mm, bottom=1.5mm, left=2mm, right=2mm, title={#2}, #1}
+% Prompt text written to the tool
+\newtcolorbox{amr}[1][brandTeal]{enhanced, arc=1mm, boxrule=0pt,
+    colback=white, overlay={\fill[#1] (frame.north east) rectangle ([xshift=-2.5pt]frame.south east);},
+    left=6pt, right=8pt, top=2pt, bottom=2pt,
+    before skip=3pt, after skip=3pt}
+
+%------------------------------------------------
+% TikZ (Arabic right-to-left inside nodes)
+%------------------------------------------------
+\newcommand{\nodecolor}{}
+\tikzset{
+    every node/.append style={
+        execute at begin node={\nodecolor\everypar{\beginR}\beginR},
+        execute at end node=\endR},
+    lawn/.code={\def\nodecolor{\color{#1}}},
+    khatwa/.style={draw=#1, fill=#1!12, very thick, rounded corners=5pt,
+        minimum height=0.95cm, text width=1.9cm, align=center,
+        font=\khatt\bfseries\small},
+    khatwa/.default=brandTeal,
+    sahm/.style={-{Stealth[length=2.5mm]}, thick, color=brandMuted},
+    rang/.style={draw=#1, fill=#1!12},
+    raqm/.style={circle, fill=#1, lawn=white, inner sep=1.5pt,
+        font=\small\bfseries},
+}
+
+% Horizontal chain of steps, right to left:
+% \flow[width]{{a}, {b\\c}, {d}}
+\newcommand{\flow}[2][1.9cm]{%
+    \begin{tikzpicture}[node distance=5mm]
+        \foreach \t [count=\i] in {#2} {
+            \ifnum\i=1
+                \node[khatwa, text width=#1] (f\i) {\t};
+            \else
+                \pgfmathtruncatemacro\p{\i-1}
+                \node[khatwa, text width=#1, left=of f\p] (f\i) {\t};
+                \draw[sahm] (f\p) -- (f\i);
+            \fi
+        }
+    \end{tikzpicture}}
+
+%------------------------------------------------
+% C code (always left-to-right, inside a fragile frame)
+%------------------------------------------------
+\lstdefinestyle{cstyle}{
+    language=C, basicstyle=\codefont\footnotesize, columns=fullflexible,
+    keepspaces=true, showstringspaces=false, upquote=true,
+    keywordstyle=\color{tealDeep}\bfseries,
+    commentstyle=\color{red!75!black},
+    stringstyle=\color{brandOrange!85!black},
+    xleftmargin=16pt,
+    numbers=left, numberstyle=\tiny\color{brandMuted}, numbersep=7pt,
+    aboveskip=0pt, belowskip=0pt,
+    morekeywords={bool, true, false}}
+% Inline listings must sit in the english environment, not LTR, otherwise
+% numbers such as 3.14 are reversed.
+% Numbers in Arabic text: \textenglish{1.75} (not \LR).
+% Compact code size for long programs (fixed line height, no gaps)
+\newcommand{\codesmall}{\fontsize{8}{8}\selectfont}
+\newcommand{\codetiny}{\fontsize{7.4}{7.6}\selectfont}
+% Inline C: \code{printf}
+\newcommand{\code}[1]{\mbox{\textenglish{\codefont\begingroup\color{tealDeep}#1\endgroup}}}
+% Program output (console)
+\lstdefinestyle{outstyle}{
+    language={}, basicstyle=\codefont\footnotesize\color{brandDark},
+    columns=fullflexible, keepspaces=true, showstringspaces=false,
+    aboveskip=0pt, belowskip=0pt}
+
+% Listings read from files (no fragile frame needed):
+%   \ccode{d1/circle.c}   \out{d1/circle.out}
+% One box per listing for the grey background (listings' own per-line
+% background leaves thin white gaps between lines)
+\newtcolorbox{codebox}{enhanced, colback=codeGrey, colframe=codeGrey,
+    boxrule=0pt, arc=0pt, left=4pt, right=4pt, top=1pt, bottom=1pt,
+    before skip=0pt, after skip=2pt,
+    overlay={\fill[brandMuted!45] (frame.south west) rectangle ([xshift=2.5pt]frame.north west);}}
+\newtcolorbox{outbox}{enhanced, colback=brandMuted!20, colframe=brandMuted!20,
+    boxrule=0pt, arc=0pt, left=4pt, right=4pt, top=1.5pt, bottom=1.5pt,
+    before skip=2pt, after skip=2pt}
+\newcommand{\ccode}[2][]{\begin{codebox}\begin{english}\lstinputlisting[style=cstyle,#1]{../code/#2}\end{english}\end{codebox}}
+\newcommand{\out}[2][]{\begin{outbox}\begin{english}\lstinputlisting[style=outstyle,#1]{../code/#2}\end{english}\end{outbox}}
+% Audience line of the cover
+\newcommand{\audience}{طلبة السنة الأولى}
+
+%------------------------------------------------
+% Cover (template's 1st slide on the light background)
+%------------------------------------------------
+\newcommand{\cover}[3]{%
+\begin{frame}[plain]
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[brandTeal, line width=1.5pt, opacity=0.3]
+            (current page.south east) ++(-1,1) circle (4cm);
+        \draw[brandTeal, line width=0.8pt, opacity=0.25]
+            (current page.north west) ++(2,2) circle (6cm);
+        \draw[brandOrange, line width=0.5pt, opacity=0.25]
+            (current page.north west) ++(2,2) circle (7cm);
+        \node[anchor=north east] at ($(current page.north east)+(-1.0,-0.8)$) {
+            \begin{tikzpicture}[scale=0.35]
+                \fill[brandTeal] (0,0) -- (0.8,1.2) -- (1.6,0) -- cycle;
+                \fill[brandOrange] (0.8,1.2) -- (1.6,2.4) -- (2.4,1.2) -- cycle;
+            \end{tikzpicture}
+        };
+    \end{tikzpicture}
+
+    \vspace{1.6cm}
+    \begin{minipage}{0.85\textwidth}
+        {\color{tealDeep}\khatt\bfseries #1} \\[0.3cm]
+        {\raggedleft\color{brandDark}\Huge\khatt\bfseries #2\par} \vspace{0.3cm}
+        {\color{brandMuted}\large #3}
+    \end{minipage}
+
+    \vspace{1.2cm}
+    \begin{minipage}{0.85\textwidth}
+        \color{brandMuted}\small
+        \begin{tabular}{@{}ll}
+            \textbf{الأستاذ:} & د. بن عبد الرزاق يوسف \\
+            \textbf{الفئة:}   & \audience \\
+        \end{tabular}
+    \end{minipage}
+\end{frame}}

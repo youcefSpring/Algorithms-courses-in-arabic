@@ -1,0 +1,207 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{الجداول ثنائية البعد}
+
+\begin{document}
+
+\cover{درس الفصل الخامس}
+{الجداول ثنائية البعد}
+{المصفوفات: التصريح، القراءة، العرض، والمعالجات الأساسية بلغة \textenglish{C}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تصرّح بمصفوفة وتصل إلى عناصرها بفهرسين.
+            \item تقرأ مصفوفة وتعرضها بحلقتين متداخلتين.
+            \item تحسب المجموع والأثر والمنقول ومجموع مصفوفتين.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{لماذا جداول ثنائية البعد؟}
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \ras{} & \ras{خوارزميات} & \ras{رياضيات} & \ras{فيزياء} \\ \hline
+        \ras{الطالب 1} & 12 & 15 & 9 \\ \hline
+        \ras{الطالب 2} & 14 & 10 & 13 \\ \hline
+        \ras{الطالب 3} & 8 & 11 & 16 \\ \hline
+    \end{tabular}
+    \end{center}
+    المعطيات منظمة في \textbf{أسطر} و\textbf{أعمدة}: نحتاج إلى جدول ثنائي البعد.
+\end{frame}
+
+\begin{frame}{المصفوفة}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{المصفوفة}: جدول ثنائي البعد، عناصره من النوع نفسه،
+        ونصل إلى كل عنصر برقم \textbf{السطر} ورقم \textbf{العمود}.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{المصفوفة في الذاكرة}
+    \vspace{0.3cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        khana/.style={draw=brandTeal, fill=white, thick, minimum width=1.7cm,
+            minimum height=0.8cm, font=\small},
+        fahras/.style={font=\small\bfseries, lawn=brandMuted}]
+        \foreach \i in {0,1,2} {
+            \foreach \j in {0,1,2,3}
+                \node[khana] at (1.7*\j, -0.8*\i) {\textenglish{\codefont\color{tealDeep}M[\i][\j]}};
+            \node[fahras] at (-1.4, -0.8*\i) {\textenglish{i = \i}};
+        }
+        \foreach \j in {0,1,2,3}
+            \node[fahras] at (1.7*\j, 0.7) {\textenglish{j = \j}};
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.2cm}
+    الفهرس الأول \code{i} للسطر، والفهرس الثاني \code{j} للعمود.
+\end{frame}
+
+\begin{frame}{التصريح بمصفوفة}
+    \begin{center}
+    \begin{minipage}{0.65\textwidth}
+        \ccode{d5/decl.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \textbf{النوع} ثم \textbf{الاسم} ثم \textbf{عدد الأسطر} ثم \textbf{عدد الأعمدة}.
+\end{frame}
+
+\begin{frame}{الوصول إلى عنصر}
+    \begin{center}
+    \begin{minipage}{0.7\textwidth}
+        \ccode{d5/access.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{A[i][j]} هو العنصر الموجود في السطر \code{i} والعمود \code{j}.
+\end{frame}
+
+\begin{frame}{قراءة مصفوفة}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d5/read.c}
+        \column{0.4\textwidth}
+        حلقة خارجية للأسطر، وحلقة داخلية للأعمدة.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{عرض مصفوفة}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/print.c}
+        \column{0.3\textwidth}
+        \out{d5/print.out}
+        \vspace{0.3cm}
+        \code{printf("\textbackslash n")} بعد كل سطر، و\code{\%4d} لمحاذاة الأعمدة.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{مجموع كل العناصر}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d5/sum.c}
+        \column{0.3\textwidth}
+        \out{d5/sum.out}
+    \end{columns}
+    \vspace{0.3cm}
+    نمر على كل العناصر بحلقتين متداخلتين.
+\end{frame}
+
+\begin{frame}{أكبر عنصر}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d5/max.c}
+        \column{0.4\textwidth}
+        نفترض أن \code{M[0][0]} هو الأكبر، ثم نقارنه بكل العناصر.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{مجموع كل سطر}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/rows.c}
+        \column{0.3\textwidth}
+        \out{d5/rows.out}
+        \vspace{0.3cm}
+        نعيد \code{s} إلى \textenglish{0} في بداية كل سطر.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{القطر الرئيسي}
+    \vspace{0.3cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        khana/.style={draw=brandTeal, fill=white, thick, minimum width=1.2cm,
+            minimum height=0.8cm, font=\bfseries},
+        qutr/.style={khana, fill=brandOrange!25}]
+        \foreach \row [count=\i from 0] in {{2,0,1},{4,5,3},{7,8,9}}
+            \foreach \v [count=\j from 0] in \row {
+                \ifnum\i=\j
+                    \node[qutr] at (1.2*\j, -0.8*\i) {\textenglish{\v}};
+                \else
+                    \node[khana] at (1.2*\j, -0.8*\i) {\textenglish{\v}};
+                \fi
+            }
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.2cm}
+    في مصفوفة مربعة، عناصر القطر الرئيسي هي \code{M[i][i]}.
+\end{frame}
+
+\begin{frame}{أثر مصفوفة مربعة}
+    \begin{columns}[T]
+        \column{0.6\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/diag.c}
+        \column{0.3\textwidth}
+        \out{d5/diag.out}
+    \end{columns}
+    \vspace{0.2cm}
+    تكفي حلقة واحدة لأن \code{i == j}.\\
+    \code{trace = 2 + 5 + 9 = 16}
+\end{frame}
+
+\begin{frame}{منقول مصفوفة}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/transpose.c}
+        \column{0.25\textwidth}
+        \out{d5/transpose.out}
+    \end{columns}
+    \vspace{0.2cm}
+    الأسطر تصبح أعمدة: \code{T[j][i] = A[i][j]}.
+\end{frame}
+
+\begin{frame}{مجموع مصفوفتين}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/add.c}
+        \column{0.3\textwidth}
+        \out{d5/add.out}
+    \end{columns}
+\end{frame}
+
+\input{examples_d5}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item كتابة \code{M[i, j]} بدل \code{M[i][j]}.
+            \item تبديل الفهرسين: \code{M[j][i]} بدل \code{M[i][j]}.
+            \item عدم إعادة المجموع إلى \textenglish{0} في بداية كل سطر.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item المصفوفة جدول من أسطر وأعمدة، نصل إلى عناصره بـ\code{M[i][j]}.
+            \item نعالجها بحلقتين متداخلتين: الأسطر ثم الأعمدة.
+            \item القطر الرئيسي \code{M[i][i]}، والمنقول \code{T[j][i] = A[i][j]}.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

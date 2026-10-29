@@ -1,0 +1,190 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{الحلقات التكرارية}
+
+\begin{document}
+
+\cover{درس الفصل الثالث}
+{الحلقات التكرارية}
+{\textenglish{for} و\textenglish{while} و\textenglish{do while} بلغة \textenglish{C}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تكرر تعليمات باستعمال \code{for} و\code{while} و\code{do while}.
+            \item تختار الحلقة المناسبة لكل مشكلة.
+            \item تتتبع تنفيذ حلقة وتتجنب الحلقة اللانهائية.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{لماذا الحلقات؟}
+    \begin{columns}[T]
+        \column{0.45\textwidth}
+        \ccode{d3/noloop.c}
+        \column{0.5\textwidth}
+        لعرض الأعداد من 1 إلى 5 نحتاج إلى خمس تعليمات.\\[4pt]
+        ولعرض الأعداد من 1 إلى 1000؟ نستعمل \textbf{حلقة}.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{الحلقة}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{الحلقة}: بنية تسمح بتكرار مجموعة من التعليمات
+        ما دام \textbf{شرط} معين صحيحًا.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{أنواع الحلقات في \textenglish{C}}
+    \begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        \ras{الحلقة} & \ras{نستعملها عندما} \\ \hline
+        \code{for}      & نعرف عدد التكرارات مسبقًا \\ \hline
+        \code{while}    & لا نعرف عدد التكرارات، وقد لا تُنفذ أبدًا \\ \hline
+        \code{do while} & تُنفذ مرة واحدة على الأقل \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{حلقة \textenglish{for}}
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \ccode{d3/for.c}
+        \column{0.3\textwidth}
+        \out{d3/for.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أجزاء حلقة \textenglish{for}}
+    \vspace{0.6cm}
+    \begin{center}
+        \flow[2.6cm]{{البداية\\\code{i = 1}}, {الشرط\\\code{i <= 5}}, {التعليمات}, {الزيادة\\\code{i++}}}
+    \end{center}
+    \vspace{0.3cm}
+    بعد الزيادة نعود إلى الشرط. تتوقف الحلقة عندما يصبح الشرط \textbf{خاطئًا}.
+\end{frame}
+
+\begin{frame}{مثال: مجموع الأعداد من 1 إلى \textenglish{n}}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d3/sum.c}
+        \column{0.35\textwidth}
+        \out{d3/sum.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{جدول التتبع: \textenglish{n = 4}}
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \ras{\code{i}} & \ras{\code{i <= n}} & \ras{\code{s = s + i}} & \ras{\code{s}} \\ \hline
+        1 & صحيح & $0 + 1$ & 1 \\ \hline
+        2 & صحيح & $1 + 2$ & 3 \\ \hline
+        3 & صحيح & $3 + 3$ & 6 \\ \hline
+        4 & صحيح & $6 + 4$ & 10 \\ \hline
+        5 & \cell{brandOrange!80!black}{خطأ} & -- & \cell{tealDeep}{\textbf{10}} \\ \hline
+    \end{tabular}
+    \end{center}
+    نعطي \code{s} القيمة الأولية \textenglish{0} قبل الحلقة.
+\end{frame}
+
+\begin{frame}{حلقة \textenglish{while}}
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \ccode{d3/while.c}
+        \column{0.45\textwidth}
+        نختبر الشرط \textbf{قبل} كل تكرار.\\[4pt]
+        لا ننسى تغيير \code{i} داخل الحلقة.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{مثال: عدد أرقام عدد صحيح}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d3/digits.c}
+        \column{0.35\textwidth}
+        \out{d3/digits.out}
+        \vspace{0.3cm}
+        لا نعرف عدد التكرارات مسبقًا، لذلك نستعمل \code{while}.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{حلقة \textenglish{do while}}
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \ccode{d3/dowhile.c}
+        \column{0.45\textwidth}
+        \out{d3/dowhile.out}
+    \end{columns}
+    \vspace{0.3cm}
+    نختبر الشرط \textbf{بعد} التكرار، إذن تُنفذ الحلقة مرة واحدة على الأقل.
+\end{frame}
+
+\begin{frame}{الحلقات المتداخلة}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d3/nested.c}
+        \column{0.35\textwidth}
+        \out{d3/nested.out}
+    \end{columns}
+    \vspace{0.2cm}
+    لكل قيمة من \code{i} تُنفذ الحلقة الداخلية كاملة.
+\end{frame}
+
+\begin{frame}{\textenglish{break} و\textenglish{continue}}
+    \begin{columns}[T]
+        \column{0.6\textwidth}
+        \ccode{d3/break.c}
+        \column{0.3\textwidth}
+        \out{d3/break.out}
+    \end{columns}
+    \vspace{0.3cm}
+    \code{continue}: تنتقل إلى التكرار التالي. \code{break}: تُوقف الحلقة.
+\end{frame}
+
+\begin{frame}{مثال: العاملي \textenglish{n!}}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d3/fact.c}
+        \column{0.35\textwidth}
+        \out{d3/fact.out}
+    \end{columns}
+    \vspace{0.2cm}
+    \code{5! = 1 * 2 * 3 * 4 * 5 = 120}
+\end{frame}
+
+\begin{frame}{الحلقة اللانهائية}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d3/infinite.c}
+        \column{0.4\textwidth}
+        \begin{obox}{\faExclamationTriangle\quad انتبه}
+            الشرط يبقى صحيحًا دائمًا، فلا تتوقف الحلقة.
+        \end{obox}
+    \end{columns}
+\end{frame}
+
+\input{examples_d3}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item وضع \code{;} بعد \code{for (...)} أو \code{while (...)}.
+            \item نسيان تهيئة المجموع \code{s = 0} أو الجداء \code{f = 1}.
+            \item خطأ في الحدود: \code{i < n} بدل \code{i <= n}.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item \code{for}: عدد التكرارات معروف.
+            \item \code{while}: الشرط قبل التكرار، و\code{do while}: الشرط بعده.
+            \item يجب أن يصبح الشرط خاطئًا في لحظة ما لتتوقف الحلقة.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

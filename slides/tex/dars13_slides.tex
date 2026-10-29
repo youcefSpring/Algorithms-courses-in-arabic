@@ -1,0 +1,319 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{الأشجار الثنائية}
+
+\begin{document}
+
+\cover{درس الفصل الثالث عشر}
+{الأشجار الثنائية}
+{العقد، الجذر والأوراق، طرق المرور، وشجرة البحث الثنائية}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تعرّف الشجرة الثنائية ومفرداتها: الجذر، الابن، الورقة، الارتفاع.
+            \item تمر على شجرة بالطرق الثلاث باستعمال دوال عودية.
+            \item تضيف قيمة إلى شجرة بحث ثنائية وتبحث عنها.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{الشجرة}
+    \begin{center}
+    \begin{tikzpicture}[
+        level distance=1.1cm,
+        level 1/.style={sibling distance=3.6cm},
+        level 2/.style={sibling distance=1.7cm},
+        every node/.append style={circle, draw=brandTeal, fill=brandTeal!12,
+            thick, minimum size=0.8cm, font=\small\bfseries},
+        jidr/.style={draw=brandOrange, fill=brandOrange!20},
+        waraqa/.style={draw=brandMuted, fill=brandMuted!15},
+        edge from parent/.style={draw, brandMuted, thick}]
+        \node[jidr] (r) {\textenglish{A}}
+            child {node {\textenglish{B}}
+                child {node[waraqa] {\textenglish{D}}}
+                child {node[waraqa] {\textenglish{E}}}}
+            child {node {\textenglish{C}}
+                child {node[waraqa] {\textenglish{F}}}};
+        \node[draw=none, fill=none, font=\small, lawn=brandOrange!80!black] at (2.8, 0) {الجذر};
+        \node[draw=none, fill=none, font=\small, lawn=brandMuted] at (3.9, -2.2) {أوراق};
+    \end{tikzpicture}
+    \end{center}
+    \textbf{الشجرة}: بنية هرمية تبدأ بـ\textbf{جذر}، ولكل عقدة \textbf{أبناء}. العقدة دون أبناء \textbf{ورقة}.
+\end{frame}
+
+\begin{frame}{مفردات الشجرة}
+    \begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        \ras{الكلمة} & \ras{المعنى} \\ \hline
+        الجذر & العقدة الأولى في الأعلى، ليس لها أب \\ \hline
+        الابن والأب & العقدة \textenglish{B} ابن للعقدة \textenglish{A} \\ \hline
+        الورقة & عقدة ليس لها أي ابن \\ \hline
+        الارتفاع & عدد المستويات من الجذر إلى أبعد ورقة \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{الشجرة الثنائية}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{الشجرة الثنائية}: شجرة لكل عقدة فيها \textbf{ابنان على الأكثر}: ابن أيسر وابن أيمن.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{تعريف العقدة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l01.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    مؤشران بدل مؤشر واحد في القائمة المتصلة. \code{NULL} يعني: لا يوجد ابن.
+\end{frame}
+
+\begin{frame}{إنشاء عقدة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l02.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    العقدة الجديدة ورقة: ليس لها أبناء.
+\end{frame}
+
+\begin{frame}{بناء شجرة صغيرة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l03.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{r->left->left}: الابن الأيسر للابن الأيسر للجذر.
+\end{frame}
+
+\begin{frame}{شجرة البحث الثنائية}
+    \begin{center}
+    \begin{tikzpicture}[
+        level distance=1.05cm,
+        level 1/.style={sibling distance=3.8cm},
+        level 2/.style={sibling distance=1.8cm},
+        every node/.append style={circle, draw=brandTeal, fill=brandTeal!12,
+            thick, minimum size=0.8cm, font=\small\bfseries},
+        edge from parent/.style={draw, brandMuted, thick}]
+        \node[draw=brandOrange, fill=brandOrange!20] {\textenglish{50}}
+            child {node {\textenglish{30}}
+                child {node {\textenglish{20}}}
+                child {node {\textenglish{40}}}}
+            child {node {\textenglish{70}}
+                child {node {\textenglish{60}}}
+                child {node {\textenglish{80}}}};
+    \end{tikzpicture}
+    \end{center}
+    كل القيم في اليسار \textbf{أصغر} من العقدة، وكل القيم في اليمين \textbf{أكبر} منها.
+\end{frame}
+
+\begin{frame}{قاعدة شجرة البحث}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        في \textbf{شجرة البحث الثنائية}: كل قيمة أصغر من العقدة توضع في \textbf{اليسار}، وكل قيمة أكبر منها توضع في \textbf{اليمين}.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{طرق المرور على الشجرة السابقة}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{الطريقة} & \ras{الترتيب} & \ras{النتيجة} \\ \hline
+        قبلي \textenglish{(preorder)} & العقدة، اليسار، اليمين & \code{50 30 20 40 70 60 80} \\ \hline
+        وسطي \textenglish{(inorder)} & اليسار، العقدة، اليمين & \code{20 30 40 50 60 70 80} \\ \hline
+        بعدي \textenglish{(postorder)} & اليسار، اليمين، العقدة & \code{20 40 30 60 80 70 50} \\ \hline
+    \end{tabular}
+    \end{center}
+    المرور الوسطي على شجرة بحث يعطي القيم \textbf{مرتبة}.
+\end{frame}
+
+\begin{frame}{المرور الوسطي}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l04.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    لتحويله إلى قبلي أو بعدي، نغيّر مكان \code{printf} فقط.
+\end{frame}
+
+\begin{frame}{الإضافة في شجرة البحث}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l05.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    ننزل يسارًا أو يمينًا حتى نجد مكانًا فارغًا.
+\end{frame}
+
+\begin{frame}[t]{برنامج كامل: إضافة ثم مرور}
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=19]{d13/l06.c}
+        \column{0.49\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=21, firstnumber=21]{d13/l06.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/l06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{البحث في شجرة البحث}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l07.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    في كل خطوة نترك نصف الشجرة: البحث سريع.
+\end{frame}
+
+\begin{frame}{عدد العقد والارتفاع}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l08.c}
+    \end{minipage}
+    \end{center}
+\end{frame}
+
+\begin{frame}{تحرير الشجرة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d13/l09.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نحرر الأبناء قبل العقدة: مرور بعدي.
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الصحة، الرياضة، الطقس، التجارة الإلكترونية، ألعاب الفيديو، الذكاء الاصطناعي، الشبكات الاجتماعية، نظام الملفات، البيئة، الهيكل التنظيمي.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الصحة، ترتيب الاستعجال}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex01.c}
+        \column{0.42\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex01.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الرياضة، أفضل نتيجة}
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex02.c}
+        \column{0.48\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex02.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: الطقس، أدنى درجة حرارة}
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex03.c}
+        \column{0.49\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex03.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: التجارة الإلكترونية، مجموع الأسعار}
+    \begin{columns}[T]
+        \column{0.50\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex04.c}
+        \column{0.47\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex04.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: ألعاب الفيديو، عمق خريطة المستويات}
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex05.c}
+        \column{0.48\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex05.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: الذكاء الاصطناعي، شجرة القرار}
+    \begin{columns}[T]
+        \column{0.45\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex06.c}
+        \column{0.52\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex06.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: الشبكات الاجتماعية، البحث عن مستخدم}
+    \begin{columns}[T]
+        \column{0.44\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex07.c}
+        \column{0.53\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex07.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: نظام الملفات، عدد المجلدات}
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex08.c}
+        \column{0.48\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex08.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: البيئة، قياسات ملوثة}
+    \begin{columns}[T]
+        \column{0.44\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex09.c}
+        \column{0.53\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex09.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: الهيكل التنظيمي، المدير قبل الموظفين}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=20]{d13/ex10.c}
+        \column{0.42\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=22, firstnumber=22]{d13/ex10.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d13/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item نسيان حالة التوقف \code{t == NULL} في الدوال العودية.
+            \item وضع قيمة كبيرة في اليسار: لا تبقى الشجرة شجرة بحث.
+            \item تحرير العقدة قبل أبنائها في \code{freeTree}.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item الشجرة الثنائية: لكل عقدة ابن أيسر وابن أيمن على الأكثر.
+            \item نعالج الأشجار بدوال عودية: قبلي، وسطي، بعدي.
+            \item في شجرة البحث: الأصغر يسارًا والأكبر يمينًا، والمرور الوسطي يعطي ترتيبًا تصاعديًا.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

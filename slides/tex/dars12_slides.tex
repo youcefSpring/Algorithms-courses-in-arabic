@@ -1,0 +1,334 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{القوائم المتصلة}
+
+\begin{document}
+
+\cover{درس الفصل الثاني عشر}
+{القوائم المتصلة}
+{العقد، الإضافة، الحذف، والمرور على القائمة}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تعرّف عقدة القائمة المتصلة بهيكل ومؤشر.
+            \item تضيف عقدة في بداية القائمة وفي نهايتها، وتمر على عناصرها.
+            \item تبحث عن قيمة، وتحذف عقدة، وتحرر القائمة.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{القائمة المتصلة}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{القائمة المتصلة}: سلسلة من \textbf{العقد}، كل عقدة فيها قيمة ومؤشر نحو العقدة التالية.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{لماذا القوائم المتصلة؟}
+    \vspace{0.6cm}
+    \begin{columns}[T]
+        \column{0.45\textwidth}
+        \begin{card}{الجدول}
+            حجمه ثابت، والإضافة في الوسط تتطلب إزاحة العناصر.
+        \end{card}
+        \column{0.45\textwidth}
+        \begin{card}{القائمة المتصلة}
+            تكبر وتصغر أثناء التنفيذ، والإضافة تغيّر مؤشرات فقط.
+        \end{card}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{القائمة في الذاكرة}
+    \vspace{0.5cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        val/.style={draw=brandTeal, fill=white, very thick, minimum width=1cm,
+            minimum height=0.8cm, font=\bfseries},
+        nxt/.style={draw=brandTeal, fill=brandTeal!15, very thick, minimum width=0.6cm,
+            minimum height=0.8cm},
+        sahm2/.style={-{Stealth[length=2.5mm]}, very thick, brandOrange}]
+        \node[draw=brandOrange, fill=brandOrange!15, very thick, minimum width=1.2cm,
+            minimum height=0.8cm] (h) at (-1.8, 0) {\code{head}};
+        \foreach \v/\x [count=\i] in {12/0, 7/2.6, 25/5.2} {
+            \node[val] (v\i) at (\x, 0) {\textenglish{\v}};
+            \node[nxt, right=0pt of v\i] (n\i) {};
+        }
+        \node[font=\bfseries, lawn=brandMuted] (null) at (8.2, 0) {\code{NULL}};
+        \draw[sahm2] (h) -- (v1);
+        \fill[brandOrange] (n1.center) circle (2pt); \draw[sahm2] (n1.center) -- (v2);
+        \fill[brandOrange] (n2.center) circle (2pt); \draw[sahm2] (n2.center) -- (v3);
+        \fill[brandOrange] (n3.center) circle (2pt); \draw[sahm2] (n3.center) -- (null);
+        \node[font=\small, lawn=brandMuted, below=4pt of v1] {\code{value}};
+        \node[font=\small, lawn=brandMuted, below=4pt of n1] {\code{next}};
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.3cm}
+    كل عقدة تحتوي على قيمة وعلى مؤشر نحو العقدة التالية. آخر عقدة تشير إلى \code{NULL}.
+\end{frame}
+
+\begin{frame}{تعريف العقدة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d12/l01.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    الحقل \code{next} مؤشر نحو هيكل من النوع نفسه.
+\end{frame}
+
+\begin{frame}{إنشاء عقدة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d12/l02.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نحجز كل عقدة بـ\code{malloc}، ونحتاج إلى \code{stdlib.h}.
+\end{frame}
+
+\begin{frame}{الإضافة في البداية: خطوة بخطوة}
+    \vspace{0.4cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        val/.style={draw=brandTeal, fill=white, very thick, minimum width=1cm,
+            minimum height=0.8cm, font=\bfseries},
+        jadid/.style={val, draw=brandOrange, fill=brandOrange!15},
+        sahm2/.style={-{Stealth[length=2.5mm]}, very thick, brandOrange},
+        qadim/.style={-{Stealth[length=2.5mm]}, thick, dashed, brandMuted}]
+        \node[draw=brandOrange, very thick, minimum width=1.2cm, minimum height=0.8cm]
+            (h) at (-2, 1.4) {\code{head}};
+        \node[jadid] (n) at (0, 1.4) {\textenglish{5}};
+        \node[val] (a) at (2.5, 0) {\textenglish{12}};
+        \node[val] (b) at (5, 0) {\textenglish{7}};
+        \draw[sahm2] (h) -- node[above, font=\scriptsize] {2} (n);
+        \draw[sahm2] (n) -- node[above right, font=\scriptsize] {1} (a);
+        \draw[sahm2] (a) -- (b);
+        \draw[qadim] (h.south) |- (a.west);
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.3cm}
+    1) العقدة الجديدة تشير إلى البداية القديمة. \quad 2) \code{head} يشير إلى العقدة الجديدة.
+\end{frame}
+
+\begin{frame}[t]{الإضافة في البداية والعرض}
+    \begin{columns}[T]
+        \column{0.53\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=14]{d12/l03.c}
+        \column{0.44\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=16, firstnumber=16]{d12/l03.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/l03.out}
+        {\small نمر على القائمة بمؤشر \code{p} حتى \code{NULL}.\par}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{الإضافة في النهاية}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d12/l04.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نصل إلى آخر عقدة، ثم نربطها بالعقدة الجديدة.
+\end{frame}
+
+\begin{frame}{الطول والمجموع}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d12/l05.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    المعالجة نفسها تحسب المجموع أو أكبر قيمة.
+\end{frame}
+
+\begin{frame}[t]{البحث عن قيمة}
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, lastline=18]{d12/l06.c}
+        \column{0.48\textwidth}
+        \ccode[basicstyle=\codefont\codetiny, firstline=20, firstnumber=20]{d12/l06.c}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/l06.out}
+        {\small \code{find} تعيد \code{NULL} إن لم تجد القيمة.\par}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{حذف العقدة الأولى}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d12/l07.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نحفظ العقدة القديمة قبل تحريك \code{head}، ثم نحررها.
+\end{frame}
+
+\begin{frame}{حذف قيمة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d12/l08.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    نربط العقدة السابقة بالعقدة التالية، فنتجاوز العقدة المحذوفة.
+\end{frame}
+
+\begin{frame}{تحرير القائمة}
+    \begin{center}
+    \begin{minipage}{0.72\textwidth}
+        \ccode{d12/l09.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    كل \code{malloc} يقابله \code{free}.
+\end{frame}
+
+\begin{frame}{الجدول أم القائمة المتصلة؟}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{} & \ras{الجدول} & \ras{القائمة المتصلة} \\ \hline
+        الحجم & ثابت & متغير أثناء التنفيذ \\ \hline
+        الوصول إلى العنصر \code{i} & مباشر: \code{T[i]} & نمر على العقد واحدة واحدة \\ \hline
+        الإضافة في البداية & إزاحة كل العناصر & تغيير مؤشرين \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الصحة، الرياضة، الطقس، النقل، التجارة الإلكترونية، ألعاب الفيديو، الشبكات الاجتماعية، الهواتف الذكية، البيئة، الطاقة.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الصحة}
+    \begin{columns}[T]
+        \column{0.70\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d12/ex01.c}
+        \column{0.27\textwidth}
+        {\small \textbf{نبضات القلب}: نبني القائمة من جدول، ثم نمر على العقد لحساب المعدل.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الرياضة}
+    \begin{columns}[T]
+        \column{0.68\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d12/ex02.c}
+        \column{0.29\textwidth}
+        {\small \textbf{مباريات بهدفين أو أكثر}: نعدّ العقد التي قيمتها 2 أو أكثر.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: الطقس}
+    \begin{columns}[T]
+        \column{0.66\textwidth}
+        \ccode[basicstyle=\codefont\codetiny]{d12/ex03.c}
+        \column{0.31\textwidth}
+        {\small \textbf{أعلى درجة حرارة}: نفترض أن العقدة الأولى هي الأعلى، ثم نقارن بالباقي.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: النقل}
+    \begin{columns}[T]
+        \column{0.67\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d12/ex04.c}
+        \column{0.30\textwidth}
+        {\small \textbf{محطات الحافلة}: نعرض أرقام المحطات. الإضافة في البداية تعكس الترتيب.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.70\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d12/ex05.c}
+        \column{0.27\textwidth}
+        {\small \textbf{مبلغ السلة}: كل عقدة سعر منتج، ونجمع الأسعار.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.66\textwidth}
+        \ccode[basicstyle=\codefont\codetiny]{d12/ex06.c}
+        \column{0.31\textwidth}
+        {\small \textbf{البحث عن نتيجة}: هل حقق أحد اللاعبين 100 نقطة؟\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: الشبكات الاجتماعية}
+    \begin{columns}[T]
+        \column{0.70\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d12/ex07.c}
+        \column{0.27\textwidth}
+        {\small \textbf{المنشورات الناجحة}: نعدّ المنشورات التي تجاوزت 50 إعجابًا.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: الهواتف الذكية}
+    \begin{columns}[T]
+        \column{0.70\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d12/ex08.c}
+        \column{0.27\textwidth}
+        {\small \textbf{عدد الإشعارات}: نحسب طول القائمة: عدد الإشعارات غير المقروءة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: البيئة}
+    \begin{columns}[T]
+        \column{0.70\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d12/ex09.c}
+        \column{0.27\textwidth}
+        {\small \textbf{أيام الهواء النقي}: نعدّ الأيام التي كان فيها مؤشر جودة الهواء 50 أو أقل.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: الطاقة}
+    \begin{columns}[T]
+        \column{0.66\textwidth}
+        \ccode[basicstyle=\codefont\codetiny]{d12/ex10.c}
+        \column{0.31\textwidth}
+        {\small \textbf{تعديل القيم}: نمر على العقد ونضيف 10 كيلوواط ساعي لكل قيمة، ثم نعرضها.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d12/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item فقدان \code{head}: تحريكه دون حفظ البداية يضيّع القائمة.
+            \item نسيان \code{next = NULL} في آخر عقدة، أو استعمال \code{p->next} و\code{p} يساوي \code{NULL}.
+            \item نسيان \code{free}، أو استعمال عقدة بعد تحريرها.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item القائمة المتصلة عقد مرتبطة بمؤشرات، تبدأ بـ\code{head} وتنتهي بـ\code{NULL}.
+            \item الإضافة والحذف يغيّران المؤشرات فقط، دون إزاحة العناصر.
+            \item نمر على القائمة بـ\code{p = p->next}، ونحرر كل العقد في النهاية.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

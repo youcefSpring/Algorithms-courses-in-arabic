@@ -1,0 +1,260 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{البنيات الشرطية}
+
+\begin{document}
+
+\cover{درس الفصل الثاني}
+{البنيات الشرطية}
+{الشرط البسيط، الشرط المركب، والاختيار المتعدد \textenglish{switch}}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تكتب عبارة منطقية بعوامل المقارنة والعوامل المنطقية.
+            \item تستعمل \code{if} و\code{else} و\code{else if}.
+            \item تستعمل \code{switch} للاختيار المتعدد.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{لماذا البنيات الشرطية؟}
+    \vspace{0.3cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        qarar/.style={diamond, aspect=2.2, draw=brandOrange, fill=brandOrange!12,
+            very thick, font=\bfseries\small, inner sep=1pt},
+        amal/.style={draw=brandTeal, fill=brandTeal!12, very thick, rounded corners=4pt,
+            minimum width=2.4cm, minimum height=0.8cm, font=\small}]
+        \node[qarar] (q) at (0,0) {الشرط صحيح؟};
+        \node[amal] (y) at (3.2,-1.5) {التعليمات 1};
+        \node[amal] (n) at (-3.2,-1.5) {التعليمات 2};
+        \draw[sahm] (q.east) -| node[pos=0.25, above, font=\small] {نعم} (y.north);
+        \draw[sahm] (q.west) -| node[pos=0.25, above, font=\small] {لا} (n.north);
+    \end{tikzpicture}
+    \end{center}
+    \vspace{0.3cm}
+    البرنامج لا ينفذ دائمًا التعليمات نفسها: \textbf{يختار} حسب قيمة الشرط.
+\end{frame}
+
+\begin{frame}{عوامل المقارنة}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{المعنى} & \ras{\textenglish{C}} & \ras{مثال} \\ \hline
+        يساوي         & \code{==} & \code{x == 0} \\ \hline
+        لا يساوي      & \code{!=} & \code{x != 0} \\ \hline
+        أصغر، أكبر    & \code{< >} & \code{x > 10} \\ \hline
+        أصغر أو يساوي، أكبر أو يساوي & \code{<= >=} & \code{x >= 10} \\ \hline
+    \end{tabular}
+    \end{center}
+    نتيجة المقارنة إما \textbf{صحيح} \textenglish{(1)} أو \textbf{خطأ} \textenglish{(0)}.
+\end{frame}
+
+\begin{frame}{العوامل المنطقية}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{العامل} & \ras{\textenglish{C}} & \ras{يكون صحيحًا إذا} \\ \hline
+        و     & \code{\&\&} & كان الشرطان صحيحين \\ \hline
+        أو    & \code{||}   & كان أحد الشرطين صحيحًا \\ \hline
+        نفي   & \code{!}    & كان الشرط خاطئًا \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{جدول الحقيقة}
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \ras{\code{A}} & \ras{\code{B}} & \ras{\code{A \&\& B}} & \ras{\code{A || B}} & \ras{\code{!A}} \\ \hline
+        0 & 0 & 0 & 0 & 1 \\ \hline
+        0 & 1 & 0 & \cell{tealDeep}{\textbf{1}} & 1 \\ \hline
+        1 & 0 & 0 & \cell{tealDeep}{\textbf{1}} & 0 \\ \hline
+        1 & 1 & \cell{tealDeep}{\textbf{1}} & \cell{tealDeep}{\textbf{1}} & 0 \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{مثال على العوامل المنطقية}
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \ccode{d2/and.c}
+        \column{0.45\textwidth}
+        \begin{itemize}
+            \item العلامة صالحة إذا كانت بين \textenglish{0} و\textenglish{20}.
+            \item الجواب نعم إذا كتب المستخدم \code{y} أو \code{Y}.
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{الشرط البسيط}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d2/if.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    إذا كان الشرط صحيحًا تُنفذ التعليمات، وإلا لا يحدث شيء.
+\end{frame}
+
+\begin{frame}{الشرط المركب: إذا... وإلا}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d2/ifelse.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    تُنفذ \textbf{إحدى} الكتلتين فقط، حسب قيمة الشرط.
+\end{frame}
+
+\begin{frame}{تنفيذ: زوجي أم فردي؟}
+    \vspace{0.6cm}
+    \begin{center}
+        \begin{minipage}{0.45\textwidth}
+            \out{d2/ifelse.out}
+        \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{7 \% 2} يساوي \textenglish{1}، إذن الشرط \code{n \% 2 == 0} خاطئ، فيُنفذ \code{else}.
+\end{frame}
+
+\begin{frame}{الشروط المتعددة: \textenglish{else if}}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d2/elseif.c}
+    \end{minipage}
+    \end{center}
+\end{frame}
+
+\begin{frame}{كيف تُقرأ \textenglish{else if}؟}
+    \begin{center}
+    \begin{tikzpicture}[
+        qarar/.style={diamond, aspect=2, draw=brandOrange, fill=brandOrange!15,
+            very thick, inner sep=1pt, minimum width=2.9cm, font=\small},
+        natija/.style={draw=brandTeal, fill=brandTeal!15, very thick,
+            rounded corners=4pt, minimum width=2.3cm, minimum height=0.75cm,
+            font=\small\bfseries},
+        fail/.style={natija, draw=brandMuted, fill=brandMuted!15},
+        lafta/.style={font=\scriptsize\bfseries, lawn=brandMuted}]
+        \node[qarar] (q1) at (0,0)     {\code{note >= 16}};
+        \node[qarar] (q2) at (-3.6,0)  {\code{note >= 12}};
+        \node[qarar] (q3) at (-7.2,0)  {\code{note >= 10}};
+        \node[fail]  (r4) at (-10.4,0) {\textenglish{Fail}};
+        \node[natija] (r1) at (0,-2)    {\textenglish{Very good}};
+        \node[natija] (r2) at (-3.6,-2) {\textenglish{Good}};
+        \node[natija] (r3) at (-7.2,-2) {\textenglish{Pass}};
+        \node[font=\small\bfseries] (st) at (0,1.5) {\code{note = 13}};
+        \draw[sahm] (st) -- (q1);
+        \foreach \a/\b in {q1/q2, q2/q3, q3/r4}
+            \draw[sahm] (\a) -- node[lafta, above] {لا} (\b);
+        \foreach \a/\b in {q1/r1, q2/r2, q3/r3}
+            \draw[sahm] (\a) -- node[lafta, right] {نعم} (\b);
+        \draw[brandOrange, very thick, rounded corners=6pt, dashed]
+            ($(r2.south west)+(-0.15,-0.15)$) rectangle ($(r2.north east)+(0.15,0.15)$);
+    \end{tikzpicture}
+    \end{center}
+    نختبر الشروط بالترتيب، ونتوقف عند \textbf{أول شرط صحيح}.
+    مع \code{note = 13} تُعرض \code{Good}.
+\end{frame}
+
+\begin{frame}{مثال: أكبر ثلاثة أعداد}
+    \begin{columns}[T]
+        \column{0.55\textwidth}
+        \ccode{d2/max3.c}
+        \column{0.4\textwidth}
+        \out{d2/max3.out}
+    \end{columns}
+    \vspace{0.3cm}
+    نفترض أن \code{a} هو الأكبر، ثم نقارنه بالعددين الآخرين.
+\end{frame}
+
+\begin{frame}{الاختيار المتعدد}
+    \begin{tbox}{\faLightbulb\quad متى نستعمل \textenglish{switch}؟}
+        عندما نقارن متغيرًا واحدًا بعدة \textbf{قيم ثابتة}،
+        من النوع \code{int} أو \code{char}.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{بنية \textenglish{switch}}
+    \begin{center}
+    \begin{minipage}{0.62\textwidth}
+        \ccode{d2/switch.c}
+    \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    \code{default} تُنفذ إذا لم توافق القيمة أي حالة.
+\end{frame}
+
+\begin{frame}{دور \textenglish{break}}
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \ccode{d2/nobreak.c}
+        \column{0.4\textwidth}
+        \out{d2/nobreak.out}
+    \end{columns}
+    \vspace{0.3cm}
+    \begin{obox}{\faExclamationTriangle\quad انتبه}
+        دون \code{break} يواصل البرنامج تنفيذ الحالات التالية.
+    \end{obox}
+\end{frame}
+
+\begin{frame}{تجميع عدة حالات}
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \ccode{d2/grouped.c}
+        \column{0.45\textwidth}
+        نكتب عدة حالات متتالية لتنفيذ التعليمات نفسها.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{مثال: آلة حاسبة}
+    \begin{center}\begin{minipage}{0.75\textwidth}\ccode[basicstyle=\codefont\codesmall]{d2/calc.c}\end{minipage}\end{center}
+\end{frame}
+
+\begin{frame}{تنفيذ الآلة الحاسبة}
+    \vspace{0.6cm}
+    \begin{center}
+        \begin{minipage}{0.45\textwidth}
+            \out{d2/calc.out}
+        \end{minipage}
+    \end{center}
+    \vspace{0.3cm}
+    يقرأ البرنامج عددين وعملية، ثم ينفذ الحالة المناسبة.
+\end{frame}
+
+\begin{frame}{\textenglish{if} أم \textenglish{switch}؟}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{} & \ras{\code{if}} & \ras{\code{switch}} \\ \hline
+        نوع الشرط   & أي عبارة منطقية & مساواة مع قيم ثابتة \\ \hline
+        المجالات    & \code{x > 10} ممكن & غير ممكن \\ \hline
+        نوع المتغير & كل الأنواع & \code{int} و\code{char} فقط \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\input{examples_d2}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item كتابة \code{=} (تعيين) بدل \code{==} (مقارنة).
+            \item وضع \code{;} بعد الشرط: \code{if (x > 0);}
+            \item نسيان \code{break} في \code{switch}.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item الشرط عبارة منطقية: صحيح أو خطأ.
+            \item \code{if / else / else if} لاختيار كتلة من التعليمات.
+            \item \code{switch} لمقارنة متغير بعدة قيم ثابتة، مع \code{break}.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}

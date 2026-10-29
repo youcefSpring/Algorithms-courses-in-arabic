@@ -1,0 +1,116 @@
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الصحة، الرياضة، الطقس، النقل، التجارة الإلكترونية، ألعاب الفيديو، معالجة الصور، الترفيه، الطاقة الشمسية، الزراعة الذكية.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الصحة}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex01.c}
+        \column{0.33\textwidth}
+        {\small\textbf{حرارة المرضى}: كل سطر مريض وكل عمود قياس: نحسب معدل حرارة كل مريض.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الرياضة}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex02.c}
+        \column{0.33\textwidth}
+        {\small\textbf{أهداف الفرق}: كل سطر فريق وكل عمود مباراة: نجد الفريق صاحب أقوى هجوم.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: الطقس}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex03.c}
+        \column{0.33\textwidth}
+        {\small\textbf{أعلى درجة حرارة}: كل سطر مدينة وكل عمود يوم: نبحث عن أعلى قيمة وموضعها.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: النقل}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex04.c}
+        \column{0.33\textwidth}
+        {\small\textbf{جدول المسافات}: \code{d[i][j]} المسافة بين المدينة \code{i} والمدينة \code{j}. نتحقق من التناظر.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex05.c}
+        \column{0.33\textwidth}
+        {\small\textbf{مبيعات المتاجر}: كل سطر متجر وكل عمود شهر: نحسب مجموع كل عمود.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex06.c}
+        \column{0.33\textwidth}
+        {\small\textbf{لعبة إكس-أو}: نتحقق هل ملأ لاعب سطرًا كاملًا في لوحة اللعب.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: معالجة الصور}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex07.c}
+        \column{0.33\textwidth}
+        {\small\textbf{سلبية صورة}: الصورة مصفوفة من البكسلات بين 0 و255. في السلبية يصبح كل بكسل \code{p} مساويًا لـ\code{255-p}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: الترفيه}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex08.c}
+        \column{0.33\textwidth}
+        {\small\textbf{مقاعد السينما}: \code{1} مقعد محجوز و\code{0} مقعد شاغر: نعدّ المقاعد الشاغرة في كل صف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: الطاقة الشمسية}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex09.c}
+        \column{0.33\textwidth}
+        {\small\textbf{ألواح السطح}: إنتاج كل لوح على السطح (كيلوواط ساعي): المجموع وأفضل لوح.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: الزراعة الذكية}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d5/ex10.c}
+        \column{0.33\textwidth}
+        {\small\textbf{رطوبة التربة}: الحقل مقسم إلى خانات: نسقي الخانات التي رطوبتها أقل من 30\%.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d5/ex10.out}
+    \end{columns}
+\end{frame}

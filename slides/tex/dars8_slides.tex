@@ -1,0 +1,321 @@
+\documentclass[aspectratio=169, 11pt, xcolor={table}]{beamer}
+\input{style}
+\title{العودية}
+
+\begin{document}
+
+\cover{درس الفصل الثامن}
+{العودية}
+{الدوال التي تستدعي نفسها: حالة التوقف والاستدعاء العودي}
+
+\begin{frame}{أهداف الدرس}
+    \begin{tbox}{\faBullseye\quad في نهاية هذا الدرس، تستطيع أن:}
+        \begin{itemize}
+            \item تعرّف الدالة العودية وتحدد حالة التوقف.
+            \item تتتبع الاستدعاءات العودية في المكدس.
+            \item تقارن بين الحل العودي والحل التكراري.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{الدالة العودية}
+    \begin{tbox}{\faLightbulb\quad تعريف}
+        \textbf{الدالة العودية}: دالة تستدعي \textbf{نفسها} لحل نسخة أصغر من المشكلة نفسها.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}{جزءا الدالة العودية}
+    \vspace{0.6cm}
+    \begin{columns}[T]
+        \column{0.45\textwidth}
+        \begin{card}{حالة التوقف}
+            حالة بسيطة نعرف حلها مباشرة، دون استدعاء.
+        \end{card}
+        \column{0.45\textwidth}
+        \begin{card}{الاستدعاء العودي}
+            نستدعي الدالة على مشكلة \textbf{أصغر}، تقترب من حالة التوقف.
+        \end{card}
+    \end{columns}
+    \vspace{0.4cm}
+    مثال: $n! = n \times (n-1)!$ \quad و\quad $0! = 1$
+\end{frame}
+
+\begin{frame}[t]{العاملي بطريقة عودية}
+    \begin{columns}[T]
+        \column{0.63\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/l01.c}
+        \column{0.34\textwidth}
+        {\small كل استدعاء ينقص \code{n} بواحد حتى نصل إلى \code{0}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/l01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{تتبع \textenglish{fact(4)}}
+    \begin{center}
+    \begin{tikzpicture}[
+        call/.style={draw=brandTeal, fill=brandTeal!12, thick, rounded corners=3pt,
+            minimum width=4.2cm, minimum height=0.55cm, font=\small},
+        stop/.style={call, draw=brandOrange, fill=brandOrange!15},
+        val/.style={draw=brandOrange, fill=white, thick, circle, inner sep=1pt,
+            minimum size=0.6cm, font=\small\bfseries}]
+        \foreach \t/\v [count=\i from 0] in {{fact(4) = 4 * fact(3)}/24,
+                {fact(3) = 3 * fact(2)}/6, {fact(2) = 2 * fact(1)}/2,
+                {fact(1) = 1 * fact(0)}/1} {
+            \node[call] (c\i) at (0, -0.85*\i) {\code{\t}};
+            \node[val]  (v\i) at (3.3, -0.85*\i) {\textenglish{\v}};
+        }
+        \node[stop] (c4) at (0, -3.4) {\code{fact(0) = 1}};
+        \node[val]  (v4) at (3.3, -3.4) {\textenglish{1}};
+        \foreach \i [evaluate=\i as \j using int(\i+1)] in {0,...,3} {
+            \draw[sahm] ([xshift=-1.6cm]c\i.south) -- ([xshift=-1.6cm]c\j.north);
+            \draw[sahm, brandOrange] (v\j) -- (v\i);
+        }
+        \node[font=\scriptsize\bfseries, lawn=brandMuted] at (-3.3, -1.7) {النزول};
+        \node[font=\scriptsize\bfseries, lawn=brandOrange!80!black] at (4.3, -1.7) {الصعود};
+    \end{tikzpicture}
+    \end{center}
+    ننزل حتى حالة التوقف، ثم نصعد بالنتائج: \code{fact(4) = 24}.
+\end{frame}
+
+\begin{frame}[t]{مجموع الأعداد من 1 إلى n}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/l02.c}
+        \column{0.41\textwidth}
+        {\small \code{sum(n) = n + sum(n-1)} و\code{sum(1) = 1}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/l02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{القوة}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/l03.c}
+        \column{0.41\textwidth}
+        {\small $x^n = x \times x^{n-1}$ و$x^0 = 1$.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/l03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{متتالية فيبوناتشي}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/l04.c}
+        \column{0.41\textwidth}
+        {\small استدعاءان عوديان في كل مرة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/l04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{شجرة استدعاءات \textenglish{fib(4)}}
+    \begin{center}
+    \begin{tikzpicture}[
+        level distance=1.05cm,
+        level 1/.style={sibling distance=4.6cm},
+        level 2/.style={sibling distance=2.3cm},
+        level 3/.style={sibling distance=1.2cm},
+        every node/.append style={draw=brandTeal, fill=brandTeal!12, thick,
+            rounded corners=3pt, font=\scriptsize, inner sep=3pt},
+        tikrar/.style={draw=brandOrange, fill=brandOrange!20},
+        edge from parent/.style={draw, brandMuted, thick}]
+        \node {\code{fib(4)}}
+            child {node {\code{fib(3)}}
+                child {node[tikrar] {\code{fib(2)}}
+                    child {node {\code{fib(1)}}}
+                    child {node {\code{fib(0)}}}}
+                child {node {\code{fib(1)}}}}
+            child {node[tikrar] {\code{fib(2)}}
+                child {node {\code{fib(1)}}}
+                child {node {\code{fib(0)}}}};
+    \end{tikzpicture}
+    \end{center}
+    \code{fib(2)} يُحسب مرتين: الحل العودي هنا بطيء جدًا عندما يكبر \code{n}.
+\end{frame}
+
+\begin{frame}[t]{القاسم المشترك الأكبر}
+    \begin{columns}[T]
+        \column{0.61\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/l05.c}
+        \column{0.36\textwidth}
+        {\small خوارزمية إقليدس: \code{gcd(a, b) = gcd(b, a \% b)}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/l05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{عرض أرقام عدد بالعكس}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/l06.c}
+        \column{0.41\textwidth}
+        {\small دالة \code{void} عودية: \code{return} وحدها تكفي للتوقف.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/l06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{دون حالة توقف}
+    \begin{center}
+    \begin{minipage}{0.7\textwidth}
+        \ccode{d8/l07.c}
+    \end{minipage}
+    \end{center}
+    \begin{obox}{\faExclamationTriangle\quad انتبه}
+        تتراكم الاستدعاءات في المكدس حتى يتوقف البرنامج بخطأ \textenglish{stack overflow}.
+    \end{obox}
+\end{frame}
+
+\begin{frame}{العودية أم التكرار؟}
+    \begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \ras{} & \ras{العودية} & \ras{التكرار (الحلقات)} \\ \hline
+        الكتابة & قصيرة وقريبة من التعريف الرياضي & أطول أحيانًا \\ \hline
+        الذاكرة & كل استدعاء يأخذ مكانًا في المكدس & ذاكرة ثابتة \\ \hline
+        الاستعمال & الأشجار، التقسيم، البحث الثنائي & الحسابات البسيطة \\ \hline
+    \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}{أمثلة تطبيقية}
+    \begin{tbox}{\faLaptopCode\quad عشرة أمثلة من مجالات مختلفة}
+        نطبق ما تعلمناه في مجالات من الحياة اليومية:
+        الرياضة، الشبكات الاجتماعية، البيئة، ألعاب الفيديو، الشبكات، علم الأحياء، الفيزياء، محركات البحث، معالجة النصوص، التجارة الإلكترونية.
+    \end{tbox}
+\end{frame}
+
+\begin{frame}[t]{المثال الأول: الرياضة}
+    \begin{columns}[T]
+        \column{0.61\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex01.c}
+        \column{0.36\textwidth}
+        {\small \textbf{عدد مباريات الإقصاء}: في كل دور تُلعب نصف عدد الفرق مباريات.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex01.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثاني: الشبكات الاجتماعية}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex02.c}
+        \column{0.32\textwidth}
+        {\small \textbf{انتشار منشور}: كل شخص يشارك المنشور مع 3 أشخاص في المستوى التالي.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex02.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثالث: البيئة}
+    \begin{columns}[T]
+        \column{0.64\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex03.c}
+        \column{0.33\textwidth}
+        {\small \textbf{نمو غابة}: عدد الأشجار يزيد 20\% كل سنة، مع غرس 50 شجرة جديدة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex03.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الرابع: ألعاب الفيديو}
+    \begin{columns}[T]
+        \column{0.60\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex04.c}
+        \column{0.37\textwidth}
+        {\small \textbf{أبراج هانوي}: ننقل 3 أقراص من العمود \code{A} إلى العمود \code{C}.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex04.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الخامس: الشبكات}
+    \begin{columns}[T]
+        \column{0.56\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex05.c}
+        \column{0.41\textwidth}
+        {\small \textbf{التحويل إلى الثنائي}: الحواسيب والشبكات تستعمل النظام الثنائي.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex05.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السادس: علم الأحياء}
+    \begin{columns}[T]
+        \column{0.58\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex06.c}
+        \column{0.39\textwidth}
+        {\small \textbf{تكاثر الأرانب}: مسألة فيبوناتشي الأصلية: عدد أزواج الأرانب كل شهر.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex06.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال السابع: الفيزياء}
+    \begin{columns}[T]
+        \column{0.66\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex07.c}
+        \column{0.31\textwidth}
+        {\small \textbf{ارتداد كرة}: بعد كل ارتداد تفقد الكرة 30\% من ارتفاعها.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex07.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال الثامن: محركات البحث}
+    \begin{columns}[T]
+        \column{0.65\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex08.c}
+        \column{0.32\textwidth}
+        {\small \textbf{البحث الثنائي}: نبحث في جدول مرتب بتقسيمه إلى نصفين في كل مرة.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex08.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال التاسع: معالجة النصوص}
+    \begin{columns}[T]
+        \column{0.63\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex09.c}
+        \column{0.34\textwidth}
+        {\small \textbf{كلمة متناظرة}: نقارن الحرف الأول بالأخير، ثم نعيد على ما بينهما.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex09.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t]{المثال العاشر: التجارة الإلكترونية}
+    \begin{columns}[T]
+        \column{0.60\textwidth}
+        \ccode[basicstyle=\codefont\codesmall]{d8/ex10.c}
+        \column{0.37\textwidth}
+        {\small \textbf{مجموع السلة}: مجموع السلة = آخر منتج + مجموع باقي المنتجات.\par}
+        \vspace{0.3cm}
+        \out[basicstyle=\codefont\scriptsize\color{brandDark}]{d8/ex10.out}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{أخطاء شائعة}
+    \begin{obox}{\faExclamationTriangle\quad تجنّب هذه الأخطاء}
+        \begin{itemize}
+            \item نسيان حالة التوقف، أو حالة توقف لا نصل إليها أبدًا.
+            \item استدعاء عودي لا يصغّر المشكلة: \code{f(n)} تستدعي \code{f(n)}.
+            \item استعمال العودية لحسابات تتكرر كثيرًا (فيبوناتشي) مع قيم كبيرة.
+        \end{itemize}
+    \end{obox}
+\end{frame}
+
+\begin{frame}{خلاصة الدرس}
+    \begin{tbox}{\faCheckCircle\quad خلاصة الدرس}
+        \begin{itemize}
+            \item الدالة العودية تستدعي نفسها على مشكلة أصغر.
+            \item كل دالة عودية تحتاج إلى حالة توقف.
+            \item العودية مناسبة للأشجار والتقسيم، والتكرار أوفر في الذاكرة.
+        \end{itemize}
+    \end{tbox}
+\end{frame}
+
+\end{document}
