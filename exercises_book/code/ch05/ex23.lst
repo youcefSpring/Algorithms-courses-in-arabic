@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+#define NB_B 6
+#define NB_P 4
+
+int main(void) {
+    int baskets[NB_B][NB_P] = {{1, 1, 0, 0},
+                               {1, 1, 1, 0},
+                               {0, 1, 1, 0},
+                               {1, 0, 0, 1},
+                               {1, 1, 0, 1},
+                               {0, 0, 1, 1}};
+    int co[NB_P][NB_P], first, second, basket;
+    for (first = 0; first < NB_P; first++) {
+        for (second = 0; second < NB_P; second++) {
+            co[first][second] = 0;
+            for (basket = 0; basket < NB_B; basket++)   (*@\cmt{عمود × عمود}@*)
+                co[first][second] += baskets[basket][first] * baskets[basket][second];
+            printf(" %d", co[first][second]);
+        }
+        printf("\n");
+    }
+    return 0;
+}

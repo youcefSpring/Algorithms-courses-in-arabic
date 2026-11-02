@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+int main(void) {
+    unsigned long long number;
+    int digit, sum = 0, pos = 1;
+    scanf("%llu", &number);
+    while (number > 0) {
+        digit = number % 10;               // نقرأ الأرقام من اليمين
+        number = number / 10;
+        if (pos % 2 == 0) {       // رقم من كل اثنين
+            digit = 2 * digit;
+            if (digit > 9)
+                digit = digit - 9;        // = مجموع رقمي الناتج
+        }
+        sum += digit;
+        pos++;
+    }
+    printf("Luhn sum = %d\n", sum);
+    if (sum % 10 == 0)
+        printf("Card number is valid\n");
+    else
+        printf("Card number is INVALID\n");
+    return 0;
+}

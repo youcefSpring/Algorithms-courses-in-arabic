@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int main(void) {
+    int day, month, year, max;
+    scanf("%d %d %d", &day, &month, &year);
+    if (month < 1 || month > 12) {
+        printf("Invalid month\n");
+    } else {
+        if (month == 2) {
+            if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
+                max = 29;
+            else
+                max = 28;
+        } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+            max = 30;
+        } else {
+            max = 31;
+        }
+        if (day >= 1 && day <= max)       (*@\cmt{اليوم داخل حدود الشهر}@*)
+            printf("%02d/%02d/%d is valid\n", day, month, year);
+        else
+            printf("Invalid day: month %d has %d days\n", month, max);
+    }
+    return 0;
+}

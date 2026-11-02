@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int main(void) {
+    char category, next, low;
+    int rank;
+    scanf(" %c", &category);
+    next = category + 1;                 // الحرف الموالي في جدول ASCII
+    rank = category - 'A' + 1;           // المسافة عن A
+    low = category + ('a' - 'A');        // الفرق بين الصغير والكبير ثابت
+    printf("Code ASCII = %d\n", category);
+    printf("Next category = %c\n", next);
+    printf("Rank = %d\n", rank);
+    printf("Lowercase = %c\n", low);
+    return 0;
+}

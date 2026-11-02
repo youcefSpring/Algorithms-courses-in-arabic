@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+int main(void) {
+    char phone[20], normal[20];
+    int read = 0, write = 0, valid = 1;
+    scanf("%19s", phone);
+    if (phone[0] == '+' && phone[1] == '2' && phone[2] == '1' && phone[3] == '3') {
+        normal[write++] = '0';            // الصيغة الدولية: نضيف الصفر
+        read = 4;
+    }
+    for (; phone[read] != '\0' && write < 19; read++) {
+        if (phone[read] < '0' || phone[read] > '9')
+            valid = 0;                    // حرف غير رقمي
+        normal[write++] = phone[read];
+    }
+    normal[write] = '\0';
+    if (write != 10 || normal[0] != '0' || normal[1] < '5' || normal[1] > '7')
+        valid = 0;
+    if (valid)
+        printf("Valid mobile number: %s\n", normal);
+    else
+        printf("Invalid number: %s\n", phone);
+    return 0;
+}

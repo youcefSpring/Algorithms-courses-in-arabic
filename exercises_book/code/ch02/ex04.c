@@ -1,0 +1,13 @@
+#include <stdio.h>
+
+int main(void) {
+    double p1, p2;
+    scanf("%lf %lf", &p1, &p2);
+    if (p1 < p2)
+        printf("Seller 1 is cheaper by %.2f DA\n", p2 - p1);
+    else if (p2 < p1)             // نختبر الحالة الثانية فقط إذا فشلت الأولى
+        printf("Seller 2 is cheaper by %.2f DA\n", p1 - p2);
+    else
+        printf("Same price\n");   // لم يبق إلا التساوي
+    return 0;
+}

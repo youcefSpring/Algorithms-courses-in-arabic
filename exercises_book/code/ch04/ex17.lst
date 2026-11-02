@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+#define NB_ORDERS 8
+
+int main(void) {
+    int times[NB_ORDERS] = {615, 540, 720, 480, 600, 545, 900, 510};
+    int index, scan, key;
+    for (index = 1; index < NB_ORDERS; index++) {
+        key = times[index];               (*@\cmt{العنصر المراد إدراجه}@*)
+        scan = index - 1;
+        while (scan >= 0 && times[scan] > key) {
+            times[scan + 1] = times[scan];      (*@\cmt{نزيح الأكبر نحو اليمين}@*)
+            scan--;
+        }
+        times[scan + 1] = key;           (*@\cmt{الفراغ الذي بقي هو مكانه}@*)
+    }
+    for (index = 0; index < NB_ORDERS; index++)
+        printf("%02d:%02d ", times[index] / 60, times[index] % 60);
+    printf("\n");
+    return 0;
+}

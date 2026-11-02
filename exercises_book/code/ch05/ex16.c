@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+#define NB_USERS 5
+#define NB_ITEMS 4
+
+int main(void) {
+    int ratings[NB_USERS][NB_ITEMS] = {{5, 3, 0, 4},
+                                       {4, 0, 0, 5},
+                                       {1, 2, 5, 0},
+                                       {0, 3, 4, 4},
+                                       {5, 0, 3, 0}};
+    int user, item, sum, count, best = -1;
+    double avg, bestAvg = 0;
+    for (item = 0; item < NB_ITEMS; item++) {
+        sum = 0;
+        count = 0;
+        for (user = 0; user < NB_USERS; user++)
+            if (ratings[user][item] > 0) {    // نتجاهل الخانات الفارغة
+                sum += ratings[user][item];
+                count++;
+            }
+        if (count > 0) {
+            avg = (double)sum / count;
+            printf("Item %d: %.2f (%d ratings)\n", item, avg, count);
+            if (avg > bestAvg) { bestAvg = avg; best = item; }
+        }
+    }
+    printf("Best rated: item %d\n", best);
+    return 0;
+}

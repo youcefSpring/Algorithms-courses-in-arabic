@@ -1,0 +1,1850 @@
+\clearpage
+\levelsection{1}{التمارين السهلة}
+
+\exhead{1.1}{1}{السعر مع الرسم على القيمة المضافة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يبيع متجر إلكتروني منتجًا بسعر دون رسوم \code{HT}. اكتب برنامجًا يقرأ هذا السعر ثم يحسب قيمة الرسم على القيمة المضافة بنسبة \en{19\%} والسعر النهائي \code{TTC}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نعرّف ثابتًا \code{TVA = 0.19}.
+\item نقرأ السعر \code{ht}.
+\item نحسب الرسم \code{tax = ht * TVA}.
+\item نحسب السعر النهائي \code{ttc = ht + tax} ثم نعرض النتيجتين.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex01.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex01.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex01.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=1.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{ht}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.10cm] (n3) at (0.00,-2.95) {\fc{tax = ht * TVA}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.10cm] (n4) at (0.00,-4.23) {\fc{ttc = ht + tax}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=3.10cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{tax, ttc}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.2}{1}{مبلغ سطر في الفاتورة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اشترى زبون عدة وحدات من نفس المنتج. اكتب برنامجًا يقرأ \textbf{سعر الوحدة} و\textbf{الكمية} ويعرض مبلغ هذا السطر من الفاتورة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ سعر الوحدة \code{price} (عدد حقيقي) والكمية \code{qty} (عدد صحيح).
+\item نضرب السعر في الكمية: \code{amount = price * qty}.
+\item نعرض المبلغ بمنزلتين عشريتين.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex02.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex02.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex02.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{price, qty}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.30cm] (n3) at (0.00,-2.95) {\fc{amount = price * qty}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.70cm] (n4) at (0.00,-4.23) {\textbf{اكتب}\ \fc{amount}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fterm] (n5) at (0.00,-5.51) {نهاية};
+\draw[sahm] (n4.south) -- (n5.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.3}{1}{متوسط تقييمات منتج}{\faTag\ علم البيانات}
+\begin{statement}
+ترك ثلاثة زبائن تقييمات لمنتج (من \en{1} إلى \en{5}). اكتب برنامجًا يقرأ التقييمات الثلاثة ويحسب \textbf{متوسطها} كعدد حقيقي.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ التقييمات \code{r1} و\code{r2} و\code{r3} كأعداد صحيحة.
+\item نحسب المجموع ثم نقسمه على \code{3.0} (وليس \code{3}) لنحصل على قسمة حقيقية.
+\item نعرض المتوسط.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex03.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex03.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex03.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{r1, r2, r3}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.50cm] (n3) at (0.00,-2.95) {\fc{avg = (r1 + r2 + r3) / 3.0}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.10cm] (n4) at (0.00,-4.23) {\textbf{اكتب}\ \fc{avg}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fterm] (n5) at (0.00,-5.51) {نهاية};
+\draw[sahm] (n4.south) -- (n5.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.4}{1}{تحويل العملة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يعرض متجر جزائري أسعاره بالدينار، ويريد عرضها أيضًا باليورو. سعر الصرف ثابت: \en{1} يورو = \en{146.5} دج. اكتب برنامجًا يحول مبلغًا مقروءًا من الدينار إلى اليورو.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نعرّف الثابت \code{RATE = 146.5}.
+\item نقرأ المبلغ بالدينار \code{da}.
+\item نقسم على سعر الصرف: \code{eur = da / RATE}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex04.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex04.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex04.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=1.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{da}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.30cm] (n3) at (0.00,-2.95) {\fc{eur = da / RATE}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.10cm] (n4) at (0.00,-4.23) {\textbf{اكتب}\ \fc{eur}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fterm] (n5) at (0.00,-5.51) {نهاية};
+\draw[sahm] (n4.south) -- (n5.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.5}{1}{الوزن الإجمالي للشحنة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+تتكون شحنة من ثلاثة طرود. اكتب برنامجًا يقرأ أوزانها بالكيلوغرام ويعرض \textbf{الوزن الإجمالي} و\textbf{متوسط} وزن الطرد.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ الأوزان الثلاثة \code{w1} و\code{w2} و\code{w3}.
+\item نحسب المجموع \code{total}.
+\item نحسب المتوسط \code{total / 3}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex05.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex05.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex05.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{w1, w2, w3}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.30cm] (n3) at (0.00,-2.95) {\fc{total = w1 + w2 + w3}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.30cm] (n4) at (0.00,-4.23) {\fc{avg = total / 3}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=3.50cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{total, avg}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.6}{1}{التخفيض الموسمي}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+في فترة التخفيضات، يُطبَّق على كل منتج نسبة تخفيض. اكتب برنامجًا يقرأ السعر الأصلي ونسبة التخفيض (بالمئة) ويعرض \textbf{قيمة التخفيض} و\textbf{السعر الجديد}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ السعر \code{price} والنسبة \code{rate}.
+\item قيمة التخفيض: \code{disc = price * rate / 100}.
+\item السعر الجديد: \code{newPrice = price - disc}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex06.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex06.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex06.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.70cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{price, rate}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.30cm] (n3) at (0.00,-2.95) {\fc{disc = price * rate / 100}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.90cm] (n4) at (0.00,-4.23) {\fc{newPrice = price - disc}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.30cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{disc, newPrice}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.7}{1}{الربح وهامش الربح}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يشتري بائع منتجًا بسعر \code{buy} ويبيعه بسعر \code{sell}. اكتب برنامجًا يحسب \textbf{الربح} و\textbf{هامش الربح} كنسبة مئوية من سعر البيع.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ سعر الشراء وسعر البيع.
+\item الربح: \code{profit = sell - buy}.
+\item الهامش: \code{margin = profit / sell * 100}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex07.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex07.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex07.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{buy, sell}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.10cm] (n3) at (0.00,-2.95) {\fc{profit = sell - buy}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.90cm] (n4) at (0.00,-4.23) {\fc{margin = profit / sell * 100}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.30cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{profit, margin}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.8}{1}{تبديل سعرين}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+أدخل موظف سعري منتجين بالعكس. اكتب برنامجًا يقرأ السعرين \code{priceA} و\code{priceB} ثم \textbf{يبدل} قيمتيهما باستعمال متغير مساعد، ويعرضهما قبل التبديل وبعده.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{priceA} و\code{priceB}.
+\item نحفظ \code{priceA} في متغير مساعد \code{tmp}.
+\item نضع \code{priceB} في \code{priceA} ثم \code{tmp} في \code{priceB}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex08.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex08.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex08.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{priceA, priceB}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.70cm] (n3) at (0.00,-2.95) {\fc{tmp = priceA}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.30cm] (n4) at (0.00,-4.23) {\fc{priceA = priceB}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=2.70cm] (n5) at (0.00,-5.51) {\fc{priceB = tmp}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=4.30cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{priceA, priceB}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.9}{1}{مدة جلسة التصفح}{\faTag\ علم البيانات}
+\begin{statement}
+يسجل موقع التجارة الإلكترونية مدة كل جلسة بالثواني. اكتب برنامجًا يحول المدة إلى \textbf{دقائق وثوانٍ} باستعمال القسمة الصحيحة \code{/} وباقي القسمة \code{\%}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ المدة \code{seconds} بالثواني.
+\item عدد الدقائق: \code{minutes = seconds / 60} (قسمة صحيحة).
+\item الثواني المتبقية: \code{rest = seconds \% 60}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex09.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex09.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex09.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{seconds}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.70cm] (n3) at (0.00,-2.95) {\fc{minutes = seconds / 60}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.10cm] (n4) at (0.00,-4.23) {\fc{rest = seconds \% 60}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.10cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{minutes, rest}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.10}{1}{معدل التحويل}{\faTag\ علم البيانات}
+\begin{statement}
+\textbf{معدل التحويل} هو نسبة الزوار الذين قاموا بالشراء. اكتب برنامجًا يقرأ عدد الزوار وعدد الطلبيات ويعرض معدل التحويل بالمئة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{visitors} و\code{orders} كأعداد صحيحة.
+\item نحول أحدهما إلى \code{double} قبل القسمة لتجنب القسمة الصحيحة.
+\item \code{rate = orders / visitors * 100}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex10.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex10.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex10.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.70cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{visitors, orders}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=7.90cm] (n3) at (0.00,-2.95) {\fc{rate = (double)orders / visitors * 100}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.30cm] (n4) at (0.00,-4.23) {\textbf{اكتب}\ \fc{rate}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fterm] (n5) at (0.00,-5.51) {نهاية};
+\draw[sahm] (n4.south) -- (n5.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\clearpage
+\levelsection{2}{التمارين المتوسطة}
+
+\exhead{1.11}{2}{عدد علب التغليف}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يجب تغليف \code{items} منتجًا في علب تتسع كل واحدة لـ \code{capacity} منتجات. اكتب برنامجًا يحسب \textbf{عدد العلب اللازمة} وعدد المنتجات في \textbf{العلبة الأخيرة}، دون استعمال أي شرط.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item عدد العلب هو القسمة الصحيحة مقربة إلى الأعلى: \code{boxes = (items + capacity - 1) / capacity}.
+\item المنتجات الموجودة في العلب الممتلئة: \code{(boxes - 1) * capacity}.
+\item العلبة الأخيرة: \code{last = items - (boxes - 1) * capacity}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex11.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex11.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex11.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{items, capacity}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=8.50cm] (n3) at (0.00,-2.95) {\fc{boxes = (items + capacity - 1) / capacity}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=7.70cm] (n4) at (0.00,-4.23) {\fc{last = items - (boxes - 1) * capacity}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=3.70cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{boxes, last}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.12}{2}{المسافة بين زبونين}{\faTag\ علم البيانات}
+\begin{statement}
+نمثل كل زبون بخاصيتين: عدد الطلبيات \code{x} ومتوسط السلة بالآلاف \code{y}. اكتب برنامجًا يحسب \textbf{مربع المسافة الإقليدية} بين زبونين (دون جذر)، ويعرض أيضًا الفرق في عدد الطلبيات.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ إحداثيات الزبونين \code{(x1, y1)} و\code{(x2, y2)}.
+\item نحسب الفرقين \code{dx = x1 - x2} و\code{dy = y1 - y2}.
+\item مربع المسافة: \code{d2 = dx*dx + dy*dy}.
+\item مسافة مانهاتن للخاصية الأولى هي \code{dx} مباشرة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex12.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex12.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex12.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{x1, y1, x2, y2}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.70cm] (n3) at (0.00,-2.95) {\fc{dx = x1 - x2}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=2.70cm] (n4) at (0.00,-4.23) {\fc{dy = y1 - y2}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=3.90cm] (n5) at (0.00,-5.51) {\fc{d2 = dx*dx + dy*dy}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=2.70cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{d2, dx}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.13}{2}{المتوسط والتباين}{\faTag\ علم البيانات}
+\begin{statement}
+لدينا مبيعات أربعة أيام. اكتب برنامجًا يحسب \textbf{المتوسط} و\textbf{التباين} (متوسط مربعات الانحرافات عن المتوسط).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ القيم الأربع ونحسب المتوسط \code{mean}.
+\item نحسب انحراف كل قيمة: \code{ai - mean}.
+\item التباين: مجموع مربعات الانحرافات مقسوم على \code{4}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex13.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex13.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex13.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{day1, day2, day3, day4}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=7.90cm] (n3) at (0.00,-2.95) {\fc{mean = (day1 + day2 + day3 + day4) / 4}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.40cm] (n4) at (0.00,-4.69) {\en{variance} = مجموع مربعات \fc{(x - mean)} مقسوم على \en{4}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.30cm] (n5) at (0.00,-6.43) {\textbf{اكتب}\ \fc{mean, variance}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-7.71) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.14}{2}{التطبيع بين \en{0} و\en{1}}{\faTag\ علم البيانات}
+\begin{statement}
+قبل تدريب نموذج، نحول الأسعار إلى المجال \code{[0, 1]} بطريقة \textbf{\en{Min-Max}}. اكتب برنامجًا يقرأ أصغر سعر وأكبر سعر وسعرًا \code{price} ويعرض قيمته المطبّعة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{min} و\code{max} و\code{price}.
+\item الصيغة: \code{xn = (price - min) / (max - min)}.
+\item نعرض \code{xn} بثلاث منازل عشرية.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex14.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex14.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex14.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{min, max, price}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=6.70cm] (n3) at (0.00,-2.95) {\fc{xn = (price - min) / (max - min)}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=1.90cm] (n4) at (0.00,-4.23) {\textbf{اكتب}\ \fc{xn}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fterm] (n5) at (0.00,-5.51) {نهاية};
+\draw[sahm] (n4.south) -- (n5.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.15}{2}{الدرجة المعيارية}{\faTag\ علم البيانات}
+\begin{statement}
+لاكتشاف الطلبيات غير العادية نحسب \textbf{الدرجة المعيارية} \code{zscore = (amount - mean) / std}. اكتب برنامجًا يقرأ مبلغ طلبية ومتوسط المبالغ وانحرافها المعياري، ويعرض \code{zscore} ثم المبلغ المقابل لـ \code{zscore = 2}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{amount} و\code{mean} و\code{std}.
+\item \code{zscore = (amount - mean) / std}.
+\item المبلغ الموافق لدرجة معيارية \en{2}: \code{x2 = mean + 2 * std}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex15.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex15.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex15.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{amount, mean, std}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=6.30cm] (n3) at (0.00,-2.95) {\fc{zscore = (amount - mean) / std}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.10cm] (n4) at (0.00,-4.23) {\fc{x2 = mean + 2 * std}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=3.50cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{zscore, x2}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.16}{2}{متوسط النجوم الموزون}{\faTag\ علم البيانات}
+\begin{statement}
+تعرض صفحة المنتج عدد التقييمات لكل نجمة (من نجمة إلى خمس نجوم). اكتب برنامجًا يقرأ الأعداد الخمسة ويحسب \textbf{المتوسط الموزون} وعدد التقييمات الكلي.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{c1} إلى \code{c5}.
+\item العدد الكلي: \code{nbReviews = c1 + c2 + c3 + c4 + c5}.
+\item المجموع الموزون: \par{\centering\small\code{weighted = 1*c1 + 2*c2 + 3*c3 + 4*c4 + 5*c5}\par}.
+\item المتوسط: \code{weighted / nbReviews} بقسمة حقيقية.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex16.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex16.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex16.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.10cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{c1, c2, c3, c4, c5}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=7.10cm] (n3) at (0.00,-2.95) {\fc{nbReviews = c1 + c2 + c3 + c4 + c5}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=8.90cm] (n4) at (0.00,-4.23) {\fc{weighted = 1*c1 + 2*c2 + 3*c3 + 4*c4 + 5*c5}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.50cm] (n5) at (0.00,-5.51) {\fc{avg = weighted / nbReviews}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=4.30cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{nbReviews, avg}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.17}{2}{نمو رقم الأعمال}{\faTag\ علم البيانات}
+\begin{statement}
+رقم أعمال متجر هذا الشهر \code{revenue}، ويتوقع نموًا شهريًا ثابتًا بنسبة \code{growth} بالمئة. اكتب برنامجًا يحسب رقم الأعمال المتوقع بعد \textbf{\en{1}} و\textbf{\en{2}} و\textbf{\en{3}} أشهر، دون حلقات ودون دالة \code{pow}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نحسب المعامل \code{factor = 1 + growth / 100}.
+\item بعد شهر: \code{r1 = revenue * factor}، بعد شهرين: \code{r2 = r1 * factor}، بعد ثلاثة: \code{r3 = r2 * factor}.
+\item نعرض القيم الثلاث.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex17.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex17.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex17.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{revenue, growth}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.30cm] (n3) at (0.00,-2.95) {\fc{factor = 1 + growth / 100}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.50cm] (n4) at (0.00,-4.23) {\fc{r1 = revenue * factor}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=3.50cm] (n5) at (0.00,-5.51) {\fc{r2 = r1 * factor}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=3.50cm] (n6) at (0.00,-6.79) {\fc{r3 = r2 * factor}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=3.50cm] (n7) at (0.00,-8.07) {\textbf{اكتب}\ \fc{r1, r2, r3}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-9.35) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.18}{2}{تفكيك مبلغ إلى أوراق نقدية}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+عند الدفع نقدًا عند الاستلام، يريد عامل التوصيل تحضير المبلغ بأقل عدد من الأوراق: \en{2000} و\en{1000} و\en{500} و\en{200}، والباقي قطع نقدية. اكتب برنامجًا يفكك المبلغ.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item عدد أوراق \en{2000}: \code{notes2000 = money / 2000} ثم نأخذ الباقي \code{money = money \% 2000}.
+\item نكرر نفس الفكرة مع \en{1000} ثم \en{500} ثم \en{200}.
+\item ما بقي في \code{money} هو مبلغ القطع النقدية.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex18.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex18.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex18.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{money}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.10cm] (n3) at (0.00,-3.18) {\fc{notes2000 = money / 2000}\\\fc{money = money \% 2000}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.10cm] (n4) at (0.00,-4.92) {\fc{notes1000 = money / 1000}\\\fc{money = money \% 1000}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.70cm] (n5) at (0.00,-6.66) {\fc{notes500 = money / 500}\\\fc{money = money \% 500}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=4.70cm] (n6) at (0.00,-8.40) {\fc{notes200 = money / 200}\\\fc{money = money \% 200}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=10.90cm] (n7) at (0.00,-9.91) {\textbf{اكتب}\ \fc{notes2000, notes1000, notes500, notes200, money}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-11.19) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.19}{2}{ساعة وصول الطلبية}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+تُسجَّل طلبية في الساعة \code{hour:minute} ويستغرق توصيلها \code{delay} دقيقة. اكتب برنامجًا يحسب \textbf{ساعة الوصول} بصيغة \en{24} ساعة، حتى لو تجاوزت منتصف الليل.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نحول وقت الطلب إلى دقائق منذ منتصف الليل: \code{total = hour * 60 + minute + delay}.
+\item ساعة الوصول: \code{(total / 60) \% 24}.
+\item الدقائق: \code{total \% 60}.
+\item نستعمل \code{\%02d} لعرض صفر على اليسار.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex19.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex19.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex19.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{hour, minute, delay}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=7.10cm] (n3) at (0.00,-2.95) {\fc{total = hour * 60 + minute + delay}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.70cm] (n4) at (0.00,-4.23) {\fc{ah = (total / 60) \% 24}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=3.30cm] (n5) at (0.00,-5.51) {\fc{am = total \% 60}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=2.50cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{ah:am}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.20}{2}{مدة الاشتراك بالأسابيع}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يشترك زبون في خدمة توصيل مجاني لمدة \code{days} يومًا. اكتب برنامجًا يعرض هذه المدة بالأسابيع والأيام، وعدد الأشهر التقريبية (شهر = \en{30} يومًا) مع الأيام المتبقية.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الأسابيع: \code{weeks = days / 7} والأيام: \code{days \% 7}.
+\item الأشهر: \code{mo = days / 30} والأيام: \code{days \% 30}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex20.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex20.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex20.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{days}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.50cm] (n3) at (0.00,-3.18) {\fc{weeks = days / 7}\\\fc{rw = days \% 7}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.10cm] (n4) at (0.00,-4.92) {\fc{mo = days / 30}\\\fc{rm = days \% 30}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.90cm] (n5) at (0.00,-6.43) {\textbf{اكتب}\ \fc{weeks, rw, mo, rm}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-7.71) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.21}{2}{عكس رمز المنتج}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+لكل منتج رمز من \textbf{ثلاثة أرقام}. لإنشاء رمز سري يعكس النظام ترتيب الأرقام (مثلًا \en{472} يصبح \en{274}). اكتب برنامجًا يقوم بذلك باستعمال \code{/} و\code{\%} فقط.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item رقم الآحاد: \code{units = code \% 10}.
+\item رقم العشرات: \code{tens = (code / 10) \% 10}.
+\item رقم المئات: \code{hundreds = code / 100}.
+\item الرمز المعكوس: \par{\centering\small\code{reversed = units * 100 + tens * 10 + hundreds}\par}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex21.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex21.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex21.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{code}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.70cm] (n3) at (0.00,-2.95) {\fc{units = code \% 10}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.90cm] (n4) at (0.00,-4.23) {\fc{tens = (code / 10) \% 10}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.50cm] (n5) at (0.00,-5.51) {\fc{hundreds = code / 100}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=9.30cm] (n6) at (0.00,-6.79) {\fc{reversed = units * 100 + tens * 10 + hundreds}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=3.10cm] (n7) at (0.00,-8.07) {\textbf{اكتب}\ \fc{reversed}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-9.35) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.22}{2}{مجموع التحقق لرقم الطلبية}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+رقم كل طلبية مكون من \textbf{أربعة أرقام}. لاكتشاف أخطاء الإدخال نحسب \textbf{مجموع أرقامه} ثم رقم التحقق \code{S \% 10}. اكتب برنامجًا يقوم بذلك.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نستخرج الأرقام الأربعة بالقسمة على \en{1000} و\en{100} و\en{10} وبباقي القسمة على \en{10}.
+\item نجمعها في \code{digitSum}.
+\item رقم التحقق هو \code{digitSum \% 10}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex22.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex22.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex22.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{order}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.70cm] (n3) at (0.00,-2.95) {\fc{d1 = order / 1000}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.90cm] (n4) at (0.00,-4.23) {\fc{d2 = (order / 100) \% 10}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.70cm] (n5) at (0.00,-5.51) {\fc{d3 = (order / 10) \% 10}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=3.30cm] (n6) at (0.00,-6.79) {\fc{d4 = order \% 10}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fproc, text width=5.90cm] (n7) at (0.00,-8.07) {\fc{digitSum = d1 + d2 + d3 + d4}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fio, text width=6.10cm] (n8) at (0.00,-9.35) {\textbf{اكتب}\ \fc{digitSum, digitSum \% 10}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fterm] (n9) at (0.00,-10.63) {نهاية};
+\draw[sahm] (n8.south) -- (n9.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.23}{2}{تقريب السعر إلى منزلتين}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+ينتج حساب الضرائب أحيانًا أسعارًا مثل \en{1234.5678}. اكتب برنامجًا يقرب سعرًا إلى \textbf{منزلتين عشريتين} دون دالة \code{round}، ثم إلى \textbf{أقرب \en{10} دنانير}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نضرب في \en{100} ونضيف \en{0.5} ثم نحول إلى \code{int} (يحذف الجزء العشري).
+\item نقسم على \code{100.0} لنرجع إلى الدينار.
+\item لأقرب \en{10}: \code{((int)(price / 10 + 0.5)) * 10}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex23.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex23.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex23.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{price}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=7.70cm] (n3) at (0.00,-2.95) {\fc{r2 = (int)(price * 100 + 0.5) / 100.0}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=7.10cm] (n4) at (0.00,-4.23) {\fc{r10 = (int)(price / 10 + 0.5) * 10}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=2.90cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{r2, r10}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.24}{2}{مؤشرات الحملة الإعلانية}{\faTag\ علم البيانات}
+\begin{statement}
+حملة إعلانية حققت عددًا من \textbf{مرات الظهور} و\textbf{النقرات} وكلفت مبلغًا معينًا. اكتب برنامجًا يحسب نسبة النقر \code{CTR} وتكلفة النقرة \code{CPC} وتكلفة الألف ظهور \code{CPM}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{CTR = clicks / impressions * 100}.
+\item \code{CPC = cost / clicks}.
+\item \code{CPM = cost / impressions * 1000}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex24.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex24.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex24.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{imp, clicks, cost}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.10cm] (n3) at (0.00,-2.95) {\fc{ctr = clicks / imp * 100}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.10cm] (n4) at (0.00,-4.23) {\fc{cpc = cost / clicks}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.90cm] (n5) at (0.00,-5.51) {\fc{cpm = cost / imp * 1000}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=4.10cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{ctr, cpc, cpm}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.25}{2}{القيمة الدائمة للزبون}{\faTag\ علم البيانات}
+\begin{statement}
+\textbf{القيمة الدائمة للزبون} \code{CLV} تقدر بـ: متوسط السلة × عدد الطلبيات في السنة × عدد سنوات الوفاء × هامش الربح. اكتب برنامجًا يحسبها.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{basket} و\code{freq} و\code{years} و\code{margin}.
+\item رقم الأعمال المتوقع: \code{rev = basket * freq * years}.
+\item \code{clv = rev * margin}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex25.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex25.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex25.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=6.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{basket, freq, years, margin}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.70cm] (n3) at (0.00,-2.95) {\fc{rev = basket * freq * years}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.90cm] (n4) at (0.00,-4.23) {\fc{clv = rev * margin}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=3.10cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{rev, clv}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.26}{2}{متوسط قيمة الطلبية}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب برنامجًا يقرأ رقم الأعمال (عدد صحيح) وعدد الطلبيات، ثم يعرض متوسط قيمة الطلبية مرة \textbf{بقسمة صحيحة} ومرة \textbf{بقسمة حقيقية}، ليوضح الفرق بينهما.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item القسمة بين عددين صحيحين تحذف الجزء العشري: \code{rev / nbOrders}.
+\item للحصول على قسمة حقيقية نحول: \code{(double)rev / nbOrders}.
+\item الفرق بين النتيجتين هو الجزء الضائع.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex26.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex26.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex26.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.10cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{rev, nbOrders}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.30cm] (n3) at (0.00,-2.95) {\fc{quotient = rev / nbOrders}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.90cm] (n4) at (0.00,-4.23) {\fc{avg = (double)rev / nbOrders}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=7.30cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{quotient, avg, avg - quotient}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.27}{2}{أيام تغطية المخزون}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+مخزون منتج في بداية الأسبوع \code{stock}. بيعت منه \code{sold} وحدة ووصلت شحنة من \code{rec} وحدة. اكتب برنامجًا يحسب المخزون الجديد وعدد \textbf{الأيام الكاملة} التي يغطيها إذا كان البيع اليومي \code{daily}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item المخزون الجديد: \code{stock = stock - sold + rec}.
+\item أيام التغطية: \code{days = stock / daily} (قسمة صحيحة).
+\item الوحدات المتبقية بعد آخر يوم كامل: \code{stock \% daily}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex27.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex27.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex27.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=6.10cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{stock, sold, rec, daily}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.50cm] (n3) at (0.00,-2.95) {\fc{stock = stock - sold + rec}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.30cm] (n4) at (0.00,-4.23) {\fc{days = stock / daily}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.30cm] (n5) at (0.00,-5.51) {\fc{rest = stock \% daily}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=4.90cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{stock, days, rest}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.28}{2}{التنبؤ بنموذج خطي}{\faTag\ علم البيانات}
+\begin{statement}
+درّب محلل بيانات نموذجًا خطيًا يتنبأ بالمبيعات \code{y} بدلالة ميزانية الإعلان \code{x} (بالآلاف): \code{y = slope*x + intercept}. اكتب برنامجًا يقرأ \code{slope} و\code{intercept} وميزانيتين ويعرض التنبؤين والفرق بينهما.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ معاملي النموذج \code{slope} و\code{intercept}.
+\item نقرأ الميزانيتين \code{x1} و\code{x2}.
+\item نحسب \code{y1 = slope*x1 + intercept} و\code{y2 = slope*x2 + intercept} والفرق \code{y2 - y1}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex28.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex28.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex28.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=6.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{slope, intercept, x1, x2}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.70cm] (n3) at (0.00,-2.95) {\fc{y1 = slope * x1 + intercept}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.70cm] (n4) at (0.00,-4.23) {\fc{y2 = slope * x2 + intercept}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.50cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{y1, y2, y2 - y1}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.29}{2}{مستقيم يمر بنقطتين}{\faTag\ علم البيانات}
+\begin{statement}
+لاحظنا أن سعر \en{100} دج يحقق \en{900} مبيعة، وسعر \en{150} دج يحقق \en{650} مبيعة. اكتب برنامجًا يقرأ نقطتين \code{(x1, y1)} و\code{(x2, y2)} ويحسب \textbf{الميل} و\textbf{الجزء المقطوع} للمستقيم المار بهما، ثم يتنبأ بالمبيعات عند سعر \en{120}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الميل: \code{slope = (y2 - y1) / (x2 - x1)}.
+\item الجزء المقطوع: \code{intercept = y1 - slope * x1}.
+\item التنبؤ: \code{sales = slope * 120 + intercept}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex29.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex29.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex29.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{x1, y1, x2, y2}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=6.10cm] (n3) at (0.00,-2.95) {\fc{slope = (y2 - y1) / (x2 - x1)}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.70cm] (n4) at (0.00,-4.23) {\fc{intercept = y1 - slope * x1}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=6.50cm] (n5) at (0.00,-5.51) {\fc{sales = slope * 120 + intercept}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=6.10cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{slope, intercept, sales}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.30}{2}{حصص الأصناف من رقم الأعمال}{\faTag\ علم البيانات}
+\begin{statement}
+حقق متجر رقم أعمال في ثلاثة أصناف: إلكترونيات، ملابس، كتب. اكتب برنامجًا يحسب \textbf{حصة} كل صنف بالمئة، ويتحقق أن مجموع الحصص \en{100\%}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item المجموع: \code{total = electronics + clothing + books}.
+\item حصة كل صنف: \code{قيمته / total * 100}.
+\item نعرض مجموع الحصص للتحقق.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex30.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex30.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex30.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=7.10cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{electronics, clothing, books}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=7.90cm] (n3) at (0.00,-2.95) {\fc{total = electronics + clothing + books}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=6.30cm] (n4) at (0.00,-4.23) {\fc{pe = electronics / total * 100}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.70cm] (n5) at (0.00,-5.51) {\fc{pc = clothing / total * 100}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=5.10cm] (n6) at (0.00,-6.79) {\fc{pb = books / total * 100}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=6.30cm] (n7) at (0.00,-8.07) {\textbf{اكتب}\ \fc{pe, pc, pb, pe + pc + pb}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-9.35) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.31}{2}{الطابع الزمني إلى ساعة}{\faTag\ علم البيانات}
+\begin{statement}
+تسجل قاعدة البيانات وقت كل نقرة بعدد الثواني منذ منتصف الليل. اكتب برنامجًا يحول هذا العدد إلى الصيغة \code{hh:mm:ss}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الساعات: \code{hours = timestamp / 3600}.
+\item الدقائق: \code{minutes = (timestamp \% 3600) / 60}.
+\item الثواني: \code{seconds = timestamp \% 60}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex31.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex31.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex31.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{timestamp}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.10cm] (n3) at (0.00,-2.95) {\fc{hours = timestamp / 3600}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=6.90cm] (n4) at (0.00,-4.23) {\fc{minutes = (timestamp \% 3600) / 60}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.10cm] (n5) at (0.00,-5.51) {\fc{seconds = timestamp \% 60}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=5.70cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{hours:minutes:seconds}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.32}{2}{فاتورة كاملة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+تحتوي سلة على ثلاثة منتجات (سعر وكمية لكل منها). يضاف الرسم \en{19\%} ثم مصاريف شحن ثابتة \en{600} دج. اكتب برنامجًا يعرض المجموع دون رسم، الرسم، والمبلغ النهائي.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ السعر والكمية لكل منتج.
+\item \code{ht = p1*q1 + p2*q2 + p3*q3}.
+\item \code{tax = ht * TVA} ثم \code{total = ht + tax + SHIP}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex32.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex32.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex32.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{p1, q1, p2, q2, p3, q3}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.50cm] (n3) at (0.00,-2.95) {\fc{ht = p1*q1 + p2*q2 + p3*q3}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.10cm] (n4) at (0.00,-4.23) {\fc{tax = ht * TVA}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.90cm] (n5) at (0.00,-5.51) {\fc{total = ht + tax + SHIP}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=4.30cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{ht, tax, total}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.33}{2}{مقارنة سعر الكيلوغرام}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يعرض المتجر نفس القهوة في عبوتين: \en{250} غ بسعر \code{p1} و\en{1} كغ بسعر \code{p2}. اكتب برنامجًا يحسب \textbf{سعر الكيلوغرام} لكل عبوة والفرق بينهما والتوفير بالمئة عند شراء العبوة الكبيرة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item سعر الكيلوغرام: \code{price / grams * 1000}.
+\item الفرق: \code{k1 - k2}.
+\item التوفير بالمئة: \code{(k1 - k2) / k1 * 100}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex33.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex33.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex33.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{g1, p1, g2, p2}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.10cm] (n3) at (0.00,-2.95) {\fc{k1 = p1 / g1 * 1000}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.10cm] (n4) at (0.00,-4.23) {\fc{k2 = p2 / g2 * 1000}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.70cm] (n5) at (0.00,-5.51) {\fc{save = (k1 - k2) / k1 * 100}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=3.90cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{k1, k2, save}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.34}{2}{نقاط الوفاء}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يحصل الزبون على \textbf{نقطة وفاء} عن كل \en{100} دج مشتريات كاملة، وكل \en{50} نقطة تساوي قسيمة بـ \en{500} دج. اكتب برنامجًا يحسب عدد النقاط والمبلغ الناقص للنقطة التالية وعدد القسائم.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item النقاط: \code{pts = amount / 100}.
+\item الناقص للنقطة التالية: \code{100 - amount \% 100}.
+\item القسائم: \code{pts / 50} وقيمتها \code{× 500}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex34.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex34.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex34.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.70cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{amount}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.90cm] (n3) at (0.00,-2.95) {\fc{pts = amount / 100}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.90cm] (n4) at (0.00,-4.23) {\fc{missing = 100 - amount \% 100}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.10cm] (n5) at (0.00,-5.51) {\fc{vouchers = pts / 50}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=7.10cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{pts, missing, vouchers * 500}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.35}{2}{متوسط مربع الخطأ}{\faTag\ علم البيانات}
+\begin{statement}
+تنبأ نموذج بمبيعات ثلاثة أيام. اكتب برنامجًا يقرأ لكل يوم القيمة الحقيقية \code{y} والمتوقعة \code{p}، ويحسب الأخطاء و\textbf{متوسط مربع الخطأ} \code{MSE}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الخطأ لكل يوم: \code{e = y - p}.
+\item نجمع مربعات الأخطاء.
+\item \code{MSE = مجموع المربعات / 3}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex35.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex35.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex35.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{y1, p1, y2, p2, y3, p3}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.70cm] (n3) at (0.00,-3.41) {\fc{e1 = y1 - p1}\\\fc{e2 = y2 - p2}\\\fc{e3 = y3 - p3}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=6.90cm] (n4) at (0.00,-5.15) {\fc{mse = (e1*e1 + e2*e2 + e3*e3) / 3}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.50cm] (n5) at (0.00,-6.43) {\textbf{اكتب}\ \fc{e1, e2, e3, mse}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-7.71) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.36}{2}{السعر بعد التضخم}{\faTag\ علم البيانات}
+\begin{statement}
+سعر منتج اليوم \code{price}، ونسبة التضخم السنوية \code{inflation} بالمئة. اكتب برنامجًا يحسب سعره المتوقع بعد سنتين، وكذلك \textbf{القيمة الحقيقية} لمبلغ \en{10000} دج بعد سنتين (أي قسمته على معامل التضخم مرتين).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item المعامل: \code{factor = 1 + inflation / 100}.
+\item السعر بعد سنتين: \code{price * factor * factor}.
+\item القيمة الحقيقية: \code{10000 / (factor * factor)}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex36.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex36.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex36.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.70cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{price, inflation}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.90cm] (n3) at (0.00,-2.95) {\fc{factor = 1 + inflation / 100}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.90cm] (n4) at (0.00,-4.23) {\fc{p2 = price * factor * factor}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=6.70cm] (n5) at (0.00,-5.51) {\fc{real = 10000 / (factor * factor)}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=3.10cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{p2, real}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.37}{2}{تبديل دون متغير مساعد}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب برنامجًا يبدل كميتي مخزون في مستودعين \code{stockA} و\code{stockB} \textbf{دون استعمال متغير ثالث}، باستعمال الجمع والطرح فقط.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{stockA = stockA + stockB} (\en{stockA} تحتوي المجموع).
+\item \code{stockB = stockA - stockB} (\en{stockB} تأخذ القيمة القديمة لـ \en{stockA}).
+\item \code{stockA = stockA - stockB} (\en{stockA} تأخذ القيمة القديمة لـ \en{stockB}).
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex37.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex37.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex37.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{stockA, stockB}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.10cm] (n3) at (0.00,-2.95) {\fc{stockA = stockA + stockB}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=5.10cm] (n4) at (0.00,-4.23) {\fc{stockB = stockA - stockB}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.10cm] (n5) at (0.00,-5.51) {\fc{stockA = stockA - stockB}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=4.30cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{stockA, stockB}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.38}{2}{المبلغ بالسنتيم}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+لتجنب أخطاء الأعداد الحقيقية، يخزن نظام الدفع المبالغ بالسنتيم كأعداد صحيحة. اكتب برنامجًا يقرأ مبلغين بالسنتيم ويعرض مجموعهما بالصيغة \code{DA.cc}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نجمع المبلغين كأعداد صحيحة: \code{totalCents = centsA + centsB}.
+\item الدينار: \code{totalCents / 100}، السنتيم: \code{totalCents \% 100}.
+\item نعرض السنتيم برقمين \code{\%02d}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex38.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex38.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex38.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{centsA, centsB}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.90cm] (n3) at (0.00,-2.95) {\fc{totalCents = centsA + centsB}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.50cm] (n4) at (0.00,-4.23) {\fc{da = totalCents / 100}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.50cm] (n5) at (0.00,-5.51) {\fc{cc = totalCents \% 100}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=2.50cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{da.cc}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.39}{2}{رموز الأصناف والحروف}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يرمز لكل صنف بحرف كبير (\en{A}، \en{B}، ...). اكتب برنامجًا يقرأ رمز صنف ويعرض \textbf{شفرته} \en{ASCII}، والحرف \textbf{التالي}، و\textbf{ترتيب} الصنف (\en{A} هو \en{1})، والحرف الصغير الموافق دون دالة \code{tolower}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الحرف في \en{C} عدد صحيح، فنعرضه بـ \code{\%d} لنحصل على شفرته.
+\item التالي: \code{category + 1}، الترتيب: \code{category - 'A' + 1}.
+\item الحرف الصغير: \code{category + ('a' - 'A')} لأن الفرق ثابت (\en{32}).
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex39.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex39.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex39.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.10cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{category}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.30cm] (n3) at (0.00,-2.95) {\fc{code = (int)category}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.10cm] (n4) at (0.00,-4.23) {\fc{next = category + 1}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.30cm] (n5) at (0.00,-5.51) {\fc{rank = category - 'A' + 1}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=5.90cm] (n6) at (0.00,-6.79) {\fc{low = category + ('a' - 'A')}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=5.70cm] (n7) at (0.00,-8.07) {\textbf{اكتب}\ \fc{code, next, rank, low}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-9.35) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.40}{2}{أسبوع ويوم التسليم}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+يُرقَّم كل يوم من السنة من \en{1} إلى \en{365}، واليوم \en{1} يوم أحد. تُطلب سلعة في اليوم \code{orderDay} وتُسلَّم بعد \code{delay} يومًا. اكتب برنامجًا يعرض رقم يوم التسليم ورقم أسبوعه ورقم يومه في الأسبوع (\en{0} = أحد).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item يوم التسليم: \code{deliveryDay = orderDay + delay}.
+\item الأسبوع: \code{(deliveryDay - 1) / 7 + 1}.
+\item يوم الأسبوع: \code{(deliveryDay - 1) \% 7}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex40.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex40.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex40.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{orderDay, delay}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=6.30cm] (n3) at (0.00,-2.95) {\fc{deliveryDay = orderDay + delay}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=6.70cm] (n4) at (0.00,-4.23) {\fc{week = (deliveryDay - 1) / 7 + 1}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.50cm] (n5) at (0.00,-5.51) {\fc{wd = (deliveryDay - 1) \% 7}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=5.70cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{deliveryDay, week, wd}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\clearpage
+\levelsection{3}{التمارين الصعبة}
+
+\exhead{1.41}{3}{الأكبر بين سعرين دون شرط}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب برنامجًا يحدد \textbf{أكبر} و\textbf{أصغر} سعرين صحيحين دون استعمال \code{if} ولا العامل الشرطي. استعمل الصيغة \par{\centering\small\code{max = (priceA + priceB + |priceA - priceB|) / 2}\par} واحسب القيمة المطلقة بعمليات على البتات.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{diff = priceA - priceB}.
+\item قناع الإشارة: \code{mask = diff >> 31} يساوي \en{0} إذا كان \code{diff} موجبًا و-\en{1} إذا كان سالبًا.
+\item القيمة المطلقة: \code{ad = (diff \textasciicircum{} mask) - mask}.
+\item \code{max = (priceA + priceB + ad) / 2} و\code{min = (priceA + priceB - ad) / 2}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex41.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex41.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex41.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{priceA, priceB}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.70cm] (n3) at (0.00,-2.95) {\fc{diff = priceA - priceB}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.70cm] (n4) at (0.00,-4.23) {\fc{mask = diff >> 31}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=5.30cm] (n5) at (0.00,-5.51) {\fc{ad = (diff \textasciicircum{} mask) - mask}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=6.70cm] (n6) at (0.00,-6.79) {\fc{max = (priceA + priceB + ad) / 2}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fproc, text width=6.70cm] (n7) at (0.00,-8.07) {\fc{min = (priceA + priceB - ad) / 2}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fio, text width=3.10cm] (n8) at (0.00,-9.35) {\textbf{اكتب}\ \fc{max, min}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fterm] (n9) at (0.00,-10.63) {نهاية};
+\draw[sahm] (n8.south) -- (n9.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.42}{3}{الانحراف المعياري بطريقة نيوتن}{\faTag\ علم البيانات}
+\begin{statement}
+لدينا تقييمات ثلاثة منتجات. اكتب برنامجًا يحسب \textbf{التباين} ثم \textbf{الانحراف المعياري} دون دالة \code{sqrt}، باستعمال \en{6} تكرارات مكتوبة يدويًا لطريقة نيوتن: \code{root = (root + variance / root) / 2}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نحسب المتوسط \code{mean} ثم التباين \code{variance}.
+\item نبدأ بتقدير أولي \code{root = variance} (أو \en{1} إذا كان صغيرًا).
+\item نطبق صيغة نيوتن ست مرات، فيقترب \code{root} بسرعة من الجذر.
+\item نتحقق بحساب \code{root * root}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex42.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex42.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex42.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=6.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{rating1, rating2, rating3}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=8.30cm] (n3) at (0.00,-2.95) {\fc{mean = (rating1 + rating2 + rating3) / 3}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=21.50cm] (n4) at (0.00,-4.23) {\fc{variance = ((rating1-mean)*(rating1-mean)+(rating2-mean)*(rating2-mean)+(rating3-mean)*(rating3-mean)) / 3}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.10cm] (n5) at (0.00,-5.51) {\fc{root = variance + 1}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=4.40cm] (n6) at (0.00,-7.25) {\en{root} = (\en{root} + \en{variance} / \en{root}) / \en{2}  (\en{6} مرات)};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=6.90cm] (n7) at (0.00,-8.99) {\textbf{اكتب}\ \fc{variance, root, root * root}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-10.27) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.43}{3}{التغاير بين السعر والمبيعات}{\faTag\ علم البيانات}
+\begin{statement}
+لدينا ثلاث ملاحظات (سعر، مبيعات). اكتب برنامجًا يحسب \textbf{التغاير} \code{cov} بين المتغيرين ويستنتج اتجاه العلاقة بطباعة إشارة التغاير، دون شرط: نطبع \code{cov > 0} كعدد (\en{1} أو \en{0}).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نحسب المتوسطين \code{mx} و\code{my}.
+\item التغاير: متوسط الجداءات \code{(xi - mx) * (yi - my)}.
+\item في \en{C} يعطي التعبير المنطقي \code{cov > 0} القيمة \en{1} أو \en{0}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex43.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex43.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex43.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{x1, y1, x2, y2, x3, y3}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.90cm] (n3) at (0.00,-3.18) {\fc{mx = (x1 + x2 + x3) / 3}\\\fc{my = (y1 + y2 + y3) / 3}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.40cm] (n4) at (0.00,-4.92) {\en{cov} = مجموع \fc{(xi-mx)*(yi-my)} مقسوم على \en{3}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=2.90cm] (n5) at (0.00,-6.43) {\fc{pos = cov > 0}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=3.10cm] (n6) at (0.00,-7.71) {\textbf{اكتب}\ \fc{cov, pos}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.99) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.44}{3}{انحدار خطي بالمربعات الصغرى}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب برنامجًا يحسب معاملي \textbf{مستقيم الانحدار} \code{y = slope*x + intercept} بطريقة المربعات الصغرى لثلاث نقاط (ميزانية إعلان، مبيعات): \par{\centering\small\code{slope = (nbPoints*Sxy - Sx*Sy) / (nbPoints*Sxx - Sx*Sx)}\par} و\code{intercept = (Sy - slope*Sx) / nbPoints}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نحسب المجاميع \code{Sx} و\code{Sy} و\code{Sxy} و\code{Sxx}.
+\item نطبق صيغة الميل \code{slope} ثم الجزء المقطوع \code{intercept}.
+\item نتحقق بالتنبؤ عند \code{x = 3}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex44.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex44.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex44.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{x1, y1, x2, y2, x3, y3}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.90cm] (n3) at (0.00,-3.18) {\fc{Sx = x1+x2+x3}\\\fc{Sy = y1+y2+y3}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.90cm] (n4) at (0.00,-4.69) {\fc{Sxy = x1*y1+x2*y2+x3*y3}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.90cm] (n5) at (0.00,-5.97) {\fc{Sxx = x1*x1+x2*x2+x3*x3}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=8.50cm] (n6) at (0.00,-7.25) {\fc{slope = (3*Sxy - Sx*Sy) / (3*Sxx - Sx*Sx)}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fproc, text width=6.50cm] (n7) at (0.00,-8.53) {\fc{intercept = (Sy - slope*Sx) / 3}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fio, text width=8.90cm] (n8) at (0.00,-9.81) {\textbf{اكتب}\ \fc{slope, intercept, slope*3 + intercept}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fterm] (n9) at (0.00,-11.09) {نهاية};
+\draw[sahm] (n8.south) -- (n9.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.45}{3}{مدة المشاهدة الكلية}{\faTag\ علم البيانات}
+\begin{statement}
+تجمع منصة فيديوهات المنتجات مدة المشاهدة الكلية بالثواني (عدد كبير). اكتب برنامجًا يحولها إلى \textbf{أيام وساعات ودقائق وثوانٍ}، ويحسب متوسط المشاهدة لكل زائر بالدقائق والثواني. استعمل النوع \code{long}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الأيام: \code{totalSec / 86400}، ثم \code{totalSec \% 86400}.
+\item الساعات من الباقي: \code{/ 3600}، ثم الدقائق \code{/ 60}، ثم الثواني \code{\% 60}.
+\item متوسط الزائر: \code{avg = totalSec / visitors} ثم نفككه إلى دقائق وثوانٍ.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex45.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex45.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex45.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.10cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{totalSec, visitors}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.90cm] (n3) at (0.00,-3.18) {\fc{days = totalSec / 86400}\\\fc{rest = totalSec \% 86400}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.10cm] (n4) at (0.00,-4.92) {\fc{hours = rest / 3600}\\\fc{rest = rest \% 3600}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.10cm] (n5) at (0.00,-6.66) {\fc{minutes = rest / 60}\\\fc{seconds = rest \% 60}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=5.30cm] (n6) at (0.00,-8.17) {\fc{avg = totalSec / visitors}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=11.30cm] (n7) at (0.00,-9.45) {\textbf{اكتب}\ \fc{days, hours, minutes, seconds, avg / 60, avg \% 60}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-10.73) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.46}{3}{خصائص المنتج بالبتات}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+تخزن خصائص منتج في عدد صحيح بين \en{0} و\en{15}، كل \textbf{بت} يمثل خاصية: البت \en{0} = متوفر، البت \en{1} = مخفض، البت \en{2} = شحن مجاني، البت \en{3} = جديد. اكتب برنامجًا يستخرج قيمة كل خاصية (\en{0} أو \en{1}) ويعرض التمثيل الثنائي.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item البت \code{k} هو \code{(flags / 2\textasciicircum{}k) \% 2}، أو \code{(flags >> k) \& 1}.
+\item نستخرج البتات الأربعة.
+\item التمثيل الثنائي يُكتب من البت \en{3} إلى البت \en{0}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex46.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex46.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex46.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{flags}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.10cm] (n3) at (0.00,-2.95) {\fc{b0 = flags \& 1}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.50cm] (n4) at (0.00,-4.23) {\fc{b1 = (flags >> 1) \& 1}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.50cm] (n5) at (0.00,-5.51) {\fc{b2 = (flags >> 2) \& 1}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=4.50cm] (n6) at (0.00,-6.79) {\fc{b3 = (flags >> 3) \& 1}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=3.70cm] (n7) at (0.00,-8.07) {\textbf{اكتب}\ \fc{b3 b2 b1 b0}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-9.35) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.47}{3}{المتوسط المتحرك الأسي}{\faTag\ علم البيانات}
+\begin{statement}
+لتنعيم سلسلة أسعار نستعمل \textbf{المتوسط المتحرك الأسي}: \code{ema = alpha * p + (1 - alpha) * ema}، مع \code{ema} يبدأ بالسعر الأول. اكتب برنامجًا يطبقه على أربعة أسعار ويعرض القيمة بعد كل سعر.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{alpha} ثم الأسعار الأربعة.
+\item \code{ema = p1}.
+\item نحدّث \code{ema} بكل سعر جديد بالصيغة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex47.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex47.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex47.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=5.70cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{alpha, p1, p2, p3, p4}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.90cm] (n3) at (0.00,-2.95) {\fc{ema = p1}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=6.30cm] (n4) at (0.00,-4.23) {\fc{ema = alpha*p2 + (1-alpha)*ema}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=6.30cm] (n5) at (0.00,-5.51) {\fc{ema = alpha*p3 + (1-alpha)*ema}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=6.30cm] (n6) at (0.00,-6.79) {\fc{ema = alpha*p4 + (1-alpha)*ema}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=2.10cm] (n7) at (0.00,-8.07) {\textbf{اكتب}\ \fc{ema}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-9.35) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.48}{3}{رقم التحقق لرمز \en{EAN-8}}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+رمز الأعمدة \textbf{\en{EAN-8}} يتكون من \en{7} أرقام ورقم تحقق. نضرب الأرقام في المواضع الفردية (\en{1}، \en{3}، \en{5}، \en{7}) في \en{3} ونجمعها مع أرقام المواضع الزوجية، ورقم التحقق \code{(10 - weightedSum \% 10) \% 10}. اكتب برنامجًا يحسبه لعدد من \en{7} أرقام.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نستخرج الأرقام السبعة من اليسار إلى اليمين بالقسمة على قوى \en{10}.
+\item \par{\centering\small\code{weightedSum = 3*(d1 + d3 + d5 + d7) + (d2 + d4 + d6)}\par}.
+\item \code{check = (10 - weightedSum \% 10) \% 10}، و\% \en{10} الأخيرة تحول \en{10} إلى \en{0}.
+\item الرمز الكامل: \code{code * 10 + check}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch01/ex48.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex48.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex48.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{code}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.40cm] (n3) at (0.00,-3.18) {\en{d1..d7} بالقسمة على قوى \en{10}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=8.30cm] (n4) at (0.00,-4.69) {\fc{weightedSum = 3*(d1+d3+d5+d7) + d2+d4+d6}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=7.50cm] (n5) at (0.00,-5.97) {\fc{check = (10 - weightedSum \% 10) \% 10}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=4.90cm] (n6) at (0.00,-7.25) {\textbf{اكتب}\ \fc{code * 10 + check}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.53) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.49}{3}{مرونة الطلب السعرية}{\faTag\ علم البيانات}
+\begin{statement}
+تقيس \textbf{مرونة الطلب} تأثر المبيعات بتغير السعر. بطريقة نقطة المنتصف: \par{\centering\small\code{elasticity = ((Q2 - Q1) / ((Q1 + Q2) / 2)) / ((P2 - P1) / ((P1 + P2) / 2))}\par}. اكتب برنامجًا يحسبها، ويحسب رقم الأعمال قبل التغيير وبعده.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نقرأ \code{(P1, Q1)} و\code{(P2, Q2)}.
+\item التغير النسبي للكمية: \code{dq = (Q2 - Q1) / ((Q1 + Q2) / 2)}.
+\item التغير النسبي للسعر: \code{dp} بنفس الطريقة.
+\item \code{elasticity = dq / dp}، ورقم الأعمال \code{P * Q}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch01/ex49.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex49.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex49.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{P1, Q1, P2, Q2}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=6.70cm] (n3) at (0.00,-2.95) {\fc{dq = (Q2 - Q1) / ((Q1 + Q2) / 2)}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=6.70cm] (n4) at (0.00,-4.23) {\fc{dp = (P2 - P1) / ((P1 + P2) / 2)}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.30cm] (n5) at (0.00,-5.51) {\fc{elasticity = dq / dp}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=6.30cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{elasticity, P1*Q1, P2*Q2}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{1.50}{3}{تعبئة حاوية الشحن}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+حاوية شحن أبعادها \code{contLength × contWidth × contHeight} (سم) ونريد ملأها بعلب أبعادها \code{boxLength × boxWidth × boxHeight} مرتبة في نفس الاتجاه. اكتب برنامجًا يحسب عدد العلب في كل بعد، والعدد الكلي، و\textbf{نسبة الحجم المستغل}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item عدد العلب في كل بعد: \code{contLength / boxLength} و\code{contWidth / boxWidth} و\code{contHeight / boxHeight} (قسمة صحيحة).
+\item العدد الكلي: جداء الأعداد الثلاثة.
+\item الحجم المستغل: \code{nbBoxes * boxLength * boxWidth * boxHeight}، والنسبة بالمئة من \code{contLength * contWidth * contHeight}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch01/ex50.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch01/ex50.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch01/ex50.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=14.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{contLength, contWidth, contHeight, boxLength, boxWidth, boxHeight}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=5.70cm] (n3) at (0.00,-3.41) {\fc{nx = contLength / boxLength}\\\fc{ny = contWidth / boxWidth}\\\fc{nz = contHeight / boxHeight}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.70cm] (n4) at (0.00,-5.15) {\fc{nbBoxes = nx * ny * nz}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=10.10cm] (n5) at (0.00,-6.43) {\fc{used = nbBoxes * boxLength * boxWidth * boxHeight}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fproc, text width=11.50cm] (n6) at (0.00,-7.71) {\fc{pct = used / (contLength * contWidth * contHeight) * 100}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=6.30cm] (n7) at (0.00,-8.99) {\textbf{اكتب}\ \fc{nx, ny, nz, nbBoxes, pct}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-10.27) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+

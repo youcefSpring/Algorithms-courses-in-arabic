@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+int main(void) {
+    int choice;
+    scanf("%d", &choice);
+    switch (choice) {
+        case 1:
+            printf("Bank card, fee = 0 DA\n");
+            break;                // break يمنع تنفيذ الحالات الموالية
+        case 2:
+            printf("Cash on delivery, fee = 200 DA\n");
+            break;
+        case 3:
+            printf("CCP account, fee = 50 DA\n");
+            break;
+        default:                  // أي قيمة أخرى
+            printf("Invalid choice\n");
+    }
+    return 0;
+}

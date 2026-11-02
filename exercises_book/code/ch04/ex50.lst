@@ -1,0 +1,29 @@
+#include <stdio.h>
+
+#define NB 14
+
+int main(void) {
+    int cost[NB] = {300, 150, 200, 500, 100, 120, 90, 400, 80, 60, 250, 700, 50, 100};
+    int budget, left = 0, right, windowCost = 0, bestLen = 0, bestLeft = 0, day;
+    scanf("%d", &budget);
+    for (right = 0; right < NB; right++) {
+        windowCost += cost[right];        (*@\cmt{نضيف يومًا من اليمين}@*)
+        while (windowCost > budget) {     (*@\cmt{تجاوزنا: نحذف من اليسار}@*)
+            windowCost -= cost[left];
+            left++;
+        }
+        if (right - left + 1 > bestLen) {
+            bestLen = right - left + 1;
+            bestLeft = left;
+        }
+    }
+    printf("Longest campaign: %d days (day %d to %d):",
+           bestLen, bestLeft + 1, bestLeft + bestLen);
+    windowCost = 0;
+    for (day = bestLeft; day < bestLeft + bestLen; day++) {
+        printf(" %d", cost[day]);
+        windowCost += cost[day];
+    }
+    printf(" = %d DA\n", windowCost);
+    return 0;
+}

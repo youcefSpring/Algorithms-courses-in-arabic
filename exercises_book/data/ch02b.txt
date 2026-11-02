@@ -1,0 +1,1030 @@
+@@
+title: آلة حاسبة للأسعار
+level: medium
+domain: ec
+@ statement
+يستعمل موظف المخزن آلة حاسبة بسيطة: يقرأ عددين وعاملًا (`+` أو `-` أو `*` أو `/` أو `%` للنسبة المئوية: a% من b). اكتب البرنامج باستعمال `switch` مع منع القسمة على صفر.
+@ stdin
+15 % 8400
+@ steps
+- نقرأ `left` ثم العامل `op` ثم `right`.
+- لكل عامل حالة في `switch`.
+- في حالة `/` نتحقق أن `right != 0`.
+- `%` تعطي `left * right / 100`.
+@ flow
+in: left, op, right
+if: op == '/' && right == 0
+  out: `"division by zero"`
+else:
+  do: حسب op: result = left+right أو left-right أو left*right أو left/right أو left*right/100
+  out: result
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double left, right, result = 0;
+    char op;
+    int ok = 1;                       // 1 إذا كانت العملية صالحة
+    scanf("%lf %c %lf", &left, &op, &right);
+    switch (op) {
+        case '+': result = left + right; break;
+        case '-': result = left - right; break;
+        case '*': result = left * right; break;
+        case '/':
+            if (right == 0) ok = 0;       // لا نقسم على صفر
+            else result = left / right;
+            break;
+        case '%': result = left * right / 100; break;   // left بالمئة من right
+        default: ok = 0;
+    }
+    if (ok)
+        printf("%.2f %c %.2f = %.2f\n", left, op, right, result);
+    else
+        printf("Error: invalid operation\n");
+    return 0;
+}
+
+@@
+title: تأجيل التوصيل في عطلة نهاية الأسبوع
+level: medium
+domain: ec
+@ statement
+لا توصيل يومي **الجمعة** و**السبت**. أيام الأسبوع مرقمة من 0 (الأحد) إلى 6 (السبت). اكتب برنامجًا يقرأ يوم الطلب ومدة التحضير بالأيام، ويحدد يوم التوصيل؛ إذا وقع في الجمعة أو السبت يؤجَّل إلى الأحد.
+@ stdin
+3 2
+@ steps
+- يوم التوصيل: `deliveryDay = (day + prep) % 7`.
+- إذا كان `deliveryDay == 5` نضيف يومين، وإذا كان `deliveryDay == 6` نضيف يومًا، ثم `% 7`.
+- نعرض اسم اليوم باستعمال `switch`.
+@ flow
+in: day, prep
+do: deliveryDay = (day + prep) % 7
+if: deliveryDay == 5
+  do: deliveryDay = 0
+else:
+  if: deliveryDay == 6
+    do: deliveryDay = 0
+out: اسم اليوم deliveryDay
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int day, prep, deliveryDay;
+    scanf("%d %d", &day, &prep);
+    deliveryDay = (day + prep) % 7;             // اليوم الطبيعي للتوصيل
+    if (deliveryDay == 5 || deliveryDay == 6) {           // الجمعة أو السبت
+        printf("Weekend: postponed to Sunday\n");
+        deliveryDay = 0;
+    }
+    printf("Delivery day: ");
+    switch (deliveryDay) {
+        case 0: printf("Sunday\n"); break;
+        case 1: printf("Monday\n"); break;
+        case 2: printf("Tuesday\n"); break;
+        case 3: printf("Wednesday\n"); break;
+        case 4: printf("Thursday\n"); break;
+    }
+    return 0;
+}
+
+@@
+title: صلاحية البطاقة البنكية
+level: medium
+domain: ec
+@ statement
+قبل قبول الدفع نتحقق أن البطاقة **غير منتهية الصلاحية**: تاريخ انتهائها (شهر، سنة) يجب أن يكون بعد التاريخ الحالي أو في نفس الشهر. اكتب برنامجًا يقرأ التاريخين ويحكم، ويعرض عدد الأشهر المتبقية.
+@ stdin
+3 2027
+11 2026
+@ steps
+- نحول كل تاريخ إلى عدد أشهر: `y * 12 + m`.
+- البطاقة صالحة إذا كان `exp >= now`.
+- الأشهر المتبقية: `exp - now`.
+@ flow
+in: em, ey, cm, cy
+do: exp = ey * 12 + em
+do: now = cy * 12 + cm
+if: exp >= now
+  out: `"valid"`, exp - now
+else:
+  out: `"expired"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int em, ey, cm, cy, exp, now;
+    scanf("%d %d", &em, &ey);         // تاريخ الانتهاء
+    scanf("%d %d", &cm, &cy);         // التاريخ الحالي
+    // تحويل التاريخ إلى عدد أشهر يسهل المقارنة
+    exp = ey * 12 + em;
+    now = cy * 12 + cm;
+    if (exp >= now)
+        printf("Card valid (%d months left)\n", exp - now);
+    else
+        printf("Card expired\n");
+    return 0;
+}
+
+@@
+title: هدية حسب حجم السلة
+level: medium
+domain: ec
+@ statement
+تصنف السلات حسب عدد القطع: صغيرة (1-3)، متوسطة (4-9)، كبيرة (10 فأكثر). الهدية: لا شيء للصغيرة، كيس قماشي للمتوسطة، وللكبيرة كيس + قسيمة 500 دج إذا تجاوز المبلغ 20000 دج. اكتب برنامجًا يعرض الصنف والهدية.
+@ stdin
+12 18500
+@ steps
+- نحدد الصنف بالمجالات.
+- في صنف الكبيرة نضيف شرطًا داخليًا على المبلغ (شرط متداخل).
+@ flow
+in: nbItems, amount
+if: nbItems >= 10
+  out: `"large + bag"`
+  if: amount > 20000
+    out: `"+ voucher"`
+else:
+  if: nbItems >= 4
+    out: `"medium + bag"`
+  else:
+    out: `"small"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbItems;
+    double amount;
+    scanf("%d %lf", &nbItems, &amount);
+    if (nbItems >= 10) {
+        printf("Large basket: tote bag");
+        if (amount > 20000)           // شرط متداخل
+            printf(" + 500 DA voucher");
+        printf("\n");
+    } else if (nbItems >= 4) {
+        printf("Medium basket: tote bag\n");
+    } else {
+        printf("Small basket: no gift\n");
+    }
+    return 0;
+}
+
+@@
+title: تطور مؤشر الأداء
+level: medium
+domain: ds
+@ statement
+نقارن قيمة مؤشر (مثل عدد الطلبيات) بين أسبوعين. نعتبر التغير **مستقرًا** إذا كانت النسبة بين -2% و+2%، وإلا **ارتفاعًا** أو **انخفاضًا**؛ ونعتبره **حادًا** إذا تجاوز 20% بالقيمة المطلقة. اكتب البرنامج.
+@ stdin
+1250 980
+@ steps
+- نسبة التغير: `change = (now - before) / before * 100`.
+- القيمة المطلقة `ac` يدويًا.
+- إذا كان `ac <= 2` مستقر؛ وإلا نحدد الاتجاه، ثم نختبر `ac > 20`.
+@ flow
+in: before, now
+do: change = (now - before) / before * 100
+do: ac = |change|
+if: ac <= 2
+  out: `"stable"`
+else:
+  if: change > 0
+    out: `"up"`
+  else:
+    out: `"down"`
+  if: ac > 20
+    out: `"sharp!"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double before, now, change, ac;
+    scanf("%lf %lf", &before, &now);
+    change = (now - before) / before * 100;    // التغير بالمئة
+    ac = (change < 0) ? -change : change;                // القيمة المطلقة
+    printf("Change = %.1f %% : ", change);
+    if (ac <= 2) {
+        printf("stable\n");
+    } else {
+        if (change > 0) printf("increase");
+        else       printf("decrease");
+        if (ac > 20)
+            printf(" (sharp!)");          // تنبيه للتغير الكبير
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: السعر الأمثل
+level: medium
+domain: ds
+@ statement
+قدّر محلل أن الطلب يتبع `Q = demandMax - slope*price`. رقم الأعمال `revenue = price * (demandMax - slope*price)` يبلغ أقصاه عند `price* = demandMax / (2b)`. لكن السعر يجب أن يبقى بين `pmin` و`pmax`. اكتب برنامجًا يحسب السعر الأمثل المسموح ورقم الأعمال الموافق.
+@ stdin
+5000 2 1500 3000
+@ steps
+- `price = demandMax / (2 * slope)`.
+- إذا كان `price < pmin` نأخذ `pmin`، وإذا كان `price > pmax` نأخذ `pmax`.
+- `revenue = price * (demandMax - slope * price)`.
+@ flow
+in: demandMax, slope, pmin, pmax
+do: price = demandMax / (2 * slope)
+if: price < pmin
+  do: price = pmin
+else:
+  if: price > pmax
+    do: price = pmax
+do: revenue = price * (demandMax - slope * price)
+out: price, revenue
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double demandMax, slope, pmin, pmax, price, revenue;
+    scanf("%lf %lf %lf %lf", &demandMax, &slope, &pmin, &pmax);
+    price = demandMax / (2 * slope);                  // قمة القطع المكافئ
+    printf("Unconstrained optimum = %.2f DA\n", price);
+    if (price < pmin)
+        price = pmin;                     // نحصر السعر في المجال المسموح
+    else if (price > pmax)
+        price = pmax;
+    revenue = price * (demandMax - slope * price);
+    printf("Chosen price = %.2f DA\n", price);
+    printf("Revenue = %.2f DA\n", revenue);
+    return 0;
+}
+
+@@
+title: الوسيط بين ثلاث قيم
+level: medium
+domain: ds
+@ statement
+**الوسيط** أقل تأثرًا بالقيم الشاذة من المتوسط. اكتب برنامجًا يقرأ ثلاثة مبالغ طلبيات ويعرض **وسيطها** (القيمة الوسطى) ومتوسطها للمقارنة، دون ترتيب كامل.
+@ stdin
+1200 98000 1500
+@ steps
+- `amount1` هو الوسيط إذا كان بين `amount2` و`amount3`: `(amount2 <= amount1 && amount1 <= amount3) || (amount3 <= amount1 && amount1 <= amount2)`.
+- نفس الاختبار لـ `amount2`، وإلا فالوسيط `amount3`.
+@ flow
+in: amount1, amount2, amount3
+if: (amount2<=amount1 && amount1<=amount3) || (amount3<=amount1 && amount1<=amount2)
+  do: med = amount1
+else:
+  if: (amount1<=amount2 && amount2<=amount3) || (amount3<=amount2 && amount2<=amount1)
+    do: med = amount2
+  else:
+    do: med = amount3
+out: med, (amount1 + amount2 + amount3) / 3
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double amount1, amount2, amount3, med;
+    scanf("%lf %lf %lf", &amount1, &amount2, &amount3);
+    if ((amount2 <= amount1 && amount1 <= amount3) || (amount3 <= amount1 && amount1 <= amount2))
+        med = amount1;                      // amount1 بين الاثنين الآخرين
+    else if ((amount1 <= amount2 && amount2 <= amount3) || (amount3 <= amount2 && amount2 <= amount1))
+        med = amount2;
+    else
+        med = amount3;
+    printf("Median = %.2f\n", med);
+    printf("Mean   = %.2f (pulled by the outlier)\n", (amount1 + amount2 + amount3) / 3);
+    return 0;
+}
+
+@@
+title: تسعير حسب ساعة الطلب
+level: medium
+domain: ec
+@ statement
+تطبق منصة توصيل الوجبات أسعارًا حسب الساعة: من 11 إلى 13 ومن 19 إلى 21 (ساعات الذروة) زيادة 20%، من 15 إلى 17 (ساعة سعيدة) تخفيض 25%، ومن 0 إلى 6 زيادة ليلية 30%. اكتب برنامجًا يقرأ الساعة والسعر.
+@ stdin
+20 1400
+@ steps
+- نحدد المعامل `factor` حسب المجال.
+- مجالا الذروة يُجمعان بـ `||`.
+- السعر النهائي `price * factor`.
+@ flow
+in: hour, price
+if: (hour>=11 && hour<=13) || (hour>=19 && hour<=21)
+  do: factor = 1.2
+else:
+  if: hour >= 15 && hour <= 17
+    do: factor = 0.75
+  else:
+    if: hour >= 0 && hour <= 6
+      do: factor = 1.3
+    else:
+      do: factor = 1
+out: price * factor
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int hour;
+    double price, factor;
+    scanf("%d %lf", &hour, &price);
+    if ((hour >= 11 && hour <= 13) || (hour >= 19 && hour <= 21))
+        factor = 1.2;                      // ساعات الذروة
+    else if (hour >= 15 && hour <= 17)
+        factor = 0.75;                     // الساعة السعيدة
+    else if (hour >= 0 && hour <= 6)
+        factor = 1.3;                      // الليل
+    else
+        factor = 1.0;                      // السعر العادي
+    printf("Hour %d: factor %.2f -> %.2f DA\n", hour, factor, price * factor);
+    return 0;
+}
+
+@@
+title: تصنيف المشاعر
+level: medium
+domain: ds
+@ statement
+يعطي نموذج تحليل المشاعر لكل تعليق درجة بين -1 و1 ودرجة ثقة بين 0 و1. اكتب برنامجًا يصنف التعليق: إذا كانت الثقة أقل من 0.6 فهو **غير مؤكد**، وإلا: إيجابي (درجة > 0.25)، سلبي (< -0.25)، أو محايد.
+@ stdin
+-0.62 0.81
+@ steps
+- نختبر الثقة أولًا: إنها شرط مسبق.
+- ثم نصنف حسب الدرجة بثلاث حالات.
+@ flow
+in: score, conf
+if: conf < 0.6
+  out: `"uncertain"`
+else:
+  if: score > 0.25
+    out: `"positive"`
+  else:
+    if: score < -0.25
+      out: `"negative"`
+    else:
+      out: `"neutral"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double score, conf;
+    scanf("%lf %lf", &score, &conf);
+    if (conf < 0.6) {
+        printf("Uncertain (confidence %.2f)\n", conf);
+    } else if (score > 0.25) {
+        printf("Positive review\n");
+    } else if (score < -0.25) {
+        printf("Negative review\n");      // يرسل إلى خدمة الزبائن
+    } else {
+        printf("Neutral review\n");
+    }
+    return 0;
+}
+
+@@
+title: كشف الاحتيال بالقواعد
+level: medium
+domain: ds
+@ statement
+نعطي كل عملية دفع **درجة خطر**: +40 إذا تجاوز المبلغ 100000 دج، +30 إذا كان البلد مختلفًا عن بلد الحساب، +20 إذا كانت الساعة بين 0 و5، +25 إذا كان الحساب عمره أقل من 7 أيام. العملية **مرفوضة** إذا بلغت الدرجة 70، و**للمراجعة** من 40. اكتب البرنامج.
+@ stdin
+125000 1 3 30
+@ steps
+- نقرأ المبلغ، `foreign` (0 أو 1)، الساعة، وعمر الحساب.
+- كل قاعدة شرط مستقل `if` يضيف نقاطًا (ليست `else if`).
+- القرار النهائي حسب المجموع.
+@ flow
+in: amount, foreign, hour, age
+do: risk = 0
+if: amount > 100000
+  do: risk = risk + 40
+if: foreign == 1
+  do: risk = risk + 30
+if: hour >= 0 && hour <= 5
+  do: risk = risk + 20
+if: age < 7
+  do: risk = risk + 25
+if: risk >= 70
+  out: `"rejected"`
+else:
+  if: risk >= 40
+    out: `"review"`
+  else:
+    out: `"accepted"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double amount;
+    int foreign, hour, age, risk = 0;
+    scanf("%lf %d %d %d", &amount, &foreign, &hour, &age);
+    // شروط مستقلة: كل قاعدة تضيف نقاطها
+    if (amount > 100000)          risk = risk + 40;
+    if (foreign == 1)             risk = risk + 30;
+    if (hour >= 0 && hour <= 5)   risk = risk + 20;
+    if (age < 7)                  risk = risk + 25;
+    printf("Risk score = %d -> ", risk);
+    if (risk >= 70)
+        printf("REJECTED\n");
+    else if (risk >= 40)
+        printf("MANUAL REVIEW\n");
+    else
+        printf("ACCEPTED\n");
+    return 0;
+}
+
+@@
+title: الفائز في تجربة A/B
+level: medium
+domain: ds
+@ statement
+نسختان A وB من صفحة منتج. اكتب برنامجًا يقرأ الزوار والمشتريات لكل نسخة، ويعلن الفائز إذا كان الفرق في معدل التحويل **0.5 نقطة على الأقل** وكان لكل نسخة 1000 زائر على الأقل؛ وإلا "غير حاسم".
+@ stdin
+1500 60
+1450 41
+@ steps
+- نحسب المعدلين `ra` و`rb`.
+- شرط حجم العينة: `na >= 1000 && nb >= 1000`.
+- الفرق `gap = ra - rb`، ونقارن `gap >= 0.5` أو `gap <= -0.5`.
+@ flow
+in: na, ca, nb, cb
+do: ra = ca/na*100 ; rb = cb/nb*100
+if: na < 1000 || nb < 1000
+  out: `"sample too small"`
+else:
+  do: gap = ra - rb
+  if: gap >= 0.5
+    out: `"A wins"`
+  else:
+    if: gap <= -0.5
+      out: `"B wins"`
+    else:
+      out: `"inconclusive"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double na, ca, nb, cb, ra, rb, gap;
+    scanf("%lf %lf %lf %lf", &na, &ca, &nb, &cb);
+    ra = ca / na * 100;                   // معدل تحويل النسخة A
+    rb = cb / nb * 100;                   // معدل تحويل النسخة B
+    printf("A: %.2f %%  B: %.2f %%\n", ra, rb);
+    if (na < 1000 || nb < 1000) {
+        printf("Sample too small\n");     // لا نحكم على عينة صغيرة
+    } else {
+        gap = ra - rb;
+        if (gap >= 0.5)       printf("Winner: A\n");
+        else if (gap <= -0.5) printf("Winner: B\n");
+        else                printf("Inconclusive\n");
+    }
+    return 0;
+}
+
+@@
+title: يوم الأسبوع لتاريخ ما
+level: hard
+domain: ec
+@ statement
+لتخطيط الحملات نحتاج يوم الأسبوع لأي تاريخ. اكتب برنامجًا يطبق **صيغة زيلر**: نعتبر جانفي وفيفري الشهرين 13 و14 من السنة السابقة، ثم
+`weekday = (day + 13(month+1)/5 + yearInCentury + yearInCentury/4 + century/4 + 5J) % 7` حيث `yearInCentury = year % 100` و`century = year / 100`، و`weekday = 0` يعني السبت.
+@ stdin
+1 11 2026
+@ steps
+- إذا كان `month < 3`: `month = month + 12` و`year = year - 1`.
+- نحسب `yearInCentury` و`century` ثم `weekday` بقسمات صحيحة.
+- نحول `weekday` إلى اسم يوم بـ `switch` (0 سبت، 1 أحد، ...).
+@ flow
+in: day, month, year
+if: month < 3
+  do: month = month + 12 ; year = year - 1
+do: yearInCentury = year % 100 ; century = year / 100
+do: weekday = (day + 13*(month+1)/5 + yearInCentury + yearInCentury/4 + century/4 + 5*century) % 7
+out: اسم اليوم weekday
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int day, month, year, yearInCentury, century, weekday;
+    scanf("%d %d %d", &day, &month, &year);
+    printf("%02d/%02d/%d is a ", day, month, year);
+    if (month < 3) {              // جانفي وفيفري: شهرا 13 و14 من السنة السابقة
+        month = month + 12;
+        year = year - 1;
+    }
+    yearInCentury = year % 100;              // السنة داخل القرن
+    century = year / 100;              // القرن
+    weekday = (day + 13 * (month + 1) / 5 + yearInCentury + yearInCentury / 4 + century / 4 + 5 * century) % 7;
+    switch (weekday) {
+        case 0: printf("Saturday\n"); break;
+        case 1: printf("Sunday\n"); break;
+        case 2: printf("Monday\n"); break;
+        case 3: printf("Tuesday\n"); break;
+        case 4: printf("Wednesday\n"); break;
+        case 5: printf("Thursday\n"); break;
+        default: printf("Friday\n");
+    }
+    return 0;
+}
+
+@@
+title: شجرة قرار للتنبؤ بمغادرة الزبون
+level: hard
+domain: ds
+@ statement
+درّبنا **شجرة قرار** للتنبؤ بمغادرة الزبون (churn). القواعد: إذا مرّ أكثر من 60 يومًا على آخر طلبية: إذا كان عدد الشكاوى ≥ 2 فـ "مغادر" (احتمال 0.85)، وإلا إذا كان الإنفاق < 10000 فـ "مغادر" (0.65) وإلا "باقٍ" (0.40). إذا مر 60 يومًا أو أقل: إذا كان الإنفاق > 50000 فـ "باقٍ" (0.05)، وإلا إذا كانت الشكاوى ≥ 3 فـ "مغادر" (0.55) وإلا "باقٍ" (0.15). اكتب البرنامج.
+@ stdin
+75 1 15000
+@ steps
+- نقرأ الأيام منذ آخر طلبية، عدد الشكاوى، والإنفاق.
+- نترجم كل عقدة في الشجرة إلى `if` وكل فرع إلى `else`.
+- كل ورقة تعطي الصنف والاحتمال.
+@ flow
+in: days, compl, spend
+if: days > 60
+  if: compl >= 2
+    do: proba = 0.85
+  else:
+    if: spend < 10000
+      do: proba = 0.65
+    else:
+      do: proba = 0.40
+else:
+  if: spend > 50000
+    do: proba = 0.05
+  else:
+    if: compl >= 3
+      do: proba = 0.55
+    else:
+      do: proba = 0.15
+out: proba, proba >= 0.5
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int days, compl;
+    double spend, proba;
+    scanf("%d %d %lf", &days, &compl, &spend);
+    if (days > 60) {                  // العقدة الجذر
+        if (compl >= 2)
+            proba = 0.85;
+        else if (spend < 10000)
+            proba = 0.65;
+        else
+            proba = 0.40;
+    } else {
+        if (spend > 50000)
+            proba = 0.05;
+        else if (compl >= 3)
+            proba = 0.55;
+        else
+            proba = 0.15;
+    }
+    // نصنف الزبون مغادرًا إذا تجاوز الاحتمال 0.5
+    printf("Churn probability = %.2f\n", proba);
+    if (proba >= 0.5)
+        printf("Prediction: will churn -> send offer\n");
+    else
+        printf("Prediction: will stay\n");
+    return 0;
+}
+
+@@
+title: ترتيب أربعة أسعار بشبكة مقارنات
+level: hard
+domain: ec
+@ statement
+اكتب برنامجًا يرتب أربعة أسعار تصاعديًا باستعمال **شبكة ترتيب** ثابتة من 5 مقارنات وتبديلات فقط: `(price1,price2)`، `(price3,price4)`، `(price1,price3)`، `(price2,price4)`، `(price2,price3)`. ثم اعرض أيضًا الوسيط (متوسط القيمتين الوسطيتين).
+@ stdin
+780 120 455 300
+@ steps
+- كل مقارنة `(x,y)`: إذا كان `x > y` نبدلهما.
+- بعد `(price1,price2)` و`(price3,price4)`: كل زوج مرتب.
+- `(price1,price3)` يضع الأصغر في `price1`، و`(price2,price4)` يضع الأكبر في `price4`.
+- `(price2,price3)` يرتب القيمتين الوسطيتين.
+@ flow
+in: price1, price2, price3, price4
+if: price1 > price2
+  do: تبديل price1 و price2
+if: price3 > price4
+  do: تبديل price3 و price4
+if: price1 > price3
+  do: تبديل price1 و price3
+if: price2 > price4
+  do: تبديل price2 و price4
+if: price2 > price3
+  do: تبديل price2 و price3
+out: price1, price2, price3, price4, (price2 + price3) / 2
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double price1, price2, price3, price4, tmp;
+    scanf("%lf %lf %lf %lf", &price1, &price2, &price3, &price4);
+    if (price1 > price2) { tmp = price1; price1 = price2; price2 = tmp; }   // رتب الزوج الأول
+    if (price3 > price4) { tmp = price3; price3 = price4; price4 = tmp; }   // رتب الزوج الثاني
+    if (price1 > price3) { tmp = price1; price1 = price3; price3 = tmp; }   // price1 أصبح الأصغر
+    if (price2 > price4) { tmp = price2; price2 = price4; price4 = tmp; }   // price4 أصبح الأكبر
+    if (price2 > price3) { tmp = price2; price2 = price3; price3 = tmp; }   // رتب الوسطيين
+    printf("Sorted: %.0f %.0f %.0f %.0f\n", price1, price2, price3, price4);
+    printf("Median = %.1f\n", (price2 + price3) / 2);
+    return 0;
+}
+
+@@
+title: الضريبة التصاعدية على دخل البائع
+level: hard
+domain: ec
+@ statement
+يدفع البائع على المنصة ضريبة **تصاعدية** على دخله السنوي: 0% حتى 240000، 23% للجزء بين 240000 و480000، 27% للجزء بين 480000 و960000، 30% للجزء بين 960000 و1920000، و33% لما فوق ذلك. اكتب برنامجًا يحسب الضريبة والنسبة الفعلية.
+@ stdin
+1350000
+@ steps
+- كل شريحة تُطبق نسبتها **على الجزء الواقع داخلها فقط**.
+- نبدأ من الشريحة العليا: إذا كان `rest > 1920000` نضيف `(rest - 1920000) * 0.33` ونضع `rest = 1920000`.
+- نكرر نزولًا حتى الشريحة الأولى.
+- النسبة الفعلية: `tax / income * 100`.
+@ flow
+in: income
+do: rest = income ; tax = 0
+if: rest > 1920000
+  do: tax += (rest - 1920000)*0.33 ; rest = 1920000
+if: rest > 960000
+  do: tax += (rest - 960000)*0.30 ; rest = 960000
+if: rest > 480000
+  do: tax += (rest - 480000)*0.27 ; rest = 480000
+if: rest > 240000
+  do: tax += (rest - 240000)*0.23
+out: tax, tax / income * 100
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double income, rest, tax = 0;
+    scanf("%lf", &income);
+    rest = income;                       // الجزء الذي لم يُضرب بعد
+    if (rest > 1920000) {                // الجزء فوق 1920000
+        tax = tax + (rest - 1920000) * 0.33;
+        rest = 1920000;
+    }
+    if (rest > 960000) {
+        tax = tax + (rest - 960000) * 0.30;
+        rest = 960000;
+    }
+    if (rest > 480000) {
+        tax = tax + (rest - 480000) * 0.27;
+        rest = 480000;
+    }
+    if (rest > 240000)                   // الشريحة الأولى معفاة
+        tax = tax + (rest - 240000) * 0.23;
+    printf("Tax = %.2f DA\n", tax);
+    if (income > 0)
+        printf("Effective rate = %.2f %%\n", tax / income * 100);
+    return 0;
+}
+
+@@
+title: عدد الأيام بين تاريخين
+level: hard
+domain: ec
+@ statement
+لحساب مدة بقاء طلبية في المستودع، اكتب برنامجًا يقرأ تاريخين من **نفس السنة** ويحسب عدد الأيام بينهما. نحسب رقم كل تاريخ في السنة باستعمال `switch` دون `break` لتجميع أيام الأشهر السابقة.
+@ stdin
+2026
+15 1
+3 4
+@ steps
+- رقم اليوم في السنة: `n = d + أيام الأشهر السابقة`.
+- `switch (m)` يبدأ من الشهر السابق وينزل (fall-through) جامعًا أيام كل شهر.
+- نضيف يومًا إذا كانت السنة كبيسة والشهر بعد فيفري.
+- الفرق `n2 - n1`.
+@ flow
+in: year, d1, m1, d2, m2
+do: n1 = رقم اليوم d1/m1
+do: n2 = رقم اليوم d2/m2
+do: diff = n2 - n1
+if: diff < 0
+  do: diff = -diff
+out: diff
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int year, d1, m1, d2, m2, n1, n2, leap, diff;
+    scanf("%d %d %d %d %d", &year, &d1, &m1, &d2, &m2);
+    leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+
+    n1 = d1;
+    switch (m1 - 1) {         // دون break: نجمع كل الأشهر السابقة
+        case 11: n1 += 30;    // نوفمبر
+        // fall through
+        case 10: n1 += 31;
+        // fall through
+        case 9:  n1 += 30;
+        // fall through
+        case 8:  n1 += 31;
+        // fall through
+        case 7:  n1 += 31;
+        // fall through
+        case 6:  n1 += 30;
+        // fall through
+        case 5:  n1 += 31;
+        // fall through
+        case 4:  n1 += 30;
+        // fall through
+        case 3:  n1 += 31;
+        // fall through
+        case 2:  n1 += 28 + leap;   // فيفري
+        // fall through
+        case 1:  n1 += 31;          // جانفي
+    }
+    n2 = d2;
+    switch (m2 - 1) {         // نفس الطريقة للتاريخ الثاني
+        case 11: n2 += 30;
+        // fall through
+        case 10: n2 += 31;
+        // fall through
+        case 9:  n2 += 30;
+        // fall through
+        case 8:  n2 += 31;
+        // fall through
+        case 7:  n2 += 31;
+        // fall through
+        case 6:  n2 += 30;
+        // fall through
+        case 5:  n2 += 31;
+        // fall through
+        case 4:  n2 += 30;
+        // fall through
+        case 3:  n2 += 31;
+        // fall through
+        case 2:  n2 += 28 + leap;
+        // fall through
+        case 1:  n2 += 31;
+    }
+    diff = n2 - n1;
+    if (diff < 0)
+        diff = -diff;
+    printf("Day numbers: %d and %d\n", n1, n2);
+    printf("Days between = %d\n", diff);
+    return 0;
+}
+
+@@
+title: اختيار شركة الشحن الأرخص
+level: hard
+domain: ec
+@ statement
+ثلاث شركات شحن بتسعيرات مختلفة لطرد وزنه `weight` كغ ومسافته `km`:
+الشركة 1: `300 + 25*weight + 2*km`؛ الشركة 2: `500 + 15*weight` ولا تقبل أكثر من 30 كغ؛ الشركة 3: `0.9 * (200 + 40*weight)` إذا كانت المسافة أقل من 100 كم، وإلا `200 + 40*weight + 3*km`.
+اكتب برنامجًا يحسب التكاليف ويختار الأرخص بين الشركات المتاحة.
+@ stdin
+12 350
+@ steps
+- نحسب `c1`.
+- `c2` فقط إذا كان `weight <= 30`، وإلا نعتبرها غير متاحة (`ok2 = 0`).
+- `c3` حسب المسافة.
+- نختار الأرخص مع تجاهل الشركة غير المتاحة.
+@ flow
+in: weight, km
+do: c1 = 300 + 25*weight + 2*km
+do: ok2 = weight <= 30 ; c2 = 500 + 15*weight
+if: km < 100
+  do: c3 = 0.9*(200 + 40*weight)
+else:
+  do: c3 = 200 + 40*weight + 3*km
+do: best = 1 ; min = c1
+if: ok2 && c2 < min
+  do: best = 2 ; min = c2
+if: c3 < min
+  do: best = 3 ; min = c3
+out: best, min
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double weight, km, c1, c2, c3, min;
+    int ok2, best;
+    scanf("%lf %lf", &weight, &km);
+    c1 = 300 + 25 * weight + 2 * km;
+    ok2 = (weight <= 30);                  // الشركة 2 لها حد للوزن
+    c2 = 500 + 15 * weight;
+    if (km < 100)
+        c3 = 0.9 * (200 + 40 * weight);    // تخفيض للمسافات القصيرة
+    else
+        c3 = 200 + 40 * weight + 3 * km;
+    printf("Carrier 1: %.2f DA\n", c1);
+    if (ok2) printf("Carrier 2: %.2f DA\n", c2);
+    else     printf("Carrier 2: not available\n");
+    printf("Carrier 3: %.2f DA\n", c3);
+    best = 1;  min = c1;              // نبدأ بالشركة 1
+    if (ok2 && c2 < min) { best = 2; min = c2; }
+    if (c3 < min)        { best = 3; min = c3; }
+    printf("Cheapest: carrier %d (%.2f DA)\n", best, min);
+    return 0;
+}
+
+@@
+title: هل العنوان داخل منطقة التوصيل؟
+level: hard
+domain: ec
+@ statement
+يخدم مستودع منطقتين: **دائرة** مركزها المستودع `(cx, cy)` ونصف قطرها `radius` كم، و**مستطيل** صناعي `[x1, x2] × [y1, y2]`. اكتب برنامجًا يقرأ إحداثيات الزبون ويحدد المنطقة التي يقع فيها (أو كلتيهما أو لا شيء)، دون استعمال الجذر التربيعي.
+@ stdin
+0 0 10
+12 20 -3 4
+13 2
+@ steps
+- داخل الدائرة: `(custX-cx)² + (custY-cy)² <= radius²` (نقارن المربعات لتجنب الجذر).
+- داخل المستطيل: `x1 <= custX <= x2` و`y1 <= custY <= y2`.
+- نجمع النتيجتين لتحديد الحالات الأربع.
+@ flow
+in: cx, cy, radius, x1, x2, y1, y2, custX, custY
+do: d2 = (custX-cx)*(custX-cx) + (custY-cy)*(custY-cy)
+do: inC = d2 <= radius*radius
+do: inR = custX>=x1 && custX<=x2 && custY>=y1 && custY<=y2
+if: inC && inR
+  out: `"both zones"`
+else:
+  if: inC || inR
+    out: `"one zone"`
+  else:
+    out: `"out of zone"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double cx, cy, radius, x1, x2, y1, y2, custX, custY, d2;
+    int inC, inR;
+    scanf("%lf %lf %lf", &cx, &cy, &radius);           // الدائرة
+    scanf("%lf %lf %lf %lf", &x1, &x2, &y1, &y2); // المستطيل
+    scanf("%lf %lf", &custX, &custY);                     // الزبون
+    d2 = (custX - cx) * (custX - cx) + (custY - cy) * (custY - cy);
+    inC = (d2 <= radius * radius);              // مقارنة المربعات بدل الجذر
+    inR = (custX >= x1 && custX <= x2 && custY >= y1 && custY <= y2);
+    printf("Squared distance = %.1f (limit %.1f)\n", d2, radius * radius);
+    if (inC && inR)
+        printf("Inside both zones\n");
+    else if (inC)
+        printf("Inside the circle only\n");
+    else if (inR)
+        printf("Inside the industrial rectangle only\n");
+    else
+        printf("Out of delivery zone\n");
+    return 0;
+}
+
+@@
+title: أقرب جار لتصنيف زبون جديد
+level: hard
+domain: ds
+@ statement
+لدينا أربعة زبائن معروفين، لكل منهم (عدد الزيارات، متوسط السلة بالآلاف) وصنف: الأول والثاني "مقتصد" (0)، الثالث والرابع "مبذر" (1). البيانات ثابتة في البرنامج: `(2,1.5)`، `(4,2)`، `(9,7.5)`، `(11,6)`. اكتب برنامجًا يقرأ زبونًا جديدًا ويصنفه بطريقة **أقرب جار** (1-NN) باستعمال مربع المسافة.
+@ stdin
+7 5
+@ steps
+- نحسب مربع المسافة إلى كل زبون من الأربعة.
+- نحتفظ بأصغر مسافة `best` وصنفها `cls`، ونحدّثهما عند كل مسافة أصغر.
+- نعرض الصنف المتنبأ به.
+@ flow
+in: visits, basket
+do: d1..d4 = مربعات المسافات
+do: best = d1 ; cls = 0
+if: d2 < best
+  do: best = d2 ; cls = 0
+if: d3 < best
+  do: best = d3 ; cls = 1
+if: d4 < best
+  do: best = d4 ; cls = 1
+out: cls
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double visits, basket, d1, d2, d3, d4, best;
+    int cls, who;
+    scanf("%lf %lf", &visits, &basket);
+    // مربع المسافة إلى كل زبون معروف (بيانات التدريب)
+    d1 = (visits - 2) * (visits - 2) + (basket - 1.5) * (basket - 1.5);
+    d2 = (visits - 4) * (visits - 4) + (basket - 2) * (basket - 2);
+    d3 = (visits - 9) * (visits - 9) + (basket - 7.5) * (basket - 7.5);
+    d4 = (visits - 11) * (visits - 11) + (basket - 6) * (basket - 6);
+    printf("d2: %.2f %.2f %.2f %.2f\n", d1, d2, d3, d4);
+    best = d1; cls = 0; who = 1;          // نبدأ بالجار الأول
+    if (d2 < best) { best = d2; cls = 0; who = 2; }
+    if (d3 < best) { best = d3; cls = 1; who = 3; }
+    if (d4 < best) { best = d4; cls = 1; who = 4; }
+    printf("Nearest neighbour: customer %d\n", who);
+    if (cls == 0) printf("Predicted class: thrifty\n");
+    else          printf("Predicted class: big spender\n");
+    return 0;
+}
+
+@@
+title: محرك التسعير الكامل
+level: hard
+domain: ec
+@ statement
+اكتب برنامج **محرك تسعير** يقرأ: مبلغ السلة، مستوى الوفاء (0 عادي، 1 فضي، 2 ذهبي)، رمز قسيمة (0 لا شيء، 1 = -10%، 2 = -1000 دج إذا تجاوزت السلة 8000)، والولاية (16 أو غيرها). القواعد: الوفاء يعطي 0% أو 3% أو 7%؛ **مجموع التخفيضات لا يتجاوز 30%** من السلة؛ ثم الرسم 19%؛ ثم الشحن: مجاني للذهبي أو إذا تجاوز المبلغ 10000، وإلا 300 للولاية 16 و700 لغيرها.
+@ stdin
+12500 2 1 31
+@ steps
+- نحسب تخفيض الوفاء `dl` بـ `switch`.
+- نحسب تخفيض القسيمة `dc` مع شرطها.
+- نحصر المجموع: إذا كان `dl + dc > 0.3 * cart` نجعله `0.3 * cart`.
+- نطبق الرسم ثم نحدد الشحن.
+@ flow
+in: cart, level, coupon, wilaya
+do: dl = حسب level: 0 أو 3% أو 7%
+do: dc = حسب coupon
+do: disc = dl + dc
+if: disc > 0.3 * cart
+  do: disc = 0.3 * cart
+do: net = (cart - disc) * 1.19
+if: level == 2 || net > 10000
+  do: ship = 0
+else:
+  if: wilaya == 16
+    do: ship = 300
+  else:
+    do: ship = 700
+out: disc, net, ship, net + ship
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double cart, dl, dc, disc, net, ship;
+    int level, coupon, wilaya;
+    scanf("%lf %d %d %d", &cart, &level, &coupon, &wilaya);
+    switch (level) {                      // تخفيض الوفاء
+        case 1:  dl = cart * 0.03; break; // فضي
+        case 2:  dl = cart * 0.07; break; // ذهبي
+        default: dl = 0;
+    }
+    dc = 0;                               // تخفيض القسيمة
+    if (coupon == 1)
+        dc = cart * 0.10;
+    else if (coupon == 2 && cart > 8000)
+        dc = 1000;
+    disc = dl + dc;
+    if (disc > 0.3 * cart)                // سقف التخفيضات 30%
+        disc = 0.3 * cart;
+    net = (cart - disc) * 1.19;           // الرسم بعد التخفيض
+    if (level == 2 || net > 10000)
+        ship = 0;
+    else if (wilaya == 16)
+        ship = 300;
+    else
+        ship = 700;
+    printf("Discounts = %.2f DA\n", disc);
+    printf("Net with tax = %.2f DA\n", net);
+    printf("Shipping = %.2f DA\n", ship);
+    printf("TOTAL = %.2f DA\n", net + ship);
+    return 0;
+}
+
+@@
+title: توازن العرض والطلب
+level: hard
+domain: ds
+@ statement
+في سوق منتج: الطلب `Qd = demandBase - demandSlope*price` والعرض `Qs = supplyBase + supplySlope*price`. **سعر التوازن** يحقق `Qd = Qs` أي `price* = (demandBase - supplyBase) / (demandSlope + supplySlope)`. تفرض الدولة أحيانًا **سعرًا أدنى** `floor`. اكتب برنامجًا يحسب التوازن؛ وإذا كان السعر الأدنى أعلى من `price*` يُباع بالسعر الأدنى ويظهر **فائض** `Qs - Qd`. تحقق أيضًا أن التوازن ممكن (`price* > 0` و`Q* > 0`).
+@ stdin
+1000 4 100 2
+180
+@ steps
+- `price = (demandBase - supplyBase) / (demandSlope + supplySlope)` و`quantity = demandBase - demandSlope * price`.
+- إذا كان `price <= 0` أو `quantity <= 0`: لا يوجد توازن ذو معنى.
+- إذا كان `floor > price`: نحسب `Qd` و`Qs` عند `floor` والفائض.
+- وإلا السعر الأدنى غير مؤثر.
+@ flow
+in: demandBase, demandSlope, supplyBase, supplySlope, floor
+do: price = (demandBase - supplyBase) / (demandSlope + supplySlope)
+do: quantity = demandBase - demandSlope * price
+if: price <= 0 || quantity <= 0
+  out: `"no equilibrium"`
+else:
+  out: price, quantity
+  if: floor > price
+    do: qd = demandBase - demandSlope*floor ; qs = supplyBase + supplySlope*floor
+    out: qs - qd
+  else:
+    out: `"floor not binding"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double demandBase, demandSlope, supplyBase, supplySlope, floor_p, price, quantity, qd, qs;
+    scanf("%lf %lf %lf %lf", &demandBase, &demandSlope, &supplyBase, &supplySlope);
+    scanf("%lf", &floor_p);               // السعر الأدنى المفروض
+    price = (demandBase - supplyBase) / (demandSlope + supplySlope);                // من demandBase - demandSlope*price = supplyBase + supplySlope*price
+    quantity = demandBase - demandSlope * price;
+    if (price <= 0 || quantity <= 0) {
+        printf("No meaningful equilibrium\n");
+    } else {
+        printf("Equilibrium: p* = %.2f DA, q* = %.2f units\n", price, quantity);
+        if (floor_p > price) {                // السعر الأدنى مؤثر
+            qd = demandBase - demandSlope * floor_p;         // الطلب ينخفض
+            qs = supplyBase + supplySlope * floor_p;         // العرض يرتفع
+            printf("At floor %.2f: demand %.2f, supply %.2f\n", floor_p, qd, qs);
+            printf("Surplus = %.2f units\n", qs - qd);
+        } else {
+            printf("Price floor not binding\n");
+        }
+    }
+    return 0;
+}

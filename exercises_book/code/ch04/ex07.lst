@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+#define NB_IDS 8
+
+int main(void) {
+    int ids[NB_IDS] = {1203, 4410, 7781, 5512, 3001, 9045, 2210, 6600};
+    int target, index, pos = -1;           (*@\cmt{-\cen{1}: غير موجود}@*)
+    scanf("%d", &target);
+    for (index = 0; index < NB_IDS && pos == -1; index++)  (*@\cmt{نتوقف عند أول تطابق}@*)
+        if (ids[index] == target)
+            pos = index;
+    if (pos >= 0)
+        printf("Product %d found at index %d\n", target, pos);
+    else
+        printf("Product %d not found\n", target);
+    return 0;
+}

@@ -1,0 +1,11 @@
+#include <stdio.h>
+
+int main(void) {
+    double amount, mean, std, zscore, x2;
+    scanf("%lf %lf %lf", &amount, &mean, &std);
+    zscore = (amount - mean) / std;         (*@\cmt{كم انحرافًا معياريًا يبعد \cen{amount} عن المتوسط}@*)
+    x2 = mean + 2 * std;          (*@\cmt{العتبة الموافقة لـ \cen{zscore} = \cen{2}}@*)
+    printf("z-score = %.2f\n", zscore);
+    printf("Threshold (z = 2) = %.2f DA\n", x2);
+    return 0;
+}

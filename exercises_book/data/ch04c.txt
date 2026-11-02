@@ -1,0 +1,532 @@
+@@
+title: أفضل فترة ربح متتالية (خوارزمية كادان)
+level: hard
+domain: ds
+@ statement
+جدول `profit` يحتوي الربح الصافي اليومي لحملة إعلانية (قد يكون سالبًا). اكتب برنامجًا يجد **الفترة المتصلة** ذات **أكبر مجموع** بخوارزمية **كادان** في مرور واحد، مع يومي بدايتها ونهايتها.
+@ steps
+- `current` أفضل مجموع لفترة تنتهي عند اليوم الحالي.
+- إذا كان `current < 0` فمن الأفضل البدء من جديد: `current = profit[day]` و`start = day`.
+- وإلا: `current += profit[day]`.
+- إذا كان `current > best` نحفظ الفترة.
+@ flow
+do: current = best = profit[0] ; start = bestFrom = bestTo = 0
+for: day = 1 ; day < NB ; day++
+  if: current < 0
+    do: current = profit[day] ; start = day
+  else:
+    do: current += profit[day]
+  if: current > best
+    do: best = current ; bestFrom = start ; bestTo = day
+out: best, bestFrom, bestTo
+@ code
+#include <stdio.h>
+
+#define NB 12
+
+int main(void) {
+    int profit[NB] = {-200, 150, 300, -120, 400, -500, 100, 250, -50, 300, -400, 80};
+    int current = profit[0], best = profit[0];
+    int start = 0, bestFrom = 0, bestTo = 0, day;
+    for (day = 1; day < NB; day++) {
+        if (current < 0) {        // ماضٍ سالب يضر: نبدأ فترة جديدة
+            current = profit[day];
+            start = day;
+        } else {
+            current += profit[day];   // نمدد الفترة الحالية
+        }
+        if (current > best) {
+            best = current;
+            bestFrom = start;
+            bestTo = day;
+        }
+    }
+    printf("Best period: day %d to day %d, profit = %d DA\n",
+           bestFrom + 1, bestTo + 1, best);
+    return 0;
+}
+
+@@
+title: الترتيب السريع دون عودية
+level: hard
+domain: ec
+@ statement
+اكتب برنامجًا يرتب أسعار 12 منتجًا بخوارزمية **الترتيب السريع** (Quick Sort) دون استعمال الدوال العودية: نستعمل **مكدسًا يدويًا** (جدولين `stackLow` و`stackHigh`) لحفظ الأجزاء التي تنتظر الترتيب. التقسيم بطريقة Lomuto مع آخر عنصر كمحور.
+@ steps
+- ندفع المجال `[0, NB-1]` في المكدس.
+- ما دام المكدس غير فارغ: نسحب مجالًا `[low, high]`.
+- التقسيم: كل عنصر أصغر من المحور ينقل إلى اليسار، ثم يوضع المحور في مكانه `pivotPos`.
+- ندفع الجزأين `[low, pivotPos-1]` و`[pivotPos+1, high]` إذا كان طولهما أكبر من 1.
+@ flow
+do: push [0, NB-1]
+while: top > 0
+  do: pop low, high
+  do: pivot = prices[high] ; store = low
+  for: scan = low ; scan < high ; scan++
+    if: prices[scan] < pivot
+      do: تبديل prices[scan] و prices[store] ; store++
+  do: تبديل prices[store] و prices[high]
+  if: store - 1 > low
+    do: push [low, store-1]
+  if: store + 1 < high
+    do: push [store+1, high]
+out: prices
+@ code
+#include <stdio.h>
+
+#define NB 12
+
+int main(void) {
+    int prices[NB] = {890, 120, 450, 3000, 75, 640, 1200, 300, 999, 15, 2200, 640};
+    int stackLow[NB], stackHigh[NB], top = 0;
+    int low, high, pivot, store, scan, tmp, index;
+    stackLow[top] = 0; stackHigh[top] = NB - 1; top++;   // المجال الكامل
+    while (top > 0) {
+        top--;                                // نسحب مجالًا
+        low = stackLow[top];
+        high = stackHigh[top];
+        pivot = prices[high];                 // المحور: آخر عنصر
+        store = low;                          // حد منطقة "الأصغر من المحور"
+        for (scan = low; scan < high; scan++) {
+            if (prices[scan] < pivot) {
+                tmp = prices[scan]; prices[scan] = prices[store]; prices[store] = tmp;
+                store++;
+            }
+        }
+        tmp = prices[store]; prices[store] = prices[high]; prices[high] = tmp;
+        // المحور الآن في مكانه النهائي store
+        if (store - 1 > low)  { stackLow[top] = low;       stackHigh[top] = store - 1; top++; }
+        if (store + 1 < high) { stackLow[top] = store + 1; stackHigh[top] = high;      top++; }
+    }
+    for (index = 0; index < NB; index++)
+        printf("%d ", prices[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: الترتيب بالدمج من الأسفل إلى الأعلى
+level: hard
+domain: ds
+@ statement
+اكتب برنامجًا يرتب أزمنة استجابة الخادم بخوارزمية **الترتيب بالدمج** في نسختها التكرارية (Bottom-Up): ندمج أجزاء بطول 1 ثم 2 ثم 4 ... مستعملين جدولًا مساعدًا، ونعرض الجدول بعد كل مرحلة.
+@ steps
+- `width` يبدأ من 1 ويتضاعف.
+- لكل زوج من الأجزاء المتجاورة `[left, mid)` و`[mid, right)`: ندمجهما في `buffer`.
+- ننسخ `buffer` إلى الجدول الأصلي بعد كل مرحلة.
+@ flow
+for: width = 1 ; width < NB ; width *= 2
+  for: left = 0 ; left < NB ; left += 2*width
+    do: mid = min(left+width, NB) ; right = min(left+2*width, NB)
+    do: دمج [left,mid) و [mid,right) في buffer
+  do: نسخ buffer إلى times
+out: times
+@ code
+#include <stdio.h>
+
+#define NB 10
+
+int main(void) {
+    int times[NB] = {120, 45, 300, 80, 95, 15, 210, 60, 33, 150};
+    int buffer[NB];
+    int width, left, mid, right, posA, posB, out, index;
+    for (width = 1; width < NB; width *= 2) {         // طول الأجزاء المرتبة
+        for (left = 0; left < NB; left += 2 * width) {
+            mid = (left + width < NB) ? left + width : NB;
+            right = (left + 2 * width < NB) ? left + 2 * width : NB;
+            posA = left; posB = mid; out = left;
+            while (posA < mid && posB < right)        // دمج جزأين مرتبين
+                buffer[out++] = (times[posA] <= times[posB]) ? times[posA++] : times[posB++];
+            while (posA < mid)   buffer[out++] = times[posA++];
+            while (posB < right) buffer[out++] = times[posB++];
+        }
+        for (index = 0; index < NB; index++)
+            times[index] = buffer[index];
+        printf("width %d:", width);
+        for (index = 0; index < NB; index++)
+            printf(" %d", times[index]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: الترتيب بالعد لمليون تقييم
+level: hard
+domain: ds
+@ statement
+لدينا عدد كبير من تقييمات المنتجات (0 إلى 10). الترتيب بالمقارنات بطيء، بينما **الترتيب بالعد** (Counting Sort) خطي. اكتب برنامجًا يولد 1000000 تقييم بمولد LCG يدوي، يعدها في جدول `count[11]`، ثم يحسب **الوسيط** و**المئين 90** مباشرة من العدادات دون تخزين الملايين.
+@ steps
+- مولد: `seed = (seed * 1103515245 + 12345) % 2^31`، والتقييم `(seed / 65536) % 11`.
+- `count[rating]++`.
+- نمر على العدادات تراكميًا: الوسيط هو أول قيمة يبلغ عندها التراكم `NB / 2`.
+@ flow
+in: seed
+for: item = 0 ; item < NB ; item++
+  do: rating = عشوائي 0..10
+  do: count[rating]++
+do: cumul = 0
+for: value = 0 ; value <= 10 ; value++
+  do: cumul += count[value]
+  if: الوسيط لم يحدد && cumul >= NB/2
+    do: median = value
+  if: p90 لم يحدد && cumul >= 0.9*NB
+    do: p90 = value
+out: median, p90
+@ code
+#include <stdio.h>
+
+#define NB 1000000L
+
+int main(void) {
+    unsigned long long seed;
+    long count[11] = {0}, cumul = 0, item;
+    int value, rating, median = -1, p90 = -1;
+    scanf("%llu", &seed);
+    for (item = 0; item < NB; item++) {
+        seed = (seed * 1103515245ULL + 12345ULL) % 2147483648ULL;
+        rating = (int)((seed / 65536) % 11);  // تقييم من 0 إلى 10
+        count[rating]++;                      // لا نخزن التقييم، فقط نعده
+    }
+    for (value = 0; value <= 10; value++) {
+        cumul += count[value];                // كم تقييمًا <= value
+        printf("%2d: %ld\n", value, count[value]);
+        if (median < 0 && cumul >= NB / 2) median = value;
+        if (p90 < 0 && cumul >= NB * 9 / 10) p90 = value;
+    }
+    printf("Median = %d, P90 = %d\n", median, p90);
+    return 0;
+}
+
+@@
+title: تصنيف زبون بـ k أقرب جيران
+level: hard
+domain: ds
+@ statement
+لدينا 10 زبائن معروفين (عدد الزيارات الشهرية، متوسط السلة بالآلاف) وصنف كل منهم: 1 = سيشتري الاشتراك المميز، 0 = لا. اكتب برنامجًا يصنف زبونًا جديدًا بخوارزمية **k-NN** مع `k = 3`: نحسب المسافات، نختار الثلاثة الأقرب (انتقاء جزئي)، ونصوت.
+@ stdin
+6 4.5
+@ steps
+- `dist[index]` = مربع المسافة إلى كل زبون.
+- لاختيار الأقرب 3 مرات: نبحث عن أصغر مسافة غير مستعملة ونعلّمها `used[index] = 1`.
+- نجمع أصوات الصنف 1، والقرار بالأغلبية.
+@ flow
+in: visits, basket
+for: index = 0 ; index < NB ; index++
+  do: dist[index] = (visits - X[index])² + (basket - Y[index])²
+do: votes = 0
+for: round = 0 ; round < NB_NEIGHBOURS ; round++
+  do: nearest = أصغر dist غير مستعملة
+  do: used[nearest] = 1 ; votes += label[nearest]
+if: votes * 2 > NB_NEIGHBOURS
+  out: `"premium"`
+else:
+  out: `"standard"`
+@ code
+#include <stdio.h>
+
+#define NB 10
+#define NB_NEIGHBOURS 3
+
+int main(void) {
+    double visitsData[NB] = {1, 2, 3, 8, 9, 7, 5, 10, 4, 6};
+    double basketData[NB] = {1.0, 1.5, 2.0, 6.0, 5.5, 4.0, 3.5, 7.0, 2.5, 5.0};
+    int label[NB]         = {0, 0, 0, 1, 1, 1, 0, 1, 0, 1};
+    double dist[NB], visits, basket, dv, db;
+    int used[NB] = {0}, index, round, nearest, votes = 0;
+    scanf("%lf %lf", &visits, &basket);
+    for (index = 0; index < NB; index++) {
+        dv = visits - visitsData[index];
+        db = basket - basketData[index];
+        dist[index] = dv * dv + db * db;      // مربع المسافة يكفي للمقارنة
+    }
+    for (round = 0; round < NB_NEIGHBOURS; round++) {     // نختار الأقرب NB_NEIGHBOURS مرات
+        nearest = -1;
+        for (index = 0; index < NB; index++)
+            if (!used[index] && (nearest < 0 || dist[index] < dist[nearest]))
+                nearest = index;
+        used[nearest] = 1;
+        votes += label[nearest];
+        printf("Neighbour %d: customer %d (d2 = %.2f, class %d)\n",
+               round + 1, nearest, dist[nearest], label[nearest]);
+    }
+    if (votes * 2 > NB_NEIGHBOURS)                        // الأغلبية
+        printf("Prediction: premium subscriber\n");
+    else
+        printf("Prediction: standard\n");
+    return 0;
+}
+
+@@
+title: تجميع الزبائن إلى ثلاث فئات
+level: hard
+domain: ds
+@ statement
+اكتب برنامجًا يطبق **K-Means** بثلاث مجموعات على إنفاق 15 زبونًا مخزن في جدول: المراكز الأولية هي أصغر قيمة، الوسط، وأكبر قيمة. نكرر الإسناد وإعادة الحساب حتى لا يتغير أي إسناد، ونعرض المراكز وأعضاء كل مجموعة.
+@ steps
+- `group[index]` رقم مجموعة كل زبون (يبدأ بـ -1).
+- الإسناد: أقرب مركز بالقيمة المطلقة للفرق.
+- `changed` يعد الزبائن الذين غيروا مجموعتهم؛ نتوقف عندما يساوي 0.
+- إعادة الحساب: كل مركز = متوسط أعضائه.
+@ flow
+do: centers = {min, middle, max} ; group[] = -1
+dowhile: changed > 0
+  do: changed = 0
+  for: index = 0 ; index < NB ; index++
+    do: closest = أقرب مركز إلى spend[index]
+    if: closest != group[index]
+      do: group[index] = closest ; changed++
+  do: كل مركز = متوسط أعضائه
+out: centers, group
+@ code
+#include <stdio.h>
+
+#define NB 15
+#define NB_GROUPS 3
+
+int main(void) {
+    double spend[NB] = {12, 15, 90, 14, 52, 48, 95, 11, 55, 100, 47, 13, 88, 50, 92};
+    double centers[NB_GROUPS] = {11, 50, 100};    // أصغر، وسط، أكبر
+    double sum[NB_GROUPS], gap, bestGap;
+    int group[NB], members[NB_GROUPS];
+    int index, cluster, closest, changed, iteration = 0;
+    for (index = 0; index < NB; index++)
+        group[index] = -1;                // لا مجموعة بعد
+    do {
+        changed = 0;
+        for (index = 0; index < NB; index++) {      // مرحلة الإسناد
+            closest = 0;
+            bestGap = -1;
+            for (cluster = 0; cluster < NB_GROUPS; cluster++) {
+                gap = spend[index] - centers[cluster];
+                if (gap < 0) gap = -gap;
+                if (bestGap < 0 || gap < bestGap) { bestGap = gap; closest = cluster; }
+            }
+            if (closest != group[index]) { group[index] = closest; changed++; }
+        }
+        for (cluster = 0; cluster < NB_GROUPS; cluster++) { sum[cluster] = 0; members[cluster] = 0; }
+        for (index = 0; index < NB; index++) {      // مرحلة إعادة الحساب
+            sum[group[index]] += spend[index];
+            members[group[index]]++;
+        }
+        for (cluster = 0; cluster < NB_GROUPS; cluster++)
+            if (members[cluster] > 0)
+                centers[cluster] = sum[cluster] / members[cluster];
+        iteration++;
+    } while (changed > 0);
+    printf("Converged in %d iterations\n", iteration);
+    for (cluster = 0; cluster < NB_GROUPS; cluster++) {
+        printf("Group %d (center %.2f):", cluster, centers[cluster]);
+        for (index = 0; index < NB; index++)
+            if (group[index] == cluster)
+                printf(" %.0f", spend[index]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: اختيار الحملات الإعلانية بميزانية محدودة
+level: hard
+domain: ec
+@ statement
+ميزانية التسويق `BUDGET` (بالآلاف). لكل حملة تكلفة وعائد متوقع، ولا يمكن تنفيذ الحملة إلا مرة واحدة. اكتب برنامجًا يجد أكبر عائد ممكن بالبرمجة الديناميكية (**مسألة حقيبة الظهر 0/1**) بجدول أحادي `best[budget]`، ثم يستنتج الحملات المختارة بجدول قرارات.
+@ steps
+- `best[money]` أكبر عائد بميزانية `money` باستعمال الحملات المعالجة حتى الآن.
+- لكل حملة نمر على الميزانيات **تنازليًا** لكي لا نستعمل الحملة مرتين: `best[money] = max(best[money], best[money - cost] + gain)`.
+- نسجل `take[campaign][money]` في جدول مسطح لإعادة بناء الاختيار.
+@ flow
+do: best[0..BUDGET] = 0
+for: camp = 0 ; camp < NB ; camp++
+  for: money = BUDGET ; money >= cost[camp] ; money--
+    if: best[money - cost] + gain > best[money]
+      do: best[money] = best[money - cost] + gain ; take = 1
+do: money = BUDGET
+for: camp = NB - 1 ; camp >= 0 ; camp--
+  if: take[camp][money]
+    out: camp
+    do: money -= cost[camp]
+out: best[BUDGET]
+@ code
+#include <stdio.h>
+
+#define NB 6
+#define BUDGET 20
+
+int main(void) {
+    int cost[NB] = {5, 8, 4, 10, 3, 7};       // بالآلاف
+    int gain[NB] = {12, 20, 9, 25, 5, 14};    // العائد المتوقع
+    int best[BUDGET + 1] = {0};
+    int take[NB * (BUDGET + 1)] = {0};        // جدول قرارات مسطح
+    int camp, money;
+    for (camp = 0; camp < NB; camp++) {
+        // تنازليًا: best[money - cost] ما زال يخص الحملات السابقة
+        for (money = BUDGET; money >= cost[camp]; money--) {
+            if (best[money - cost[camp]] + gain[camp] > best[money]) {
+                best[money] = best[money - cost[camp]] + gain[camp];
+                take[camp * (BUDGET + 1) + money] = 1;
+            }
+        }
+    }
+    printf("Max gain = %d with budget %d\n", best[BUDGET], BUDGET);
+    money = BUDGET;
+    printf("Campaigns:");
+    for (camp = NB - 1; camp >= 0; camp--) {  // نعيد بناء الاختيار من الآخر
+        if (take[camp * (BUDGET + 1) + money]) {
+            printf(" #%d(cost %d)", camp, cost[camp]);
+            money -= cost[camp];
+        }
+    }
+    printf("\n");
+    return 0;
+}
+
+@@
+title: المنتجات التي تُشترى معًا
+level: hard
+domain: ds
+@ statement
+نمثل كل سلة **بقناع بتات**: البت `p` يساوي 1 إذا احتوت السلة المنتج `p` (6 منتجات). اكتب برنامجًا يحسب لكل زوج من المنتجات **الدعم** (عدد السلات التي تحتوي الاثنين) ويعرض الأزواج التي يتجاوز دعمها 30%، مع **الثقة** `support(A,B) / support(A)` — أساس خوارزمية Apriori.
+@ steps
+- `single[p]` عدد السلات التي فيها المنتج `p`: نختبر `(basket >> p) & 1`.
+- لكل زوج `first < second`: نعد السلات التي فيها البتان.
+- نعرض الأزواج التي `pairCount * 100 / NB_BASKETS >= 30`.
+@ flow
+for: basket = 0 ; basket < NB_B ; basket++
+  for: prod = 0 ; prod < NB_P ; prod++
+    if: (baskets[basket] >> prod) & 1
+      do: single[prod]++
+for: first = 0 ; first < NB_P ; first++
+  for: second = first + 1 ; second < NB_P ; second++
+    do: pairCount = عدد السلات التي فيها first و second
+    if: pairCount * 100 >= 30 * NB_B
+      out: first, second, pairCount, pairCount / single[first]
+@ code
+#include <stdio.h>
+
+#define NB_B 10
+#define NB_P 6
+
+int main(void) {
+    // 0 هاتف، 1 غلاف، 2 شاحن، 3 سماعات، 4 ساعة، 5 حاسوب
+    int baskets[NB_B] = {0x07, 0x03, 0x0B, 0x01, 0x23, 0x0F, 0x30, 0x03, 0x13, 0x07};
+    int single[NB_P] = {0};
+    int basket, prod, first, second, pairCount, mask;
+    for (basket = 0; basket < NB_B; basket++)
+        for (prod = 0; prod < NB_P; prod++)
+            if ((baskets[basket] >> prod) & 1)    // هل البت prod يساوي 1؟
+                single[prod]++;
+    for (first = 0; first < NB_P; first++) {
+        for (second = first + 1; second < NB_P; second++) {
+            mask = (1 << first) | (1 << second);  // البتان معًا
+            pairCount = 0;
+            for (basket = 0; basket < NB_B; basket++)
+                if ((baskets[basket] & mask) == mask)
+                    pairCount++;
+            if (pairCount * 100 >= 30 * NB_B)
+                printf("{%d,%d}: support %d%%, confidence %d->%d = %.2f\n",
+                       first, second, pairCount * 100 / NB_B, first, second,
+                       (double)pairCount / single[first]);
+        }
+    }
+    return 0;
+}
+
+@@
+title: معامل جيني لتركز الإنفاق
+level: hard
+domain: ds
+@ statement
+يقيس **معامل جيني** مدى تركز الإنفاق عند قلة من الزبائن (0 = توزيع متساوٍ، 1 = زبون واحد ينفق كل شيء). بعد ترتيب الإنفاق تصاعديًا: `G = (2 Σ i·x_i) / (n Σ x_i) - (n + 1) / n` حيث `i` من 1 إلى n. اكتب برنامجًا يحسبه، ويحسب أيضًا حصة أكبر 20% من الزبائن.
+@ steps
+- ترتيب تصاعدي.
+- `weighted = Σ (rank + 1) * spend[rank]` و`total = Σ spend`.
+- نطبق الصيغة.
+- أكبر 20% هم آخر `NB / 5` عناصر بعد الترتيب.
+@ flow
+do: ترتيب spend تصاعديًا
+for: rank = 0 ; rank < NB ; rank++
+  do: weighted += (rank + 1) * spend[rank] ; total += spend[rank]
+do: gini = 2*weighted / (NB*total) - (NB + 1.0) / NB
+do: top = مجموع آخر NB/5 عناصر
+out: gini, top / total
+@ code
+#include <stdio.h>
+
+#define NB 10
+
+int main(void) {
+    double spend[NB] = {1200, 800, 45000, 3000, 950, 2200, 18000, 600, 1500, 7000};
+    double key, weighted = 0, total = 0, gini, top = 0;
+    int rank, scan;
+    for (rank = 1; rank < NB; rank++) {           // ترتيب بالإدراج
+        key = spend[rank];
+        for (scan = rank - 1; scan >= 0 && spend[scan] > key; scan--)
+            spend[scan + 1] = spend[scan];
+        spend[scan + 1] = key;
+    }
+    for (rank = 0; rank < NB; rank++) {
+        weighted += (rank + 1) * spend[rank];     // الرتبة تبدأ من 1
+        total += spend[rank];
+    }
+    gini = 2 * weighted / (NB * total) - (NB + 1.0) / NB;
+    for (rank = NB - NB / 5; rank < NB; rank++)   // أكبر 20%
+        top += spend[rank];
+    printf("Gini = %.3f\n", gini);
+    printf("Top 20%% customers = %.1f%% of revenue\n", top * 100 / total);
+    return 0;
+}
+
+@@
+title: أطول فترة ضمن الميزانية
+level: hard
+domain: ec
+@ statement
+يريد مسؤول الإعلانات تشغيل حملة في **أيام متتالية**، وتكلفة كل يوم معروفة. اكتب برنامجًا يجد **أطول** سلسلة أيام متتالية مجموع تكاليفها لا يتجاوز الميزانية، بطريقة **النافذة المنزلقة** في `O(n)`.
+@ stdin
+1000
+@ steps
+- مؤشرا النافذة `left` و`right`، ومجموعها `windowCost`.
+- نوسع النافذة يمينًا بإضافة `cost[right]`.
+- ما دام المجموع يتجاوز الميزانية نقلصها من اليسار.
+- نحفظ أطول نافذة صالحة.
+@ flow
+in: budget
+do: left = 0 ; windowCost = 0 ; bestLen = 0
+for: right = 0 ; right < NB ; right++
+  do: windowCost += cost[right]
+  while: windowCost > budget
+    do: windowCost -= cost[left] ; left++
+  if: right - left + 1 > bestLen
+    do: bestLen = right - left + 1 ; bestLeft = left
+out: bestLen, bestLeft
+@ code
+#include <stdio.h>
+
+#define NB 14
+
+int main(void) {
+    int cost[NB] = {300, 150, 200, 500, 100, 120, 90, 400, 80, 60, 250, 700, 50, 100};
+    int budget, left = 0, right, windowCost = 0, bestLen = 0, bestLeft = 0, day;
+    scanf("%d", &budget);
+    for (right = 0; right < NB; right++) {
+        windowCost += cost[right];        // نضيف يومًا من اليمين
+        while (windowCost > budget) {     // تجاوزنا: نحذف من اليسار
+            windowCost -= cost[left];
+            left++;
+        }
+        if (right - left + 1 > bestLen) {
+            bestLen = right - left + 1;
+            bestLeft = left;
+        }
+    }
+    printf("Longest campaign: %d days (day %d to %d):",
+           bestLen, bestLeft + 1, bestLeft + bestLen);
+    windowCost = 0;
+    for (day = bestLeft; day < bestLeft + bestLen; day++) {
+        printf(" %d", cost[day]);
+        windowCost += cost[day];
+    }
+    printf(" = %d DA\n", windowCost);
+    return 0;
+}

@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+    int phone, cover, charger;
+    scanf("%d %d %d", &phone, &cover, &charger);
+    (*@\cmt{! تعني النفي: !\cen{cover} صحيح إذا كان \cen{cover} يساوي \cen{0}}@*)
+    if (phone && !cover)
+        printf("Recommend: phone cover\n");
+    else if (cover && charger)
+        printf("Recommend: earphones\n");
+    else
+        printf("No recommendation\n");
+    return 0;
+}

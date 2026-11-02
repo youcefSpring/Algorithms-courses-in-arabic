@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int main(void) {
+    unsigned long long seed;
+    int nbBaskets, basketNo, item, nbItems, big = 0;
+    double uniform, basket, total = 0;
+    scanf("%llu %d", &seed, &nbBaskets);
+    for (basketNo = 0; basketNo < nbBaskets; basketNo++) {
+        seed = (seed * 1103515245ULL + 12345ULL) % 2147483648ULL;
+        uniform = seed / 2147483648.0;          // عدد شبه عشوائي في [0, 1)
+        nbItems = 1 + (int)(uniform * 5);             // عدد القطع: 1 إلى 5
+        basket = 0;
+        for (item = 0; item < nbItems; item++) {
+            seed = (seed * 1103515245ULL + 12345ULL) % 2147483648ULL;
+            uniform = seed / 2147483648.0;
+            basket += 500 + uniform * 2500;     // سعر بين 500 و 3000
+        }
+        total += basket;
+        if (basket > 6000)
+            big++;
+    }
+    printf("P(basket > 6000) ~ %.4f\n", (double)big / nbBaskets);
+    printf("Mean basket ~ %.2f DA\n", total / nbBaskets);
+    return 0;
+}

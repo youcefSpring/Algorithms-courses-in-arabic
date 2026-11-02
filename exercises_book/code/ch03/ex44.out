@@ -1,0 +1,6 @@
+Epoch  500: weight = 3.1758, bias = 6.1123, MSE = 1.9131
+Epoch 1000: weight = 3.1244, bias = 6.4344, MSE = 1.8789
+Epoch 1500: weight = 3.1214, bias = 6.4534, MSE = 1.8788
+Epoch 2000: weight = 3.1212, bias = 6.4545, MSE = 1.8788
+Epoch 2500: weight = 3.1212, bias = 6.4545, MSE = 1.8788
+Epoch 3000: weight = 3.1212, bias = 6.4545, MSE = 1.8788

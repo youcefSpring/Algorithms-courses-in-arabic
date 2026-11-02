@@ -1,0 +1,901 @@
+@@
+title: عرض كتالوج الأسعار
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يقرأ أسعار `nbPrices` منتجات (`nbPrices <= 50`) في **جدول**، ثم يعرض كل سعر مع فهرسه.
+@ stdin
+5
+1200 450 3999 89.5 700
+@ steps
+- نصرح بجدول `double prices[50]`.
+- حلقة أولى للقراءة: `scanf("%lf", &prices[index])`.
+- حلقة ثانية للعرض.
+@ flow
+in: nbPrices
+for: index = 0 ; index < nbPrices ; index++
+  in: prices[index]
+for: index = 0 ; index < nbPrices ; index++
+  out: index, prices[index]
+@ code
+#include <stdio.h>
+
+#define MAX 50                    // السعة القصوى للجدول
+
+int main(void) {
+    double prices[MAX];                // جدول من 50 عددًا حقيقيًا
+    int nbPrices, index;
+    scanf("%d", &nbPrices);
+    for (index = 0; index < nbPrices; index++)
+        scanf("%lf", &prices[index]);      // &prices[index] عنوان الخانة index
+    for (index = 0; index < nbPrices; index++)
+        printf("T[%d] = %.2f DA\n", index, prices[index]);
+    return 0;
+}
+
+@@
+title: مبيعات الأسبوع
+level: easy
+domain: ds
+@ statement
+مبيعات أسبوع مخزنة في جدول مهيأ مباشرة في البرنامج. اكتب برنامجًا يحسب **المجموع** و**المتوسط** وعدد الأيام التي تجاوزت المتوسط.
+@ steps
+- نهيئ الجدول `{...}` بسبع قيم.
+- حلقة أولى للمجموع، ثم المتوسط.
+- حلقة ثانية للعد: نحتاج المتوسط أولًا، لذلك نمر على الجدول مرتين.
+@ flow
+do: sales[7] = {...} ; sum = 0
+for: day = 0 ; day < 7 ; day++
+  do: sum += sales[day]
+do: avg = sum / 7 ; above = 0
+for: day = 0 ; day < 7 ; day++
+  if: sales[day] > avg
+    do: above++
+out: sum, avg, above
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double sales[7] = {120, 95, 140, 180, 160, 210, 75};   // مبيعات 7 أيام
+    double sum = 0, avg;
+    int day, above = 0;
+    for (day = 0; day < 7; day++)
+        sum += sales[day];
+    avg = sum / 7;
+    // مرور ثانٍ: لم يكن المتوسط معروفًا في المرور الأول
+    for (day = 0; day < 7; day++)
+        if (sales[day] > avg)
+            above++;
+    printf("Total = %.0f, average = %.2f\n", sum, avg);
+    printf("Days above average: %d\n", above);
+    return 0;
+}
+
+@@
+title: أكثر منتج مبيعًا
+level: easy
+domain: ec
+@ statement
+يحتوي الجدول `sold` عدد الوحدات المباعة لكل منتج (الفهرس هو رقم المنتج). اكتب برنامجًا يجد **أكثر منتج مبيعًا** وفهرسه.
+@ steps
+- `best = 0` (فهرس الأكبر مبدئيًا).
+- لكل `index` من 1: إذا كان `sold[index] > sold[best]` فـ `best = index`.
+- نحفظ الفهرس فقط، فالقيمة هي `sold[best]`.
+@ flow
+do: best = 0
+for: index = 1 ; index < NB_PRODUCTS ; index++
+  if: sold[index] > sold[best]
+    do: best = index
+out: best, sold[best]
+@ code
+#include <stdio.h>
+
+#define NB_PRODUCTS 8
+
+int main(void) {
+    int sold[NB_PRODUCTS] = {34, 120, 56, 98, 143, 12, 77, 143};
+    int index, best = 0;              // نحفظ الفهرس، لا القيمة
+    for (index = 1; index < NB_PRODUCTS; index++)
+        if (sold[index] > sold[best])
+            best = index;
+    printf("Best seller: product #%d with %d units\n", best, sold[best]);
+    return 0;
+}
+
+@@
+title: المنتجات النافدة
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يعرض أرقام المنتجات التي **مخزونها 0** من جدول المخزون، ويعد عددها.
+@ steps
+- نمر على الجدول.
+- إذا كان `stock[index] == 0` نعرض `index` ونزيد العداد.
+@ flow
+do: count = 0
+for: index = 0 ; index < NB_PRODUCTS ; index++
+  if: stock[index] == 0
+    out: index
+    do: count++
+out: count
+@ code
+#include <stdio.h>
+
+#define NB_PRODUCTS 10
+
+int main(void) {
+    int stock[NB_PRODUCTS] = {5, 0, 12, 0, 7, 3, 0, 22, 1, 9};
+    int index, count = 0;
+    printf("Out of stock:");
+    for (index = 0; index < NB_PRODUCTS; index++) {
+        if (stock[index] == 0) {      // منتج نافد
+            printf(" #%d", index);
+            count++;
+        }
+    }
+    printf("\n%d products to reorder\n", count);
+    return 0;
+}
+
+@@
+title: رفع كل الأسعار
+level: easy
+domain: ec
+@ statement
+بسبب ارتفاع تكاليف النقل، يرفع المتجر **كل** الأسعار بنسبة `percent`%. اكتب برنامجًا يعدل الجدول **في مكانه** ثم يعرضه.
+@ stdin
+8
+@ steps
+- نقرأ النسبة `percent`.
+- لكل خانة: `prices[index] = prices[index] * (1 + percent / 100)`.
+@ flow
+in: percent
+for: index = 0 ; index < NB_PRICES ; index++
+  do: prices[index] = prices[index] * (1 + percent / 100)
+for: index = 0 ; index < NB_PRICES ; index++
+  out: prices[index]
+@ code
+#include <stdio.h>
+
+#define NB_PRICES 5
+
+int main(void) {
+    double prices[NB_PRICES] = {1000, 2500, 499, 12000, 75};
+    double percent;
+    int index;
+    scanf("%lf", &percent);
+    for (index = 0; index < NB_PRICES; index++)
+        prices[index] = prices[index] * (1 + percent / 100);  // تعديل الخانة في مكانها
+    for (index = 0; index < NB_PRICES; index++)
+        printf("%.2f ", prices[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: آخر الطلبيات أولًا
+level: easy
+domain: ec
+@ statement
+تحفظ لوحة التحكم أرقام الطلبيات بترتيب وصولها. اكتب برنامجًا يقرأ `nbOrders` رقمًا ويعرضها **من الأحدث إلى الأقدم**.
+@ stdin
+6
+1001 1002 1005 1009 1010 1014
+@ steps
+- نقرأ الأرقام في الجدول.
+- نعرضها بحلقة تنازلية من `nbOrders - 1` إلى `0`.
+@ flow
+in: nbOrders
+for: index = 0 ; index < nbOrders ; index++
+  in: orders[index]
+for: index = nbOrders - 1 ; index >= 0 ; index--
+  out: orders[index]
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int orders[100], nbOrders, index;
+    scanf("%d", &nbOrders);
+    for (index = 0; index < nbOrders; index++)
+        scanf("%d", &orders[index]);
+    printf("Latest first:");
+    for (index = nbOrders - 1; index >= 0; index--)  // من الفهرس الأخير إلى 0
+        printf(" %d", orders[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: البحث عن منتج
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يبحث عن رقم منتج في جدول الأرقام **بحثًا تسلسليًا**، ويعرض موضعه أو رسالة "غير موجود".
+@ stdin
+5512
+@ steps
+- `pos = -1` يعني "لم نجده بعد".
+- نمر على الجدول ما دام `pos == -1`؛ عند التساوي نحفظ الموضع.
+@ flow
+in: target
+do: pos = -1 ; index = 0
+while: index < NB_IDS && pos == -1
+  if: ids[index] == target
+    do: pos = index
+  do: index++
+if: pos >= 0
+  out: pos
+else:
+  out: `"not found"`
+@ code
+#include <stdio.h>
+
+#define NB_IDS 8
+
+int main(void) {
+    int ids[NB_IDS] = {1203, 4410, 7781, 5512, 3001, 9045, 2210, 6600};
+    int target, index, pos = -1;           // -1: غير موجود
+    scanf("%d", &target);
+    for (index = 0; index < NB_IDS && pos == -1; index++)  // نتوقف عند أول تطابق
+        if (ids[index] == target)
+            pos = index;
+    if (pos >= 0)
+        printf("Product %d found at index %d\n", target, pos);
+    else
+        printf("Product %d not found\n", target);
+    return 0;
+}
+
+@@
+title: نسخ المنتجات الفاخرة
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا ينسخ الأسعار التي تتجاوز 5000 دج من جدول `prices` إلى جدول جديد `premium` (قسم المنتجات الفاخرة)، ثم يعرض `premium`.
+@ steps
+- `nbPremium = 0` عدد العناصر في `premium`.
+- إذا كان `prices[index] > 5000`: `premium[nbPremium] = prices[index]` ثم `nbPremium++`.
+- `nbPremium` في النهاية هو حجم `premium`.
+@ flow
+do: nbPremium = 0
+for: index = 0 ; index < NB_PRICES ; index++
+  if: prices[index] > 5000
+    do: premium[nbPremium] = prices[index] ; nbPremium++
+for: index = 0 ; index < nbPremium ; index++
+  out: premium[index]
+@ code
+#include <stdio.h>
+
+#define NB_PRICES 8
+
+int main(void) {
+    double prices[NB_PRICES] = {1200, 8900, 450, 15000, 5000, 7200, 300, 22000};
+    double premium[NB_PRICES];                  // في أسوأ الحالات كل العناصر
+    int index, nbPremium = 0;                 // nbPremium: عدد العناصر المنسوخة
+    for (index = 0; index < NB_PRICES; index++)
+        if (prices[index] > 5000)
+            premium[nbPremium++] = prices[index];        // ننسخ ثم نزيد nbPremium
+    printf("%d premium products:", nbPremium);
+    for (index = 0; index < nbPremium; index++)
+        printf(" %.0f", premium[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: نسبة التقييمات الإيجابية
+level: easy
+domain: ds
+@ statement
+اكتب برنامجًا يحسب نسبة التقييمات **الإيجابية** (4 أو 5 نجوم) في جدول من التقييمات.
+@ steps
+- نعد العناصر التي تحقق `ratings[index] >= 4`.
+- النسبة: `pos * 100.0 / NB_REVIEWS`.
+@ flow
+do: pos = 0
+for: index = 0 ; index < NB_REVIEWS ; index++
+  if: ratings[index] >= 4
+    do: pos++
+out: pos * 100.0 / NB_REVIEWS
+@ code
+#include <stdio.h>
+
+#define NB_REVIEWS 12
+
+int main(void) {
+    int ratings[NB_REVIEWS] = {5, 4, 3, 5, 2, 4, 4, 1, 5, 3, 4, 5};
+    int index, pos = 0;
+    for (index = 0; index < NB_REVIEWS; index++)
+        if (ratings[index] >= 4)
+            pos++;
+    printf("Positive reviews: %d / %d = %.1f %%\n", pos, NB_REVIEWS, pos * 100.0 / NB_REVIEWS);
+    return 0;
+}
+
+@@
+title: الفاتورة من جدولين
+level: easy
+domain: ec
+@ statement
+جدول `price` يحتوي أسعار المنتجات وجدول `qty` الكميات المطلوبة (نفس الفهرس = نفس المنتج). اكتب برنامجًا يعرض مبلغ كل سطر والمجموع.
+@ steps
+- لكل `index`: `line = price[index] * qty[index]`.
+- نتجاهل الأسطر ذات الكمية 0.
+- نجمع المبالغ.
+@ flow
+do: total = 0
+for: index = 0 ; index < NB_ITEMS ; index++
+  if: qty[index] > 0
+    do: line = price[index] * qty[index]
+    out: index, line
+    do: total += line
+out: total
+@ code
+#include <stdio.h>
+
+#define NB_ITEMS 5
+
+int main(void) {
+    double price[NB_ITEMS] = {350, 1200, 80, 4500, 999};
+    int qty[NB_ITEMS] = {2, 0, 10, 1, 3};    // جدولان متوازيان
+    double total = 0, line;
+    int index;
+    for (index = 0; index < NB_ITEMS; index++) {
+        if (qty[index] > 0) {
+            line = price[index] * qty[index];
+            printf("Item %d: %d x %.2f = %.2f\n", index, qty[index], price[index], line);
+            total += line;
+        }
+    }
+    printf("TOTAL = %.2f DA\n", total);
+    return 0;
+}
+
+@@
+title: عكس الجدول في مكانه
+level: medium
+domain: ds
+@ statement
+لعرض سلسلة زمنية من الأحدث إلى الأقدم، اكتب برنامجًا **يعكس** جدولًا في مكانه (دون جدول ثانٍ) بتبديل العناصر المتناظرة.
+@ steps
+- `left` من البداية و`right` من النهاية.
+- ما دام `left < right`: نبدل `series[left]` و`series[right]` ثم `left++` و`right--`.
+@ flow
+do: left = 0 ; right = SIZE - 1
+while: left < right
+  do: tmp = series[left] ; series[left] = series[right] ; series[right] = tmp
+  do: left++ ; right--
+out: series
+@ code
+#include <stdio.h>
+
+#define SIZE 7
+
+int main(void) {
+    int series[SIZE] = {10, 20, 30, 40, 50, 60, 70};
+    int left = 0, right = SIZE - 1, tmp;
+    while (left < right) {               // نتوقف عند المنتصف
+        tmp = series[left];                 // تبديل الطرفين
+        series[left] = series[right];
+        series[right] = tmp;
+        left++;
+        right--;
+    }
+    for (left = 0; left < SIZE; left++)
+        printf("%d ", series[left]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: تدوير جدول المناوبات
+level: medium
+domain: ec
+@ statement
+جدول يحتوي أرقام عمال التوصيل حسب أيام الأسبوع. كل أسبوع **يدور** الجدول بخطوة `steps` نحو اليسار (العامل الأول يصبح في الآخر). اكتب البرنامج.
+@ stdin
+2
+@ steps
+- تدوير بخطوة واحدة: نحفظ `shifts[0]`، نزيح الباقي نحو اليسار، ونضع المحفوظ في الآخر.
+- نكرر ذلك `steps` مرة (أو `steps % NB_DAYS` مرة).
+@ flow
+in: steps
+for: step = 0 ; step < steps % NB_DAYS ; step++
+  do: first = shifts[0]
+  for: index = 0 ; index < NB_DAYS - 1 ; index++
+    do: shifts[index] = shifts[index + 1]
+  do: shifts[NB_DAYS - 1] = first
+out: shifts
+@ code
+#include <stdio.h>
+
+#define NB_DAYS 7
+
+int main(void) {
+    int shifts[NB_DAYS] = {11, 12, 13, 14, 15, 16, 17};
+    int steps, step, index, first;
+    scanf("%d", &steps);
+    for (step = 0; step < steps % NB_DAYS; step++) {     // تدوير NB_DAYS مرة يعيد الجدول كما كان
+        first = shifts[0];
+        for (index = 0; index < NB_DAYS - 1; index++)
+            shifts[index] = shifts[index + 1];          // إزاحة نحو اليسار
+        shifts[NB_DAYS - 1] = first;
+    }
+    printf("Rotated:");
+    for (index = 0; index < NB_DAYS; index++)
+        printf(" %d", shifts[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: إدراج منتج جديد في موضع
+level: medium
+domain: ec
+@ statement
+قائمة المنتجات المميزة مخزنة في جدول. اكتب برنامجًا **يدرج** منتجًا جديدًا في الموضع `pos` مع إزاحة العناصر الموالية نحو اليمين.
+@ stdin
+2 777
+@ steps
+- نتحقق أن `0 <= pos <= size` وأن الجدول غير ممتلئ.
+- نزيح من الآخر: `featured[index] = featured[index - 1]` لـ `index` من `size` نزولًا إلى `pos + 1`.
+- `featured[pos] = newId` ثم `size++`.
+@ flow
+in: pos, newId
+if: pos < 0 || pos > size || size == MAX
+  out: `"impossible"`
+else:
+  for: index = size ; index > pos ; index--
+    do: featured[index] = featured[index - 1]
+  do: featured[pos] = newId ; size++
+  out: featured
+@ code
+#include <stdio.h>
+
+#define MAX 10
+
+int main(void) {
+    int featured[MAX] = {101, 205, 330, 412, 560};
+    int size = 5, pos, newId, index;         // size: عدد العناصر المستعملة
+    scanf("%d %d", &pos, &newId);
+    if (pos < 0 || pos > size || size == MAX) {
+        printf("Insertion impossible\n");
+        return 0;
+    }
+    // نبدأ من الآخر لكي لا نمسح أي عنصر
+    for (index = size; index > pos; index--)
+        featured[index] = featured[index - 1];
+    featured[pos] = newId;
+    size++;
+    for (index = 0; index < size; index++)
+        printf("%d ", featured[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: حذف منتج متوقف
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يحذف من الجدول المنتج ذي الرقم `removedId` (إن وُجد) بإزاحة العناصر الموالية نحو اليسار، ثم يعرض الجدول الجديد.
+@ stdin
+330
+@ steps
+- نبحث عن موضع `removedId`.
+- إذا وُجد في `pos`: `products[index] = products[index + 1]` لـ `index` من `pos` إلى `size - 2`، ثم `size--`.
+@ flow
+in: removedId
+do: pos = موضع removedId أو -1
+if: pos == -1
+  out: `"not found"`
+else:
+  for: index = pos ; index < size - 1 ; index++
+    do: products[index] = products[index + 1]
+  do: size--
+  out: products
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int products[10] = {101, 205, 330, 412, 560, 618};
+    int size = 6, removedId, index, pos = -1;
+    scanf("%d", &removedId);
+    for (index = 0; index < size; index++)           // البحث عن الموضع
+        if (products[index] == removedId) { pos = index; break; }
+    if (pos == -1) {
+        printf("%d not found\n", removedId);
+    } else {
+        for (index = pos; index < size - 1; index++)
+            products[index] = products[index + 1];          // نسد الفراغ
+        size--;                          // الجدول فقد عنصرًا
+        for (index = 0; index < size; index++)
+            printf("%d ", products[index]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: الترتيب بالفقاعات
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يرتب أسعار المنتجات **تصاعديًا** بخوارزمية **الفقاعات**، مع التوقف المبكر إذا لم يحدث أي تبديل في دورة كاملة.
+@ steps
+- في كل دورة نقارن كل عنصرين متجاورين ونبدلهما إذا كانا غير مرتبين.
+- بعد الدورة الأولى يصل الأكبر إلى الآخر.
+- `swapped = 0` في بداية الدورة؛ إذا بقي 0 فالجدول مرتب.
+@ flow
+do: pass = 0
+dowhile: swapped
+  do: swapped = 0
+  for: index = 0 ; index < NB_PRICES - 1 - pass ; index++
+    if: prices[index] > prices[index + 1]
+      do: تبديل prices[index] و prices[index+1] ; swapped = 1
+  do: pass++
+out: prices
+@ code
+#include <stdio.h>
+
+#define NB_PRICES 8
+
+int main(void) {
+    double prices[NB_PRICES] = {890, 120, 450, 3000, 75, 640, 1200, 300};
+    double tmp;
+    int index, pass = 0, swapped;
+    do {
+        swapped = 0;
+        // آخر pass عناصر مرتبة سلفًا
+        for (index = 0; index < NB_PRICES - 1 - pass; index++) {
+            if (prices[index] > prices[index + 1]) {
+                tmp = prices[index]; prices[index] = prices[index + 1]; prices[index + 1] = tmp;
+                swapped = 1;
+            }
+        }
+        pass++;
+    } while (swapped);            // لا تبديل = الجدول مرتب
+    printf("Sorted in %d passes:", pass);
+    for (index = 0; index < NB_PRICES; index++)
+        printf(" %.0f", prices[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: الترتيب بالانتقاء
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يرتب عدد زيارات صفحات الموقع **تنازليًا** بخوارزمية **الانتقاء**: في كل خطوة نبحث عن أكبر عنصر في الجزء غير المرتب ونضعه في بدايته.
+@ steps
+- لكل `index` من 0 إلى `NB_PAGES - 2`: نبحث عن فهرس الأكبر `maxPos` بين `index` و`NB_PAGES - 1`.
+- نبدل `visits[index]` و`visits[maxPos]`.
+- عدد التبديلات لا يتجاوز `NB_PAGES - 1`.
+@ flow
+for: index = 0 ; index < NB_PAGES - 1 ; index++
+  do: maxPos = index
+  for: scan = index + 1 ; scan < NB_PAGES ; scan++
+    if: visits[scan] > visits[maxPos]
+      do: maxPos = scan
+  do: تبديل visits[index] و visits[maxPos]
+out: visits
+@ code
+#include <stdio.h>
+
+#define NB_PAGES 8
+
+int main(void) {
+    int visits[NB_PAGES] = {340, 1200, 85, 960, 1200, 410, 77, 2300};
+    int index, scan, maxPos, tmp;
+    for (index = 0; index < NB_PAGES - 1; index++) {
+        maxPos = index;                    // فهرس الأكبر في visits[index..N-1]
+        for (scan = index + 1; scan < NB_PAGES; scan++)
+            if (visits[scan] > visits[maxPos])
+                maxPos = scan;
+        tmp = visits[index]; visits[index] = visits[maxPos]; visits[maxPos] = tmp;  // نضعه في الموضع index
+    }
+    printf("Pages by visits:");
+    for (index = 0; index < NB_PAGES; index++)
+        printf(" %d", visits[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: الترتيب بالإدراج
+level: medium
+domain: ec
+@ statement
+تصل الطلبيات بأوقات غير مرتبة (بالدقائق). اكتب برنامجًا يرتبها بخوارزمية **الإدراج**: نأخذ كل عنصر وندرجه في مكانه في الجزء المرتب على يساره.
+@ steps
+- لكل `index` من 1: `key = times[index]`.
+- نزيح العناصر الأكبر من `key` نحو اليمين: `scan` من `index - 1` نزولًا.
+- نضع `key` في `times[scan + 1]`.
+@ flow
+for: index = 1 ; index < NB_ORDERS ; index++
+  do: key = times[index] ; scan = index - 1
+  while: scan >= 0 && times[scan] > key
+    do: times[scan + 1] = times[scan] ; scan--
+  do: times[scan + 1] = key
+out: times
+@ code
+#include <stdio.h>
+
+#define NB_ORDERS 8
+
+int main(void) {
+    int times[NB_ORDERS] = {615, 540, 720, 480, 600, 545, 900, 510};
+    int index, scan, key;
+    for (index = 1; index < NB_ORDERS; index++) {
+        key = times[index];               // العنصر المراد إدراجه
+        scan = index - 1;
+        while (scan >= 0 && times[scan] > key) {
+            times[scan + 1] = times[scan];      // نزيح الأكبر نحو اليمين
+            scan--;
+        }
+        times[scan + 1] = key;           // الفراغ الذي بقي هو مكانه
+    }
+    for (index = 0; index < NB_ORDERS; index++)
+        printf("%02d:%02d ", times[index] / 60, times[index] % 60);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: البحث الثنائي في كتالوج مرتب
+level: medium
+domain: ec
+@ statement
+أرقام المنتجات في الكتالوج **مرتبة تصاعديًا**. اكتب برنامجًا يبحث عن رقم **بحثًا ثنائيًا** ويعرض عدد المقارنات.
+@ stdin
+7781
+@ steps
+- `lo = 0`، `hi = NB_IDS - 1`.
+- `mid = (lo + hi) / 2`: إذا كان `catalog[mid] == target` وجدناه.
+- إذا كان `catalog[mid] < target` نبحث يمينًا `lo = mid + 1`، وإلا يسارًا `hi = mid - 1`.
+@ flow
+in: target
+do: lo = 0 ; hi = NB_IDS - 1 ; pos = -1
+while: lo <= hi && pos == -1
+  do: mid = (lo + hi) / 2 ; cmp++
+  if: catalog[mid] == target
+    do: pos = mid
+  else:
+    if: catalog[mid] < target
+      do: lo = mid + 1
+    else:
+      do: hi = mid - 1
+out: pos, cmp
+@ code
+#include <stdio.h>
+
+#define NB_IDS 12
+
+int main(void) {
+    int catalog[NB_IDS] = {1001, 1203, 2210, 3001, 3550, 4410, 5512,
+                6600, 7781, 8120, 9045, 9900};      // مرتب
+    int target, lo = 0, hi = NB_IDS - 1, mid, pos = -1, cmp = 0;
+    scanf("%d", &target);
+    while (lo <= hi && pos == -1) {
+        mid = (lo + hi) / 2;
+        cmp++;
+        if (catalog[mid] == target)
+            pos = mid;
+        else if (catalog[mid] < target)
+            lo = mid + 1;         // target في النصف الأيمن
+        else
+            hi = mid - 1;         // target في النصف الأيسر
+    }
+    if (pos >= 0)
+        printf("Found at index %d after %d comparisons\n", pos, cmp);
+    else
+        printf("Not found (%d comparisons)\n", cmp);
+    return 0;
+}
+
+@@
+title: وسيط أسعار السوق
+level: medium
+domain: ds
+@ statement
+لتحديد سعر عادل لمنتج نجمع أسعار المنافسين ونأخذ **الوسيط**. اكتب برنامجًا يقرأ `nbPrices` أسعار، يرتبها، ثم يحسب الوسيط (العنصر الأوسط، أو متوسط العنصرين الأوسطين إذا كان `nbPrices` زوجيًا).
+@ stdin
+8
+2500 2390 2700 9900 2450 2600 2550 1200
+@ steps
+- نقرأ الأسعار ونرتبها بالإدراج.
+- إذا كان `nbPrices` فرديًا: `prices[nbPrices / 2]`.
+- وإلا: `(prices[nbPrices/2 - 1] + prices[nbPrices/2]) / 2`.
+@ flow
+in: nbPrices, prices
+do: ترتيب prices تصاعديًا
+if: nbPrices % 2 == 1
+  do: med = prices[nbPrices / 2]
+else:
+  do: med = (prices[nbPrices/2 - 1] + prices[nbPrices/2]) / 2
+out: med
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double prices[100], key, med;
+    int nbPrices, index, scan;
+    scanf("%d", &nbPrices);
+    for (index = 0; index < nbPrices; index++)
+        scanf("%lf", &prices[index]);
+    for (index = 1; index < nbPrices; index++) {         // ترتيب بالإدراج
+        key = prices[index];
+        for (scan = index - 1; scan >= 0 && prices[scan] > key; scan--)
+            prices[scan + 1] = prices[scan];
+        prices[scan + 1] = key;
+    }
+    if (nbPrices % 2 == 1)
+        med = prices[nbPrices / 2];               // العنصر الأوسط
+    else
+        med = (prices[nbPrices / 2 - 1] + prices[nbPrices / 2]) / 2;
+    printf("Median price = %.2f DA\n", med);
+    return 0;
+}
+
+@@
+title: المنوال بجدول عدادات
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يجد **المنوال** (القيمة الأكثر تكرارًا) في جدول تقييمات من 1 إلى 5، باستعمال **جدول عدادات** `cnt[6]` حيث `cnt[value]` عدد مرات ظهور `value`.
+@ steps
+- نهيئ `cnt` بأصفار: `int cnt[6] = {0}`.
+- لكل تقييم `ratings`: `cnt[ratings]++` (القيمة نفسها فهرس).
+- المنوال هو الفهرس ذو أكبر عداد.
+@ flow
+do: cnt[0..5] = 0
+for: index = 0 ; index < NB_REVIEWS ; index++
+  do: cnt[ratings[index]]++
+do: mode = 1
+for: value = 2 ; value <= 5 ; value++
+  if: cnt[value] > cnt[mode]
+    do: mode = value
+out: mode, cnt[mode]
+@ code
+#include <stdio.h>
+
+#define NB_REVIEWS 15
+
+int main(void) {
+    int ratings[NB_REVIEWS] = {4, 5, 3, 4, 4, 2, 5, 4, 1, 3, 4, 5, 5, 4, 3};
+    int cnt[6] = {0};             // كل الخانات تبدأ من 0
+    int index, value, mode = 1;
+    for (index = 0; index < NB_REVIEWS; index++)
+        cnt[ratings[index]]++;              // التقييم نفسه هو الفهرس
+    for (value = 2; value <= 5; value++)
+        if (cnt[value] > cnt[mode])
+            mode = value;
+    for (value = 1; value <= 5; value++)
+        printf("%d stars: %d\n", value, cnt[value]);
+    printf("Mode = %d (%d times)\n", mode, cnt[mode]);
+    return 0;
+}
+
+@@
+title: توزيع الطلبيات حسب الساعة
+level: medium
+domain: ds
+@ statement
+لدينا ساعات 20 طلبية (من 0 إلى 23). اكتب برنامجًا يحسب عدد الطلبيات في كل ساعة بجدول `cnt[24]`، ويعرض الساعات غير الفارغة مع شريط نجوم، ثم **ساعة الذروة**.
+@ steps
+- `cnt[hour]++` لكل طلبية.
+- نعرض فقط الساعات التي `cnt[hour] > 0`.
+- ساعة الذروة: فهرس أكبر عداد.
+@ flow
+for: index = 0 ; index < NB_ORDERS ; index++
+  do: cnt[hours[index]]++
+do: peak = 0
+for: hour = 0 ; hour < 24 ; hour++
+  if: cnt[hour] > 0
+    out: hour, نجوم cnt[hour]
+  if: cnt[hour] > cnt[peak]
+    do: peak = hour
+out: peak
+@ code
+#include <stdio.h>
+
+#define NB_ORDERS 20
+
+int main(void) {
+    int hours[NB_ORDERS] = {9, 12, 13, 20, 21, 12, 20, 22, 8, 13,
+                    20, 21, 12, 19, 20, 23, 13, 20, 10, 21};
+    int cnt[24] = {0};
+    int index, hour, bar, peak = 0;
+    for (index = 0; index < NB_ORDERS; index++)
+        cnt[hours[index]]++;
+    for (hour = 0; hour < 24; hour++) {
+        if (cnt[hour] > 0) {
+            printf("%02dh | ", hour);
+            for (bar = 0; bar < cnt[hour]; bar++)
+                printf("#");
+            printf(" %d\n", cnt[hour]);
+        }
+        if (cnt[hour] > cnt[peak])
+            peak = hour;
+    }
+    printf("Peak hour: %02dh\n", peak);
+    return 0;
+}
+
+@@
+title: حذف المكرر من جدول مرتب
+level: medium
+domain: ds
+@ statement
+في سجل مرتب لأرقام الزبائن الذين زاروا الموقع تتكرر بعض الأرقام. اكتب برنامجًا يحذف **المكرر** في مكانه ويعرض عدد الزبائن المختلفين.
+@ steps
+- بما أن الجدول مرتب، المكرر متجاور.
+- `nbUnique = 1` (العنصر الأول محفوظ دائمًا).
+- لكل `index` من 1: إذا كان `visitors[index] != visitors[nbUnique - 1]` نكتب `visitors[nbUnique] = visitors[index]` و`nbUnique++`.
+@ flow
+do: nbUnique = 1
+for: index = 1 ; index < SIZE ; index++
+  if: visitors[index] != visitors[nbUnique - 1]
+    do: visitors[nbUnique] = visitors[index] ; nbUnique++
+out: nbUnique, visitors[0..k-1]
+@ code
+#include <stdio.h>
+
+#define SIZE 12
+
+int main(void) {
+    int visitors[SIZE] = {101, 101, 105, 107, 107, 107, 110, 112, 112, 115, 115, 120};
+    int index, nbUnique = 1;                 // nbUnique: حجم الجزء دون تكرار
+    for (index = 1; index < SIZE; index++)
+        if (visitors[index] != visitors[nbUnique - 1])     // مختلف عن آخر عنصر محفوظ
+            visitors[nbUnique++] = visitors[index];
+    printf("%d unique customers:", nbUnique);
+    for (index = 0; index < nbUnique; index++)
+        printf(" %d", visitors[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: دمج قائمتي أسعار مرتبتين
+level: medium
+domain: ec
+@ statement
+لدى مستودعين قائمتا أسعار **مرتبتان**. اكتب برنامجًا **يدمجهما** في قائمة واحدة مرتبة في مرور واحد (دون إعادة ترتيب).
+@ steps
+- مؤشران `posA` على `listA` و`posB` على `listB`.
+- نأخذ الأصغر بين `listA[posA]` و`listB[posB]` ونضعه في `merged[posC]`.
+- عند نفاد إحدى القائمتين ننسخ بقية الأخرى.
+@ flow
+do: posA = 0 ; posB = 0 ; posC = 0
+while: posA < na && posB < nb
+  if: listA[posA] <= listB[posB]
+    do: merged[posC++] = listA[posA++]
+  else:
+    do: merged[posC++] = listB[posB++]
+while: posA < na
+  do: merged[posC++] = listA[posA++]
+while: posB < nb
+  do: merged[posC++] = listB[posB++]
+out: merged
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int listA[5] = {120, 450, 800, 1500, 3000};
+    int listB[4] = {99, 500, 820, 2500};
+    int merged[9], na = 5, nb = 4, posA = 0, posB = 0, posC = 0;
+    while (posA < na && posB < nb) {
+        if (listA[posA] <= listB[posB])
+            merged[posC++] = listA[posA++];      // الأصغر من listA
+        else
+            merged[posC++] = listB[posB++];      // الأصغر من listB
+    }
+    while (posA < na) merged[posC++] = listA[posA++];   // بقية listA
+    while (posB < nb) merged[posC++] = listB[posB++];   // بقية listB
+    for (posA = 0; posA < posC; posA++)
+        printf("%d ", merged[posA]);
+    printf("\n");
+    return 0;
+}

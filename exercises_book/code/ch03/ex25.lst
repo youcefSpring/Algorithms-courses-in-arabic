@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbDays, day;
+    double p2, p1, sales;
+    scanf("%d %lf %lf", &nbDays, &p2, &p1);    (*@\cmt{أول يومين}@*)
+    for (day = 3; day <= nbDays; day++) {
+        scanf("%lf", &sales);
+        printf("Day %d: MA3 = %.2f\n", day, (p2 + p1 + sales) / 3);
+        p2 = p1;                  (*@\cmt{إزاحة النافذة بمقدار يوم}@*)
+        p1 = sales;
+    }
+    return 0;
+}

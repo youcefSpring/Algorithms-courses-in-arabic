@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+#define NB 9
+
+int main(void) {
+    int sales[NB] = {200, 230, 210, 260, 180, 190, 240, 150, 170};
+    int diff[NB - 1], day, worst = 0;
+    for (day = 0; day < NB - 1; day++) {
+        diff[day] = sales[day + 1] - sales[day];  (*@\cmt{تغير من يوم لآخر}@*)
+        printf("%+d ", diff[day]);
+    }
+    for (day = 1; day < NB - 1; day++)
+        if (diff[day] < diff[worst])
+            worst = day;
+    printf("\nBiggest drop: %d (from day %d to day %d)\n",
+           diff[worst], worst + 1, worst + 2);
+    return 0;
+}

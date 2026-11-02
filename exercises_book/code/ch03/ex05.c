@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+int main(void) {
+    int hours;
+    scanf("%d", &hours);
+    while (hours > 0) {                       // الشرط يُختبر قبل كل دورة
+        printf("%d hours left\n", hours);
+        hours = hours - 6;
+    }
+    printf("Black Friday sale started!\n");
+    return 0;
+}

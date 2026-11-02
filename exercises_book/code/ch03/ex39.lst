@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+int main(void) {
+    int secret, lo = 1, hi = 100000, guess, tries = 0;
+    scanf("%d", &secret);
+    do {
+        guess = (lo + hi) / 2;    (*@\cmt{نجرب منتصف المجال}@*)
+        tries++;
+        printf("Try %2d: %6d -> ", tries, guess);
+        if (guess < secret) {
+            printf("higher\n");
+            lo = guess + 1;       (*@\cmt{نتخلص من النصف الأيسر}@*)
+        } else if (guess > secret) {
+            printf("lower\n");
+            hi = guess - 1;       (*@\cmt{نتخلص من النصف الأيمن}@*)
+        } else {
+            printf("found!\n");
+        }
+    } while (guess != secret);
+    printf("Found in %d tries\n", tries);
+    return 0;
+}

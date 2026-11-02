@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+#define NB_ORDERS 2
+#define NB_PRODUCTS 3
+#define NB_SUPPLIERS 2
+
+int main(void) {
+    int quantities[NB_ORDERS][NB_PRODUCTS] = {{10, 5, 2}, {0, 20, 8}};
+    int unitPrice[NB_PRODUCTS][NB_SUPPLIERS] = {{100, 95}, {40, 48}, {250, 230}};
+    int cost[NB_ORDERS][NB_SUPPLIERS];
+    int order, supplier, prod;
+    for (order = 0; order < NB_ORDERS; order++) {
+        for (supplier = 0; supplier < NB_SUPPLIERS; supplier++) {
+            cost[order][supplier] = 0;
+            for (prod = 0; prod < NB_PRODUCTS; prod++)   (*@\cmt{سطر × عمود}@*)
+                cost[order][supplier] += quantities[order][prod] * unitPrice[prod][supplier];
+        }
+        printf("Order %d: supplier A = %d, supplier B = %d -> choose %c\n", order,
+               cost[order][0], cost[order][1], cost[order][0] <= cost[order][1] ? 'A' : 'B');
+    }
+    return 0;
+}

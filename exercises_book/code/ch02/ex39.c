@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+int main(void) {
+    double amount;
+    int foreign, hour, age, risk = 0;
+    scanf("%lf %d %d %d", &amount, &foreign, &hour, &age);
+    // شروط مستقلة: كل قاعدة تضيف نقاطها
+    if (amount > 100000)          risk = risk + 40;
+    if (foreign == 1)             risk = risk + 30;
+    if (hour >= 0 && hour <= 5)   risk = risk + 20;
+    if (age < 7)                  risk = risk + 25;
+    printf("Risk score = %d -> ", risk);
+    if (risk >= 70)
+        printf("REJECTED\n");
+    else if (risk >= 40)
+        printf("MANUAL REVIEW\n");
+    else
+        printf("ACCEPTED\n");
+    return 0;
+}

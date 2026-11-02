@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int main(void) {
+    double ratingA, ratingB, ratingC, max;
+    int best;
+    scanf("%lf %lf %lf", &ratingA, &ratingB, &ratingC);
+    max = ratingA;                      (*@\cmt{نفترض أن الأول هو الأفضل}@*)
+    best = 1;
+    if (ratingB > max) {                (*@\cmt{> تمامًا: عند التساوي نحتفظ بالأصغر رقمًا}@*)
+        max = ratingB;
+        best = 2;
+    }
+    if (ratingC > max) {
+        max = ratingC;
+        best = 3;
+    }
+    printf("Best product: #%d (%.1f stars)\n", best, max);
+    return 0;
+}

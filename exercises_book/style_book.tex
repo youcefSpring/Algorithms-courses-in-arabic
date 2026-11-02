@@ -1,0 +1,279 @@
+% Style of the exercises book (same palette and fonts as the slides).
+% Compile from exercises_book/ with:  tectonic book.tex
+
+\usepackage[a4paper, top=2.2cm, bottom=2.2cm, left=2cm, right=2cm,
+    headheight=15pt]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage[most]{tcolorbox}
+\usepackage{fontawesome5}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{adjustbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{polyglossia}
+\usepackage{hyperref}
+
+\usetikzlibrary{positioning, calc, arrows.meta, shapes.geometric,
+    shapes.multipart, shapes.misc, fit, backgrounds, decorations.pathreplacing}
+
+%------------------------------------------------
+% Languages and fonts
+%------------------------------------------------
+\setdefaultlanguage[numerals=maghrib]{arabic}
+\setotherlanguage{english}
+
+\newfontfamily\arabicfont[
+    Script=Arabic, Scale=1.0, Path=../fonts/, Extension=.ttf,
+    UprightFont=*-Regular, BoldFont=*-Bold,
+    ItalicFont=*-Italic, SlantedFont=*-Italic,
+    BoldItalicFont=*-BoldItalic, BoldSlantedFont=*-BoldItalic]{Amiri}
+\newfontfamily\arabicfontsf[
+    Script=Arabic, Scale=1.0, Path=../fonts/, Extension=.ttf,
+    UprightFont=*-Regular, BoldFont=*-Bold,
+    ItalicFont=*-Italic, SlantedFont=*-Italic,
+    BoldItalicFont=*-BoldItalic, BoldSlantedFont=*-BoldItalic]{Amiri}
+\newfontfamily\arabicfonttt[Script=Arabic, Scale=1.0, Path=../fonts/,
+    Extension=.ttf, UprightFont=*-Regular, BoldFont=*-Bold,
+    ItalicFont=*-Italic, SlantedFont=*-Italic,
+    BoldItalicFont=*-BoldItalic, BoldSlantedFont=*-BoldItalic]{Amiri}
+\newfontfamily\codefont[Scale=0.95, BoldFont=lmmonolt10-bold.otf,
+    ItalicFont=lmmono10-italic.otf]{lmmono10-regular.otf}
+\newfontfamily\khatt[Script=Arabic, Scale=1.05, Path=../fonts/,
+    BoldFont=ae_AlBattar.ttf]{ae_AlBattar.ttf}
+
+%------------------------------------------------
+% Colors
+%------------------------------------------------
+\definecolor{brandTeal}{HTML}{5CC8E6}
+\definecolor{brandOrange}{HTML}{FFA27F}
+\definecolor{brandLight}{HTML}{F8F9FA}
+\definecolor{brandDark}{HTML}{263238}
+\definecolor{brandMuted}{HTML}{6C757D}
+\colorlet{tealDeep}{brandTeal!60!black}
+\definecolor{codeGrey}{HTML}{F4F6F8}
+\definecolor{cmtRed}{HTML}{D32F2F}
+\definecolor{lvEasy}{HTML}{2E9E5B}
+\definecolor{lvMedium}{HTML}{F08C2E}
+\definecolor{lvHard}{HTML}{C62828}
+
+\hypersetup{colorlinks=true, linkcolor=brandDark, urlcolor=tealDeep}
+
+%------------------------------------------------
+% Page style
+%------------------------------------------------
+\newcommand{\teacher}{د. بن عبد الرزاق يوسف}
+\newcommand{\audience}{طلبة السنة الأولى}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\color{brandMuted}\small\khatt\leftmark}
+\fancyhead[L]{\color{brandMuted}\small كتاب التمارين المحلولة}
+\fancyfoot[C]{\color{brandMuted}\small\textenglish{\thepage}}
+\fancyfoot[R]{\color{brandMuted}\small\faUserTie\ \teacher}
+\fancyfoot[L]{\color{brandMuted}\small\audience}
+\renewcommand{\headrule}{{\color{brandTeal}\hrule height 0.8pt}}
+\renewcommand{\chaptermark}[1]{\markboth{الفصل \textenglish{\thechapter}: #1}{}}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrule}{}%
+    \fancyfoot[C]{\color{brandMuted}\small\textenglish{\thepage}}%
+    \fancyfoot[R]{\color{brandMuted}\small\faUserTie\ \teacher}}
+
+% Chapter heading
+\titleformat{\chapter}[display]{\normalfont}
+    {\begin{tikzpicture}
+        \node[fill=brandTeal, text=white, rounded corners=6pt,
+            minimum width=2.2cm, minimum height=1.6cm,
+            font=\khatt\bfseries\LARGE] {الفصل \textenglish{\thechapter}};
+        \fill[brandOrange] (1.4,-0.8) rectangle (16,-0.72);
+     \end{tikzpicture}}
+    {8pt}{\color{brandDark}\khatt\bfseries\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{18pt}
+\titleformat{\section}{\color{tealDeep}\khatt\bfseries\Large}{}{0pt}
+    {\color{brandOrange}\faSquare\quad}
+\titleformat{\subsection}{\color{brandDark}\khatt\bfseries\large}{}{0pt}
+    {\color{brandTeal}\faChevronLeft\ }
+
+\setlist[itemize]{label={\color{brandTeal}\small\faChevronLeft}, itemsep=1pt,
+    topsep=2pt}
+\setlist[enumerate]{label={\color{tealDeep}\bfseries\textenglish{\arabic*})},
+    itemsep=1pt, topsep=2pt}
+
+\renewcommand{\arraystretch}{1.35}
+\setlength{\arrayrulewidth}{0.6pt}
+\arrayrulecolor{brandMuted!70}
+\newcommand{\ras}[1]{\cellcolor{brandTeal!20}\textbf{#1}}
+
+%------------------------------------------------
+% Boxes
+%------------------------------------------------
+\tcbset{
+    brandbox/.style={
+        enhanced, breakable, arc=4pt, outer arc=4pt, boxrule=1.2pt,
+        coltitle=white, coltext=brandDark, fonttitle=\khatt\bfseries,
+        toptitle=0.8mm, bottomtitle=0.8mm,
+        top=1.5mm, bottom=1.5mm, left=3mm, right=3mm,
+        before skip=6pt, after skip=6pt}
+}
+\newtcolorbox{tbox}[2][]{brandbox, colback=brandTeal!8,
+    colframe=brandTeal, title={#2}, #1}
+\newtcolorbox{obox}[2][]{brandbox, colback=brandOrange!10,
+    colframe=brandOrange, title={#2}, #1}
+
+% Inline C code and numbers inside Arabic text
+\newcommand{\code}[1]{\mbox{\textenglish{\codefont\begingroup\color{tealDeep}#1\endgroup}}}
+\newcommand{\en}[1]{\textenglish{#1}}
+% Code inside flowchart nodes
+\newcommand{\fc}[1]{\mbox{\textenglish{\codefont\begingroup\color{brandDark}#1\endgroup}}}
+
+%------------------------------------------------
+% Exercise layout
+%------------------------------------------------
+\newcommand{\lvbadge}[1]{%
+    \ifnum#1=1 \tcbox[on line, colback=lvEasy, colframe=lvEasy, arc=3pt,
+        boxsep=0pt, left=5pt, right=5pt, top=2pt, bottom=2pt,
+        coltext=white]{\small\bfseries\faStar\ سهل}\fi
+    \ifnum#1=2 \tcbox[on line, colback=lvMedium, colframe=lvMedium, arc=3pt,
+        boxsep=0pt, left=5pt, right=5pt, top=2pt, bottom=2pt,
+        coltext=white]{\small\bfseries\faStar\faStar\ متوسط}\fi
+    \ifnum#1=3 \tcbox[on line, colback=lvHard, colframe=lvHard, arc=3pt,
+        boxsep=0pt, left=5pt, right=5pt, top=2pt, bottom=2pt,
+        coltext=white]{\small\bfseries\faStar\faStar\faStar\ صعب}\fi}
+
+% \exhead{number}{level 1|2|3}{title}{domain}
+\newcommand{\exhead}[4]{%
+    \par\addvspace{10pt}%
+    \begin{tcolorbox}[enhanced, colback=brandDark, colframe=brandDark,
+        arc=4pt, boxrule=0pt, left=3mm, right=3mm, top=1.6mm, bottom=1.6mm,
+        coltext=white, before skip=0pt, after skip=4pt]
+        {\khatt\bfseries\large\color{brandTeal}تمرين \textenglish{#1}}%
+        \quad{\khatt\bfseries\large #3}\hfill
+        {\small\color{brandOrange}#4}\quad\lvbadge{#2}
+    \end{tcolorbox}%
+    \phantomsection\addcontentsline{toc}{section}{\textenglish{#1}\quad #3}}
+
+\newtcolorbox{statement}{enhanced, breakable, colback=white,
+    colframe=brandTeal, boxrule=0pt, leftrule=0pt, rightrule=3pt, arc=0pt,
+    left=3mm, right=3mm, top=1.5mm, bottom=1.5mm, before skip=2pt,
+    after skip=4pt, coltext=brandDark}
+
+\newcommand{\parthead}[2]{%
+    \par\addvspace{4pt}{\color{tealDeep}\khatt\bfseries #1\quad #2}\par\nobreak\vspace{1pt}}
+
+\newtcolorbox{stepsbox}{enhanced, breakable, colback=brandTeal!6,
+    colframe=brandTeal!6, boxrule=0pt, arc=3pt, left=3mm, right=3mm,
+    top=1mm, bottom=1mm, before skip=2pt, after skip=4pt}
+
+%------------------------------------------------
+% C code: always LTR, comments in red (Arabic comments allowed)
+%------------------------------------------------
+\lstdefinestyle{cstyle}{
+    language=C, basicstyle=\codefont\small, columns=fullflexible,
+    keepspaces=true, showstringspaces=false, upquote=true,
+    keywordstyle=\color{tealDeep}\bfseries,
+    commentstyle=\color{cmtRed},
+    stringstyle=\color{brandOrange!80!black},
+    xleftmargin=18pt,
+    numbers=left, numberstyle=\scriptsize\color{brandMuted}, numbersep=8pt,
+    aboveskip=0pt, belowskip=0pt, escapeinside={(*@}{@*)},
+    morekeywords={bool, true, false, NULL, FILE, size_t}}
+\lstdefinestyle{outstyle}{
+    language={}, basicstyle=\codefont\small\color{brandDark},
+    columns=fullflexible, keepspaces=true, showstringspaces=false,
+    aboveskip=0pt, belowskip=0pt}
+
+% Arabic comment inside a listing (red): // + RTL text
+\newcommand{\cmt}[1]{{\color{cmtRed}//\ \mbox{\RL{\arabicfont\color{cmtRed}#1}}}}
+\newcommand{\cen}[1]{\textenglish{\codefont #1}}
+
+\newtcolorbox{codebox}{enhanced, breakable, colback=codeGrey,
+    colframe=brandMuted!35, boxrule=0.4pt, arc=2pt, left=4pt, right=4pt,
+    top=3pt, bottom=3pt, before skip=2pt, after skip=4pt,
+    overlay unbroken and first={\node[anchor=north east, font=\scriptsize\bfseries,
+        text=brandMuted] at (frame.north east) {\textenglish{C}};}}
+\newtcolorbox{outbox}{enhanced, breakable, colback=brandDark,
+    colframe=brandDark, boxrule=0pt, arc=2pt, left=6pt, right=6pt,
+    top=3pt, bottom=3pt, before skip=2pt, after skip=4pt}
+\lstdefinestyle{outdark}{style=outstyle,
+    basicstyle=\codefont\small\color{brandLight}}
+
+\newcommand{\ccode}[2][\small]{\begin{codebox}\begin{english}\lstinputlisting[style=cstyle, basicstyle=\codefont#1]{#2}\end{english}\end{codebox}}
+\newcommand{\cout}[1]{\begin{outbox}\begin{english}\lstinputlisting[style=outdark]{#1}\end{english}\end{outbox}}
+
+%------------------------------------------------
+% Flowcharts (organigrammes)
+%------------------------------------------------
+\newcommand{\nodecolor}{}
+\tikzset{
+    every node/.append style={
+        execute at begin node={\nodecolor\everypar{\beginR}\beginR},
+        execute at end node=\endR},
+    lawn/.code={\def\nodecolor{\color{#1}}},
+    sahm/.style={-{Stealth[length=2.3mm]}, thick, color=brandMuted},
+    fterm/.style={rounded rectangle, draw=brandDark, fill=brandDark,
+        lawn=white, font=\small\bfseries, minimum height=0.7cm,
+        minimum width=2.2cm, inner sep=2pt},
+    fproc/.style={rectangle, draw=brandTeal!80!black, fill=brandTeal!12,
+        very thick, align=center, font=\small, inner sep=3pt},
+    fcall/.style={rectangle, draw=tealDeep, fill=brandTeal!25,
+        very thick, align=center, font=\small, inner sep=3pt,
+        double, double distance=1.2pt},
+    fio/.style={trapezium, trapezium left angle=72, trapezium right angle=108,
+        trapezium stretches=true, draw=brandOrange!85!black,
+        fill=brandOrange!14, very thick, align=center, font=\small,
+        inner sep=2pt},
+    fdec/.style={diamond, aspect=2.2, draw=lvMedium!80!black,
+        fill=yellow!14, very thick, align=center, font=\small,
+        inner sep=0pt},
+    flbl/.style={font=\scriptsize\bfseries, lawn=brandMuted},
+    fline/.style={thick, color=brandMuted},
+}
+
+\newenvironment{flowbox}{%
+    \begin{tcolorbox}[enhanced, colback=white, colframe=brandMuted!35,
+        boxrule=0.4pt, arc=2pt, before skip=2pt, after skip=6pt,
+        halign=center]}{\end{tcolorbox}}
+
+%------------------------------------------------
+% Chapter statistics chart (generated values)
+% \chapstats{easy}{medium}{hard}{ecommerce}{datascience}
+%------------------------------------------------
+\newcommand{\chapstats}[5]{%
+\begin{tcolorbox}[enhanced, colback=white, colframe=brandMuted!35,
+    boxrule=0.4pt, arc=3pt, title={\faChartBar\quad محتوى الفصل: \textenglish{\the\numexpr#1+#2+#3\relax} تمرينًا محلولًا},
+    coltitle=brandDark, colbacktitle=brandTeal!15, fonttitle=\khatt\bfseries,
+    halign=center]
+\begin{tikzpicture}[x=0.11cm]
+    % difficulty bar
+    \node[anchor=east, font=\small\bfseries] at (-1,0.35) {المستوى};
+    \fill[lvEasy]   (0,0) rectangle (#1,0.7);
+    \fill[lvMedium] (#1,0) rectangle (#1+#2,0.7);
+    \fill[lvHard]   (#1+#2,0) rectangle (#1+#2+#3,0.7);
+    \node[lawn=white, font=\small\bfseries] at (#1/2,0.35) {\en{#1}};
+    \node[lawn=white, font=\small\bfseries] at (#1+#2/2,0.35) {\en{#2}};
+    \node[lawn=white, font=\small\bfseries] at (#1+#2+#3/2,0.35) {\en{#3}};
+    % domain bar
+    \node[anchor=east, font=\small\bfseries] at (-1,-0.75) {المجال};
+    \fill[brandOrange] (0,-1.1) rectangle (#4,-0.4);
+    \fill[brandTeal]   (#4,-1.1) rectangle (#4+#5,-0.4);
+    \node[font=\small\bfseries] at (#4/2,-0.75) {\en{#4}};
+    \node[font=\small\bfseries] at (#4+#5/2,-0.75) {\en{#5}};
+    % legend
+    \begin{scope}[yshift=-1.9cm, font=\small]
+        \fill[lvEasy] (0,0) rectangle (2.5,0.3);   \node[anchor=west] at (3,0.15) {سهل};
+        \fill[lvMedium] (14,0) rectangle (16.5,0.3); \node[anchor=west] at (17,0.15) {متوسط};
+        \fill[lvHard] (30,0) rectangle (32.5,0.3); \node[anchor=west] at (33,0.15) {صعب};
+        \fill[brandOrange] (46,0) rectangle (48.5,0.3); \node[anchor=west] at (49,0.15) {تجارة إلكترونية};
+        \fill[brandTeal] (70,0) rectangle (72.5,0.3); \node[anchor=west] at (73,0.15) {علم البيانات};
+    \end{scope}
+\end{tikzpicture}
+\end{tcolorbox}}
+\newcommand{\insertstats}[1]{\IfFileExists{gen/ch#1_stats.tex}{\input{gen/ch#1_stats}}{}}

@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+int main(void) {
+    int priceA, priceB, tmp;
+    scanf("%d %d", &priceA, &priceB);
+    printf("Before: priceA = %d, priceB = %d\n", priceA, priceB);
+    tmp = priceA;          (*@\cmt{نحفظ \cen{priceA} قبل أن نفقدها}@*)
+    priceA = priceB;            (*@\cmt{\cen{priceA} تأخذ قيمة \cen{priceB}}@*)
+    priceB = tmp;          (*@\cmt{\cen{priceB} تأخذ القيمة القديمة لـ \cen{priceA}}@*)
+    printf("After:  priceA = %d, priceB = %d\n", priceA, priceB);
+    return 0;
+}

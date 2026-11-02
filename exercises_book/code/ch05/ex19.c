@@ -1,0 +1,29 @@
+#include <stdio.h>
+
+#define NB 5
+
+int main(void) {
+    double points[NB][2] = {{2, 1.5}, {8, 6}, {3, 2}, {9, 7.5}, {5, 3}};
+    double dist[NB][NB], dx, dy, bestDist = -1;
+    int first, second, pairA = 0, pairB = 0;
+    for (first = 0; first < NB; first++) {
+        dist[first][first] = 0;
+        for (second = first + 1; second < NB; second++) {   // النصف العلوي فقط
+            dx = points[first][0] - points[second][0];
+            dy = points[first][1] - points[second][1];
+            dist[first][second] = dist[second][first] = dx * dx + dy * dy;
+            if (bestDist < 0 || dist[first][second] < bestDist) {
+                bestDist = dist[first][second];
+                pairA = first;
+                pairB = second;
+            }
+        }
+    }
+    for (first = 0; first < NB; first++) {
+        for (second = 0; second < NB; second++)
+            printf("%7.2f", dist[first][second]);
+        printf("\n");
+    }
+    printf("Closest customers: %d and %d\n", pairA, pairB);
+    return 0;
+}

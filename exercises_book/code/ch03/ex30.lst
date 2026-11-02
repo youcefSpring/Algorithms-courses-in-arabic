@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+int main(void) {
+    double stock, initDemand, growth, dem;
+    int day = 0;
+    scanf("%lf %lf %lf", &stock, &initDemand, &growth);
+    dem = initDemand;
+    while (stock > 0) {
+        day++;
+        dem = (int)(dem + 0.5);   (*@\cmt{الطلب عدد صحيح من الوحدات}@*)
+        if (dem >= stock) {           (*@\cmt{آخر يوم: لا يكفي المخزون}@*)
+            printf("Stock out on day %d (unmet demand: %.0f)\n", day, dem - stock);
+            stock = 0;
+        } else {
+            stock = stock - dem;
+            printf("Day %2d: sold %3.0f, left %4.0f\n", day, dem, stock);
+            dem = dem * (1 + growth / 100);   (*@\cmt{الطلب يرتفع}@*)
+        }
+    }
+    return 0;
+}

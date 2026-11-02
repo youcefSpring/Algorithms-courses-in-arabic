@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int main(void) {
+    long number;
+    int digit, count = 0, sum = 0, big = 0;
+    scanf("%ld", &number);
+    do {                          (*@\cmt{\cen{do-while}: الرقم \cen{0} له رقم واحد}@*)
+        digit = number % 10;               (*@\cmt{آخر رقم}@*)
+        count++;
+        sum += digit;
+        if (digit > big) big = digit;
+        number = number / 10;               (*@\cmt{نحذف آخر رقم}@*)
+    } while (number > 0);
+    printf("Digits = %d, sum = %d, largest = %d\n", count, sum, big);
+    return 0;
+}

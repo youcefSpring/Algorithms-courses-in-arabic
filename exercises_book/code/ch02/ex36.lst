@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int main(void) {
+    double amount1, amount2, amount3, med;
+    scanf("%lf %lf %lf", &amount1, &amount2, &amount3);
+    if ((amount2 <= amount1 && amount1 <= amount3) || (amount3 <= amount1 && amount1 <= amount2))
+        med = amount1;                      (*@\cmt{\cen{amount1} بين الاثنين الآخرين}@*)
+    else if ((amount1 <= amount2 && amount2 <= amount3) || (amount3 <= amount2 && amount2 <= amount1))
+        med = amount2;
+    else
+        med = amount3;
+    printf("Median = %.2f\n", med);
+    printf("Mean   = %.2f (pulled by the outlier)\n", (amount1 + amount2 + amount3) / 3);
+    return 0;
+}

@@ -1,0 +1,47 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الخوارزمية}: سلسلة منتهية ومرتبة من التعليمات تحل مسألة: مدخلات $\leftarrow$ معالجة $\leftarrow$ مخرجات.
+    \item \textbf{المتغير}: خانة في الذاكرة لها \textbf{اسم} و\textbf{نوع} و\textbf{قيمة} يمكن أن تتغير.
+    \item \textbf{الثابت}: قيمة لا تتغير أثناء التنفيذ (\code{\#define TVA 0.19} أو \code{const}).
+    \item \textbf{التعبير}: تركيب من متغيرات وثوابت وعوامل يُحسب ليعطي قيمة.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[node distance=6mm,
+    stp/.style={draw=#1, fill=#1!12, very thick, rounded corners=5pt,
+        minimum height=1.2cm, text width=3.2cm, align=center, font=\small}]
+    \node[stp=brandOrange] (i) {\textbf{المدخلات}\\ \code{scanf}};
+    \node[stp=brandTeal, left=of i] (p) {\textbf{المعالجة}\\ \code{= + - * / \%}};
+    \node[stp=brandDark, left=of p] (o) {\textbf{المخرجات}\\ \code{printf}};
+    \draw[sahm] (i) -- (p); \draw[sahm] (p) -- (o);
+\end{tikzpicture}
+
+\vspace{4mm}
+\begin{tikzpicture}[
+    khana/.style={draw=brandTeal, fill=white, very thick, minimum width=2.3cm,
+        minimum height=0.9cm, font=\large\bfseries}]
+    \foreach \t/\n/\v [count=\i] in {int/qty/3, double/price/349.90, char/cat/'G'} {
+        \node[khana] (k\i) at (-3.2*\i, 0) {\en{\v}};
+        \node[above=1pt of k\i, font=\small] {\code{\n}};
+        \node[below=1pt of k\i, font=\scriptsize, lawn=brandMuted] {\en{\t}};
+    }
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|c|X|}
+\hline
+\ras{النوع} & \ras{الصيغة} & \ras{الاستعمال في التمارين} \\ \hline
+\code{int} & \code{\%d} & الكميات، عدد الطلبيات، الثواني \\ \hline
+\code{long} & \code{\%ld} & الأعداد الكبيرة (رموز المنتجات، الأحجام) \\ \hline
+\code{double} & \code{\%lf} / \code{\%f} & الأسعار، النسب، المتوسطات \\ \hline
+\code{char} & \code{\%c} & رموز الأصناف \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad القسمة في \en{C}}
+\code{7 / 2} تعطي \code{3} (قسمة صحيحة) و\code{7 \% 2} تعطي \code{1}، أما \code{7 / 2.0} فتعطي \code{3.5}.
+\end{obox}
+
+\insertstats{01}

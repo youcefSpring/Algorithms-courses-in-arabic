@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+#define NB_CLASSES 3
+
+int main(void) {
+    int confusion[NB_CLASSES][NB_CLASSES] = {{50,  8,  2},
+                                             { 6, 30, 14},
+                                             { 1,  9, 80}};
+    int cls, other, rowSum, colSum, truePos;
+    double precision, recall, f1;
+    for (cls = 0; cls < NB_CLASSES; cls++) {
+        rowSum = colSum = 0;
+        for (other = 0; other < NB_CLASSES; other++) {
+            rowSum += confusion[cls][other];  // الحقيقي = cls
+            colSum += confusion[other][cls];  // المتنبأ = cls
+        }
+        truePos = confusion[cls][cls];
+        precision = (double)truePos / colSum;
+        recall = (double)truePos / rowSum;
+        f1 = 2 * precision * recall / (precision + recall);
+        printf("Class %d: precision %.3f, recall %.3f, F1 %.3f\n",
+               cls, precision, recall, f1);
+    }
+    return 0;
+}

@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int main(void) {
+    int bits[32], nbBits = 0, number, pos;
+    scanf("%d", &number);
+    printf("%d = ", number);
+    do {
+        bits[nbBits++] = number % 2;  (*@\cmt{البتات من اليمين إلى اليسار}@*)
+        number = number / 2;
+    } while (number > 0);
+    for (pos = nbBits - 1; pos >= 0; pos--)   (*@\cmt{العرض بالترتيب المعاكس}@*)
+        printf("%d", bits[pos]);
+    printf(" (%d bits)\n", nbBits);
+    return 0;
+}

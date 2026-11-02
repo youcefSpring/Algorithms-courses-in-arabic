@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+#define NB 4
+#define NB_FEAT 4
+
+int main(void) {
+    double weights[NB_FEAT] = {0.4, 0.3, 0.2, 0.1};
+    (*@\cmt{كل \cen{4} قيم متتالية = منتج: تقييم، مبيعات، هامش، توفر (بين \cen{0} و \cen{1})}@*)
+    double features[NB * NB_FEAT] = {0.90, 0.40, 0.30, 1.0,
+                                     0.70, 0.95, 0.50, 1.0,
+                                     0.85, 0.60, 0.80, 0.0,
+                                     0.60, 0.30, 0.90, 1.0};
+    double score, bestScore = -1;
+    int product, feat, best = 0;
+    for (product = 0; product < NB; product++) {
+        score = 0;
+        for (feat = 0; feat < NB_FEAT; feat++)
+            score += weights[feat] * features[product * NB_FEAT + feat];
+        printf("Product %d: score %.3f\n", product, score);
+        if (score > bestScore) {
+            bestScore = score;
+            best = product;
+        }
+    }
+    printf("Top result: product %d\n", best);
+    return 0;
+}

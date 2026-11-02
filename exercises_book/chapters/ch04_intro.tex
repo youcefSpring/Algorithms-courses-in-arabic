@@ -1,0 +1,43 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الجدول}: مجموعة عناصر \textbf{من نفس النوع} متجاورة في الذاكرة، لها اسم واحد، ونصل إلى كل عنصر بـ\textbf{فهرسه}.
+    \item الفهرس في \en{C} يبدأ من \en{0} وينتهي عند \code{SIZE - 1}.
+    \item \textbf{التصريح}: \code{double prices[50];} و\textbf{التهيئة}: \code{int stock[4] = \{5, 0, 12, 7\};}
+    \item \textbf{الحجم المستعمل} \code{nbItems} قد يكون أصغر من \textbf{السعة} \code{MAX}.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    khana/.style={draw=brandTeal, fill=white, very thick, minimum width=1.5cm,
+        minimum height=0.9cm, font=\bfseries},
+    fahras/.style={font=\small}]
+    \foreach \v [count=\i from 0] in {1200, 450, 3999, 89, 700} {
+        \node[khana] (k\i) at (-1.6*\i, 0) {\en{\v}};
+        \node[fahras, below=3pt of k\i] {\code{prices[\i]}};
+    }
+    \node[font=\small\bfseries, lawn=brandOrange] at (1.6,0) {\code{prices}};
+    \draw[sahm, brandOrange] (1.2,0) -- (k0.east);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[ybar, bar width=0.55cm, width=12cm, height=5.2cm,
+    symbolic x coords={lin,bin,bub,ins,mer,cnt}, xtick=data, ymin=0,
+    xticklabels={\en{linear}, \en{binary}, \en{bubble}, \en{insertion}, \en{merge}, \en{counting}},
+    xticklabel style={font=\small},
+    ylabel={\textarabic{عدد العمليات لـ} \en{n = 1000}}, ymode=log, log origin=infty,
+    nodes near coords={}, axis lines*=left, enlarge x limits=0.12]
+    \addplot[fill=brandTeal, draw=tealDeep] coordinates {(lin,1000) (bin,10) (bub,500000) (ins,250000) (mer,10000) (cnt,1011)};
+\end{axis}
+\end{tikzpicture}
+
+{\small مقارنة تقريبية لتكلفة خوارزميات البحث والترتيب المستعملة في هذا الفصل (سلم لوغاريتمي).}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad تجاوز حدود الجدول}
+\en{C} لا يتحقق من الفهرس: الكتابة في \code{prices[50]} لجدول من \en{50} خانة تفسد الذاكرة دون أي رسالة خطأ.
+\end{obox}
+
+\insertstats{04}

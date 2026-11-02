@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbPoints, index;
+    double budget, sales, sx = 0, sy = 0, sxy = 0, sxx = 0, slope, intercept;
+    scanf("%d", &nbPoints);
+    for (index = 0; index < nbPoints; index++) {
+        scanf("%lf %lf", &budget, &sales);
+        sx += budget;  sy += sales;        // المجاميع البسيطة
+        sxy += budget * sales;             // مجموع الجداءات
+        sxx += budget * budget;             // مجموع المربعات
+    }
+    slope = (nbPoints * sxy - sx * sy) / (nbPoints * sxx - sx * sx);
+    intercept = (sy - slope * sx) / nbPoints;
+    printf("Sales = %.3f * budget + %.3f\n", slope, intercept);
+    printf("Forecast for budget 8: %.1f\n", slope * 8 + intercept);
+    return 0;
+}

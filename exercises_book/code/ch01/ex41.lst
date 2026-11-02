@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+    int priceA, priceB, diff, mask, ad, max, min;
+    scanf("%d %d", &priceA, &priceB);
+    diff = priceA - priceB;
+    mask = diff >> 31;               (*@\cmt{كل البتات \cen{1} إذا كان \cen{diff} سالبًا، وإلا \cen{0}}@*)
+    ad = (diff ^ mask) - mask;       (*@\cmt{إذا كان سالبًا: عكس البتات ثم +\cen{1} = -\cen{diff}}@*)
+    max = (priceA + priceB + ad) / 2;       (*@\cmt{الأكبر}@*)
+    min = (priceA + priceB - ad) / 2;       (*@\cmt{الأصغر}@*)
+    printf("|a - b| = %d\n", ad);
+    printf("Max = %d, Min = %d\n", max, min);
+    return 0;
+}

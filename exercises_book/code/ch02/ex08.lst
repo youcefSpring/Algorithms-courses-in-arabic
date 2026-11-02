@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+int main(void) {
+    int birth, year, age;
+    scanf("%d %d", &birth, &year);
+    age = year - birth;               (*@\cmt{السن التقريبية}@*)
+    if (age >= 16)
+        printf("Age %d: purchase allowed\n", age);
+    else
+        printf("Age %d: refused (%d years left)\n", age, 16 - age);
+    return 0;
+}

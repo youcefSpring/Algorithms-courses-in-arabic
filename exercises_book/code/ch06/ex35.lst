@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+#define NB 4
+
+int main(void) {
+    char codes[NB][20] = {"TV-SAM-55-Q80", "TV-SAM-65-Q90", "TV-SAM-55-S95", "TV-SAM-43-AU7"};
+    int pos = 0, index, same = 1;
+    char ch;
+    while (same) {
+        ch = codes[0][pos];
+        if (ch == '\0') same = 0;             (*@\cmt{الرمز الأول انتهى}@*)
+        for (index = 1; index < NB && same; index++)
+            if (codes[index][pos] != ch)
+                same = 0;                     (*@\cmt{اختلاف في الموضع \cen{pos}}@*)
+        if (same) pos++;
+    }
+    printf("Common prefix: \"");
+    for (index = 0; index < pos; index++)
+        putchar(codes[0][index]);
+    printf("\" (%d chars)\n", pos);
+    return 0;
+}

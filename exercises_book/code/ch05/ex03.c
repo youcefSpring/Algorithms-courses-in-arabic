@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+#define NB_STORES 3
+#define NB_DAYS 4
+
+int main(void) {
+    int sales[NB_STORES][NB_DAYS] = {{120, 95, 140, 180},
+                                     { 80, 60,  75,  90},
+                                     {200, 210, 190, 250}};
+    int storeTotal[NB_STORES];
+    int store, day;
+    for (store = 0; store < NB_STORES; store++) {
+        storeTotal[store] = 0;            // مجمِّع خاص بكل سطر
+        for (day = 0; day < NB_DAYS; day++)
+            storeTotal[store] += sales[store][day];
+        printf("Store %d: %d\n", store, storeTotal[store]);
+    }
+    return 0;
+}

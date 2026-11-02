@@ -1,0 +1,11 @@
+#include <stdio.h>
+
+#define RATE 146.5                (*@\cmt{سعر صرف اليورو بالدينار}@*)
+
+int main(void) {
+    double da, eur;
+    scanf("%lf", &da);            (*@\cmt{المبلغ بالدينار}@*)
+    eur = da / RATE;              (*@\cmt{التحويل إلى اليورو}@*)
+    printf("%.2f DA = %.2f EUR\n", da, eur);
+    return 0;
+}

@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+    double price, sum = 0;
+    int nbItems = 0;
+    scanf("%lf", &price);             (*@\cmt{القراءة الأولى قبل الحلقة}@*)
+    while (price != 0) {              (*@\cmt{\cen{0} قيمة حارسة: نهاية الإدخال}@*)
+        sum += price;
+        nbItems++;
+        scanf("%lf", &price);         (*@\cmt{نقرأ السعر التالي}@*)
+    }
+    printf("%d items, total = %.2f DA\n", nbItems, sum);
+    return 0;
+}

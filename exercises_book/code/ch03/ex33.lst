@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbCustomers, index;
+    double minutes, amount, sx = 0, sy = 0, sxy = 0, sxx = 0, syy = 0;
+    double num, den2, den;
+    scanf("%d", &nbCustomers);
+    for (index = 0; index < nbCustomers; index++) {
+        scanf("%lf %lf", &minutes, &amount);
+        sx += minutes; sy += amount; sxy += minutes * amount;
+        sxx += minutes * minutes; syy += amount * amount;
+    }
+    num = nbCustomers * sxy - sx * sy;
+    den2 = (nbCustomers * sxx - sx * sx) * (nbCustomers * syy - sy * sy);
+    den = den2;                           (*@\cmt{الجذر بطريقة نيوتن}@*)
+    for (index = 0; index < 40; index++)
+        den = (den + den2 / den) / 2;
+    printf("Pearson r = %.4f\n", num / den);
+    return 0;
+}

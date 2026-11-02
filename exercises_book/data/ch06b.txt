@@ -1,0 +1,806 @@
+@@
+title: قوة كلمة المرور
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يقيّم **قوة كلمة المرور**: نقطة لكل شرط محقق (الطول ≥ 8، حرف كبير، حرف صغير، رقم، رمز خاص)، ثم يعرض "ضعيفة" (0-2)، "متوسطة" (3-4)، أو "قوية" (5) مع الشروط الناقصة.
+@ stdin
+Shop2026
+@ steps
+- مرور واحد يرفع الأعلام `hasUpper` و`hasLower` و`hasDigit` و`hasSymbol` ويحسب الطول.
+- `score` = عدد الشروط المحققة.
+@ flow
+in: password
+do: مرور واحد لرفع الأعلام وحساب length
+do: score = (length >= 8) + hasUpper + hasLower + hasDigit + hasSymbol
+if: score == 5
+  out: `"strong"`
+else:
+  if: score >= 3
+    out: `"medium"`
+  else:
+    out: `"weak"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char password[50], ch;
+    int pos, length = 0, hasUpper = 0, hasLower = 0, hasDigit = 0, hasSymbol = 0, score;
+    scanf("%49s", password);
+    for (pos = 0; password[pos] != '\0'; pos++) {
+        ch = password[pos];
+        if (ch >= 'A' && ch <= 'Z')      hasUpper = 1;
+        else if (ch >= 'a' && ch <= 'z') hasLower = 1;
+        else if (ch >= '0' && ch <= '9') hasDigit = 1;
+        else                             hasSymbol = 1;   // ! @ # ...
+        length++;
+    }
+    score = (length >= 8) + hasUpper + hasLower + hasDigit + hasSymbol;  // كل شرط 0 أو 1
+    printf("Score %d/5: %s\n", score, score == 5 ? "strong" : score >= 3 ? "medium" : "weak");
+    if (length < 8) printf("- use at least 8 characters\n");
+    if (!hasUpper)  printf("- add an uppercase letter\n");
+    if (!hasLower)  printf("- add a lowercase letter\n");
+    if (!hasDigit)  printf("- add a digit\n");
+    if (!hasSymbol) printf("- add a symbol\n");
+    return 0;
+}
+
+@@
+title: التحقق من رقم الهاتف
+level: medium
+domain: ec
+@ statement
+رقم الهاتف النقال الجزائري يتكون من **10 أرقام** ويبدأ بـ `05` أو `06` أو `07`، وقد يُكتب بالصيغة الدولية `+213` متبوعة بـ 9 أرقام (دون الصفر). اكتب برنامجًا يتحقق من الرقم ويعرضه بالصيغة الموحدة `0XXXXXXXXX`.
+@ stdin
++213661234567
+@ steps
+- إذا بدأ بـ `+213`: نتخطى 4 حروف ونضيف `0` في البداية.
+- نتحقق أن الباقي أرقام فقط وأن الطول الكلي 10.
+- الحرف الثاني يجب أن يكون 5 أو 6 أو 7.
+@ flow
+in: phone
+if: يبدأ بـ +213
+  do: normal = "0" + بقية الأرقام
+else:
+  do: normal = phone
+if: طول normal == 10 && كله أرقام && normal[0]=='0' && normal[1] بين 5 و 7
+  out: normal
+else:
+  out: `"invalid"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char phone[20], normal[20];
+    int read = 0, write = 0, valid = 1;
+    scanf("%19s", phone);
+    if (phone[0] == '+' && phone[1] == '2' && phone[2] == '1' && phone[3] == '3') {
+        normal[write++] = '0';            // الصيغة الدولية: نضيف الصفر
+        read = 4;
+    }
+    for (; phone[read] != '\0' && write < 19; read++) {
+        if (phone[read] < '0' || phone[read] > '9')
+            valid = 0;                    // حرف غير رقمي
+        normal[write++] = phone[read];
+    }
+    normal[write] = '\0';
+    if (write != 10 || normal[0] != '0' || normal[1] < '5' || normal[1] > '7')
+        valid = 0;
+    if (valid)
+        printf("Valid mobile number: %s\n", normal);
+    else
+        printf("Invalid number: %s\n", phone);
+    return 0;
+}
+
+@@
+title: تفكيك سطر CSV
+level: medium
+domain: ds
+@ statement
+تصدير المنتجات يعطي أسطرًا بصيغة `id;name;price;qty`. اكتب برنامجًا يفكك سطرًا إلى حقوله (دون `strtok`)، ويحول السعر والكمية إلى أعداد، ويحسب قيمة المخزون.
+@ steps
+- نمر على السطر وننسخ الحروف في الحقل الحالي `field[fieldNo]`.
+- عند `;` ننهي الحقل بـ `'\0'` وننتقل إلى الحقل التالي.
+- نحول الحقل 0 و3 إلى `int` والحقل 2 إلى `double` يدويًا.
+@ flow
+do: fieldNo = 0 ; len = 0
+for: pos = 0 ; line[pos] != '\0' ; pos++
+  if: line[pos] == ';'
+    do: fields[fieldNo][len] = '\0' ; fieldNo++ ; len = 0
+  else:
+    do: fields[fieldNo][len++] = line[pos]
+do: تحويل الحقول الرقمية
+out: الحقول, price * qty
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char line[] = "1042;USB-C Charger;2450.50;37";
+    char fields[4][40];
+    int pos, fieldNo = 0, length = 0, id = 0, qty = 0, afterDot = 0;
+    double price = 0, scale = 1;
+    for (pos = 0; line[pos] != '\0'; pos++) {
+        if (line[pos] == ';') {
+            fields[fieldNo][length] = '\0';   // نهاية الحقل
+            fieldNo++;
+            length = 0;
+        } else {
+            fields[fieldNo][length++] = line[pos];
+        }
+    }
+    fields[fieldNo][length] = '\0';           // الحقل الأخير
+    for (pos = 0; fields[0][pos] != '\0'; pos++)
+        id = id * 10 + (fields[0][pos] - '0');
+    for (pos = 0; fields[3][pos] != '\0'; pos++)
+        qty = qty * 10 + (fields[3][pos] - '0');
+    for (pos = 0; fields[2][pos] != '\0'; pos++) {   // السعر العشري
+        if (fields[2][pos] == '.') { afterDot = 1; continue; }
+        if (!afterDot) price = price * 10 + (fields[2][pos] - '0');
+        else { scale /= 10; price += (fields[2][pos] - '0') * scale; }
+    }
+    printf("id=%d name=\"%s\" price=%.2f qty=%d\n", id, fields[1], price, qty);
+    printf("Stock value = %.2f DA\n", price * qty);
+    return 0;
+}
+
+@@
+title: ترتيب أسماء المنتجات أبجديًا
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يرتب أسماء 6 منتجات **أبجديًا** (ترتيب القاموس) بالترتيب بالفقاعات، مع مقارنة يدوية بين سلسلتين بدل `strcmp`، وتبديل الأسماء حرفًا بحرف.
+@ steps
+- مقارنة سلسلتين: نتقدم ما دام الحرفان متساويين وغير نهائيين؛ الفرق `a[pos] - b[pos]` يحدد الترتيب.
+- إذا كان الفرق موجبًا نبدل الاسمين (نسخ عبر جدول مؤقت).
+@ flow
+for: pass = 0 ; pass < NB - 1 ; pass++
+  for: index = 0 ; index < NB - 1 - pass ; index++
+    do: diff = مقارنة names[index] و names[index+1]
+    if: diff > 0
+      do: تبديل الاسمين
+out: names
+@ code
+#include <stdio.h>
+
+#define NB 6
+#define LEN 30
+
+int main(void) {
+    char names[NB][LEN] = {"Mouse", "Keyboard", "Monitor", "Cable", "Microphone", "Camera"};
+    char tmp[LEN];
+    int pass, index, pos, diff;
+    for (pass = 0; pass < NB - 1; pass++) {
+        for (index = 0; index < NB - 1 - pass; index++) {
+            pos = 0;                          // مقارنة يدوية
+            while (names[index][pos] == names[index + 1][pos] && names[index][pos] != '\0')
+                pos++;
+            diff = names[index][pos] - names[index + 1][pos];
+            if (diff > 0) {                   // الأول بعد الثاني في القاموس
+                for (pos = 0; (tmp[pos] = names[index][pos]) != '\0'; pos++) ;
+                for (pos = 0; (names[index][pos] = names[index + 1][pos]) != '\0'; pos++) ;
+                for (pos = 0; (names[index + 1][pos] = tmp[pos]) != '\0'; pos++) ;
+            }
+        }
+    }
+    for (index = 0; index < NB; index++)
+        printf("%d. %s\n", index + 1, names[index]);
+    return 0;
+}
+
+@@
+title: ضغط الرموز بالترميز الطولي
+level: medium
+domain: ds
+@ statement
+سجل الأحداث يحتوي سلاسل طويلة من نفس الحرف مثل `"VVVVVCCCAAAAAAAB"` (V زيارة، C سلة، A إضافة، B شراء). اكتب برنامجًا يضغطها **بالترميز الطولي** (RLE): `5V3C7A1B`، ويعرض نسبة الضغط.
+@ steps
+- نعد طول السلسلة الحالية من نفس الحرف `run`.
+- عند تغير الحرف: نكتب العدد (قد يتكون من عدة أرقام) ثم الحرف.
+@ flow
+do: write = 0 ; pos = 0
+while: log[pos] != '\0'
+  do: run = 1
+  while: log[pos + run] == log[pos]
+    do: run++
+  do: كتابة run ثم الحرف في packed
+  do: pos += run
+out: packed, write / length
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char events[] = "VVVVVVVVVVVVCCCAAAAAAABVVVVC";
+    char packed[80], digits[10];
+    int pos = 0, run, write = 0, nbDigits;
+    while (events[pos] != '\0') {
+        run = 1;
+        while (events[pos + run] == events[pos])  // طول السلسلة المتكررة
+            run++;
+        nbDigits = 0;
+        do {                                  // العدد قد يكون > 9
+            digits[nbDigits++] = '0' + run % 10;
+            run /= 10;
+        } while (run > 0);
+        while (nbDigits > 0)
+            packed[write++] = digits[--nbDigits];
+        packed[write++] = events[pos];
+        while (events[pos] == packed[write - 1])
+            pos++;                            // نتجاوز السلسلة
+    }
+    packed[write] = '\0';
+    printf("Original: %s (%d)\nPacked:   %s (%d)\n", events, pos, packed, write);
+    printf("Ratio = %.1f %%\n", write * 100.0 / pos);
+    return 0;
+}
+
+@@
+title: إخفاء رقم البطاقة
+level: medium
+domain: ec
+@ statement
+لا يجوز عرض رقم البطاقة كاملًا في صفحة التأكيد. اكتب برنامجًا يأخذ رقمًا من 16 رقمًا ويعرضه بالصيغة `**** **** **** 1234` (آخر 4 أرقام فقط ظاهرة، وفراغ كل 4 خانات).
+@ stdin
+4539578763621486
+@ steps
+- الطول يجب أن يكون 16.
+- لكل موضع `pos`: إذا كان `pos < 12` نكتب `*` وإلا الرقم.
+- نضيف فراغًا بعد كل 4 خانات ما عدا الأخيرة.
+@ flow
+in: card
+for: pos = 0 ; pos < 16 ; pos++
+  if: pos < 12
+    do: masked[write++] = '*'
+  else:
+    do: masked[write++] = card[pos]
+  if: pos % 4 == 3 && pos < 15
+    do: masked[write++] = ' '
+out: masked
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char card[20], masked[25];
+    int pos, write = 0, length = 0;
+    scanf("%19s", card);
+    while (card[length] != '\0') length++;
+    if (length != 16) {
+        printf("Invalid card length\n");
+        return 0;
+    }
+    for (pos = 0; pos < 16; pos++) {
+        masked[write++] = (pos < 12) ? '*' : card[pos];   // آخر 4 أرقام فقط
+        if (pos % 4 == 3 && pos < 15)
+            masked[write++] = ' ';            // مجموعات من 4
+    }
+    masked[write] = '\0';
+    printf("Card: %s\n", masked);
+    return 0;
+}
+
+@@
+title: تنسيق المبالغ بفواصل الآلاف
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يحول مبلغًا صحيحًا مثل `12500750` إلى نص منسق `12 500 750 DA` (فراغ كل ثلاثة أرقام من اليمين) لعرضه في الفاتورة.
+@ stdin
+12500750
+@ steps
+- نحول العدد إلى أرقام في جدول (من اليمين).
+- عند الكتابة من اليسار: نضيف فراغًا قبل كل رقم يكون عدد الأرقام الباقية بعده مضاعفًا لـ 3.
+@ flow
+in: amount
+do: digits = أرقام amount ; count
+for: pos = count - 1 ; pos >= 0 ; pos--
+  do: text[write++] = '0' + digits[pos]
+  if: pos > 0 && pos % 3 == 0
+    do: text[write++] = ' '
+out: text
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long amount;
+    int digits[20], count = 0, pos, write = 0;
+    char text[40];
+    scanf("%ld", &amount);
+    do {
+        digits[count++] = amount % 10;    // الأرقام من الآحاد
+        amount /= 10;
+    } while (amount > 0);
+    for (pos = count - 1; pos >= 0; pos--) {
+        text[write++] = '0' + digits[pos];
+        if (pos > 0 && pos % 3 == 0)      // بقي مضاعف لـ 3 أرقام
+            text[write++] = ' ';
+    }
+    text[write] = '\0';
+    printf("%s DA\n", text);
+    return 0;
+}
+
+@@
+title: قراءة تاريخ بصيغة ISO
+level: medium
+domain: ds
+@ statement
+تخزن قاعدة البيانات التواريخ بصيغة `YYYY-MM-DD`. اكتب برنامجًا يقرأ تاريخًا نصيًا، يتحقق من الصيغة (الطول 10، الشرطتان في الموضعين 4 و7، والباقي أرقام)، ويستخرج السنة والشهر واليوم كأعداد ويعرضه بصيغة `DD/MM/YYYY`.
+@ stdin
+2026-11-02
+@ steps
+- نتحقق من الطول والشرطتين والأرقام.
+- نحول كل جزء بحلقة صغيرة: `value = value * 10 + digit`.
+- نتحقق من مجال الشهر واليوم.
+@ flow
+in: text
+if: الصيغة غير صحيحة
+  out: `"bad format"`
+else:
+  do: year = text[0..3] ; month = text[5..6] ; day = text[8..9]
+  if: month بين 1 و 12 && day بين 1 و 31
+    out: day/month/year
+  else:
+    out: `"bad values"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[20];
+    int pos, length = 0, valid = 1, year = 0, month = 0, day = 0;
+    scanf("%19s", text);
+    while (text[length] != '\0') length++;
+    if (length != 10 || text[4] != '-' || text[7] != '-')
+        valid = 0;
+    for (pos = 0; pos < length && valid; pos++)
+        if (pos != 4 && pos != 7 && (text[pos] < '0' || text[pos] > '9'))
+            valid = 0;
+    if (!valid) {
+        printf("Bad format\n");
+        return 0;
+    }
+    for (pos = 0; pos < 4; pos++)  year = year * 10 + (text[pos] - '0');
+    for (pos = 5; pos < 7; pos++)  month = month * 10 + (text[pos] - '0');
+    for (pos = 8; pos < 10; pos++) day = day * 10 + (text[pos] - '0');
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31)
+        printf("%02d/%02d/%d\n", day, month, year);
+    else
+        printf("Bad values\n");
+    return 0;
+}
+
+@@
+title: استخراج الوسوم من التعليقات
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يستخرج كل **الوسوم** (hashtags) من منشور تسويقي: كل كلمة تبدأ بـ `#` وتتكون من حروف وأرقام و`_`، ويعرضها واحدًا في كل سطر بحروف صغيرة.
+@ steps
+- عند `#`: نبدأ وسمًا جديدًا ونجمع الحروف المسموحة بعده.
+- نتوقف عند أول حرف غير مسموح.
+- نتجاهل `#` الوحيدة (وسم فارغ).
+@ flow
+for: pos = 0 ; post[pos] != '\0' ; pos++
+  if: post[pos] == '#'
+    do: len = 0
+    while: حرف مسموح بعده
+      do: tag[len++] = صغير(post[pos+1]) ; pos++
+    if: len > 0
+      out: tag
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char post[] = "New drop! #BlackFriday deals on #Phones and #Smart_TV, # not a tag #2026Sale";
+    char tag[40], ch;
+    int pos, length, count = 0;
+    for (pos = 0; post[pos] != '\0'; pos++) {
+        if (post[pos] != '#')
+            continue;
+        length = 0;
+        while (1) {                           // نجمع حروف الوسم
+            ch = post[pos + 1];
+            if (ch >= 'A' && ch <= 'Z') ch += 'a' - 'A';
+            if (!((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_'))
+                break;
+            tag[length++] = ch;
+            pos++;
+        }
+        tag[length] = '\0';
+        if (length > 0) {
+            printf("#%s\n", tag);
+            count++;
+        }
+    }
+    printf("%d hashtags\n", count);
+    return 0;
+}
+
+@@
+title: تحليل المشاعر بالكلمات المفتاحية
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يعطي تعليقًا **درجة مشاعر**: +1 لكل كلمة من قائمة الكلمات الإيجابية و-1 لكل كلمة سلبية (مقارنة كلمات كاملة بحروف صغيرة)، ثم يصنف التعليق.
+@ steps
+- نقطع النص إلى كلمات (حروف فقط) ونحولها إلى حروف صغيرة.
+- نقارن كل كلمة بكل كلمة في القائمتين (مقارنة يدوية).
+- الدرجة > 0 إيجابي، < 0 سلبي، وإلا محايد.
+@ flow
+do: score = 0
+while: توجد كلمة word في النص
+  for: index = 0 ; index < NB_POS + NB_NEG ; index++
+    if: word == lexicon[index]
+      if: index < NB_POS
+        do: score++
+      else:
+        do: score--
+out: score والتصنيف
+@ code
+#include <stdio.h>
+
+#define NB_POS 5
+#define NB_NEG 5
+
+int main(void) {
+    char review[] = "Good product, fast delivery but the box was broken. Excellent price!";
+    // الكلمات 0..4 إيجابية، و 5..9 سلبية
+    char lexicon[NB_POS + NB_NEG][12] = {"good", "fast", "excellent", "great", "cheap",
+                                         "bad", "slow", "broken", "late", "fake"};
+    char word[30], ch;
+    int pos = 0, length, index, cmp, score = 0;
+    while (review[pos] != '\0') {
+        length = 0;
+        while (1) {                           // نقرأ الكلمة التالية
+            ch = review[pos];
+            if (ch >= 'A' && ch <= 'Z') ch += 'a' - 'A';
+            if (ch < 'a' || ch > 'z') break;
+            word[length++] = ch;
+            pos++;
+        }
+        word[length] = '\0';
+        if (review[pos] != '\0') pos++;       // نتجاوز الفاصل
+        if (length == 0) continue;
+        for (index = 0; index < NB_POS + NB_NEG; index++) {
+            for (cmp = 0; word[cmp] == lexicon[index][cmp] && word[cmp] != '\0'; cmp++) ;
+            if (word[cmp] == lexicon[index][cmp]) {   // تطابق كامل
+                score += (index < NB_POS) ? 1 : -1;
+                printf("%s: %+d\n", word, (index < NB_POS) ? 1 : -1);
+            }
+        }
+    }
+    printf("Score = %d -> %s\n", score, score > 0 ? "positive" : score < 0 ? "negative" : "neutral");
+    return 0;
+}
+
+@@
+title: الكلمات المختلفة في تعليق
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا **يقطع** تعليقًا إلى كلمات (حروف صغيرة، دون علامات الترقيم) ويخزن الكلمات **المختلفة** في جدول من السلاسل مع عدد تكرار كل منها.
+@ steps
+- نستخرج كل كلمة في `word`.
+- نبحث عنها في جدول `vocab`؛ إذا وُجدت نزيد عدادها، وإلا نضيفها بعداد 1.
+@ flow
+do: nbWords = 0
+while: توجد كلمة word
+  do: found = البحث عن word في vocab
+  if: found >= 0
+    do: freq[found]++
+  else:
+    do: نسخ word إلى vocab[nbWords] ; freq[nbWords++] = 1
+out: vocab, freq
+@ code
+#include <stdio.h>
+
+#define MAX_WORDS 30
+
+int main(void) {
+    char text[] = "The phone is great. The battery is great, the screen is OK.";
+    char vocab[MAX_WORDS][20], word[20], ch;
+    int freq[MAX_WORDS], nbWords = 0, pos = 0, length, index, cmp, found;
+    while (text[pos] != '\0') {
+        length = 0;
+        while (1) {
+            ch = text[pos];
+            if (ch >= 'A' && ch <= 'Z') ch += 'a' - 'A';
+            if (ch < 'a' || ch > 'z') break;
+            word[length++] = ch;
+            pos++;
+        }
+        word[length] = '\0';
+        if (text[pos] != '\0') pos++;
+        if (length == 0) continue;
+        found = -1;
+        for (index = 0; index < nbWords && found < 0; index++) {
+            for (cmp = 0; word[cmp] == vocab[index][cmp] && word[cmp] != '\0'; cmp++) ;
+            if (word[cmp] == vocab[index][cmp])
+                found = index;
+        }
+        if (found >= 0) {
+            freq[found]++;                    // كلمة معروفة
+        } else {
+            for (cmp = 0; (vocab[nbWords][cmp] = word[cmp]) != '\0'; cmp++) ;
+            freq[nbWords++] = 1;              // كلمة جديدة
+        }
+    }
+    for (index = 0; index < nbWords; index++)
+        printf("%-8s %d\n", vocab[index], freq[index]);
+    printf("%d distinct words\n", nbWords);
+    return 0;
+}
+
+@@
+title: أطول بادئة مشتركة لرموز المنتجات
+level: medium
+domain: ec
+@ statement
+رموز منتجات نفس العائلة تشترك في **بادئة**. اكتب برنامجًا يجد **أطول بادئة مشتركة** بين كل الرموز في جدول.
+@ steps
+- نقارن الحرف `pos` في كل الرموز.
+- نتوقف عند أول موضع يختلف فيه رمز أو ينتهي.
+@ flow
+do: pos = 0 ; same = 1
+while: same
+  do: ch = codes[0][pos]
+  for: index = 1 ; index < NB ; index++
+    if: codes[index][pos] != ch || ch == '\0'
+      do: same = 0
+  if: same
+    do: pos++
+out: أول pos حرفًا
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+int main(void) {
+    char codes[NB][20] = {"TV-SAM-55-Q80", "TV-SAM-65-Q90", "TV-SAM-55-S95", "TV-SAM-43-AU7"};
+    int pos = 0, index, same = 1;
+    char ch;
+    while (same) {
+        ch = codes[0][pos];
+        if (ch == '\0') same = 0;             // الرمز الأول انتهى
+        for (index = 1; index < NB && same; index++)
+            if (codes[index][pos] != ch)
+                same = 0;                     // اختلاف في الموضع pos
+        if (same) pos++;
+    }
+    printf("Common prefix: \"");
+    for (index = 0; index < pos; index++)
+        putchar(codes[0][index]);
+    printf("\" (%d chars)\n", pos);
+    return 0;
+}
+
+@@
+title: توازن الأقواس في ملف إعدادات
+level: medium
+domain: ds
+@ statement
+ملف إعدادات المتجر بصيغة شبيهة بـ JSON. اكتب برنامجًا يتحقق من **توازن الأقواس** `()` و`[]` و`{}` باستعمال **مكدس** (جدول حروف)، ويتجاهل ما بين علامتي الاقتباس.
+@ steps
+- قوس فاتح: ندفعه في المكدس.
+- قوس مغلق: يجب أن يطابق قمة المكدس، ثم نسحبها.
+- في النهاية يجب أن يكون المكدس فارغًا.
+@ flow
+do: top = 0 ; ok = 1
+for: pos = 0 ; text[pos] != '\0' && ok ; pos++
+  if: داخل اقتباس
+    do: تجاهل
+  else:
+    if: قوس فاتح
+      do: stack[top++] = text[pos]
+    else:
+      if: قوس مغلق
+        if: top == 0 || لا يطابق stack[top-1]
+          do: ok = 0
+        else:
+          do: top--
+out: ok && top == 0
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "{\"shop\": {\"name\": \"Dz(Store\", \"tags\": [\"tech\", \"home\"]}, \"open\": [8, 20]}";
+    char stack[50], ch, expected;
+    int pos, top = 0, ok = 1, inQuote = 0;
+    for (pos = 0; text[pos] != '\0' && ok; pos++) {
+        ch = text[pos];
+        if (ch == '"') { inQuote = !inQuote; continue; }
+        if (inQuote) continue;                // الأقواس داخل النص لا تُحسب
+        if (ch == '(' || ch == '[' || ch == '{') {
+            stack[top++] = ch;                // دفع
+        } else if (ch == ')' || ch == ']' || ch == '}') {
+            expected = (ch == ')') ? '(' : (ch == ']') ? '[' : '{';
+            if (top == 0 || stack[top - 1] != expected)
+                ok = 0;
+            else
+                top--;                        // سحب
+        }
+    }
+    if (ok && top == 0)
+        printf("Brackets are balanced\n");
+    else
+        printf("Unbalanced at position %d\n", pos - 1);
+    return 0;
+}
+
+@@
+title: لون المنتج من الشفرة الست عشرية
+level: medium
+domain: ec
+@ statement
+ألوان المنتجات مخزنة بصيغة الويب `#RRGGBB`. اكتب برنامجًا يحول الشفرة إلى ثلاث قيم عشرية (أحمر، أخضر، أزرق) بين 0 و255، ويحسب **سطوعها** `0.299R + 0.587G + 0.114B` ليختار نصًا أبيض أو أسود فوقها.
+@ stdin
+#FF8800
+@ steps
+- قيمة رقم ست عشري: `0-9` أو `A-F` (أو `a-f`).
+- كل لون رقمان: `16 * high + low`.
+- السطوع > 128: نص أسود، وإلا أبيض.
+@ flow
+in: color
+for: part = 0 ; part < 3 ; part++
+  do: high = قيمة color[1 + 2*part] ; low = قيمة color[2 + 2*part]
+  do: rgb[part] = 16 * high + low
+do: light = 0.299*R + 0.587*G + 0.114*B
+out: rgb, light
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char color[10], ch;
+    int rgb[3], part, digit, half, value;
+    double light;
+    scanf("%9s", color);
+    for (part = 0; part < 3; part++) {
+        value = 0;
+        for (half = 0; half < 2; half++) {    // رقمان لكل لون
+            ch = color[1 + 2 * part + half];
+            if (ch >= '0' && ch <= '9')      digit = ch - '0';
+            else if (ch >= 'A' && ch <= 'F') digit = ch - 'A' + 10;
+            else                             digit = ch - 'a' + 10;
+            value = value * 16 + digit;
+        }
+        rgb[part] = value;
+    }
+    light = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+    printf("%s -> R=%d G=%d B=%d\n", color, rgb[0], rgb[1], rgb[2]);
+    printf("Brightness %.1f -> use %s text\n", light, light > 128 ? "black" : "white");
+    return 0;
+}
+
+@@
+title: سهولة قراءة وصف المنتج
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يحسب مؤشرات **سهولة القراءة** لوصف منتج: عدد الجمل (تنتهي بـ `.` أو `!` أو `?`)، عدد الكلمات، عدد الحروف، متوسط الكلمات في الجملة ومتوسط الحروف في الكلمة.
+@ steps
+- مرور واحد: نعد الحروف، بدايات الكلمات، ونهايات الجمل.
+- المؤشران: `words / sentences` و`letters / words`.
+@ flow
+for: pos = 0 ; text[pos] != '\0' ; pos++
+  if: حرف
+    do: letters++
+    if: !inWord
+      do: words++ ; inWord = 1
+  else:
+    do: inWord = 0
+  if: text[pos] == '.' || '!' || '?'
+    do: sentences++
+out: words / sentences, letters / words
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "This blender is powerful. It crushes ice in seconds! Easy to clean? Yes, very easy.";
+    int pos, letters = 0, words = 0, sentences = 0, inWord = 0;
+    char ch;
+    for (pos = 0; text[pos] != '\0'; pos++) {
+        ch = text[pos];
+        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+            letters++;
+            if (!inWord) { words++; inWord = 1; }    // بداية كلمة
+        } else {
+            inWord = 0;
+        }
+        if (ch == '.' || ch == '!' || ch == '?')
+            sentences++;                              // نهاية جملة
+    }
+    printf("Sentences %d, words %d, letters %d\n", sentences, words, letters);
+    printf("Words per sentence = %.2f\n", (double)words / sentences);
+    printf("Letters per word = %.2f\n", (double)letters / words);
+    return 0;
+}
+
+@@
+title: مسافة هامينغ بين رمزين
+level: medium
+domain: ds
+@ statement
+لاكتشاف أخطاء الإدخال في رموز المنتجات ذات الطول الثابت، نحسب **مسافة هامينغ**: عدد المواضع التي يختلف فيها الحرفان. اكتب برنامجًا يحسبها ويعرض المواضع المختلفة، ويعتبر الرمز "خطأ إدخال محتمل" إذا كانت المسافة 1.
+@ stdin
+DZ48K7Q2 DZ48K1Q2
+@ steps
+- نتحقق أن للرمزين نفس الطول.
+- نقارن الحروف موضعًا بموضع ونعد الاختلافات.
+@ flow
+in: codeA, codeB
+do: distance = 0
+for: pos = 0 ; codeA[pos] != '\0' ; pos++
+  if: codeA[pos] != codeB[pos]
+    do: distance++
+    out: pos
+out: distance
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char codeA[30], codeB[30];
+    int pos, lengthA = 0, lengthB = 0, distance = 0;
+    scanf("%29s %29s", codeA, codeB);
+    while (codeA[lengthA] != '\0') lengthA++;
+    while (codeB[lengthB] != '\0') lengthB++;
+    if (lengthA != lengthB) {
+        printf("Different lengths: not comparable\n");
+        return 0;
+    }
+    for (pos = 0; pos < lengthA; pos++)
+        if (codeA[pos] != codeB[pos]) {
+            distance++;
+            printf("Position %d: %c vs %c\n", pos, codeA[pos], codeB[pos]);
+        }
+    printf("Hamming distance = %d%s\n", distance,
+           distance == 1 ? " -> probable typo" : "");
+    return 0;
+}
+
+@@
+title: تحليل معاملات رابط البحث
+level: medium
+domain: ec
+@ statement
+رابط صفحة البحث يحتوي معاملات بعد `?` على شكل `key=value` مفصولة بـ `&`. اكتب برنامجًا يستخرج كل زوج ويعرضه، ويستخرج بالخصوص قيمة `maxprice` كعدد.
+@ steps
+- نتقدم إلى ما بعد `?`.
+- نقرأ المفتاح حتى `=` ثم القيمة حتى `&` أو النهاية.
+- نقارن المفتاح بـ `"maxprice"` يدويًا، ونحول قيمته.
+@ flow
+do: pos = موضع ما بعد '?'
+while: url[pos] != '\0'
+  do: key = حتى '=' ; value = حتى '&'
+  out: key, value
+  if: key == "maxprice"
+    do: maxPrice = تحويل value
+out: maxPrice
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char url[] = "https://shop.dz/search?q=laptop&brand=hp&maxprice=95000&sort=price";
+    char key[20], value[30], target[] = "maxprice";
+    int pos = 0, length, cmp;
+    long maxPrice = -1;
+    while (url[pos] != '?' && url[pos] != '\0') pos++;
+    if (url[pos] == '?') pos++;
+    while (url[pos] != '\0') {
+        length = 0;
+        while (url[pos] != '=' && url[pos] != '\0') key[length++] = url[pos++];
+        key[length] = '\0';
+        if (url[pos] == '=') pos++;
+        length = 0;
+        while (url[pos] != '&' && url[pos] != '\0') value[length++] = url[pos++];
+        value[length] = '\0';
+        if (url[pos] == '&') pos++;           // الزوج التالي
+        printf("%-9s = %s\n", key, value);
+        for (cmp = 0; key[cmp] == target[cmp] && key[cmp] != '\0'; cmp++) ;
+        if (key[cmp] == target[cmp]) {        // المفتاح هو maxprice
+            maxPrice = 0;
+            for (cmp = 0; value[cmp] != '\0'; cmp++)
+                maxPrice = maxPrice * 10 + (value[cmp] - '0');
+        }
+    }
+    printf("Max price filter: %ld DA\n", maxPrice);
+    return 0;
+}

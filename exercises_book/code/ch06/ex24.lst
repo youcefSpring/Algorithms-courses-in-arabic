@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+int main(void) {
+    char password[50], ch;
+    int pos, length = 0, hasUpper = 0, hasLower = 0, hasDigit = 0, hasSymbol = 0, score;
+    scanf("%49s", password);
+    for (pos = 0; password[pos] != '\0'; pos++) {
+        ch = password[pos];
+        if (ch >= 'A' && ch <= 'Z')      hasUpper = 1;
+        else if (ch >= 'a' && ch <= 'z') hasLower = 1;
+        else if (ch >= '0' && ch <= '9') hasDigit = 1;
+        else                             hasSymbol = 1;   // ! @ # ...
+        length++;
+    }
+    score = (length >= 8) + hasUpper + hasLower + hasDigit + hasSymbol;  (*@\cmt{كل شرط \cen{0} أو \cen{1}}@*)
+    printf("Score %d/5: %s\n", score, score == 5 ? "strong" : score >= 3 ? "medium" : "weak");
+    if (length < 8) printf("- use at least 8 characters\n");
+    if (!hasUpper)  printf("- add an uppercase letter\n");
+    if (!hasLower)  printf("- add a lowercase letter\n");
+    if (!hasDigit)  printf("- add a digit\n");
+    if (!hasSymbol) printf("- add a symbol\n");
+    return 0;
+}

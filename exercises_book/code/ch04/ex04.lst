@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+#define NB_PRODUCTS 10
+
+int main(void) {
+    int stock[NB_PRODUCTS] = {5, 0, 12, 0, 7, 3, 0, 22, 1, 9};
+    int index, count = 0;
+    printf("Out of stock:");
+    for (index = 0; index < NB_PRODUCTS; index++) {
+        if (stock[index] == 0) {      (*@\cmt{منتج نافد}@*)
+            printf(" #%d", index);
+            count++;
+        }
+    }
+    printf("\n%d products to reorder\n", count);
+    return 0;
+}

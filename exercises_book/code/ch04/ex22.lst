@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+#define SIZE 12
+
+int main(void) {
+    int visitors[SIZE] = {101, 101, 105, 107, 107, 107, 110, 112, 112, 115, 115, 120};
+    int index, nbUnique = 1;                 (*@\cmt{\cen{nbUnique}: حجم الجزء دون تكرار}@*)
+    for (index = 1; index < SIZE; index++)
+        if (visitors[index] != visitors[nbUnique - 1])     (*@\cmt{مختلف عن آخر عنصر محفوظ}@*)
+            visitors[nbUnique++] = visitors[index];
+    printf("%d unique customers:", nbUnique);
+    for (index = 0; index < nbUnique; index++)
+        printf(" %d", visitors[index]);
+    printf("\n");
+    return 0;
+}

@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+#define NB_DAYS 7
+
+int main(void) {
+    int shifts[NB_DAYS] = {11, 12, 13, 14, 15, 16, 17};
+    int steps, step, index, first;
+    scanf("%d", &steps);
+    for (step = 0; step < steps % NB_DAYS; step++) {     (*@\cmt{تدوير \cen{NB\_DAYS} مرة يعيد الجدول كما كان}@*)
+        first = shifts[0];
+        for (index = 0; index < NB_DAYS - 1; index++)
+            shifts[index] = shifts[index + 1];          (*@\cmt{إزاحة نحو اليسار}@*)
+        shifts[NB_DAYS - 1] = first;
+    }
+    printf("Rotated:");
+    for (index = 0; index < NB_DAYS; index++)
+        printf(" %d", shifts[index]);
+    printf("\n");
+    return 0;
+}

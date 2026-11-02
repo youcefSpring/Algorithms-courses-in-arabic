@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    int maxRow, row, col;
+    long coef, rowSum;
+    scanf("%d", &maxRow);
+    for (row = 0; row <= maxRow; row++) {
+        coef = 1; rowSum = 1;
+        printf("n=%2d: 1", row);
+        for (col = 1; col <= row; col++) {
+            coef = coef * (row - col + 1) / col;  (*@\cmt{العنصر من سابقه، القسمة دقيقة}@*)
+            rowSum += coef;
+            printf(" %ld", coef);
+        }
+        printf("  (sum %ld)\n", rowSum);   (*@\cmt{= \cen{2} أس \cen{row}}@*)
+    }
+    return 0;
+}

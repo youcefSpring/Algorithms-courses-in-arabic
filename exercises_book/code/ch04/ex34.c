@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+#define LIMIT 120
+
+int main(void) {
+    int isPrime[LIMIT + 1];
+    int number, multiple, count = 0;
+    for (number = 2; number <= LIMIT; number++)
+        isPrime[number] = 1;              // كل عدد مرشح مبدئيًا
+    for (number = 2; number * number <= LIMIT; number++)
+        if (isPrime[number])
+            // المضاعفات الأصغر من number² شُطبت سابقًا
+            for (multiple = number * number; multiple <= LIMIT; multiple += number)
+                isPrime[multiple] = 0;
+    for (number = 2; number <= LIMIT; number++)
+        if (isPrime[number]) {
+            printf("%d ", number);
+            count++;
+        }
+    printf("\n%d primes up to %d\n", count, LIMIT);
+    return 0;
+}

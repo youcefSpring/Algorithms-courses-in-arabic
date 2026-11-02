@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+int main(void) {
+    double weight, km, c1, c2, c3, min;
+    int ok2, best;
+    scanf("%lf %lf", &weight, &km);
+    c1 = 300 + 25 * weight + 2 * km;
+    ok2 = (weight <= 30);                  (*@\cmt{الشركة \cen{2} لها حد للوزن}@*)
+    c2 = 500 + 15 * weight;
+    if (km < 100)
+        c3 = 0.9 * (200 + 40 * weight);    (*@\cmt{تخفيض للمسافات القصيرة}@*)
+    else
+        c3 = 200 + 40 * weight + 3 * km;
+    printf("Carrier 1: %.2f DA\n", c1);
+    if (ok2) printf("Carrier 2: %.2f DA\n", c2);
+    else     printf("Carrier 2: not available\n");
+    printf("Carrier 3: %.2f DA\n", c3);
+    best = 1;  min = c1;              (*@\cmt{نبدأ بالشركة \cen{1}}@*)
+    if (ok2 && c2 < min) { best = 2; min = c2; }
+    if (c3 < min)        { best = 3; min = c3; }
+    printf("Cheapest: carrier %d (%.2f DA)\n", best, min);
+    return 0;
+}

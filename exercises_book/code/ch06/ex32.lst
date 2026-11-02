@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+int main(void) {
+    char post[] = "New drop! #BlackFriday deals on #Phones and #Smart_TV, # not a tag #2026Sale";
+    char tag[40], ch;
+    int pos, length, count = 0;
+    for (pos = 0; post[pos] != '\0'; pos++) {
+        if (post[pos] != '#')
+            continue;
+        length = 0;
+        while (1) {                           (*@\cmt{نجمع حروف الوسم}@*)
+            ch = post[pos + 1];
+            if (ch >= 'A' && ch <= 'Z') ch += 'a' - 'A';
+            if (!((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_'))
+                break;
+            tag[length++] = ch;
+            pos++;
+        }
+        tag[length] = '\0';
+        if (length > 0) {
+            printf("#%s\n", tag);
+            count++;
+        }
+    }
+    printf("%d hashtags\n", count);
+    return 0;
+}

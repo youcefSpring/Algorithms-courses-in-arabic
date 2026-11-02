@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+#define NB_PRICES 8
+
+int main(void) {
+    double prices[NB_PRICES] = {890, 120, 450, 3000, 75, 640, 1200, 300};
+    double tmp;
+    int index, pass = 0, swapped;
+    do {
+        swapped = 0;
+        // آخر pass عناصر مرتبة سلفًا
+        for (index = 0; index < NB_PRICES - 1 - pass; index++) {
+            if (prices[index] > prices[index + 1]) {
+                tmp = prices[index]; prices[index] = prices[index + 1]; prices[index + 1] = tmp;
+                swapped = 1;
+            }
+        }
+        pass++;
+    } while (swapped);            // لا تبديل = الجدول مرتب
+    printf("Sorted in %d passes:", pass);
+    for (index = 0; index < NB_PRICES; index++)
+        printf(" %.0f", prices[index]);
+    printf("\n");
+    return 0;
+}

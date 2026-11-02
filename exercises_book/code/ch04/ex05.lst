@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+#define NB_PRICES 5
+
+int main(void) {
+    double prices[NB_PRICES] = {1000, 2500, 499, 12000, 75};
+    double percent;
+    int index;
+    scanf("%lf", &percent);
+    for (index = 0; index < NB_PRICES; index++)
+        prices[index] = prices[index] * (1 + percent / 100);  (*@\cmt{تعديل الخانة في مكانها}@*)
+    for (index = 0; index < NB_PRICES; index++)
+        printf("%.2f ", prices[index]);
+    printf("\n");
+    return 0;
+}

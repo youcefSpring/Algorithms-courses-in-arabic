@@ -1,0 +1,9 @@
+Customer 0 <- depot 0 (400 DA)
+Customer 1 <- depot 1 (300 DA)
+Customer 2 <- depot 0 (300 DA)
+Customer 3 <- depot 2 (350 DA)
+Customer 4 <- depot 2 (450 DA)
+Total cost = 1800 DA
+Depot 0 serves 2 customer(s)
+Depot 1 serves 1 customer(s)
+Depot 2 serves 2 customer(s)

@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    double na, ca, nb, cb, ra, rb, gap;
+    scanf("%lf %lf %lf %lf", &na, &ca, &nb, &cb);
+    ra = ca / na * 100;                   (*@\cmt{معدل تحويل النسخة \cen{A}}@*)
+    rb = cb / nb * 100;                   (*@\cmt{معدل تحويل النسخة \cen{B}}@*)
+    printf("A: %.2f %%  B: %.2f %%\n", ra, rb);
+    if (na < 1000 || nb < 1000) {
+        printf("Sample too small\n");     (*@\cmt{لا نحكم على عينة صغيرة}@*)
+    } else {
+        gap = ra - rb;
+        if (gap >= 0.5)       printf("Winner: A\n");
+        else if (gap <= -0.5) printf("Winner: B\n");
+        else                printf("Inconclusive\n");
+    }
+    return 0;
+}

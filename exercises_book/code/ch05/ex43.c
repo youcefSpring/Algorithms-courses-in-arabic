@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+#define NB 5
+#define DAMPING 0.85
+
+int main(void) {
+    int links[NB][NB] = {{0, 1, 1, 0, 0},
+                         {0, 0, 1, 0, 0},
+                         {1, 0, 0, 1, 0},
+                         {0, 0, 1, 0, 1},
+                         {1, 0, 1, 0, 0}};
+    double rank[NB], newRank[NB], change, gap;
+    int outDegree[NB], from, to, iteration = 0;
+    for (from = 0; from < NB; from++) {
+        outDegree[from] = 0;
+        for (to = 0; to < NB; to++)
+            outDegree[from] += links[from][to];
+        rank[from] = 1.0 / NB;                    // توزيع ابتدائي متساوٍ
+    }
+    do {
+        change = 0;
+        for (to = 0; to < NB; to++) {
+            newRank[to] = (1 - DAMPING) / NB;     // القفز العشوائي
+            for (from = 0; from < NB; from++)
+                if (links[from][to])
+                    newRank[to] += DAMPING * rank[from] / outDegree[from];
+        }
+        for (to = 0; to < NB; to++) {
+            gap = newRank[to] - rank[to];
+            change += (gap < 0) ? -gap : gap;
+            rank[to] = newRank[to];
+        }
+        iteration++;
+    } while (change > 1e-6);
+    printf("Converged after %d iterations\n", iteration);
+    for (to = 0; to < NB; to++)
+        printf("Page %d: %.4f\n", to, rank[to]);
+    return 0;
+}

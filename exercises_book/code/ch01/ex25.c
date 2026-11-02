@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+int main(void) {
+    double basket, margin, rev, clv;
+    int freq, years;
+    scanf("%lf %d %d %lf", &basket, &freq, &years, &margin);
+    rev = basket * freq * years;  // رقم الأعمال طوال مدة الوفاء
+    clv = rev * margin;           // الربح الذي يحققه الزبون
+    printf("Expected revenue = %.2f DA\n", rev);
+    printf("CLV = %.2f DA\n", clv);
+    return 0;
+}

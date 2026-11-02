@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+#define NB 15
+#define NB_CLASSES 3
+
+int main(void) {
+    int actual[NB]    = {2, 0, 1, 2, 2, 0, 1, 1, 2, 0, 2, 1, 0, 2, 1};
+    int predicted[NB] = {2, 0, 2, 2, 1, 0, 1, 0, 2, 0, 2, 1, 1, 2, 1};
+    int confusion[NB_CLASSES][NB_CLASSES] = {{0}};
+    int index, row, col, correct = 0;
+    for (index = 0; index < NB; index++)
+        confusion[actual[index]][predicted[index]]++;   (*@\cmt{الفهرسان من الجدولين}@*)
+    printf("actual\\pred  neg neu pos\n");
+    for (row = 0; row < NB_CLASSES; row++) {
+        printf("%11d", row);
+        for (col = 0; col < NB_CLASSES; col++)
+            printf(" %3d", confusion[row][col]);
+        printf("\n");
+        correct += confusion[row][row];   (*@\cmt{القطر = التنبؤات الصحيحة}@*)
+    }
+    printf("Accuracy = %d/%d = %.2f\n", correct, NB, (double)correct / NB);
+    return 0;
+}

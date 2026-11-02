@@ -1,0 +1,31 @@
+#include <stdio.h>
+
+#define NB 12
+
+int main(void) {
+    int prices[NB] = {890, 120, 450, 3000, 75, 640, 1200, 300, 999, 15, 2200, 640};
+    int stackLow[NB], stackHigh[NB], top = 0;
+    int low, high, pivot, store, scan, tmp, index;
+    stackLow[top] = 0; stackHigh[top] = NB - 1; top++;   // المجال الكامل
+    while (top > 0) {
+        top--;                                // نسحب مجالًا
+        low = stackLow[top];
+        high = stackHigh[top];
+        pivot = prices[high];                 // المحور: آخر عنصر
+        store = low;                          // حد منطقة "الأصغر من المحور"
+        for (scan = low; scan < high; scan++) {
+            if (prices[scan] < pivot) {
+                tmp = prices[scan]; prices[scan] = prices[store]; prices[store] = tmp;
+                store++;
+            }
+        }
+        tmp = prices[store]; prices[store] = prices[high]; prices[high] = tmp;
+        // المحور الآن في مكانه النهائي store
+        if (store - 1 > low)  { stackLow[top] = low;       stackHigh[top] = store - 1; top++; }
+        if (store + 1 < high) { stackLow[top] = store + 1; stackHigh[top] = high;      top++; }
+    }
+    for (index = 0; index < NB; index++)
+        printf("%d ", prices[index]);
+    printf("\n");
+    return 0;
+}

@@ -1,0 +1,13 @@
+#include <stdio.h>
+
+int main(void) {
+    double capital, rate, factor;
+    int years, year;
+    scanf("%lf %lf %d", &capital, &rate, &years);
+    factor = 1 + rate / 100;
+    for (year = 1; year <= years; year++) {
+        capital = capital * factor;                (*@\cmt{القوة تُبنى بالضرب المتكرر}@*)
+        printf("Year %d: %.2f DA\n", year, capital);
+    }
+    return 0;
+}

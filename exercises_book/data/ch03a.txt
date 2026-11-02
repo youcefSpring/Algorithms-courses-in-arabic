@@ -1,0 +1,972 @@
+@@
+title: مجموع أسعار السلة
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يقرأ عدد المنتجات `nbItems` ثم أسعارها، ويعرض **المجموع** باستعمال حلقة `for`.
+@ stdin
+5
+1200 450 3999 89.5 700
+@ steps
+- نقرأ `nbItems` ونهيئ `sum = 0`.
+- حلقة `for` من `item = 1` إلى `nbItems`: نقرأ سعرًا ونضيفه.
+- نعرض المجموع.
+@ flow
+in: nbItems
+do: sum = 0
+for: item = 1 ; item <= nbItems ; item++
+  in: price
+  do: sum = sum + price
+out: sum
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbItems, item;
+    double price, sum = 0;            // المجمِّع يبدأ من الصفر
+    scanf("%d", &nbItems);
+    for (item = 1; item <= nbItems; item++) {    // nbItems تكرارًا بالضبط
+        scanf("%lf", &price);
+        sum = sum + price;            // نضيف السعر الحالي
+    }
+    printf("Basket total = %.2f DA\n", sum);
+    return 0;
+}
+
+@@
+title: عدد الطلبيات الكبيرة
+level: easy
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ `nbOrders` مبالغ طلبيات ويعد كم منها **يتجاوز 10000 دج**، ثم يعرض نسبتها.
+@ stdin
+8
+2500 12000 800 15600 9999 10001 4300 22000
+@ steps
+- عداد `count = 0`.
+- لكل مبلغ: إذا كان `> 10000` نزيد العداد.
+- النسبة: `count * 100.0 / nbOrders`.
+@ flow
+in: nbOrders
+do: count = 0
+for: index = 0 ; index < nbOrders ; index++
+  in: amount
+  if: amount > 10000
+    do: count++
+out: count, count * 100.0 / nbOrders
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbOrders, index, count = 0;
+    double amount;
+    scanf("%d", &nbOrders);
+    for (index = 0; index < nbOrders; index++) {
+        scanf("%lf", &amount);
+        if (amount > 10000)
+            count++;              // طلبية كبيرة: نزيد العداد
+    }
+    printf("Large orders: %d / %d (%.1f %%)\n", count, nbOrders, count * 100.0 / nbOrders);
+    return 0;
+}
+
+@@
+title: متوسط التقييمات
+level: easy
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ عدد التقييمات `nbReviews` ثم التقييمات (أعداد صحيحة من 1 إلى 5) ويحسب **المتوسط**.
+@ stdin
+7
+5 4 4 3 5 2 4
+@ steps
+- نجمع التقييمات في `sum`.
+- المتوسط `(double)sum / nbReviews`.
+@ flow
+in: nbReviews
+do: sum = 0
+for: index = 0 ; index < nbReviews ; index++
+  in: rating
+  do: sum = sum + rating
+out: sum / nbReviews
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbReviews, index, rating, sum = 0;
+    scanf("%d", &nbReviews);
+    for (index = 0; index < nbReviews; index++) {
+        scanf("%d", &rating);
+        sum += rating;                 // sum += rating تعني sum = sum + rating
+    }
+    printf("Average = %.2f\n", (double)sum / nbReviews);
+    return 0;
+}
+
+@@
+title: جدول الأسعار حسب الكمية
+level: easy
+domain: ec
+@ statement
+يعرض المتجر جدولًا يبين ثمن 1 إلى 10 وحدات من منتج سعره مقروء. اكتب البرنامج.
+@ stdin
+275
+@ steps
+- حلقة `for` على الكمية `qty` من 1 إلى 10.
+- نعرض `qty` و`qty * price` في كل سطر.
+@ flow
+in: price
+for: qty = 1 ; qty <= 10 ; qty++
+  out: qty, qty * price
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int qty;
+    double price;
+    scanf("%lf", &price);
+    printf("Qty | Price\n");
+    for (qty = 1; qty <= 10; qty++)                 // سطر لكل كمية
+        printf("%3d | %8.2f\n", qty, qty * price);
+    return 0;
+}
+
+@@
+title: العد التنازلي للتخفيضات
+level: easy
+domain: ec
+@ statement
+تبدأ تخفيضات "الجمعة السوداء" بعد `hours` ساعة. اكتب برنامجًا يعرض **عدًا تنازليًا** بخطوة 6 ساعات باستعمال حلقة `while` حتى يصل إلى 0 أو أقل.
+@ stdin
+27
+@ steps
+- ما دام `hours > 0` نعرض `hours` ثم نطرح 6.
+- عند الخروج من الحلقة نعرض رسالة البداية.
+@ flow
+in: hours
+while: hours > 0
+  out: hours
+  do: hours = hours - 6
+out: `"Sale started!"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int hours;
+    scanf("%d", &hours);
+    while (hours > 0) {                       // الشرط يُختبر قبل كل دورة
+        printf("%d hours left\n", hours);
+        hours = hours - 6;
+    }
+    printf("Black Friday sale started!\n");
+    return 0;
+}
+
+@@
+title: الإدخال حتى الصفر
+level: easy
+domain: ec
+@ statement
+يُدخل أمين الصندوق أسعار المنتجات واحدًا واحدًا ولا يعرف عددها مسبقًا، ويُنهي بإدخال **0**. اكتب برنامجًا يحسب المجموع وعدد المنتجات.
+@ stdin
+350 1200 75 990 0
+@ steps
+- نقرأ السعر الأول قبل الحلقة.
+- ما دام `price != 0`: نضيفه ونزيد العداد ثم نقرأ السعر التالي.
+- القيمة 0 **قيمة حارسة** تنهي الإدخال.
+@ flow
+do: sum = 0 ; nbItems = 0
+in: price
+while: price != 0
+  do: sum = sum + price ; nbItems++
+  in: price
+out: nbItems, sum
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double price, sum = 0;
+    int nbItems = 0;
+    scanf("%lf", &price);             // القراءة الأولى قبل الحلقة
+    while (price != 0) {              // 0 قيمة حارسة: نهاية الإدخال
+        sum += price;
+        nbItems++;
+        scanf("%lf", &price);         // نقرأ السعر التالي
+    }
+    printf("%d items, total = %.2f DA\n", nbItems, sum);
+    return 0;
+}
+
+@@
+title: أغلى منتج
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يقرأ `nbPrices` أسعار ويعرض **أكبرها** ورقم ترتيبه.
+@ stdin
+6
+450 1290 300 1290 870 99
+@ steps
+- نقرأ السعر الأول ونعتبره الأكبر: `max = price` و`pos = 1`.
+- لكل سعر موالٍ: إذا كان أكبر من `max` نحدّث `max` و`pos`.
+@ flow
+in: nbPrices, price
+do: max = price ; pos = 1
+for: index = 2 ; index <= nbPrices ; index++
+  in: price
+  if: price > max
+    do: max = price ; pos = index
+out: max, pos
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbPrices, index, pos;
+    double price, max;
+    scanf("%d %lf", &nbPrices, &price);
+    max = price;                      // أول سعر هو الأكبر مبدئيًا
+    pos = 1;
+    for (index = 2; index <= nbPrices; index++) {
+        scanf("%lf", &price);
+        if (price > max) {            // وجدنا سعرًا أكبر
+            max = price;
+            pos = index;
+        }
+    }
+    printf("Most expensive: %.2f DA (item #%d)\n", max, pos);
+    return 0;
+}
+
+@@
+title: أرقام الطلبيات الزوجية
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يعرض كل أرقام الطلبيات **الزوجية** بين `first` و`last` (ضمنًا) ويعد عددها.
+@ stdin
+1001 1015
+@ steps
+- حلقة من `first` إلى `last`.
+- نعرض الرقم إذا كان `orderId % 2 == 0`.
+@ flow
+in: first, last
+do: count = 0
+for: orderId = first ; orderId <= last ; orderId++
+  if: orderId % 2 == 0
+    out: orderId
+    do: count++
+out: count
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int first, last, orderId, count = 0;
+    scanf("%d %d", &first, &last);
+    for (orderId = first; orderId <= last; orderId++) {
+        if (orderId % 2 == 0) {         // رقم زوجي
+            printf("%d ", orderId);
+            count++;
+        }
+    }
+    printf("\nEven order numbers: %d\n", count);
+    return 0;
+}
+
+@@
+title: الادخار لشراء حاسوب
+level: easy
+domain: ec
+@ statement
+يريد طالب شراء حاسوب سعره `price`. يدّخر كل شهر مبلغًا `monthly`. اكتب برنامجًا يحسب **عدد الأشهر** اللازمة باستعمال `while`.
+@ stdin
+95000 12500
+@ steps
+- `saved = 0` و`months = 0`.
+- ما دام `saved < price`: نضيف `monthly` ونزيد الأشهر.
+@ flow
+in: price, monthly
+do: saved = 0 ; months = 0
+while: saved < price
+  do: saved = saved + monthly
+  do: months++
+out: months, saved
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double price, monthly, saved = 0;
+    int months = 0;
+    scanf("%lf %lf", &price, &monthly);
+    while (saved < price) {       // لا نعرف عدد التكرارات مسبقًا
+        saved += monthly;
+        months++;
+    }
+    printf("Months needed: %d (saved %.2f DA)\n", months, saved);
+    return 0;
+}
+
+@@
+title: إعادة طلب تقييم صالح
+level: easy
+domain: ds
+@ statement
+اكتب برنامجًا يطلب من الزبون تقييمًا بين 1 و5، ويعيد الطلب **ما دام** الإدخال غير صالح، باستعمال `do ... while`.
+@ stdin
+7 0 4
+@ steps
+- `do`: نقرأ التقييم.
+- `while (rating < 1 || rating > 5)`: نعيد إذا كان خارج المجال.
+- الحلقة تنفذ **مرة واحدة على الأقل**.
+@ flow
+dowhile: rating < 1 || rating > 5
+  in: rating
+out: rating
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int rating, tries = 0;
+    do {
+        printf("Rating (1-5): ");
+        scanf("%d", &rating);
+        tries++;
+        if (rating < 1 || rating > 5)
+            printf("invalid!\n");
+    } while (rating < 1 || rating > 5);     // نعيد ما دام الإدخال خاطئًا
+    printf("Accepted rating %d after %d tries\n", rating, tries);
+    return 0;
+}
+
+@@
+title: الأصغر والأكبر والمدى
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ أوقات تحميل `nbPages` صفحات (بالمللي ثانية) ويعرض **الأصغر** و**الأكبر** و**المدى** (الفرق بينهما) والمتوسط، في مرور واحد على البيانات.
+@ stdin
+7
+320 280 910 450 300 275 610
+@ steps
+- القيمة الأولى تهيئ `min` و`max` و`sum`.
+- في كل تكرار نحدّث الثلاثة.
+- المدى: `max - min`.
+@ flow
+in: nbPages, loadTime
+do: min = loadTime ; max = loadTime ; sum = loadTime
+for: index = 2 ; index <= nbPages ; index++
+  in: loadTime
+  do: sum = sum + loadTime
+  if: loadTime < min
+    do: min = loadTime
+  if: loadTime > max
+    do: max = loadTime
+out: min, max, max - min, sum / nbPages
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbPages, index;
+    double loadTime, min, max, sum;
+    scanf("%d %lf", &nbPages, &loadTime);
+    min = max = sum = loadTime;          // التهيئة بالقيمة الأولى
+    for (index = 2; index <= nbPages; index++) {
+        scanf("%lf", &loadTime);
+        sum += loadTime;
+        if (loadTime < min) min = loadTime;     // تحديث الأصغر
+        if (loadTime > max) max = loadTime;     // تحديث الأكبر
+    }
+    printf("Min = %.0f ms, Max = %.0f ms\n", min, max);
+    printf("Range = %.0f ms, Mean = %.1f ms\n", max - min, sum / nbPages);
+    return 0;
+}
+
+@@
+title: المتوسط والتباين في مرور واحد
+level: medium
+domain: ds
+@ statement
+لحساب التباين دون تخزين البيانات نستعمل الصيغة: `var = (Σsales²)/nbDays - mean²`. اكتب برنامجًا يقرأ `nbDays` قيم مبيعات يومية ويحسب المتوسط والتباين في مرور واحد.
+@ stdin
+6
+120 135 98 160 142 115
+@ steps
+- نجمع `sum = Σsales` و`s2 = Σsales²` في نفس الحلقة.
+- `mean = sum / nbDays`.
+- `var = s2 / nbDays - mean * mean`.
+@ flow
+in: nbDays
+do: sum = 0 ; s2 = 0
+for: day = 0 ; day < nbDays ; day++
+  in: sales
+  do: sum = sum + sales ; s2 = s2 + sales * sales
+do: mean = sum / nbDays
+do: var = s2 / nbDays - mean * mean
+out: mean, var
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbDays, day;
+    double sales, sum = 0, s2 = 0, mean, var;
+    scanf("%d", &nbDays);
+    for (day = 0; day < nbDays; day++) {
+        scanf("%lf", &sales);
+        sum += sales;                   // مجموع القيم
+        s2 += sales * sales;              // مجموع المربعات
+    }
+    mean = sum / nbDays;
+    var = s2 / nbDays - mean * mean;   // متوسط المربعات ناقص مربع المتوسط
+    printf("Mean = %.2f\n", mean);
+    printf("Variance = %.2f\n", var);
+    return 0;
+}
+
+@@
+title: الجذر التربيعي بطريقة نيوتن
+level: medium
+domain: ds
+@ statement
+نحتاج الانحراف المعياري، أي **جذر** التباين، دون `sqrt`. اكتب برنامجًا يحسب الجذر بطريقة نيوتن `root = (root + value / root) / 2` ويكرر **حتى** يصبح الفرق بين تقديرين متتاليين أقل من `1e-9`، ويعرض عدد التكرارات.
+@ stdin
+547.25
+@ steps
+- نبدأ بـ `root = value` (أو 1 إذا كان `value < 1`).
+- `do`: نحفظ `old = root` ثم نحسب `root` الجديد.
+- نكرر ما دام `|root - old| > 1e-9`.
+@ flow
+in: value
+do: root = value ; it = 0
+dowhile: |root - old| > 1e-9
+  do: old = root
+  do: root = (root + value / root) / 2
+  do: it++
+out: root, it
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double value, root, old, diff;
+    int it = 0;
+    scanf("%lf", &value);
+    root = (value > 1) ? value : 1;          // تقدير أولي موجب
+    do {
+        old = root;
+        root = (root + value / root) / 2;      // متوسط root و value/root
+        it++;
+        diff = root - old;
+        if (diff < 0) diff = -diff;   // القيمة المطلقة
+    } while (diff > 1e-9);
+    printf("sqrt(%.2f) = %.9f\n", value, root);
+    printf("Iterations: %d\n", it);
+    return 0;
+}
+
+@@
+title: ترتيبات عرض المنتجات
+level: medium
+domain: ec
+@ statement
+في واجهة الصفحة الرئيسية `slots` خانات ونريد اختيار وترتيب منتجات من بين `nbProducts`. عدد **الترتيبات** هو `nbProducts! / (nbProducts-slots)! = nbProducts × (nbProducts-1) × ... × (nbProducts-slots+1)`. اكتب برنامجًا يحسبه بحلقة، ويحسب أيضًا `nbProducts!`.
+@ stdin
+10 4
+@ steps
+- `arr = 1`، ثم نضرب في `nbProducts`، `nbProducts-1`، ... `slots` مرات.
+- `fact = 1` ثم نضرب في 1، 2، ...، `nbProducts`.
+- نستعمل `long long` لأن الأعداد تكبر بسرعة.
+@ flow
+in: nbProducts, slots
+do: arr = 1
+for: step = 0 ; step < slots ; step++
+  do: arr = arr * (nbProducts - step)
+do: fact = 1
+for: step = 2 ; step <= nbProducts ; step++
+  do: fact = fact * step
+out: arr, fact
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbProducts, slots, step;
+    long long arr = 1, fact = 1;  // long long لتجنب تجاوز السعة
+    scanf("%d %d", &nbProducts, &slots);
+    for (step = 0; step < slots; step++)
+        arr *= (nbProducts - step);           // nbProducts × (nbProducts-1) × ... (slots عوامل)
+    for (step = 2; step <= nbProducts; step++)
+        fact *= step;                // nbProducts!
+    printf("Arrangements A(%d,%d) = %lld\n", nbProducts, slots, arr);
+    printf("%d! = %lld\n", nbProducts, fact);
+    return 0;
+}
+
+@@
+title: عدد الحزم الممكنة
+level: medium
+domain: ec
+@ statement
+يريد المتجر تكوين **حزم** من `size` منتجات مختلفة من بين `nbProducts` (الترتيب غير مهم). عدد التوفيقات `C(nbProducts,size)`. اكتب برنامجًا يحسبه بحلقة واحدة دون حساب العامليات الكاملة: `C = C * (nbProducts - size + step) / step` لكل `step` من 1 إلى `size`.
+@ stdin
+20 5
+@ steps
+- `bundles = 1`.
+- لكل `step` من 1 إلى `size`: نضرب أولًا ثم نقسم؛ القسمة دائمًا صحيحة بالضبط.
+- هذه الطريقة تتجنب الأعداد الضخمة.
+@ flow
+in: nbProducts, size
+do: bundles = 1
+for: step = 1 ; step <= size ; step++
+  do: bundles = bundles * (nbProducts - size + step) / step
+out: bundles
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbProducts, size, step;
+    long long bundles = 1;
+    scanf("%d %d", &nbProducts, &size);
+    for (step = 1; step <= size; step++) {
+        // بعد هذه الخطوة bundles = C(nbProducts-size+step, step)، عدد صحيح دائمًا
+        bundles = bundles * (nbProducts - size + step) / step;
+    }
+    printf("Bundles C(%d,%d) = %lld\n", nbProducts, size, bundles);
+    return 0;
+}
+
+@@
+title: أكبر قاسم مشترك لأحجام العبوات
+level: medium
+domain: ec
+@ statement
+يصل منتج في كراتين من `packA` وحدة ومنتج آخر في كراتين من `packB` وحدة. لتكوين رفوف متساوية دون باقٍ نحتاج **أكبر قاسم مشترك**. اكتب برنامجًا يحسبه بخوارزمية **إقليدس**.
+@ stdin
+84 120
+@ steps
+- ما دام `packB != 0`: `rest = packA % packB` ثم `packA = packB` و`packB = rest`.
+- عند التوقف، `packA` هو القاسم المشترك الأكبر.
+@ flow
+in: packA, packB
+while: packB != 0
+  do: rest = packA % packB
+  do: packA = packB ; packB = rest
+out: packA
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int packA, packB, rest, a0, b0;
+    scanf("%d %d", &packA, &packB);
+    a0 = packA; b0 = packB;               // نحفظ القيم الأصلية للعرض
+    while (packB != 0) {
+        rest = packA % packB;                // pgcd(packA, packB) = pgcd(packB, packA % packB)
+        packA = packB;
+        packB = rest;
+    }
+    printf("GCD(%d, %d) = %d\n", a0, b0, packA);
+    printf("Shelves of %d units: %d + %d\n", packA, a0 / packA, b0 / packA);
+    return 0;
+}
+
+@@
+title: تزامن دورات التموين
+level: medium
+domain: ec
+@ statement
+يُموَّن منتج كل `cycleA` أيام ومنتج آخر كل `cycleB` أيام، وقد مُوِّنا معًا اليوم. بعد كم يومًا يُموَّنان **معًا** من جديد؟ اكتب برنامجًا يحسب **المضاعف المشترك الأصغر** `lcm = cycleA / gcd * cycleB`.
+@ stdin
+6 15
+@ steps
+- نحسب `gcd(cycleA, cycleB)` بخوارزمية إقليدس على نسختين من المتغيرين.
+- `lcm = cycleA / g * cycleB` (نقسم أولًا لتجنب تجاوز السعة).
+@ flow
+in: cycleA, cycleB
+do: gcdA = cycleA ; gcdB = cycleB
+while: gcdB != 0
+  do: rest = gcdA % gcdB ; gcdA = gcdB ; gcdB = rest
+do: lcm = cycleA / gcdA * cycleB
+out: lcm
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int cycleA, cycleB, gcdA, gcdB, rest, lcm;
+    scanf("%d %d", &cycleA, &cycleB);
+    gcdA = cycleA; gcdB = cycleB;                 // نسختان لكي لا نفقد cycleA و cycleB
+    while (gcdB != 0) {
+        rest = gcdA % gcdB;
+        gcdA = gcdB;
+        gcdB = rest;
+    }                             // gcdA = pgcd(cycleA, cycleB)
+    lcm = cycleA / gcdA * cycleB;
+    printf("Both restocked again after %d days\n", lcm);
+    return 0;
+}
+
+@@
+title: هل رقم المنتج أولي؟
+level: medium
+domain: ec
+@ statement
+لتوزيع المنتجات على خوادم التخزين نستعمل أرقامًا **أولية**. اكتب برنامجًا يتحقق إن كان عدد ما أوليًا، باختبار القواسم من 2 حتى `divisor * divisor <= number` فقط.
+@ stdin
+7919
+@ steps
+- إذا كان `number < 2` فهو ليس أوليًا.
+- نجرب القواسم `divisor` ما دام `divisor * divisor <= number`؛ نتوقف عند أول قاسم.
+- إذا لم نجد قاسمًا فهو أولي.
+@ flow
+in: number
+do: prime = number >= 2 ; divisor = 2
+while: prime && divisor * divisor <= number
+  if: number % divisor == 0
+    do: prime = 0
+  do: divisor++
+out: prime
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int number, divisor, prime;
+    scanf("%d", &number);
+    prime = (number >= 2);             // 0 و 1 ليسا أوليين
+    // يكفي البحث حتى الجذر: إذا كان number = a × b فأحدهما <= الجذر
+    for (divisor = 2; prime && divisor * divisor <= number; divisor++) {
+        if (number % divisor == 0)
+            prime = 0;            // وجدنا قاسمًا
+    }
+    if (prime)
+        printf("%d is prime\n", number);
+    else
+        printf("%d is not prime\n", number);
+    return 0;
+}
+
+@@
+title: أرقام رقم الطلبية
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يقرأ رقم طلبية (عدد صحيح موجب طويل) ويحسب **عدد أرقامه** و**مجموعها** و**أكبر رقم** فيه، بحلقة تقسم على 10.
+@ stdin
+90417253
+@ steps
+- ما دام `number > 0`: الرقم الأخير `digit = number % 10` ثم `number = number / 10`.
+- نزيد العداد ونضيف `digit` للمجموع ونحدّث الأكبر.
+@ flow
+in: number
+do: count = 0 ; sum = 0 ; big = 0
+dowhile: number > 0
+  do: digit = number % 10
+  do: count++ ; sum += digit
+  if: digit > big
+    do: big = digit
+  do: number = number / 10
+out: count, sum, big
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long number;
+    int digit, count = 0, sum = 0, big = 0;
+    scanf("%ld", &number);
+    do {                          // do-while: الرقم 0 له رقم واحد
+        digit = number % 10;               // آخر رقم
+        count++;
+        sum += digit;
+        if (digit > big) big = digit;
+        number = number / 10;               // نحذف آخر رقم
+    } while (number > 0);
+    printf("Digits = %d, sum = %d, largest = %d\n", count, sum, big);
+    return 0;
+}
+
+@@
+title: رمز تخفيض متناظر
+level: medium
+domain: ec
+@ statement
+رموز التخفيض الخاصة هي أعداد **متناظرة** (تُقرأ بنفس الطريقة من اليسار واليمين مثل 12321). اكتب برنامجًا يعكس العدد بحلقة ويتحقق إن كان متناظرًا.
+@ stdin
+45654
+@ steps
+- `rev = 0`، وما دام `code > 0`: `rev = rev * 10 + code % 10` ثم `code /= 10`.
+- نقارن `rev` بالعدد الأصلي.
+@ flow
+in: code
+do: work = code ; rev = 0
+while: work > 0
+  do: rev = rev * 10 + work % 10
+  do: work = work / 10
+if: rev == code
+  out: `"palindrome"`
+else:
+  out: `"not palindrome"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long code, work, rev = 0;
+    scanf("%ld", &code);
+    work = code;                        // نعمل على نسخة
+    while (work > 0) {
+        rev = rev * 10 + work % 10;  // نلصق آخر رقم في نهاية rev
+        work = work / 10;
+    }
+    printf("Reversed: %ld\n", rev);
+    if (rev == code)
+        printf("%ld is a valid palindrome code\n", code);
+    else
+        printf("%ld is not a palindrome\n", code);
+    return 0;
+}
+
+@@
+title: نمو المستخدمين بمتتالية فيبوناتشي
+level: medium
+domain: ds
+@ statement
+في نموذج نمو مبسط، عدد المستخدمين الجدد كل شهر يساوي مجموع الشهرين السابقين (متتالية **فيبوناتشي**)، بدءًا من 1 و1. اكتب برنامجًا يعرض الأشهر حتى يتجاوز العدد الشهري `target`، مع المجموع التراكمي.
+@ stdin
+500
+@ steps
+- `prev = 1`، `current = 1` (الشهران الأولان).
+- في كل دورة: `next = prev + current` ثم نزيح `prev = current` و`current = next`.
+- نتوقف عندما يتجاوز العدد الهدف.
+@ flow
+in: target
+do: prev = 1 ; current = 1 ; total = 2 ; month = 2
+while: current <= target
+  do: next = prev + current
+  do: prev = current ; current = next
+  do: total += next ; month++
+out: month, current, total
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long prev = 1, current = 1, next, total = 2, target;
+    int month = 2;
+    scanf("%ld", &target);
+    printf("Month 1: 1\nMonth 2: 1\n");
+    while (current <= target) {
+        next = prev + current;                // الشهر الجديد = مجموع الشهرين السابقين
+        prev = current;                    // نزيح النافذة
+        current = next;
+        total += next;
+        month++;
+        printf("Month %d: %ld\n", month, next);
+    }
+    printf("Total users after %d months: %ld\n", month, total);
+    return 0;
+}
+
+@@
+title: الفائدة المركبة على عدة سنوات
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يحسب قيمة استثمار `capital` بعد `years` سنوات بنسبة فائدة سنوية `rate`%، ويعرض القيمة في نهاية كل سنة، دون `pow`.
+@ stdin
+100000 6 5
+@ steps
+- `factor = 1 + rate / 100`.
+- حلقة على السنوات: `capital = capital * factor` ثم العرض.
+@ flow
+in: capital, rate, years
+do: factor = 1 + rate / 100
+for: year = 1 ; year <= years ; year++
+  do: capital = capital * factor
+  out: year, capital
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double capital, rate, factor;
+    int years, year;
+    scanf("%lf %lf %d", &capital, &rate, &years);
+    factor = 1 + rate / 100;
+    for (year = 1; year <= years; year++) {
+        capital = capital * factor;                // القوة تُبنى بالضرب المتكرر
+        printf("Year %d: %.2f DA\n", year, capital);
+    }
+    return 0;
+}
+
+@@
+title: جدول تسديد الشراء بالتقسيط
+level: medium
+domain: ec
+@ statement
+اشترى زبون هاتفًا بالتقسيط: المبلغ `balance`، فائدة شهرية `rate`% على الباقي، وقسط شهري ثابت `installment`. اكتب برنامجًا يعرض لكل شهر الفائدة والباقي، حتى السداد الكامل، مع مجموع الفوائد.
+@ stdin
+60000 1.5 11000
+@ steps
+- ما دام الباقي `balance > 0`: الفائدة `interest = balance * rate / 100`.
+- `balance = balance + interest - installment`؛ إذا أصبح سالبًا فالقسط الأخير أصغر.
+- نجمع الفوائد.
+@ flow
+in: balance, rate, installment
+do: month = 0 ; totI = 0
+while: balance > 0
+  do: interest = balance * rate / 100 ; totI += interest
+  do: balance = balance + interest - installment ; month++
+  if: balance < 0
+    do: balance = 0
+  out: month, interest, balance
+out: totI
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double balance, rate, installment, interest, totI = 0;
+    int month = 0;
+    scanf("%lf %lf %lf", &balance, &rate, &installment);
+    printf("Month | Interest | Remaining\n");
+    while (balance > 0) {
+        interest = balance * rate / 100;          // فائدة الشهر على الباقي
+        totI += interest;
+        balance = balance + interest - installment;            // نضيف الفائدة ونطرح القسط
+        month++;
+        if (balance < 0) balance = 0;         // القسط الأخير يسدد ما تبقى فقط
+        printf("%5d | %8.2f | %9.2f\n", month, interest, balance);
+    }
+    printf("Total interest = %.2f DA\n", totI);
+    return 0;
+}
+
+@@
+title: أطول فترة نمو متواصل
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ مبيعات `nbDays` يومًا متتالية ويحدد **أطول سلسلة** من الأيام التي ارتفعت فيها المبيعات مقارنة باليوم السابق، ويوم نهايتها.
+@ stdin
+10
+50 55 60 58 61 64 70 75 72 80
+@ steps
+- نحتفظ بالقيمة السابقة `prev`.
+- إذا كان `sales > prev` نزيد طول السلسلة الحالية `cur`، وإلا نعيدها إلى 0.
+- نحدّث الأطول `best` ويوم نهايته.
+@ flow
+in: nbDays, prev
+do: cur = 0 ; best = 0 ; end = 1
+for: day = 2 ; day <= nbDays ; day++
+  in: sales
+  if: sales > prev
+    do: cur++
+  else:
+    do: cur = 0
+  if: cur > best
+    do: best = cur ; end = day
+  do: prev = sales
+out: best, end
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbDays, day, cur = 0, best = 0, end = 1;
+    double prev, sales;
+    scanf("%d %lf", &nbDays, &prev);
+    for (day = 2; day <= nbDays; day++) {
+        scanf("%lf", &sales);
+        if (sales > prev)
+            cur++;                // السلسلة تستمر
+        else
+            cur = 0;              // السلسلة انقطعت
+        if (cur > best) {
+            best = cur;
+            end = day;
+        }
+        prev = sales;                 // اليوم الحالي يصبح السابق
+    }
+    printf("Longest growth streak: %d days (ending day %d)\n", best, end);
+    return 0;
+}
+
+@@
+title: المتوسط المتحرك لثلاثة أيام
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ مبيعات `nbDays` يومًا ويعرض ابتداءً من اليوم الثالث **المتوسط المتحرك** لآخر 3 أيام، دون جداول: نحتفظ بآخر قيمتين في متغيرين.
+@ stdin
+7
+100 130 115 160 140 170 150
+@ steps
+- نقرأ أول قيمتين في `p2` (قبل الأخيرة) و`p1` (الأخيرة).
+- لكل قيمة جديدة `sales`: المتوسط `(p2 + p1 + sales) / 3`.
+- نزيح النافذة: `p2 = p1` ثم `p1 = sales`.
+@ flow
+in: nbDays, p2, p1
+for: day = 3 ; day <= nbDays ; day++
+  in: sales
+  out: day, (p2 + p1 + sales) / 3
+  do: p2 = p1 ; p1 = sales
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbDays, day;
+    double p2, p1, sales;
+    scanf("%d %lf %lf", &nbDays, &p2, &p1);    // أول يومين
+    for (day = 3; day <= nbDays; day++) {
+        scanf("%lf", &sales);
+        printf("Day %d: MA3 = %.2f\n", day, (p2 + p1 + sales) / 3);
+        p2 = p1;                  // إزاحة النافذة بمقدار يوم
+        p1 = sales;
+    }
+    return 0;
+}
+
+@@
+title: مدرج تكراري للتقييمات
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ `nbReviews` تقييمات (1 إلى 5) ويعد تكرار كل قيمة في خمسة عدادات، ثم يرسم **مدرجًا تكراريًا** نصيًا بالرمز `*` لكل نجمة.
+@ stdin
+15
+5 4 5 3 5 4 4 2 5 1 4 5 3 4 5
+@ steps
+- خمسة عدادات `c1` إلى `c5` نزيدها بـ `switch`.
+- لرسم السطر `stars` نستعمل حلقة داخلية تطبع `*` عددًا من المرات يساوي العداد.
+- لتجنب تكرار الكود نختار العداد في كل دورة بـ `switch`.
+@ flow
+in: nbReviews
+for: index = 0 ; index < nbReviews ; index++
+  in: rating
+  do: زيادة العداد c_r
+for: stars = 5 ; stars >= 1 ; stars--
+  do: bar = عداد التقييم stars
+  for: star = 0 ; star < bar ; star++
+    out: `"*"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbReviews, index, rating, stars, star, bar;
+    int c1 = 0, c2 = 0, c3 = 0, c4 = 0, c5 = 0;
+    scanf("%d", &nbReviews);
+    for (index = 0; index < nbReviews; index++) {
+        scanf("%d", &rating);
+        switch (rating) {              // نزيد عداد القيمة المقروءة
+            case 1: c1++; break;
+            case 2: c2++; break;
+            case 3: c3++; break;
+            case 4: c4++; break;
+            case 5: c5++; break;
+        }
+    }
+    for (stars = 5; stars >= 1; stars--) {    // من 5 نجوم إلى نجمة واحدة
+        switch (stars) {
+            case 5: bar = c5; break;
+            case 4: bar = c4; break;
+            case 3: bar = c3; break;
+            case 2: bar = c2; break;
+            default: bar = c1;
+        }
+        printf("%d stars | ", stars);
+        for (star = 0; star < bar; star++)   // حلقة داخلية: طول العمود
+            printf("*");
+        printf(" (%d)\n", bar);
+    }
+    return 0;
+}

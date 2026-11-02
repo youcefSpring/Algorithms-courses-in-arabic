@@ -1,0 +1,11 @@
+#include <stdio.h>
+
+int main(void) {
+    int timestamp, hours, minutes, seconds;
+    scanf("%d", &timestamp);              (*@\cmt{ثوانٍ منذ منتصف الليل}@*)
+    hours = timestamp / 3600;                 (*@\cmt{\cen{3600} ثانية في الساعة}@*)
+    minutes = (timestamp % 3600) / 60;          (*@\cmt{ما تبقى من الساعة بالدقائق}@*)
+    seconds = timestamp % 60;                   (*@\cmt{الثواني المتبقية}@*)
+    printf("%d s -> %02d:%02d:%02d\n", timestamp, hours, minutes, seconds);
+    return 0;
+}

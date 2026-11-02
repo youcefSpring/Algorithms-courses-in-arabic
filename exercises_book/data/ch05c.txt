@@ -1,0 +1,628 @@
+@@
+title: حل جملة معادلات بطريقة غاوس
+level: hard
+domain: ds
+@ statement
+نموذج تسعير يقود إلى جملة من 4 معادلات خطية بـ 4 مجاهيل `A x = b`. اكتب برنامجًا يحلها بطريقة **الحذف لغاوس** مع **الارتكاز الجزئي** (اختيار أكبر محور بالقيمة المطلقة لتقليل أخطاء التقريب) ثم **التعويض التراجعي**.
+@ steps
+- نضع `b` كعمود إضافي في المصفوفة الموسعة `aug[4][5]`.
+- لكل عمود `pivotCol`: نختار السطر ذا أكبر `|aug[row][pivotCol]|` ونبدله مع سطر المحور.
+- نحذف المجهول من الأسطر السفلى: `aug[row] -= factor * aug[pivotCol]`.
+- التعويض التراجعي من آخر سطر إلى الأول.
+@ flow
+for: pivotCol = 0 ; pivotCol < NB ; pivotCol++
+  do: best = سطر أكبر |aug[row][pivotCol]|
+  do: تبديل السطرين pivotCol و best
+  for: row = pivotCol + 1 ; row < NB ; row++
+    do: factor = aug[row][pivotCol] / aug[pivotCol][pivotCol]
+    do: aug[row] = aug[row] - factor * aug[pivotCol]
+for: row = NB - 1 ; row >= 0 ; row--
+  do: solution[row] = (aug[row][NB] - Σ aug[row][col]*solution[col]) / aug[row][row]
+out: solution
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+int main(void) {
+    double aug[NB][NB + 1] = {{ 2,  1, -1,  3,  18},     // المصفوفة الموسعة [A | b]
+                              { 4,  1,  2, -1,  14},
+                              {-2,  5,  1,  1,  20},
+                              { 1, -1,  3,  2,  21}};
+    double solution[NB], factor, tmp, bestVal, value, sum;
+    int pivotCol, row, col, best;
+    for (pivotCol = 0; pivotCol < NB; pivotCol++) {
+        best = pivotCol;                          // الارتكاز الجزئي
+        bestVal = aug[pivotCol][pivotCol] < 0 ? -aug[pivotCol][pivotCol] : aug[pivotCol][pivotCol];
+        for (row = pivotCol + 1; row < NB; row++) {
+            value = aug[row][pivotCol] < 0 ? -aug[row][pivotCol] : aug[row][pivotCol];
+            if (value > bestVal) { bestVal = value; best = row; }
+        }
+        for (col = 0; col <= NB; col++) {         // تبديل السطرين
+            tmp = aug[pivotCol][col]; aug[pivotCol][col] = aug[best][col]; aug[best][col] = tmp;
+        }
+        for (row = pivotCol + 1; row < NB; row++) {   // الحذف تحت المحور
+            factor = aug[row][pivotCol] / aug[pivotCol][pivotCol];
+            for (col = pivotCol; col <= NB; col++)
+                aug[row][col] -= factor * aug[pivotCol][col];
+        }
+    }
+    for (row = NB - 1; row >= 0; row--) {         // التعويض التراجعي
+        sum = aug[row][NB];
+        for (col = row + 1; col < NB; col++)
+            sum -= aug[row][col] * solution[col];
+        solution[row] = sum / aug[row][row];
+    }
+    for (row = 0; row < NB; row++)
+        printf("x%d = %.4f\n", row + 1, solution[row]);
+    return 0;
+}
+
+@@
+title: مقلوب مصفوفة بطريقة غاوس-جوردان
+level: hard
+domain: ds
+@ statement
+اكتب برنامجًا يحسب **مقلوب** مصفوفة 3×3 بطريقة **غاوس-جوردان**: نلصق مصفوفة الوحدة على يمين المصفوفة، ونحول الجزء الأيسر إلى الوحدة؛ الجزء الأيمن يصبح المقلوب. نتحقق بحساب `A × A⁻¹`.
+@ steps
+- `work[3][6]`: الأعمدة 0..2 هي `A` والأعمدة 3..5 هي الوحدة.
+- لكل محور: نقسم سطره على المحور ليصبح 1، ثم نصفر العمود في **كل** الأسطر الأخرى (فوق وتحت).
+- إذا كان المحور 0 نبحث عن سطر نبدله معه؛ إذا لم نجد فالمصفوفة غير قابلة للقلب.
+@ flow
+do: work = [A | I]
+for: pivot = 0 ; pivot < 3 ; pivot++
+  if: work[pivot][pivot] == 0
+    do: تبديل مع سطر محوره غير معدوم
+  do: قسمة السطر pivot على work[pivot][pivot]
+  for: row = 0 ; row < 3 ; row++
+    if: row != pivot
+      do: work[row] -= work[row][pivot] * work[pivot]
+out: الأعمدة 3..5 = المقلوب
+@ code
+#include <stdio.h>
+
+#define NB 3
+
+int main(void) {
+    double matrix[NB][NB] = {{2, 1, 1}, {1, 3, 2}, {1, 0, 0}};
+    double work[NB][2 * NB], factor, tmp, check;
+    int pivot, row, col, swapRow, inner;
+    for (row = 0; row < NB; row++)
+        for (col = 0; col < 2 * NB; col++)
+            work[row][col] = (col < NB) ? matrix[row][col] : (col - NB == row);  // [A | I]
+    for (pivot = 0; pivot < NB; pivot++) {
+        if (work[pivot][pivot] == 0) {            // محور معدوم: نبحث عن سطر آخر
+            for (swapRow = pivot + 1; swapRow < NB && work[swapRow][pivot] == 0; swapRow++)
+                ;
+            if (swapRow == NB) { printf("Matrix is not invertible\n"); return 0; }
+            for (col = 0; col < 2 * NB; col++) {
+                tmp = work[pivot][col]; work[pivot][col] = work[swapRow][col]; work[swapRow][col] = tmp;
+            }
+        }
+        factor = work[pivot][pivot];
+        for (col = 0; col < 2 * NB; col++)
+            work[pivot][col] /= factor;           // المحور يصبح 1
+        for (row = 0; row < NB; row++)
+            if (row != pivot) {                   // نصفر العمود في باقي الأسطر
+                factor = work[row][pivot];
+                for (col = 0; col < 2 * NB; col++)
+                    work[row][col] -= factor * work[pivot][col];
+            }
+    }
+    printf("Inverse:\n");
+    for (row = 0; row < NB; row++) {
+        for (col = NB; col < 2 * NB; col++)
+            printf(" %7.3f", work[row][col]);
+        printf("\n");
+    }
+    printf("Check A x inv (diagonal):");
+    for (row = 0; row < NB; row++) {
+        check = 0;
+        for (inner = 0; inner < NB; inner++)
+            check += matrix[row][inner] * work[inner][NB + row];
+        printf(" %.3f", check);
+    }
+    printf("\n");
+    return 0;
+}
+
+@@
+title: ترتيب صفحات المنتجات بخوارزمية PageRank
+level: hard
+domain: ds
+@ statement
+صفحات 5 منتجات مرتبطة بروابط "منتجات مشابهة": `links[from][to] = 1`. اكتب برنامجًا يحسب **PageRank** لكل صفحة بطريقة **القوة المتكررة**: `rank_new[to] = (1 - d)/N + d × Σ rank[from] / outDegree[from]` مع `d = 0.85`، حتى يصبح التغير الكلي أقل من `1e-6`.
+@ steps
+- `outDegree[from]` عدد الروابط الخارجة من كل صفحة.
+- نبدأ بـ `rank = 1/N` لكل صفحة.
+- في كل تكرار: كل صفحة توزع رتبتها بالتساوي على الصفحات التي تشير إليها.
+- نتوقف عندما يصبح `Σ |rank_new - rank|` صغيرًا.
+@ flow
+do: outDegree = مجموع كل سطر ; rank = 1/N
+dowhile: change > 1e-6
+  for: to = 0 ; to < N ; to++
+    do: newRank[to] = (1-d)/N + d * Σ rank[from]*links[from][to]/outDegree[from]
+  do: change = Σ |newRank - rank| ; rank = newRank
+out: rank
+@ code
+#include <stdio.h>
+
+#define NB 5
+#define DAMPING 0.85
+
+int main(void) {
+    int links[NB][NB] = {{0, 1, 1, 0, 0},
+                         {0, 0, 1, 0, 0},
+                         {1, 0, 0, 1, 0},
+                         {0, 0, 1, 0, 1},
+                         {1, 0, 1, 0, 0}};
+    double rank[NB], newRank[NB], change, gap;
+    int outDegree[NB], from, to, iteration = 0;
+    for (from = 0; from < NB; from++) {
+        outDegree[from] = 0;
+        for (to = 0; to < NB; to++)
+            outDegree[from] += links[from][to];
+        rank[from] = 1.0 / NB;                    // توزيع ابتدائي متساوٍ
+    }
+    do {
+        change = 0;
+        for (to = 0; to < NB; to++) {
+            newRank[to] = (1 - DAMPING) / NB;     // القفز العشوائي
+            for (from = 0; from < NB; from++)
+                if (links[from][to])
+                    newRank[to] += DAMPING * rank[from] / outDegree[from];
+        }
+        for (to = 0; to < NB; to++) {
+            gap = newRank[to] - rank[to];
+            change += (gap < 0) ? -gap : gap;
+            rank[to] = newRank[to];
+        }
+        iteration++;
+    } while (change > 1e-6);
+    printf("Converged after %d iterations\n", iteration);
+    for (to = 0; to < NB; to++)
+        printf("Page %d: %.4f\n", to, rank[to]);
+    return 0;
+}
+
+@@
+title: أقصر المسافات بين كل المستودعات (فلويد-وارشال)
+level: hard
+domain: ec
+@ statement
+مصفوفة `dist[5][5]` تعطي طول الطريق المباشر بين المستودعات (`INF` إذا لم يوجد طريق مباشر). اكتب برنامجًا يحسب **أقصر مسافة بين كل زوج** بخوارزمية **فلويد-وارشال**: لكل مستودع وسيط `via`، نتحقق هل المرور عبره أقصر.
+@ steps
+- ثلاث حلقات متداخلة: الوسيط `via` في الخارج.
+- `if (dist[from][via] + dist[via][to] < dist[from][to])` نحدّث.
+- نتجنب جمع `INF` مع قيمة.
+@ flow
+for: via = 0 ; via < NB ; via++
+  for: from = 0 ; from < NB ; from++
+    for: to = 0 ; to < NB ; to++
+      if: dist[from][via] + dist[via][to] < dist[from][to]
+        do: dist[from][to] = dist[from][via] + dist[via][to]
+out: dist
+@ code
+#include <stdio.h>
+
+#define NB 5
+#define INF 1000000
+
+int main(void) {
+    int dist[NB][NB] = {{  0, 120, INF, 300, INF},
+                        {120,   0,  90, INF, 400},
+                        {INF,  90,   0,  60, 150},
+                        {300, INF,  60,   0, 110},
+                        {INF, 400, 150, 110,   0}};
+    int via, from, to;
+    for (via = 0; via < NB; via++)                // المستودع الوسيط
+        for (from = 0; from < NB; from++)
+            for (to = 0; to < NB; to++)
+                if (dist[from][via] < INF && dist[via][to] < INF
+                    && dist[from][via] + dist[via][to] < dist[from][to])
+                    dist[from][to] = dist[from][via] + dist[via][to];   // طريق أقصر
+    for (from = 0; from < NB; from++) {
+        for (to = 0; to < NB; to++)
+            printf("%5d", dist[from][to]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: أقصر طريق للتوصيل (ديكسترا)
+level: hard
+domain: ec
+@ statement
+اكتب برنامجًا يحسب أقصر طريق من المستودع (العقدة 0) إلى كل حي في المدينة بخوارزمية **ديكسترا** على مصفوفة المجاورة (0 = لا طريق)، ويعيد بناء المسار إلى حي مقروء باستعمال جدول `previous`.
+@ stdin
+5
+@ steps
+- `best[node] = INF` إلا المصدر 0، و`done[node] = 0`.
+- في كل دورة: نختار العقدة غير المعالجة ذات أصغر `best`، ونعلمها معالجة.
+- نحدّث جيرانها: إذا كان `best[node] + weight < best[next]`.
+- المسار: نتبع `previous` من الوجهة إلى المصدر.
+@ flow
+in: target
+do: best = INF ; best[0] = 0
+for: round = 0 ; round < NB ; round++
+  do: node = أصغر best غير معالجة ; done[node] = 1
+  for: next = 0 ; next < NB ; next++
+    if: road[node][next] && best[node] + road < best[next]
+      do: best[next] = best[node] + road ; previous[next] = node
+out: best[target], المسار عبر previous
+@ code
+#include <stdio.h>
+
+#define NB 6
+#define INF 1000000
+
+int main(void) {
+    int road[NB][NB] = {{0, 7, 9, 0, 0, 14},
+                        {7, 0, 10, 15, 0, 0},
+                        {9, 10, 0, 11, 0, 2},
+                        {0, 15, 11, 0, 6, 0},
+                        {0, 0, 0, 6, 0, 9},
+                        {14, 0, 2, 0, 9, 0}};
+    int best[NB], done[NB], previous[NB], path[NB];
+    int node, next, round, target, length = 0;
+    for (node = 0; node < NB; node++) {
+        best[node] = INF; done[node] = 0; previous[node] = -1;
+    }
+    best[0] = 0;                                  // المستودع
+    for (round = 0; round < NB; round++) {
+        node = -1;                                // أقرب عقدة غير معالجة
+        for (next = 0; next < NB; next++)
+            if (!done[next] && (node < 0 || best[next] < best[node]))
+                node = next;
+        done[node] = 1;                           // مسافتها نهائية الآن
+        for (next = 0; next < NB; next++)
+            if (road[node][next] && best[node] + road[node][next] < best[next]) {
+                best[next] = best[node] + road[node][next];
+                previous[next] = node;
+            }
+    }
+    scanf("%d", &target);
+    for (node = target; node != -1; node = previous[node])
+        path[length++] = node;                    // المسار معكوسًا
+    printf("Distance to %d = %d min\nPath:", target, best[target]);
+    while (length > 0)
+        printf(" %d", path[--length]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: الانحدار الخطي المتعدد بالمعادلات الطبيعية
+level: hard
+domain: ds
+@ statement
+نريد التنبؤ بالمبيعات `y` من ميزانية الإعلان `x1` وعدد التخفيضات `x2`: `y = b0 + b1 x1 + b2 x2`. اكتب برنامجًا يبني **المعادلات الطبيعية** `(XᵀX) β = Xᵀy` (مصفوفة 3×3) ثم يحلها بالحذف لغاوس، ويحسب معامل التحديد `R²`.
+@ steps
+- مصفوفة التصميم `X`: عمود من 1 ثم `x1` ثم `x2`.
+- `xtx[a][b] = Σ X[row][a] * X[row][b]` و`xty[a] = Σ X[row][a] * sales[row]`.
+- حل الجملة 3×3 بالحذف ثم التعويض.
+- `R² = 1 - SSres / SStot`.
+@ flow
+do: design[row] = {1, x1, x2}
+do: xtx = Xᵀ X ; xty = Xᵀ sales
+do: حل xtx × beta = xty بغاوس
+do: ssRes = Σ (sales - ŷ)² ; ssTot = Σ (sales - mean)²
+out: beta, 1 - ssRes / ssTot
+@ code
+#include <stdio.h>
+
+#define NB 8
+#define NB_COEF 3
+
+int main(void) {
+    double x1[NB] = {1, 2, 3, 4, 5, 6, 7, 8};             // الإعلان
+    double x2[NB] = {0, 1, 0, 2, 1, 3, 2, 3};             // التخفيضات
+    double sales[NB]  = {14, 22, 21, 35, 33, 47, 44, 52};     // المبيعات
+    double design[NB][NB_COEF], aug[NB_COEF][NB_COEF + 1], beta[NB_COEF];
+    double factor, sum, mean = 0, ssRes = 0, ssTot = 0, predicted;
+    int row, colA, colB, pivot;
+    for (row = 0; row < NB; row++) {
+        design[row][0] = 1; design[row][1] = x1[row]; design[row][2] = x2[row];
+        mean += sales[row] / NB;
+    }
+    for (colA = 0; colA < NB_COEF; colA++) {      // المعادلات الطبيعية
+        for (colB = 0; colB < NB_COEF; colB++) {
+            aug[colA][colB] = 0;
+            for (row = 0; row < NB; row++)
+                aug[colA][colB] += design[row][colA] * design[row][colB];
+        }
+        aug[colA][NB_COEF] = 0;
+        for (row = 0; row < NB; row++)
+            aug[colA][NB_COEF] += design[row][colA] * sales[row];
+    }
+    for (pivot = 0; pivot < NB_COEF; pivot++)     // الحذف (XtX موجبة: لا ارتكاز)
+        for (row = pivot + 1; row < NB_COEF; row++) {
+            factor = aug[row][pivot] / aug[pivot][pivot];
+            for (colB = pivot; colB <= NB_COEF; colB++)
+                aug[row][colB] -= factor * aug[pivot][colB];
+        }
+    for (row = NB_COEF - 1; row >= 0; row--) {    // التعويض التراجعي
+        sum = aug[row][NB_COEF];
+        for (colB = row + 1; colB < NB_COEF; colB++)
+            sum -= aug[row][colB] * beta[colB];
+        beta[row] = sum / aug[row][row];
+    }
+    for (row = 0; row < NB; row++) {
+        predicted = beta[0] + beta[1] * x1[row] + beta[2] * x2[row];
+        ssRes += (sales[row] - predicted) * (sales[row] - predicted);
+        ssTot += (sales[row] - mean) * (sales[row] - mean);
+    }
+    printf("sales = %.3f + %.3f*ads + %.3f*promos\n", beta[0], beta[1], beta[2]);
+    printf("R^2 = %.4f\n", 1 - ssRes / ssTot);
+    return 0;
+}
+
+@@
+title: تجميع الزبائن في بعدين
+level: hard
+domain: ds
+@ statement
+مصفوفة `points[12][2]`: لكل زبون (التكرار الشهري، متوسط السلة). اكتب برنامجًا يطبق **K-Means** بمجموعتين في بعدين: المراكز مصفوفة `centers[2][2]` تبدأ بأول زبونين، والمسافة مربع إقليدي. نعرض المراكز النهائية وحجم كل مجموعة و**مجموع المربعات داخل المجموعات**.
+@ steps
+- إسناد كل زبون لأقرب مركز في بعدين.
+- إعادة الحساب: متوسط كل إحداثية لأعضاء المجموعة.
+- التوقف عندما لا يتغير أي إسناد.
+- `inertia = Σ` مربع المسافة إلى المركز.
+@ flow
+do: centers = أول نقطتين ; label = -1
+dowhile: changed
+  do: changed = 0
+  for: row = 0 ; row < NB ; row++
+    do: closest = أقرب مركز
+    if: closest != label[row]
+      do: label[row] = closest ; changed = 1
+  do: centers = متوسطات المجموعات
+do: inertia = Σ مربع المسافة إلى المركز
+out: centers, inertia
+@ code
+#include <stdio.h>
+
+#define NB 12
+#define NB_K 2
+
+int main(void) {
+    double points[NB][2] = {{1, 2.0}, {2, 1.5}, {1, 1.0}, {3, 2.5}, {2, 2.2}, {9, 8.0},
+                            {8, 7.5}, {10, 9.0}, {9, 7.0}, {7, 8.5}, {3, 1.8}, {8, 9.2}};
+    double centers[NB_K][2], sum[NB_K][2], dx, dy, dist, bestDist, inertia = 0;
+    int label[NB], count[NB_K], row, cluster, closest, changed, axis;
+    for (cluster = 0; cluster < NB_K; cluster++)
+        for (axis = 0; axis < 2; axis++)
+            centers[cluster][axis] = points[cluster][axis];   // أول نقطتين
+    for (row = 0; row < NB; row++)
+        label[row] = -1;
+    do {
+        changed = 0;
+        for (row = 0; row < NB; row++) {
+            closest = 0; bestDist = -1;
+            for (cluster = 0; cluster < NB_K; cluster++) {
+                dx = points[row][0] - centers[cluster][0];
+                dy = points[row][1] - centers[cluster][1];
+                dist = dx * dx + dy * dy;
+                if (bestDist < 0 || dist < bestDist) { bestDist = dist; closest = cluster; }
+            }
+            if (closest != label[row]) { label[row] = closest; changed = 1; }
+        }
+        for (cluster = 0; cluster < NB_K; cluster++) {
+            sum[cluster][0] = sum[cluster][1] = 0; count[cluster] = 0;
+        }
+        for (row = 0; row < NB; row++) {          // مجموع الإحداثيات لكل مجموعة
+            sum[label[row]][0] += points[row][0];
+            sum[label[row]][1] += points[row][1];
+            count[label[row]]++;
+        }
+        for (cluster = 0; cluster < NB_K; cluster++)
+            if (count[cluster] > 0)
+                for (axis = 0; axis < 2; axis++)
+                    centers[cluster][axis] = sum[cluster][axis] / count[cluster];
+    } while (changed);
+    for (row = 0; row < NB; row++) {
+        dx = points[row][0] - centers[label[row]][0];
+        dy = points[row][1] - centers[label[row]][1];
+        inertia += dx * dx + dy * dy;
+    }
+    for (cluster = 0; cluster < NB_K; cluster++)
+        printf("Cluster %d: center (%.2f, %.2f), %d customers\n", cluster,
+               centers[cluster][0], centers[cluster][1], count[cluster]);
+    printf("Inertia = %.3f\n", inertia);
+    return 0;
+}
+
+@@
+title: التنبؤ بتقييم مفقود (الترشيح التعاوني)
+level: hard
+domain: ds
+@ statement
+في مصفوفة التقييمات (زبائن × منتجات) القيمة 0 تعني "لم يقيّم". نريد التنبؤ بتقييم الزبون `target` للمنتج `item` بطريقة **الترشيح التعاوني**: نحسب **تشابه جيب التمام** بينه وبين كل زبون آخر قيّم المنتج (على المنتجات المشتركة فقط)، ثم المتوسط الموزون بالتشابه.
+@ stdin
+0 2
+@ steps
+- لكل زبون آخر `other` قيّم `item`: نحسب `dot`، و`normA`، و`normB` على المنتجات التي قيّمها الاثنان.
+- `similarity = dot / جذر(normA * normB)` (الجذر بطريقة نيوتن).
+- `prediction = Σ similarity × rating[other][item] / Σ similarity`.
+@ flow
+in: target, item
+do: weightedSum = 0 ; simSum = 0
+for: other = 0 ; other < NB_USERS ; other++
+  if: other != target && ratings[other][item] > 0
+    do: similarity = cosine(target, other) على المشترك
+    do: weightedSum += similarity * ratings[other][item]
+    do: simSum += similarity
+out: weightedSum / simSum
+@ code
+#include <stdio.h>
+
+#define NB_USERS 5
+#define NB_ITEMS 5
+
+int main(void) {
+    int ratings[NB_USERS][NB_ITEMS] = {{5, 4, 0, 1, 0},
+                                       {4, 5, 4, 1, 1},
+                                       {1, 1, 2, 5, 4},
+                                       {5, 5, 5, 0, 1},
+                                       {2, 0, 1, 4, 5}};
+    int target, item, other, col, step;
+    double dot, normA, normB, product, root, similarity;
+    double weightedSum = 0, simSum = 0;
+    scanf("%d %d", &target, &item);
+    for (other = 0; other < NB_USERS; other++) {
+        if (other == target || ratings[other][item] == 0)
+            continue;                             // لم يقيّم المنتج المطلوب
+        dot = normA = normB = 0;
+        for (col = 0; col < NB_ITEMS; col++)
+            if (ratings[target][col] > 0 && ratings[other][col] > 0) {   // مشترك
+                dot += ratings[target][col] * ratings[other][col];
+                normA += ratings[target][col] * ratings[target][col];
+                normB += ratings[other][col] * ratings[other][col];
+            }
+        if (dot == 0)
+            continue;
+        product = normA * normB;
+        root = product;
+        for (step = 0; step < 60; step++)         // الجذر بطريقة نيوتن
+            root = (root + product / root) / 2;
+        similarity = dot / root;
+        printf("User %d: similarity %.3f, rating %d\n", other, similarity, ratings[other][item]);
+        weightedSum += similarity * ratings[other][item];
+        simSum += similarity;
+    }
+    if (simSum > 0)
+        printf("Predicted rating of user %d for item %d = %.2f\n", target, item, weightedSum / simSum);
+    else
+        printf("Not enough data\n");
+    return 0;
+}
+
+@@
+title: مناطق التوصيل المتصلة (ملء المناطق)
+level: hard
+domain: ec
+@ statement
+خريطة المدينة شبكة `zone[6][8]`: 1 حي مخدوم و0 غير مخدوم. نريد عد **المناطق المتصلة** (أحياء مخدومة متجاورة أفقيًا أو عموديًا) وحجم كل منطقة، لتعيين سائق لكل منطقة. اكتب البرنامج بخوارزمية **ملء المنطقة** باستعمال **مكدس يدوي** (دون عودية).
+@ steps
+- `region[row][col]` رقم المنطقة لكل خانة (0 = لم تُزر).
+- لكل خانة مخدومة لم تُزر: نبدأ منطقة جديدة وندفعها في المكدس.
+- ما دام المكدس غير فارغ: نسحب خانة ونعلّم جيرانها الأربعة المخدومين غير المزارين وندفعهم.
+@ flow
+do: nbRegions = 0
+for: row = 0 ; row < 6 ; row++
+  for: col = 0 ; col < 8 ; col++
+    if: zone[row][col] == 1 && region[row][col] == 0
+      do: nbRegions++ ; دفع (row, col)
+      while: top > 0
+        do: سحب خانة ; size++
+        do: دفع الجيران الأربعة المخدومين غير المزارين
+      out: nbRegions, size
+@ code
+#include <stdio.h>
+
+#define NB_ROWS 6
+#define NB_COLS 8
+
+int main(void) {
+    int zone[NB_ROWS][NB_COLS] = {{1, 1, 0, 0, 0, 1, 1, 0},
+                                  {1, 0, 0, 1, 0, 0, 1, 0},
+                                  {0, 0, 1, 1, 1, 0, 0, 0},
+                                  {1, 0, 0, 1, 0, 0, 1, 1},
+                                  {1, 1, 0, 0, 0, 0, 1, 0},
+                                  {0, 1, 0, 1, 1, 0, 0, 0}};
+    int region[NB_ROWS][NB_COLS] = {{0}};
+    int stackRow[NB_ROWS * NB_COLS], stackCol[NB_ROWS * NB_COLS];
+    int moveRow[4] = {-1, 1, 0, 0}, moveCol[4] = {0, 0, -1, 1};
+    int row, col, top, curRow, curCol, nextRow, nextCol, dir, size, nbRegions = 0;
+    for (row = 0; row < NB_ROWS; row++)
+        for (col = 0; col < NB_COLS; col++) {
+            if (zone[row][col] != 1 || region[row][col] != 0)
+                continue;
+            nbRegions++;                          // منطقة جديدة
+            region[row][col] = nbRegions;
+            top = 0; size = 0;
+            stackRow[top] = row; stackCol[top] = col; top++;
+            while (top > 0) {
+                top--;
+                curRow = stackRow[top]; curCol = stackCol[top];
+                size++;
+                for (dir = 0; dir < 4; dir++) {   // الجيران الأربعة
+                    nextRow = curRow + moveRow[dir];
+                    nextCol = curCol + moveCol[dir];
+                    if (nextRow >= 0 && nextRow < NB_ROWS && nextCol >= 0 && nextCol < NB_COLS
+                        && zone[nextRow][nextCol] == 1 && region[nextRow][nextCol] == 0) {
+                        region[nextRow][nextCol] = nbRegions;   // نعلّم قبل الدفع
+                        stackRow[top] = nextRow; stackCol[top] = nextCol; top++;
+                    }
+                }
+            }
+            printf("Region %d: %d block(s)\n", nbRegions, size);
+        }
+    for (row = 0; row < NB_ROWS; row++) {
+        for (col = 0; col < NB_COLS; col++)
+            printf("%2d", region[row][col]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: أطول مسار تصفح مشترك
+level: hard
+domain: ds
+@ statement
+مسارا تصفح لزبونين ممثلان بجدولي أرقام صفحات. اكتب برنامجًا يجد **أطول متتالية مشتركة** (LCS) بينهما بالبرمجة الديناميكية: `table[i][j]` طول LCS لأول `i` صفحة من الأول وأول `j` من الثاني، ثم يعيد بناء المتتالية.
+@ steps
+- إذا تساوت الصفحتان: `table[posA][posB] = table[posA-1][posB-1] + 1`.
+- وإلا: الأكبر بين `table[posA-1][posB]` و`table[posA][posB-1]`.
+- إعادة البناء من الخانة الأخيرة نحو `[0][0]`.
+@ flow
+for: posA = 1 ; posA <= LEN_A ; posA++
+  for: posB = 1 ; posB <= LEN_B ; posB++
+    if: pagesA[posA-1] == pagesB[posB-1]
+      do: table[posA][posB] = table[posA-1][posB-1] + 1
+    else:
+      do: table[posA][posB] = max(فوق, يسار)
+do: إعادة البناء من [LEN_A][LEN_B]
+out: table[LEN_A][LEN_B], المتتالية
+@ code
+#include <stdio.h>
+
+#define LEN_A 8
+#define LEN_B 7
+
+int main(void) {
+    int pagesA[LEN_A] = {1, 4, 2, 7, 3, 9, 5, 6};     // الصفحة 1 = الرئيسية
+    int pagesB[LEN_B] = {1, 2, 4, 7, 9, 6, 5};
+    int table[LEN_A + 1][LEN_B + 1], common[LEN_B];
+    int posA, posB, length;
+    for (posA = 0; posA <= LEN_A; posA++)
+        for (posB = 0; posB <= LEN_B; posB++) {
+            if (posA == 0 || posB == 0)
+                table[posA][posB] = 0;                // متتالية فارغة
+            else if (pagesA[posA - 1] == pagesB[posB - 1])
+                table[posA][posB] = table[posA - 1][posB - 1] + 1;
+            else if (table[posA - 1][posB] >= table[posA][posB - 1])
+                table[posA][posB] = table[posA - 1][posB];
+            else
+                table[posA][posB] = table[posA][posB - 1];
+        }
+    length = table[LEN_A][LEN_B];
+    posA = LEN_A; posB = LEN_B;
+    while (posA > 0 && posB > 0) {                    // إعادة البناء
+        if (pagesA[posA - 1] == pagesB[posB - 1]) {
+            common[table[posA][posB] - 1] = pagesA[posA - 1];
+            posA--; posB--;
+        } else if (table[posA - 1][posB] >= table[posA][posB - 1]) {
+            posA--;
+        } else {
+            posB--;
+        }
+    }
+    printf("LCS length = %d\nCommon path:", length);
+    for (posA = 0; posA < length; posA++)
+        printf(" %d", common[posA]);
+    printf("\n");
+    return 0;
+}

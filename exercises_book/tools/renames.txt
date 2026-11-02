@@ -1,0 +1,144 @@
+1.8: a=priceA b=priceB
+1.9: m=minutes r=rest s=seconds
+1.11: c=capacity n=items
+1.13: a=day1 b=day2 c=day3 d=day4 m=mean v=variance
+1.14: x=price
+1.15: x=amount z=zscore
+1.16: n=nbReviews s=weighted
+1.17: R=revenue f=factor g=growth
+1.18: a=notes2000 b=notes1000 c=notes500 d=notes200 m=money
+1.19: h=hour m=minute t=delay
+1.20: d=days w=weeks
+1.21: h=hundreds n=code r=reversed t=tens u=units
+1.22: n=order s=digitSum
+1.23: x=price
+1.26: n=nbOrders q=quotient
+1.27: s=stock
+1.28: a=slope b=intercept
+1.29: a=slope b=intercept y=sales
+1.30: b=books c=clothing e=electronics t=total
+1.31: h=hours m=minutes s=seconds t=timestamp
+1.36: f=factor i=inflation p=price
+1.37: a=stockA b=stockB
+1.38: a=centsA b=centsB t=totalCents
+1.39: c=category
+1.40: d=orderDay k=delay t=deliveryDay
+1.41: a=priceA b=priceB d=diff
+1.42: a=rating1 b=rating2 c=rating3 m=mean r=root v=variance
+1.44: a=slope b=intercept n=nbPoints
+1.45: d=days h=hours m=minutes r=rest s=seconds t=totalSec v=visitors
+1.46: f=flags
+1.47: e=ema
+1.48: S=weightedSum n=code
+1.49: E=elasticity
+1.50: A=contLength B=contWidth C=contHeight a=boxLength b=boxWidth c=boxHeight n=nbBoxes
+2.2: q=quantity s=stock
+2.3: n=orderId
+2.5: r=rating
+2.6: r=result
+2.9: c=choice
+2.12: w=weight
+2.13: a=ratingA b=ratingB c=ratingC
+2.14: a=price1 b=price2 c=price3 t=tmp
+2.15: y=year
+2.16: d=days m=month y=year
+2.17: n=nbOrders
+2.18: t=taxRate
+2.19: x=amount z=zscore
+2.21: h=halves v=rounded
+2.22: F=fixedCost m=margin p=price q=units v=varCost
+2.23: d=day m=month y=year
+2.24: d=day m=month y=year
+2.27: w=wilaya
+2.28: q=quantity
+2.29: e=overlapEnd s=overlapStart
+2.30: a=left b=right r=result
+2.31: d=deliveryDay
+2.33: n=nbItems
+2.34: c=change
+2.35: R=revenue a=demandMax b=slope p=price
+2.36: a=amount1 b=amount2 c=amount3
+2.37: f=factor h=hour
+2.40: d=gap
+2.41: J=century K=yearInCentury d=day h=weekday m=month y=year
+2.42: p=proba
+2.43: a=price1 b=price2 c=price3 d=price4 t=tmp
+2.44: x=rest
+2.45: y=year
+2.46: w=weight
+2.47: r=radius x=custX y=custY
+2.48: x=visits y=basket
+2.49: w=wilaya
+2.50: a=demandBase b=demandSlope c=supplyBase d=supplySlope p=price q=quantity
+3.1: i=item n=nbItems p=price
+3.2: i=index n=nbOrders x=amount
+3.3: i=index n=nbReviews r=rating
+3.4: q=qty
+3.5: n=hours
+3.6: n=nbItems p=price
+3.7: i=index n=nbPrices p=price
+3.8: a=first b=last i=orderId
+3.9: m=monthly
+3.10: r=rating
+3.11: i=index n=nbPages x=loadTime
+3.12: i=day n=nbDays s=sum x=sales
+3.13: r=root v=value
+3.14: i=step k=slots n=nbProducts
+3.15: c=bundles i=step k=size n=nbProducts
+3.16: a=packA b=packB r=rest
+3.17: a=cycleA b=cycleB r=rest x=gcdA y=gcdB
+3.18: i=divisor n=number
+3.19: d=digit n=number
+3.20: m=work n=code
+3.21: a=prev b=current c=next m=month
+3.22: C=capital f=factor n=years t=rate y=year
+3.23: P=balance i=interest m=installment r=rate
+3.24: i=day n=nbDays x=sales
+3.25: i=day n=nbDays x=sales
+3.26: c=bar i=index j=star k=stars n=nbReviews r=rating
+3.27: b=bit n=number p=place
+3.28: d=discount q=qty
+3.29: i=index n=nbCustomers x=spend
+3.30: S=stock d=initDemand g=growth
+3.31: i=day n=nbDays s=smooth x=sales
+3.32: a=slope b=intercept i=index n=nbPoints x=budget y=sales
+3.33: i=index n=nbCustomers x=minutes y=amount
+3.34: i=index n=nbPrices x=price
+3.35: i=row j=col n=levels
+3.36: f=gap
+3.37: C=capital k=term_k r=rate t=years x=exponent
+3.38: c=change h=hour n=nbHours x=visits
+3.40: T=target d=day n=maxDays x=sales
+3.41: N=limit d=divisor n=number
+3.42: i=customer x=spend
+3.43: N=nbBaskets b=basketNo j=item k=nbItems u=uniform
+3.44: b=bias e=epoch i=index n=nbPoints w=weight x=feature y=target
+3.45: d=digit n=number
+3.46: N=maxRow c=coef k=col n=row s=rowSum
+3.47: d=digit n=number p=power
+3.48: n=number
+3.49: S=maxLevel d=demand s=minLevel
+3.50: i=day n=nbDays p=price
+4.1: T=prices i=index n=nbPrices
+4.2: S=sales i=day
+4.3: N=NB_PRODUCTS i=index
+4.4: N=NB_PRODUCTS i=index
+4.5: N=NB_PRICES T=prices i=index p=percent
+4.6: T=orders i=index n=nbOrders
+4.7: N=NB_IDS i=index x=target
+4.8: N=NB_PRICES P=premium T=prices i=index k=nbPremium
+4.9: N=NB_REVIEWS i=index r=ratings
+4.10: N=NB_ITEMS i=index
+4.11: N=SIZE T=series i=left j=right t=tmp
+4.12: N=NB_DAYS T=shifts i=index k=steps s=step
+4.13: T=featured i=index n=size x=newId
+4.14: T=products i=index n=size x=removedId
+4.15: N=NB_PRICES T=prices i=index t=tmp
+4.16: N=NB_PAGES T=visits i=index j=scan m=maxPos t=tmp
+4.17: N=NB_ORDERS T=times i=index j=scan
+4.18: N=NB_IDS T=catalog x=target
+4.19: T=prices i=index j=scan n=nbPrices
+4.20: N=NB_REVIEWS i=index r=ratings v=value
+4.21: N=NB_ORDERS h=hour i=index k=bar
+4.22: N=SIZE T=visitors i=index k=nbUnique
+4.23: A=listA B=listB C=merged i=posA j=posB k=posC

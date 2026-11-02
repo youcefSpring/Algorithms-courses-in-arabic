@@ -242,3 +242,8 @@
         \end{tabular}
     \end{minipage}
 \end{frame}}
+
+% list lines are 1.4 cm apart (baseline to baseline)
+\newlength{\lineGap}\setlength{\lineGap}{1.4cm}
+\AtBeginDocument{\let\origlist\list
+    \def\list#1#2{\origlist{#1}{#2\setlength{\itemsep}{\dimexpr\lineGap-\baselineskip\relax}\setlength{\parsep}{0pt}}}}

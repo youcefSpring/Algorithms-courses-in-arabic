@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbReviews, index, rating, sum = 0;
+    scanf("%d", &nbReviews);
+    for (index = 0; index < nbReviews; index++) {
+        scanf("%d", &rating);
+        sum += rating;                 // sum += rating تعني sum = sum + rating
+    }
+    printf("Average = %.2f\n", (double)sum / nbReviews);
+    return 0;
+}

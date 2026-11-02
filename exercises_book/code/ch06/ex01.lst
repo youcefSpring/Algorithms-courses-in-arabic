@@ -1,0 +1,10 @@
+#include <stdio.h>
+
+int main(void) {
+    char name[] = "Wireless Headphones";  (*@\cmt{المترجم يضيف '\\cen{0}' في النهاية}@*)
+    int length = 0;
+    while (name[length] != '\0')          (*@\cmt{نتوقف عند علامة النهاية}@*)
+        length++;
+    printf("\"%s\" has %d characters\n", name, length);
+    return 0;
+}

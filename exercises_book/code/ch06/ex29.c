@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+int main(void) {
+    char card[20], masked[25];
+    int pos, write = 0, length = 0;
+    scanf("%19s", card);
+    while (card[length] != '\0') length++;
+    if (length != 16) {
+        printf("Invalid card length\n");
+        return 0;
+    }
+    for (pos = 0; pos < 16; pos++) {
+        masked[write++] = (pos < 12) ? '*' : card[pos];   // آخر 4 أرقام فقط
+        if (pos % 4 == 3 && pos < 15)
+            masked[write++] = ' ';            // مجموعات من 4
+    }
+    masked[write] = '\0';
+    printf("Card: %s\n", masked);
+    return 0;
+}

@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+#define MAX 10
+
+int main(void) {
+    int ratings[MAX][MAX];
+    int nbUsers, nbItems, user, item, rowSum;
+    scanf("%d %d", &nbUsers, &nbItems);
+    for (user = 0; user < nbUsers; user++)
+        for (item = 0; item < nbItems; item++)
+            scanf("%d", &ratings[user][item]);    // عنوان الخانة
+    for (user = 0; user < nbUsers; user++) {
+        rowSum = 0;
+        printf("User %d:", user);
+        for (item = 0; item < nbItems; item++) {
+            printf(" %d", ratings[user][item]);
+            rowSum += ratings[user][item];
+        }
+        printf("  avg %.2f\n", (double)rowSum / nbItems);
+    }
+    return 0;
+}

@@ -1,0 +1,904 @@
+@@
+title: طول اسم المنتج
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يحسب **طول** اسم منتج (عدد الحروف) دون الدالة `strlen`، مستغلًا أن كل سلسلة في C تنتهي بالحرف الخاص `'\0'`.
+@ steps
+- نبدأ بـ `length = 0`.
+- ما دام `name[length] != '\0'` نزيد `length`.
+- عند التوقف، `length` هو عدد الحروف.
+@ flow
+do: length = 0
+while: name[length] != '\0'
+  do: length++
+out: length
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char name[] = "Wireless Headphones";  // المترجم يضيف '\0' في النهاية
+    int length = 0;
+    while (name[length] != '\0')          // نتوقف عند علامة النهاية
+        length++;
+    printf("\"%s\" has %d characters\n", name, length);
+    return 0;
+}
+
+@@
+title: عدد كلمات التعليق
+level: easy
+domain: ds
+@ statement
+اكتب برنامجًا يعد **الكلمات** في تعليق زبون. الكلمة سلسلة من الحروف غير الفراغية؛ قد توجد عدة فراغات متتالية.
+@ steps
+- `inWord = 0` يعني أننا خارج كلمة.
+- عند حرف غير فراغ ونحن خارج كلمة: كلمة جديدة `words++` و`inWord = 1`.
+- عند فراغ: `inWord = 0`.
+@ flow
+do: words = 0 ; inWord = 0 ; pos = 0
+while: review[pos] != '\0'
+  if: review[pos] == ' '
+    do: inWord = 0
+  else:
+    if: !inWord
+      do: words++ ; inWord = 1
+  do: pos++
+out: words
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char review[] = "  Great   phone, fast delivery  and good price ";
+    int words = 0, inWord = 0, pos;
+    for (pos = 0; review[pos] != '\0'; pos++) {
+        if (review[pos] == ' ') {
+            inWord = 0;               // الفراغ ينهي الكلمة
+        } else if (!inWord) {
+            words++;                  // أول حرف من كلمة جديدة
+            inWord = 1;
+        }
+    }
+    printf("Words: %d\n", words);
+    return 0;
+}
+
+@@
+title: رمز المنتج بالحروف الكبيرة
+level: easy
+domain: ec
+@ statement
+رموز المنتجات (SKU) يجب أن تكون بالحروف **الكبيرة**. اكتب برنامجًا يحول رمزًا في مكانه دون `toupper`: كل حرف بين `'a'` و`'z'` نطرح منه `'a' - 'A'`.
+@ steps
+- نمر على السلسلة حتى `'\0'`.
+- إذا كان الحرف صغيرًا: `code[pos] = code[pos] - 'a' + 'A'`.
+- الأرقام والرموز تبقى كما هي.
+@ flow
+for: pos = 0 ; code[pos] != '\0' ; pos++
+  if: code[pos] >= 'a' && code[pos] <= 'z'
+    do: code[pos] = code[pos] - 'a' + 'A'
+out: code
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char code[] = "tv-sam55-qled-2026";
+    int pos;
+    for (pos = 0; code[pos] != '\0'; pos++)
+        if (code[pos] >= 'a' && code[pos] <= 'z')
+            code[pos] = code[pos] - 'a' + 'A';    // الإزاحة بين الصغير والكبير
+    printf("SKU: %s\n", code);
+    return 0;
+}
+
+@@
+title: عرض الاسم معكوسًا
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يقرأ اسم مستخدم (كلمة واحدة) ويعرضه **معكوسًا** حرفًا بحرف.
+@ stdin
+amina2026
+@ steps
+- نقرأ بـ `scanf("%s", user)` (دون `&` لأن اسم الجدول عنوان).
+- نحسب الطول، ثم نطبع من `length - 1` نزولًا إلى 0.
+@ flow
+in: user
+do: length = طول user
+for: pos = length - 1 ; pos >= 0 ; pos--
+  out: user[pos]
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char user[50];
+    int length = 0, pos;
+    scanf("%49s", user);              // 49 حرفًا كحد أقصى + '\0'
+    while (user[length] != '\0')
+        length++;
+    for (pos = length - 1; pos >= 0; pos--)
+        putchar(user[pos]);           // نطبع حرفًا واحدًا
+    putchar('\n');
+    return 0;
+}
+
+@@
+title: عدد الأرقام في رمز ترويجي
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يعد في رمز ترويجي عدد **الأرقام** وعدد **الحروف** وعدد الرموز الأخرى.
+@ stdin
+SUMMER-2026-X7
+@ steps
+- رقم: `'0' <= ch <= '9'`.
+- حرف: بين `'a'` و`'z'` أو بين `'A'` و`'Z'`.
+- غير ذلك: رمز.
+@ flow
+in: promo
+for: pos = 0 ; promo[pos] != '\0' ; pos++
+  if: رقم
+    do: digits++
+  else:
+    if: حرف
+      do: letters++
+    else:
+      do: others++
+out: digits, letters, others
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char promo[40], ch;
+    int pos, digits = 0, letters = 0, others = 0;
+    scanf("%39s", promo);
+    for (pos = 0; promo[pos] != '\0'; pos++) {
+        ch = promo[pos];
+        if (ch >= '0' && ch <= '9')
+            digits++;
+        else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+            letters++;
+        else
+            others++;                 // - أو _ أو غيرهما
+    }
+    printf("Digits %d, letters %d, others %d\n", digits, letters, others);
+    return 0;
+}
+
+@@
+title: نسخ سلسلة يدويًا
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا ينسخ اسم منتج إلى جدول جديد حرفًا بحرف **دون** `strcpy`، دون أن ننسى `'\0'`، ثم يعدل النسخة ليتأكد أن الأصل لم يتغير.
+@ steps
+- ننسخ ما دام الحرف ليس `'\0'`.
+- بعد الحلقة نضع `'\0'` في النسخة.
+@ flow
+do: pos = 0
+while: source[pos] != '\0'
+  do: copy[pos] = source[pos] ; pos++
+do: copy[pos] = '\0'
+out: source, copy
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char source[] = "Gaming Laptop";
+    char copy[50];
+    int pos = 0;
+    while (source[pos] != '\0') {
+        copy[pos] = source[pos];      // حرفًا بحرف
+        pos++;
+    }
+    copy[pos] = '\0';                 // ضروري: علامة النهاية
+    copy[0] = 'X';                    // نعدل النسخة فقط
+    printf("Source: %s\nCopy:   %s\n", source, copy);
+    return 0;
+}
+
+@@
+title: الاسم الكامل للزبون
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يقرأ الاسم واللقب ويكوّن **الاسم الكامل** "اللقب الاسم" في جدول ثالث دون `strcat`.
+@ stdin
+Yacine Belkacem
+@ steps
+- ننسخ اللقب في `full`، ثم نضيف فراغًا.
+- نلصق الاسم بعده، ثم `'\0'`.
+@ flow
+in: first, last
+do: نسخ last إلى full
+do: full[pos++] = ' '
+do: نسخ first بعده ; full[pos] = '\0'
+out: full
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char first[30], last[30], full[62];
+    int pos = 0, src;
+    scanf("%29s %29s", first, last);
+    for (src = 0; last[src] != '\0'; src++)
+        full[pos++] = last[src];      // اللقب أولًا
+    full[pos++] = ' ';
+    for (src = 0; first[src] != '\0'; src++)
+        full[pos++] = first[src];     // ثم الاسم
+    full[pos] = '\0';
+    printf("Customer: %s (%d chars)\n", full, pos);
+    return 0;
+}
+
+@@
+title: مطابقة كلمة المرور
+level: easy
+domain: ec
+@ statement
+عند التسجيل يكتب المستخدم كلمة المرور مرتين. اكتب برنامجًا يتحقق من **تطابقهما** حرفًا بحرف دون `strcmp`.
+@ stdin
+Dz2026!pass Dz2026!Pass
+@ steps
+- نتقدم ما دام الحرفان متساويين وليسا نهاية السلسلة.
+- السلسلتان متطابقتان إذا كان الحرفان عند التوقف متساويين (أي كلاهما `'\0'`).
+@ flow
+in: first, second
+do: pos = 0
+while: first[pos] == second[pos] && first[pos] != '\0'
+  do: pos++
+if: first[pos] == second[pos]
+  out: `"match"`
+else:
+  out: pos
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char first[40], second[40];
+    int pos = 0;
+    scanf("%39s %39s", first, second);
+    while (first[pos] == second[pos] && first[pos] != '\0')
+        pos++;                        // نتقدم ما دام الحرفان متطابقين
+    if (first[pos] == second[pos])    // الاثنان '\0'
+        printf("Passwords match\n");
+    else
+        printf("Mismatch at position %d ('%c' vs '%c')\n", pos, first[pos], second[pos]);
+    return 0;
+}
+
+@@
+title: علامات التعجب في التعليقات
+level: easy
+domain: ds
+@ statement
+كثرة علامات التعجب قد تدل على تعليق انفعالي. اكتب برنامجًا يعد تكرار حرف مقروء (مثل `!`) في تعليق ويعرض نسبته من طول التعليق.
+@ stdin
+!
+@ steps
+- نقرأ الحرف المطلوب بـ `scanf(" %c")`.
+- نمر على التعليق ونعد التطابقات ونحسب الطول.
+@ flow
+in: target
+do: count = 0 ; length = 0
+while: review[length] != '\0'
+  if: review[length] == target
+    do: count++
+  do: length++
+out: count, count * 100.0 / length
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char review[] = "Worst delivery ever!!! Never again!!";
+    char target;
+    int count = 0, length = 0;
+    scanf(" %c", &target);
+    while (review[length] != '\0') {
+        if (review[length] == target)
+            count++;
+        length++;                     // نحسب الطول في نفس المرور
+    }
+    printf("'%c' appears %d times (%.1f %% of text)\n", target, count, count * 100.0 / length);
+    return 0;
+}
+
+@@
+title: تحقق بسيط من البريد الإلكتروني
+level: easy
+domain: ec
+@ statement
+اكتب برنامجًا يقبل البريد الإلكتروني إذا احتوى **@ واحدة فقط** ليست في البداية، وبعدها **نقطة** واحدة على الأقل ليست مباشرة بعد @ ولا في النهاية.
+@ stdin
+client.dz@shop.example.com
+@ steps
+- نعد علامات `@` ونحفظ موضعها `atPos`.
+- نبحث عن نقطة في موضع `> atPos + 1`.
+- نتحقق أن الحرف الأخير ليس نقطة.
+@ flow
+in: email
+do: atCount, atPos, dotAfter, length
+if: atCount == 1 && atPos > 0 && dotAfter && آخر حرف ليس نقطة
+  out: `"valid"`
+else:
+  out: `"invalid"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char email[80];
+    int pos, atCount = 0, atPos = -1, dotAfter = 0, length = 0;
+    scanf("%79s", email);
+    for (pos = 0; email[pos] != '\0'; pos++) {
+        if (email[pos] == '@') {
+            atCount++;
+            atPos = pos;
+        } else if (email[pos] == '.' && atPos >= 0 && pos > atPos + 1) {
+            dotAfter = 1;             // نقطة في اسم النطاق
+        }
+        length++;
+    }
+    if (atCount == 1 && atPos > 0 && dotAfter && email[length - 1] != '.')
+        printf("%s: valid\n", email);
+    else
+        printf("%s: invalid\n", email);
+    return 0;
+}
+
+@@
+title: اسم متناظر
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يتحقق إن كانت عبارة **متناظرة** مع تجاهل الفراغات وحالة الحروف (مثل "Step on no pets").
+@ steps
+- مؤشران: `left` من البداية و`right` من النهاية.
+- نتخطى الفراغات من الجهتين.
+- نقارن الحرفين بعد تحويلهما إلى صغيرين يدويًا.
+@ flow
+do: left = 0 ; right = length - 1 ; ok = 1
+while: left < right && ok
+  do: تخطي الفراغات
+  if: lower(text[left]) != lower(text[right])
+    do: ok = 0
+  do: left++ ; right--
+out: ok
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "Step on no pets";
+    int left = 0, right = 0, ok = 1;
+    char chLeft, chRight;
+    while (text[right] != '\0')
+        right++;
+    right--;                              // آخر حرف
+    while (left < right && ok) {
+        while (text[left] == ' ') left++;     // نتخطى الفراغات
+        while (text[right] == ' ') right--;
+        chLeft = text[left];
+        chRight = text[right];
+        if (chLeft >= 'A' && chLeft <= 'Z') chLeft += 'a' - 'A';
+        if (chRight >= 'A' && chRight <= 'Z') chRight += 'a' - 'A';
+        if (chLeft != chRight)
+            ok = 0;
+        left++;
+        right--;
+    }
+    printf("\"%s\" is %sa palindrome\n", text, ok ? "" : "not ");
+    return 0;
+}
+
+@@
+title: أطول كلمة في الوصف
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يجد **أطول كلمة** في وصف منتج، ويعرضها مع طولها وموضع بدايتها، وكذلك متوسط طول الكلمات.
+@ steps
+- نمر على النص ونحسب طول الكلمة الحالية `current` وبدايتها.
+- عند نهاية كلمة (فراغ أو `'\0'`) نقارنها بالأطول.
+- نجمع الأطوال ونعد الكلمات للمتوسط.
+@ flow
+do: current = 0 ; best = 0
+for: pos = 0 ; pos <= length ; pos++
+  if: نهاية كلمة
+    if: current > best
+      do: best = current ; bestStart = pos - current
+    if: current > 0
+      do: words++ ; total += current
+    do: current = 0
+  else:
+    do: current++
+out: best, bestStart, total / words
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "Ultra thin waterproof smartwatch with heart monitor";
+    int pos, current = 0, best = 0, bestStart = 0, words = 0, total = 0, done = 0;
+    for (pos = 0; !done; pos++) {
+        if (text[pos] == ' ' || text[pos] == '\0') {  // نهاية كلمة
+            if (current > best) {
+                best = current;
+                bestStart = pos - current;
+            }
+            if (current > 0) { words++; total += current; }
+            current = 0;
+            if (text[pos] == '\0') done = 1;
+        } else {
+            current++;
+        }
+    }
+    printf("Longest word: ");
+    for (pos = bestStart; pos < bestStart + best; pos++)
+        putchar(text[pos]);
+    printf(" (%d letters, starts at %d)\n", best, bestStart);
+    printf("Average word length: %.2f\n", (double)total / words);
+    return 0;
+}
+
+@@
+title: تنسيق أسماء المنتجات
+level: medium
+domain: ec
+@ statement
+تصل أسماء المنتجات من الموردين بحروف عشوائية مثل `"sAMSUNG gALAXY s24 ULTRA"`. اكتب برنامجًا يحولها إلى **صيغة العنوان**: الحرف الأول من كل كلمة كبير والباقي صغير.
+@ steps
+- `start = 1` عند بداية كل كلمة.
+- إذا كان الحرف أول كلمة: نحوله إلى كبير؛ وإلا إلى صغير.
+- الفراغ يعيد `start = 1`.
+@ flow
+do: start = 1
+for: pos = 0 ; name[pos] != '\0' ; pos++
+  if: name[pos] == ' '
+    do: start = 1
+  else:
+    if: start
+      do: name[pos] = كبير ; start = 0
+    else:
+      do: name[pos] = صغير
+out: name
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char name[] = "sAMSUNG gALAXY s24 ULTRA";
+    int pos, start = 1;
+    for (pos = 0; name[pos] != '\0'; pos++) {
+        if (name[pos] == ' ') {
+            start = 1;                    // الكلمة التالية تبدأ بعد الفراغ
+        } else if (start) {
+            if (name[pos] >= 'a' && name[pos] <= 'z')
+                name[pos] -= 'a' - 'A';   // أول حرف: كبير
+            start = 0;
+        } else if (name[pos] >= 'A' && name[pos] <= 'Z') {
+            name[pos] += 'a' - 'A';       // بقية الحروف: صغيرة
+        }
+    }
+    printf("%s\n", name);
+    return 0;
+}
+
+@@
+title: حذف الفراغات الزائدة
+level: medium
+domain: ds
+@ statement
+تنظيف البيانات: اكتب برنامجًا يحذف من نص الفراغات في **البداية** و**النهاية** ويختصر الفراغات المتتالية في فراغ واحد، **في مكانه**.
+@ steps
+- مؤشر قراءة `read` ومؤشر كتابة `write`.
+- ننسخ الحرف إلا إذا كان فراغًا وكان آخر حرف مكتوب فراغًا (أو لم نكتب شيئًا بعد).
+- في النهاية نحذف فراغًا أخيرًا إن وُجد.
+@ flow
+do: write = 0
+for: read = 0 ; text[read] != '\0' ; read++
+  if: text[read] != ' ' || (write > 0 && text[write-1] != ' ')
+    do: text[write++] = text[read]
+if: write > 0 && text[write-1] == ' '
+  do: write--
+do: text[write] = '\0'
+out: text
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "   Free    shipping   on   all   orders   ";
+    int read, write = 0;
+    for (read = 0; text[read] != '\0'; read++)
+        // نكتب الحرف إلا إذا كان فراغًا مكررًا أو فراغًا في البداية
+        if (text[read] != ' ' || (write > 0 && text[write - 1] != ' '))
+            text[write++] = text[read];
+    if (write > 0 && text[write - 1] == ' ')
+        write--;                          // فراغ النهاية
+    text[write] = '\0';
+    printf("[%s]\n", text);
+    return 0;
+}
+
+@@
+title: تحويل نص إلى عدد صحيح
+level: medium
+domain: ec
+@ statement
+تصل الأسعار من نموذج الويب كنصوص مثل `"-12500"`. اكتب برنامجًا يحولها إلى `int` دون `atoi`، مع معالجة الإشارة ورفض النص إذا احتوى حرفًا غير رقمي.
+@ stdin
+-12500
+@ steps
+- إذا كان الحرف الأول `-` أو `+` نحفظ الإشارة ونتقدم.
+- لكل رقم: `value = value * 10 + (ch - '0')`.
+- حرف غير رقمي: النص غير صالح.
+@ flow
+in: text
+do: pos = 0 ; sign = 1 ; value = 0 ; valid = 1
+if: text[0] == '-' || text[0] == '+'
+  do: إشارة ; pos = 1
+while: text[pos] != '\0' && valid
+  if: رقم
+    do: value = value * 10 + (text[pos] - '0')
+  else:
+    do: valid = 0
+  do: pos++
+out: sign * value
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[30];
+    int pos = 0, sign = 1, valid = 1;
+    long value = 0;
+    scanf("%29s", text);
+    if (text[0] == '-' || text[0] == '+') {
+        if (text[0] == '-') sign = -1;
+        pos = 1;
+    }
+    if (text[pos] == '\0') valid = 0;     // إشارة بلا أرقام
+    for (; text[pos] != '\0' && valid; pos++) {
+        if (text[pos] >= '0' && text[pos] <= '9')
+            value = value * 10 + (text[pos] - '0');   // نزيح ونضيف الرقم
+        else
+            valid = 0;
+    }
+    if (valid)
+        printf("\"%s\" -> %ld (double: %ld)\n", text, sign * value, 2 * sign * value);
+    else
+        printf("\"%s\" is not a number\n", text);
+    return 0;
+}
+
+@@
+title: تحويل عدد صحيح إلى نص
+level: medium
+domain: ec
+@ statement
+لطباعة رقم الطلبية على الملصق كنص، اكتب برنامجًا يحول عددًا صحيحًا (قد يكون 0) إلى سلسلة حروف دون `sprintf`، ثم يضيف البادئة `ORD-`.
+@ stdin
+470213
+@ steps
+- نستخرج الأرقام من اليمين `number % 10` ونخزنها في جدول مؤقت.
+- نكتب البادئة ثم الأرقام بالترتيب المعاكس، ونحول كل رقم بـ `'0' + digit`.
+@ flow
+in: number
+do: نسخ "ORD-" إلى label ; pos = 4
+dowhile: number > 0
+  do: digits[count++] = number % 10 ; number /= 10
+while: count > 0
+  do: label[pos++] = '0' + digits[--count]
+do: label[pos] = '\0'
+out: label
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char label[20] = "ORD-";
+    int digits[12], count = 0, pos = 4;
+    long number;
+    scanf("%ld", &number);
+    do {                                  // do-while: العدد 0 يعطي "0"
+        digits[count++] = number % 10;
+        number /= 10;
+    } while (number > 0);
+    while (count > 0)
+        label[pos++] = '0' + digits[--count];  // من أكبر رقم إلى أصغرها
+    label[pos] = '\0';
+    printf("Label: %s\n", label);
+    return 0;
+}
+
+@@
+title: قراءة سعر عشري من نص
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يحول نص سعر مثل `"1299.95"` إلى `double` دون `atof`: الجزء الصحيح كالعادة، وبعد النقطة كل رقم يُضرب في 0.1 ثم 0.01 ...
+@ stdin
+1299.95
+@ steps
+- قبل النقطة: `value = value * 10 + digit`.
+- بعد النقطة: `scale = scale / 10` و`value += digit * scale`.
+@ flow
+in: text
+do: value = 0 ; afterDot = 0 ; scale = 1
+for: pos = 0 ; text[pos] != '\0' ; pos++
+  if: text[pos] == '.'
+    do: afterDot = 1
+  else:
+    if: !afterDot
+      do: value = value * 10 + digit
+    else:
+      do: scale /= 10 ; value += digit * scale
+out: value
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[30];
+    double value = 0, scale = 1;
+    int pos, afterDot = 0, digit;
+    scanf("%29s", text);
+    for (pos = 0; text[pos] != '\0'; pos++) {
+        if (text[pos] == '.') {
+            afterDot = 1;
+            continue;
+        }
+        digit = text[pos] - '0';
+        if (!afterDot) {
+            value = value * 10 + digit;       // الجزء الصحيح
+        } else {
+            scale /= 10;                      // 0.1 ثم 0.01 ...
+            value += digit * scale;
+        }
+    }
+    printf("Price = %.2f, with tax = %.2f\n", value, value * 1.19);
+    return 0;
+}
+
+@@
+title: رابط صديق لمحركات البحث
+level: medium
+domain: ec
+@ statement
+لإنشاء رابط صفحة المنتج (slug)، اكتب برنامجًا يحول الاسم إلى حروف صغيرة، ويعوض كل سلسلة من الرموز غير الحرفية/الرقمية بـ `-` واحدة، دون `-` في البداية أو النهاية. مثال: `"Smart TV 55\" (4K)!"` يصبح `smart-tv-55-4k`.
+@ steps
+- إذا كان الحرف حرفًا أو رقمًا: نكتبه صغيرًا.
+- وإلا: نكتب `-` فقط إذا كان آخر حرف مكتوب ليس `-` وكان `write > 0`.
+- نحذف `-` الأخيرة إن وجدت.
+@ flow
+do: write = 0
+for: read = 0 ; name[read] != '\0' ; read++
+  if: حرف أو رقم
+    do: slug[write++] = صغير(name[read])
+  else:
+    if: write > 0 && slug[write-1] != '-'
+      do: slug[write++] = '-'
+if: write > 0 && slug[write-1] == '-'
+  do: write--
+do: slug[write] = '\0'
+out: slug
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char name[] = "Smart TV 55\" (4K) -- Ultra HD!";
+    char slug[60], ch;
+    int read, write = 0;
+    for (read = 0; name[read] != '\0'; read++) {
+        ch = name[read];
+        if (ch >= 'A' && ch <= 'Z')
+            ch += 'a' - 'A';                  // حروف صغيرة
+        if ((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))
+            slug[write++] = ch;
+        else if (write > 0 && slug[write - 1] != '-')
+            slug[write++] = '-';              // فاصل واحد فقط
+    }
+    if (write > 0 && slug[write - 1] == '-')
+        write--;
+    slug[write] = '\0';
+    printf("https://shop.dz/p/%s\n", slug);
+    return 0;
+}
+
+@@
+title: البحث عن كلمة مفتاحية
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يبحث عن كلمة مفتاحية داخل وصف منتج (دون `strstr`) ويعرض **كل** مواضع ظهورها وعددها.
+@ stdin
+battery
+@ steps
+- لكل موضع بداية ممكن `start` في النص: نقارن الحروف واحدًا واحدًا.
+- إذا وصلنا إلى `'\0'` الكلمة: وجدنا تطابقًا.
+@ flow
+in: word
+for: start = 0 ; text[start] != '\0' ; start++
+  do: match = 0
+  while: word[match] != '\0' && text[start+match] == word[match]
+    do: match++
+  if: word[match] == '\0'
+    out: start
+    do: count++
+out: count
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "Long battery life. The battery charges fast; spare battery included.";
+    char word[30];
+    int start, match, count = 0;
+    scanf("%29s", word);
+    for (start = 0; text[start] != '\0'; start++) {
+        match = 0;
+        // نتقدم ما دامت الحروف متطابقة
+        while (word[match] != '\0' && text[start + match] == word[match])
+            match++;
+        if (word[match] == '\0') {            // كل حروف الكلمة تطابقت
+            printf("Found at position %d\n", start);
+            count++;
+        }
+    }
+    printf("\"%s\" appears %d time(s)\n", word, count);
+    return 0;
+}
+
+@@
+title: حجب الكلمات المسيئة
+level: medium
+domain: ds
+@ statement
+قبل نشر التعليقات يحجب الموقع كلمة ممنوعة بتعويض كل حروفها بـ `*`. اكتب برنامجًا يقوم بذلك في مكانه، **فقط** عندما تكون الكلمة كاملة (ليست جزءًا من كلمة أطول).
+@ steps
+- نبحث عن الكلمة في كل موضع.
+- نتحقق أن الحرف قبلها وبعدها ليس حرفًا (حدود كلمة).
+- نعوض حروفها بـ `*`.
+@ flow
+for: start = 0 ; text[start] != '\0' ; start++
+  do: match = طول التطابق في start
+  if: تطابق كامل && حدود كلمة
+    for: pos = start ; pos < start + match ; pos++
+      do: text[pos] = '*'
+out: text
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "This seller is a scam, total scam! scampi is fine.";
+    char banned[] = "scam";
+    int start, match, pos, before, after;
+    for (start = 0; text[start] != '\0'; start++) {
+        match = 0;
+        while (banned[match] != '\0' && text[start + match] == banned[match])
+            match++;
+        if (banned[match] != '\0')
+            continue;                         // لا تطابق
+        before = (start > 0) ? text[start - 1] : ' ';
+        after = text[start + match];
+        // حدود كلمة: ما قبلها وما بعدها ليسا حرفين
+        if (!((before >= 'a' && before <= 'z') || (before >= 'A' && before <= 'Z')) &&
+            !((after >= 'a' && after <= 'z') || (after >= 'A' && after <= 'Z')))
+            for (pos = start; pos < start + match; pos++)
+                text[pos] = '*';
+    }
+    printf("%s\n", text);
+    return 0;
+}
+
+@@
+title: تكرار الحروف في الأوصاف
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يحسب **تكرار كل حرف** إنجليزي (دون تمييز بين الكبير والصغير) في نص، باستعمال جدول من 26 عدادًا، ثم يعرض الحروف الخمسة الأكثر تكرارًا.
+@ steps
+- `count[ch - 'a']++` بعد تحويل الحرف إلى صغير.
+- لاختيار الأكثر 5 مرات: نبحث عن الأكبر، نعرضه، ثم نجعله -1.
+@ flow
+for: pos = 0 ; text[pos] != '\0' ; pos++
+  if: حرف
+    do: count[lower - 'a']++
+for: rank = 0 ; rank < 5 ; rank++
+  do: best = فهرس أكبر عداد
+  out: 'a' + best, count[best]
+  do: count[best] = -1
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "Fast delivery and excellent customer service. Recommended seller!";
+    int count[26] = {0}, pos, rank, letter, best;
+    char ch;
+    for (pos = 0; text[pos] != '\0'; pos++) {
+        ch = text[pos];
+        if (ch >= 'A' && ch <= 'Z') ch += 'a' - 'A';
+        if (ch >= 'a' && ch <= 'z')
+            count[ch - 'a']++;                // 'a' -> 0 ... 'z' -> 25
+    }
+    for (rank = 1; rank <= 5; rank++) {
+        best = 0;
+        for (letter = 1; letter < 26; letter++)
+            if (count[letter] > count[best])
+                best = letter;
+        printf("%d. '%c': %d\n", rank, 'a' + best, count[best]);
+        count[best] = -1;                     // لا نختاره مرة أخرى
+    }
+    return 0;
+}
+
+@@
+title: أسماء متجانسة الحروف
+level: medium
+domain: ec
+@ statement
+لاكتشاف الحسابات المكررة بأسماء مقلوبة الحروف، اكتب برنامجًا يتحقق إن كانت كلمتان **متجانستين** (نفس الحروف بنفس التكرار، بترتيب مختلف) باستعمال جدول عدادات واحد.
+@ stdin
+listen silent
+@ steps
+- الكلمة الأولى تزيد العدادات، والثانية تنقصها.
+- الكلمتان متجانستان إذا عادت كل العدادات إلى 0.
+@ flow
+in: first, second
+for: pos = 0 ; first[pos] != '\0' ; pos++
+  do: count[first[pos] - 'a']++
+for: pos = 0 ; second[pos] != '\0' ; pos++
+  do: count[second[pos] - 'a']--
+do: ok = كل العدادات أصفار
+out: ok
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char first[30], second[30];
+    int count[26] = {0}, pos, letter, ok = 1;
+    scanf("%29s %29s", first, second);
+    for (pos = 0; first[pos] != '\0'; pos++)
+        count[first[pos] - 'a']++;        // +1 لكل حرف من الأولى
+    for (pos = 0; second[pos] != '\0'; pos++)
+        count[second[pos] - 'a']--;       // -1 لكل حرف من الثانية
+    for (letter = 0; letter < 26; letter++)
+        if (count[letter] != 0)
+            ok = 0;
+    printf("%s / %s: %s\n", first, second, ok ? "anagrams" : "different");
+    return 0;
+}
+
+@@
+title: تشفير رمز القسيمة بإزاحة قيصر
+level: medium
+domain: ec
+@ statement
+لإخفاء رموز القسائم في الرسائل التسويقية نستعمل **تشفير قيصر**: كل حرف يُزاح بـ `shift` موضعًا في الأبجدية (مع الدوران بعد Z)، والأرقام تُزاح في 0..9. اكتب برنامجًا يشفر ثم يفك التشفير للتحقق.
+@ stdin
+SALE2026 3
+@ steps
+- حرف كبير: `'A' + (ch - 'A' + shift) % 26`.
+- رقم: `'0' + (ch - '0' + shift) % 10`.
+- فك التشفير: إزاحة بـ `26 - shift` و`10 - shift % 10`.
+@ flow
+in: code, shift
+for: pos = 0 ; code[pos] != '\0' ; pos++
+  if: حرف كبير
+    do: code[pos] = 'A' + (code[pos] - 'A' + shift) % 26
+  else:
+    if: رقم
+      do: code[pos] = '0' + (code[pos] - '0' + shift) % 10
+out: code
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char code[30];
+    int shift, pos, round, step;
+    scanf("%29s %d", code, &shift);
+    for (round = 0; round < 2; round++) {
+        // الجولة 0: تشفير، الجولة 1: فك التشفير
+        step = (round == 0) ? shift : 26 - shift % 26;
+        for (pos = 0; code[pos] != '\0'; pos++) {
+            if (code[pos] >= 'A' && code[pos] <= 'Z')
+                code[pos] = 'A' + (code[pos] - 'A' + step) % 26;   // دوران
+            else if (code[pos] >= '0' && code[pos] <= '9')
+                code[pos] = '0' + (code[pos] - '0' + (round == 0 ? shift : 10 - shift % 10)) % 10;
+        }
+        printf("%s: %s\n", round == 0 ? "Encrypted" : "Decrypted", code);
+    }
+    return 0;
+}

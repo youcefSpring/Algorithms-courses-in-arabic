@@ -1,0 +1,31 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbReviews, index, rating, stars, star, bar;
+    int c1 = 0, c2 = 0, c3 = 0, c4 = 0, c5 = 0;
+    scanf("%d", &nbReviews);
+    for (index = 0; index < nbReviews; index++) {
+        scanf("%d", &rating);
+        switch (rating) {              // نزيد عداد القيمة المقروءة
+            case 1: c1++; break;
+            case 2: c2++; break;
+            case 3: c3++; break;
+            case 4: c4++; break;
+            case 5: c5++; break;
+        }
+    }
+    for (stars = 5; stars >= 1; stars--) {    // من 5 نجوم إلى نجمة واحدة
+        switch (stars) {
+            case 5: bar = c5; break;
+            case 4: bar = c4; break;
+            case 3: bar = c3; break;
+            case 2: bar = c2; break;
+            default: bar = c1;
+        }
+        printf("%d stars | ", stars);
+        for (star = 0; star < bar; star++)   // حلقة داخلية: طول العمود
+            printf("*");
+        printf(" (%d)\n", bar);
+    }
+    return 0;
+}

@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int main(void) {
+    double weight, cost;
+    int fast;
+    scanf("%lf %d", &weight, &fast);       // الوزن ونوع التوصيل
+    if (weight <= 1)
+        cost = 400;
+    else if (weight <= 5)
+        cost = 700;
+    else if (weight <= 20)
+        cost = 1200;
+    else
+        cost = 1200 + (weight - 20) * 80;  // 80 دج لكل كغ فوق 20
+    if (fast == 1)
+        cost = cost * 2;              // التوصيل السريع مضاعف
+    printf("Shipping cost = %.2f DA\n", cost);
+    return 0;
+}

@@ -1,0 +1,10 @@
+#include <stdio.h>
+
+int main(void) {
+    int seconds, minutes, rest;
+    scanf("%d", &seconds);              (*@\cmt{المدة بالثواني}@*)
+    minutes = seconds / 60;                   (*@\cmt{قسمة صحيحة: عدد الدقائق الكاملة}@*)
+    rest = seconds % 60;                   (*@\cmt{الباقي: الثواني المتبقية}@*)
+    printf("%d s = %d min %d s\n", seconds, minutes, rest);
+    return 0;
+}

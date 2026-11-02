@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+int main(void) {
+    long code;
+    int d1, d2, d3, d4, d5, d6, d7, weightedSum, check;
+    scanf("%ld", &code);
+    d1 = code / 1000000;             // الرقم الأول من اليسار
+    d2 = (code / 100000) % 10;
+    d3 = (code / 10000) % 10;
+    d4 = (code / 1000) % 10;
+    d5 = (code / 100) % 10;
+    d6 = (code / 10) % 10;
+    d7 = code % 10;                  // الرقم السابع
+    weightedSum = 3 * (d1 + d3 + d5 + d7) + (d2 + d4 + d6);   // المجموع الموزون
+    check = (10 - weightedSum % 10) % 10;   // ما يكمل weightedSum إلى مضاعف 10
+    printf("Weighted sum = %d\n", weightedSum);
+    printf("Check digit = %d\n", check);
+    printf("EAN-8 = %ld\n", code * 10 + check);
+    return 0;
+}

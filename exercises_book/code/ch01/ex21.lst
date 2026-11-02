@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+int main(void) {
+    int code, units, tens, hundreds, reversed;
+    scanf("%d", &code);
+    units = code % 10;               (*@\cmt{رقم الآحاد}@*)
+    tens = (code / 10) % 10;        (*@\cmt{نحذف الآحاد ثم نأخذ الرقم الأخير}@*)
+    hundreds = code / 100;              (*@\cmt{رقم المئات}@*)
+    reversed = units * 100 + tens * 10 + hundreds; (*@\cmt{نعيد التركيب بالترتيب المعاكس}@*)
+    printf("Code %d -> %d\n", code, reversed);
+    return 0;
+}

@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+#define MAX_WORDS 30
+
+int main(void) {
+    char text[] = "The phone is great. The battery is great, the screen is OK.";
+    char vocab[MAX_WORDS][20], word[20], ch;
+    int freq[MAX_WORDS], nbWords = 0, pos = 0, length, index, cmp, found;
+    while (text[pos] != '\0') {
+        length = 0;
+        while (1) {
+            ch = text[pos];
+            if (ch >= 'A' && ch <= 'Z') ch += 'a' - 'A';
+            if (ch < 'a' || ch > 'z') break;
+            word[length++] = ch;
+            pos++;
+        }
+        word[length] = '\0';
+        if (text[pos] != '\0') pos++;
+        if (length == 0) continue;
+        found = -1;
+        for (index = 0; index < nbWords && found < 0; index++) {
+            for (cmp = 0; word[cmp] == vocab[index][cmp] && word[cmp] != '\0'; cmp++) ;
+            if (word[cmp] == vocab[index][cmp])
+                found = index;
+        }
+        if (found >= 0) {
+            freq[found]++;                    (*@\cmt{كلمة معروفة}@*)
+        } else {
+            for (cmp = 0; (vocab[nbWords][cmp] = word[cmp]) != '\0'; cmp++) ;
+            freq[nbWords++] = 1;              (*@\cmt{كلمة جديدة}@*)
+        }
+    }
+    for (index = 0; index < nbWords; index++)
+        printf("%-8s %d\n", vocab[index], freq[index]);
+    printf("%d distinct words\n", nbWords);
+    return 0;
+}

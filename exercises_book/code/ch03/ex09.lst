@@ -1,0 +1,13 @@
+#include <stdio.h>
+
+int main(void) {
+    double price, monthly, saved = 0;
+    int months = 0;
+    scanf("%lf %lf", &price, &monthly);
+    while (saved < price) {       (*@\cmt{لا نعرف عدد التكرارات مسبقًا}@*)
+        saved += monthly;
+        months++;
+    }
+    printf("Months needed: %d (saved %.2f DA)\n", months, saved);
+    return 0;
+}

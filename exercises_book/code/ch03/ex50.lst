@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbDays, day, minDay = 1, buy = 0, sell = 0;
+    double price, minP, best = 0;
+    scanf("%d %lf", &nbDays, &price);
+    minP = price;
+    for (day = 2; day <= nbDays; day++) {
+        scanf("%lf", &price);
+        if (price - minP > best) {    (*@\cmt{البيع اليوم أفضل من كل ما سبق}@*)
+            best = price - minP;
+            buy = minDay;
+            sell = day;
+        }
+        if (price < minP) {           (*@\cmt{سعر شراء أفضل للأيام القادمة}@*)
+            minP = price;
+            minDay = day;
+        }
+    }
+    if (best > 0)
+        printf("Buy day %d, sell day %d: profit %.0f DA\n", buy, sell, best);
+    else
+        printf("No profitable trade\n");
+    return 0;
+}

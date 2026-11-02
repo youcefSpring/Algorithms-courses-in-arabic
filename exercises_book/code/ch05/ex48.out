@@ -1,0 +1,5 @@
+User 1: similarity 0.976, rating 4
+User 2: similarity 0.416, rating 2
+User 3: similarity 0.994, rating 5
+User 4: similarity 0.614, rating 1
+Predicted rating of user 0 for item 2 = 3.44

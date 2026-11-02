@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+#define NB_ROWS 5
+#define NB_COLS 8
+
+int main(void) {
+    int matrix[NB_ROWS][NB_COLS] = {{0, 0, 3, 0, 0, 0, 0, 1},
+                                    {0, 0, 0, 0, 0, 0, 0, 0},
+                                    {2, 0, 0, 0, 5, 0, 0, 0},
+                                    {0, 0, 0, 0, 0, 0, 4, 0},
+                                    {0, 1, 0, 0, 0, 0, 0, 0}};
+    int rows[NB_ROWS * NB_COLS], cols[NB_ROWS * NB_COLS], values[NB_ROWS * NB_COLS];
+    int row, col, nonZero = 0, index;
+    for (row = 0; row < NB_ROWS; row++)
+        for (col = 0; col < NB_COLS; col++)
+            if (matrix[row][col] != 0) {      // نحفظ الإحداثيات والقيمة فقط
+                rows[nonZero] = row;
+                cols[nonZero] = col;
+                values[nonZero] = matrix[row][col];
+                nonZero++;
+            }
+    printf("Density = %d/%d = %.1f %%\n", nonZero, NB_ROWS * NB_COLS,
+           nonZero * 100.0 / (NB_ROWS * NB_COLS));
+    for (index = 0; index < nonZero; index++)
+        printf("(%d,%d)=%d ", rows[index], cols[index], values[index]);
+    printf("\n");
+    return 0;
+}

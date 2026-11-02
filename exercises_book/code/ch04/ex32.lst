@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+#define NB 12
+
+int main(void) {
+    double values[NB] = {3200, 2900, 3500, 41000, 3100, 2700,
+                         3300, 150, 3600, 2800, 3400, 3000};
+    double key, q1, q3, iqr, low, high;
+    int index, scan;
+    for (index = 1; index < NB; index++) {        (*@\cmt{ترتيب بالإدراج}@*)
+        key = values[index];
+        for (scan = index - 1; scan >= 0 && values[scan] > key; scan--)
+            values[scan + 1] = values[scan];
+        values[scan + 1] = key;
+    }
+    q1 = values[NB / 4];                  (*@\cmt{الربيع الأول}@*)
+    q3 = values[3 * NB / 4];              (*@\cmt{الربيع الثالث}@*)
+    iqr = q3 - q1;
+    low = q1 - 1.5 * iqr;
+    high = q3 + 1.5 * iqr;
+    printf("Q1 = %.0f, Q3 = %.0f, bounds = [%.0f, %.0f]\n", q1, q3, low, high);
+    for (index = 0; index < NB; index++)
+        if (values[index] < low || values[index] > high)
+            printf("Outlier: %.0f\n", values[index]);
+    return 0;
+}

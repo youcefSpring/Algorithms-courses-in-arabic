@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    int actual, pred;
+    scanf("%d %d", &actual, &pred);
+    if (actual == pred) {             (*@\cmt{تنبؤ صحيح}@*)
+        if (pred == 1)
+            printf("TP: cancellation correctly detected\n");
+        else
+            printf("TN: normal order correctly detected\n");
+    } else {                          (*@\cmt{تنبؤ خاطئ}@*)
+        if (pred == 1)
+            printf("FP: false alarm\n");
+        else
+            printf("FN: missed cancellation\n");
+    }
+    return 0;
+}

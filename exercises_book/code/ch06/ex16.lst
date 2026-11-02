@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+int main(void) {
+    char label[20] = "ORD-";
+    int digits[12], count = 0, pos = 4;
+    long number;
+    scanf("%ld", &number);
+    do {                                  (*@\cmt{\cen{do-while}: العدد \cen{0} يعطي "\cen{0}"}@*)
+        digits[count++] = number % 10;
+        number /= 10;
+    } while (number > 0);
+    while (count > 0)
+        label[pos++] = '0' + digits[--count];  (*@\cmt{من أكبر رقم إلى أصغرها}@*)
+    label[pos] = '\0';
+    printf("Label: %s\n", label);
+    return 0;
+}

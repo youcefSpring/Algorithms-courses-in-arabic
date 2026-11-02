@@ -1,0 +1,924 @@
+@@
+title: الدقة والاستدعاء لكل صنف
+level: medium
+domain: ds
+@ statement
+انطلاقًا من مصفوفة التباس جاهزة (3 أصناف)، اكتب برنامجًا يحسب لكل صنف **الدقة** `precision = TP / مجموع العمود` و**الاستدعاء** `recall = TP / مجموع السطر` و**F1** = `2PR / (P + R)`.
+@ steps
+- `TP = confusion[cls][cls]`.
+- مجموع العمود `cls`: كل التنبؤات بهذا الصنف.
+- مجموع السطر `cls`: كل العناصر التي صنفها الحقيقي `cls`.
+@ flow
+for: cls = 0 ; cls < 3 ; cls++
+  do: rowSum = Σ confusion[cls][col] ; colSum = Σ confusion[row][cls]
+  do: precision = TP / colSum ; recall = TP / rowSum
+  do: f1 = 2*precision*recall / (precision + recall)
+  out: cls, precision, recall, f1
+@ code
+#include <stdio.h>
+
+#define NB_CLASSES 3
+
+int main(void) {
+    int confusion[NB_CLASSES][NB_CLASSES] = {{50,  8,  2},
+                                             { 6, 30, 14},
+                                             { 1,  9, 80}};
+    int cls, other, rowSum, colSum, truePos;
+    double precision, recall, f1;
+    for (cls = 0; cls < NB_CLASSES; cls++) {
+        rowSum = colSum = 0;
+        for (other = 0; other < NB_CLASSES; other++) {
+            rowSum += confusion[cls][other];  // الحقيقي = cls
+            colSum += confusion[other][cls];  // المتنبأ = cls
+        }
+        truePos = confusion[cls][cls];
+        precision = (double)truePos / colSum;
+        recall = (double)truePos / rowSum;
+        f1 = 2 * precision * recall / (precision + recall);
+        printf("Class %d: precision %.3f, recall %.3f, F1 %.3f\n",
+               cls, precision, recall, f1);
+    }
+    return 0;
+}
+
+@@
+title: تناظر مصفوفة الشراء المشترك
+level: medium
+domain: ds
+@ statement
+`together[a][b]` عدد المرات التي اشتُري فيها المنتجان `a` و`b` معًا؛ يجب أن تكون المصفوفة **متناظرة**. اكتب برنامجًا يتحقق من ذلك ويعرض الخانات غير المتطابقة (أخطاء تسجيل).
+@ steps
+- نقارن فقط النصف العلوي `row < col` بالنصف السفلي.
+- كل اختلاف خطأ نعرضه.
+@ flow
+do: errors = 0
+for: row = 0 ; row < NB ; row++
+  for: col = row + 1 ; col < NB ; col++
+    if: together[row][col] != together[col][row]
+      out: row, col
+      do: errors++
+if: errors == 0
+  out: `"symmetric"`
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+int main(void) {
+    int together[NB][NB] = {{ 0, 12,  5,  3},
+                            {12,  0,  7,  9},
+                            { 5,  8,  0,  2},
+                            { 3,  9,  2,  0}};
+    int row, col, errors = 0;
+    for (row = 0; row < NB; row++)
+        for (col = row + 1; col < NB; col++)      // نصف المصفوفة يكفي
+            if (together[row][col] != together[col][row]) {
+                printf("Mismatch (%d,%d): %d vs %d\n", row, col,
+                       together[row][col], together[col][row]);
+                errors++;
+            }
+    if (errors == 0)
+        printf("Matrix is symmetric\n");
+    else
+        printf("%d error(s) found\n", errors);
+    return 0;
+}
+
+@@
+title: حساب الشراء المشترك من السلات
+level: medium
+domain: ds
+@ statement
+مصفوفة `baskets[6][4]` تحتوي 1 إذا احتوت السلة (سطر) المنتج (عمود). اكتب برنامجًا يحسب مصفوفة **الشراء المشترك** `co = Bᵀ × B`، حيث `co[a][b]` عدد السلات التي فيها `a` و`b` معًا، والقطر عدد السلات التي فيها كل منتج.
+@ steps
+- `co[first][second] = Σ baskets[basket][first] * baskets[basket][second]`.
+- الجداء يساوي 1 فقط إذا كان المنتجان موجودين.
+@ flow
+for: first = 0 ; first < NB_P ; first++
+  for: second = 0 ; second < NB_P ; second++
+    do: co = 0
+    for: basket = 0 ; basket < NB_B ; basket++
+      do: co += baskets[basket][first] * baskets[basket][second]
+    out: co
+@ code
+#include <stdio.h>
+
+#define NB_B 6
+#define NB_P 4
+
+int main(void) {
+    int baskets[NB_B][NB_P] = {{1, 1, 0, 0},
+                               {1, 1, 1, 0},
+                               {0, 1, 1, 0},
+                               {1, 0, 0, 1},
+                               {1, 1, 0, 1},
+                               {0, 0, 1, 1}};
+    int co[NB_P][NB_P], first, second, basket;
+    for (first = 0; first < NB_P; first++) {
+        for (second = 0; second < NB_P; second++) {
+            co[first][second] = 0;
+            for (basket = 0; basket < NB_B; basket++)   // عمود × عمود
+                co[first][second] += baskets[basket][first] * baskets[basket][second];
+            printf(" %d", co[first][second]);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: أقرب رف فارغ
+level: medium
+domain: ec
+@ statement
+المستودع شبكة رفوف `grid[5][6]` (1 مشغول، 0 فارغ). العامل في الموقع `(row, col)`. اكتب برنامجًا يجد **أقرب رف فارغ** بمسافة مانهاتن `|dr| + |dc|` (عدد الخطوات في الممرات).
+@ stdin
+2 3
+@ steps
+- نمر على كل الخانات الفارغة.
+- المسافة: القيمة المطلقة لفرق الأسطر + القيمة المطلقة لفرق الأعمدة.
+- نحتفظ بالأقرب.
+@ flow
+in: myRow, myCol
+do: best = -1
+for: row = 0 ; row < 5 ; row++
+  for: col = 0 ; col < 6 ; col++
+    if: grid[row][col] == 0
+      do: dist = |row - myRow| + |col - myCol|
+      if: best < 0 || dist < best
+        do: best = dist ; bestRow = row ; bestCol = col
+out: bestRow, bestCol, best
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int grid[5][6] = {{1, 1, 0, 1, 1, 1},
+                      {1, 1, 1, 1, 1, 0},
+                      {1, 1, 1, 1, 1, 1},
+                      {0, 1, 1, 1, 1, 1},
+                      {1, 1, 1, 1, 0, 1}};
+    int myRow, myCol, row, col, dRow, dCol, dist;
+    int best = -1, bestRow = -1, bestCol = -1;
+    scanf("%d %d", &myRow, &myCol);
+    for (row = 0; row < 5; row++)
+        for (col = 0; col < 6; col++)
+            if (grid[row][col] == 0) {
+                dRow = row - myRow; if (dRow < 0) dRow = -dRow;
+                dCol = col - myCol; if (dCol < 0) dCol = -dCol;
+                dist = dRow + dCol;               // مسافة مانهاتن
+                if (best < 0 || dist < best) {
+                    best = dist; bestRow = row; bestCol = col;
+                }
+            }
+    printf("Nearest empty shelf: (%d, %d), %d steps\n", bestRow, bestCol, best);
+    return 0;
+}
+
+@@
+title: خريطة حرارية للطلبيات
+level: medium
+domain: ds
+@ statement
+مصفوفة `orders[7][6]`: عدد الطلبيات لكل يوم من الأسبوع (أسطر) في 6 فترات من اليوم (أعمدة). اكتب برنامجًا يرسم **خريطة حرارية نصية**: كل خانة تُرسم برمز حسب شدتها `.` ثم `-` ثم `+` ثم `#`، بعد تحديد الأكبر.
+@ steps
+- نجد القيمة القصوى `peak`.
+- المستوى: `level = value * 4 / (peak + 1)` بين 0 و3.
+- `switch` على المستوى لاختيار الرمز.
+@ flow
+do: peak = أكبر خانة
+for: day = 0 ; day < 7 ; day++
+  for: slot = 0 ; slot < 6 ; slot++
+    do: level = orders[day][slot] * 4 / (peak + 1)
+    out: رمز المستوى
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int orders[7][6] = {{ 2,  5, 14, 10, 18, 25},
+                        { 1,  6, 12,  9, 20, 22},
+                        { 3,  4, 15, 11, 17, 28},
+                        { 2,  7, 13, 12, 21, 30},
+                        { 5,  9, 20, 16, 26, 38},
+                        { 8, 15, 25, 22, 30, 41},
+                        { 7, 12, 22, 18, 24, 29}};
+    int day, slot, level, peak = 0;
+    char symbol;
+    for (day = 0; day < 7; day++)
+        for (slot = 0; slot < 6; slot++)
+            if (orders[day][slot] > peak)
+                peak = orders[day][slot];
+    printf("     0-4 4-8 8-12 12-16 16-20 20-24\n");
+    for (day = 0; day < 7; day++) {
+        printf("Day %d ", day + 1);
+        for (slot = 0; slot < 6; slot++) {
+            level = orders[day][slot] * 4 / (peak + 1);   // 0..3
+            switch (level) {
+                case 0:  symbol = '.'; break;
+                case 1:  symbol = '-'; break;
+                case 2:  symbol = '+'; break;
+                default: symbol = '#';
+            }
+            printf("  %c  ", symbol);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: جدول محوري من السجلات
+level: medium
+domain: ds
+@ statement
+لدينا سجلات بيع: لكل عملية (الصنف 0..2، الشهر 0..3، المبلغ). اكتب برنامجًا يبني **جدولًا محوريًا** `pivot[3][4]` يجمع المبالغ حسب الصنف والشهر، مع مجاميع الأسطر والأعمدة.
+@ steps
+- نهيئ المصفوفة بأصفار.
+- لكل سجل: `pivot[category[rec]][month[rec]] += amount[rec]`.
+- نعرض الجدول مع مجموع كل سطر، ثم سطر مجاميع الأعمدة.
+@ flow
+for: rec = 0 ; rec < NB_REC ; rec++
+  do: pivot[category[rec]][month[rec]] += amount[rec]
+for: cat = 0 ; cat < 3 ; cat++
+  out: pivot[cat] ومجموعه
+out: مجاميع الأعمدة
+@ code
+#include <stdio.h>
+
+#define NB_REC 12
+
+int main(void) {
+    int category[NB_REC] = {0, 1, 0, 2, 1, 1, 0, 2, 2, 0, 1, 2};
+    int month[NB_REC]    = {0, 0, 1, 1, 2, 0, 3, 3, 0, 2, 3, 2};
+    int amount[NB_REC]   = {500, 300, 450, 900, 120, 220, 610, 400, 350, 200, 180, 700};
+    int pivot[3][4] = {{0}}, colTotal[4] = {0};
+    int rec, cat, mon, rowTotal;
+    for (rec = 0; rec < NB_REC; rec++)
+        pivot[category[rec]][month[rec]] += amount[rec];   // التجميع
+    printf("cat |  M1   M2   M3   M4 | total\n");
+    for (cat = 0; cat < 3; cat++) {
+        rowTotal = 0;
+        printf("%3d |", cat);
+        for (mon = 0; mon < 4; mon++) {
+            printf(" %4d", pivot[cat][mon]);
+            rowTotal += pivot[cat][mon];
+            colTotal[mon] += pivot[cat][mon];
+        }
+        printf(" | %5d\n", rowTotal);
+    }
+    printf("sum |");
+    for (mon = 0; mon < 4; mon++)
+        printf(" %4d", colTotal[mon]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: مجاميع المستطيلات بالمجاميع التراكمية الثنائية
+level: medium
+domain: ds
+@ statement
+للإجابة بسرعة عن "مجموع المبيعات للمتاجر من `r1` إلى `r2` في الأيام من `c1` إلى `c2`"، نبني مصفوفة **مجاميع تراكمية ثنائية** `prefix[row+1][col+1]` = مجموع المستطيل من `(0,0)` إلى `(row,col)`. كل استعلام يصبح 4 عمليات.
+@ stdin
+1 2 1 3
+@ steps
+- `prefix[r+1][c+1] = sales[r][c] + prefix[r][c+1] + prefix[r+1][c] - prefix[r][c]`.
+- المستطيل: `prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]`.
+@ flow
+for: row = 0 ; row < 3 ; row++
+  for: col = 0 ; col < 4 ; col++
+    do: prefix[row+1][col+1] = sales + prefix[row][col+1] + prefix[row+1][col] - prefix[row][col]
+in: r1, r2, c1, c2
+out: prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int sales[3][4] = {{120, 95, 140, 180},
+                       { 80, 60,  75,  90},
+                       {200, 210, 190, 250}};
+    int prefix[4][5] = {{0}};             // سطر وعمود إضافيان من الأصفار
+    int row, col, r1, r2, c1, c2;
+    for (row = 0; row < 3; row++)
+        for (col = 0; col < 4; col++)
+            // نطرح التداخل الذي جُمع مرتين
+            prefix[row + 1][col + 1] = sales[row][col] + prefix[row][col + 1]
+                                     + prefix[row + 1][col] - prefix[row][col];
+    scanf("%d %d %d %d", &r1, &r2, &c1, &c2);
+    printf("Stores %d-%d, days %d-%d: %d\n", r1, r2, c1 + 1, c2 + 1,
+           prefix[r2 + 1][c2 + 1] - prefix[r1][c2 + 1]
+           - prefix[r2 + 1][c1] + prefix[r1][c1]);
+    return 0;
+}
+
+@@
+title: تدوير صورة المنتج
+level: medium
+domain: ec
+@ statement
+صورة منتج صغيرة مخزنة كمصفوفة بكسلات `image[4][6]` (درجات رمادي). اكتب برنامجًا **يديرها 90° مع عقارب الساعة** في مصفوفة جديدة `rotated[6][4]`.
+@ steps
+- البكسل `(row, col)` ينتقل إلى `(col, HEIGHT - 1 - row)`.
+- أبعاد الصورة تتبادل.
+@ flow
+for: row = 0 ; row < HEIGHT ; row++
+  for: col = 0 ; col < WIDTH ; col++
+    do: rotated[col][HEIGHT - 1 - row] = image[row][col]
+out: rotated
+@ code
+#include <stdio.h>
+
+#define HEIGHT 4
+#define WIDTH 6
+
+int main(void) {
+    int image[HEIGHT][WIDTH] = {{ 1,  2,  3,  4,  5,  6},
+                                { 7,  8,  9, 10, 11, 12},
+                                {13, 14, 15, 16, 17, 18},
+                                {19, 20, 21, 22, 23, 24}};
+    int rotated[WIDTH][HEIGHT], row, col;
+    for (row = 0; row < HEIGHT; row++)
+        for (col = 0; col < WIDTH; col++)
+            // السطر الأول يصبح العمود الأخير
+            rotated[col][HEIGHT - 1 - row] = image[row][col];
+    for (row = 0; row < WIDTH; row++) {
+        for (col = 0; col < HEIGHT; col++)
+            printf("%3d", rotated[row][col]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: تصغير صورة إلى مصغّرة
+level: medium
+domain: ec
+@ statement
+لعرض **مصغّرات** المنتجات، اكتب برنامجًا يصغر صورة `image[6][8]` إلى النصف: كل بكسل في المصغرة متوسط مربع `2×2` من الصورة الأصلية.
+@ steps
+- المصغرة أبعادها `3×4`.
+- `thumb[row][col]` = متوسط البكسلات `(2row, 2col)`، `(2row, 2col+1)`، `(2row+1, 2col)`، `(2row+1, 2col+1)`.
+@ flow
+for: row = 0 ; row < 3 ; row++
+  for: col = 0 ; col < 4 ; col++
+    do: thumb[row][col] = متوسط المربع 2×2
+out: thumb
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int image[6][8] = {{ 10,  12, 200, 210,  50,  52, 90,  94},
+                       { 14,  16, 205, 215,  54,  56, 92,  96},
+                       {100, 104,  30,  34, 250, 246, 10,  12},
+                       {102, 106,  32,  36, 248, 252, 14,  16},
+                       { 60,  60,  60,  60, 120, 124, 180, 184},
+                       { 60,  60,  60,  60, 128, 132, 188, 192}};
+    int thumb[3][4], row, col;
+    for (row = 0; row < 3; row++) {
+        for (col = 0; col < 4; col++) {
+            thumb[row][col] = (image[2 * row][2 * col] + image[2 * row][2 * col + 1]
+                             + image[2 * row + 1][2 * col] + image[2 * row + 1][2 * col + 1]) / 4;
+            printf("%4d", thumb[row][col]);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: تنعيم صورة بمرشح المتوسط
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يطبق **مرشح المتوسط 3×3** على صورة `image[5][5]` لإزالة الضجيج: كل بكسل داخلي يصبح متوسط جيرانه التسعة؛ بكسلات الحافة تبقى كما هي.
+@ steps
+- نعمل على مصفوفة جديدة `blurred` لكي لا نستعمل قيمًا معدلة.
+- لكل بكسل داخلي: حلقتان صغيرتان على `dRow` و`dCol` من -1 إلى 1.
+@ flow
+for: row = 0 ; row < 5 ; row++
+  for: col = 0 ; col < 5 ; col++
+    if: بكسل حافة
+      do: blurred = image[row][col]
+    else:
+      do: blurred = مجموع الجيران التسعة / 9
+out: blurred
+@ code
+#include <stdio.h>
+
+#define SIZE 5
+
+int main(void) {
+    int image[SIZE][SIZE] = {{10, 10,  10, 10, 10},
+                             {10, 10, 255, 10, 10},
+                             {10, 10,  10, 10, 10},
+                             {10, 10,  10,  0, 10},
+                             {10, 10,  10, 10, 10}};
+    int blurred[SIZE][SIZE], row, col, dRow, dCol, sum;
+    for (row = 0; row < SIZE; row++) {
+        for (col = 0; col < SIZE; col++) {
+            if (row == 0 || col == 0 || row == SIZE - 1 || col == SIZE - 1) {
+                blurred[row][col] = image[row][col];   // الحافة دون تغيير
+            } else {
+                sum = 0;
+                for (dRow = -1; dRow <= 1; dRow++)     // الجوار 3×3
+                    for (dCol = -1; dCol <= 1; dCol++)
+                        sum += image[row + dRow][col + dCol];
+                blurred[row][col] = sum / 9;
+            }
+            printf("%4d", blurred[row][col]);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: سلسلة ماركوف لحالات الزبائن
+level: medium
+domain: ds
+@ statement
+للزبون 3 حالات: 0 جديد، 1 نشط، 2 خامل. مصفوفة الانتقال `transition[from][to]` تعطي احتمال الانتقال شهريًا. انطلاقًا من توزيع ابتدائي (1000 جديد)، اكتب برنامجًا يحسب **توزيع الزبائن** بعد كل شهر لمدة `months` أشهر.
+@ stdin
+6
+@ steps
+- `next[to] = Σ current[from] * transition[from][to]` (جداء شعاع في مصفوفة).
+- ننسخ `next` إلى `current` بعد كل شهر.
+@ flow
+in: months
+do: current = {1000, 0, 0}
+for: month = 1 ; month <= months ; month++
+  for: to = 0 ; to < 3 ; to++
+    do: next[to] = Σ current[from] * transition[from][to]
+  do: current = next
+  out: current
+@ code
+#include <stdio.h>
+
+#define NB_STATES 3
+
+int main(void) {
+    double transition[NB_STATES][NB_STATES] = {{0.0, 0.6, 0.4},   // جديد
+                                               {0.0, 0.8, 0.2},   // نشط
+                                               {0.0, 0.3, 0.7}};  // خامل
+    double current[NB_STATES] = {1000, 0, 0}, next[NB_STATES];
+    int months, month, from, to;
+    scanf("%d", &months);
+    for (month = 1; month <= months; month++) {
+        for (to = 0; to < NB_STATES; to++) {
+            next[to] = 0;
+            for (from = 0; from < NB_STATES; from++)
+                next[to] += current[from] * transition[from][to];
+        }
+        for (to = 0; to < NB_STATES; to++)
+            current[to] = next[to];       // الشهر التالي ينطلق من هنا
+        printf("Month %d: new %.0f, active %.1f, idle %.1f\n",
+               month, current[0], current[1], current[2]);
+    }
+    return 0;
+}
+
+@@
+title: جدول المسافات المثلثي
+level: medium
+domain: ec
+@ statement
+جدول المسافات بين المدن **متناظر**، فتكفي مصفوفة **مثلثية سفلية**. اكتب برنامجًا يتحقق أن مصفوفة مقروءة مثلثية سفلية (كل الخانات فوق القطر أصفار)، ثم يستعملها لإيجاد المسافة بين مدينتين في أي ترتيب.
+@ stdin
+1 3
+@ steps
+- مثلثية سفلية: `matrix[row][col] == 0` لكل `col > row`.
+- المسافة بين `a` و`b`: نقرأ دائمًا `matrix[max][min]`.
+@ flow
+do: lower = 1
+for: row = 0 ; row < 4 ; row++
+  for: col = row + 1 ; col < 4 ; col++
+    if: dist[row][col] != 0
+      do: lower = 0
+in: cityA, cityB
+if: cityA < cityB
+  do: تبديل cityA و cityB
+out: lower, dist[cityA][cityB]
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+int main(void) {
+    int dist[NB][NB] = {{  0,   0,   0, 0},     // الجزائر
+                        {430,   0,   0, 0},     // وهران
+                        {390, 820,   0, 0},     // قسنطينة
+                        {200, 600, 340, 0}};    // سطيف
+    int row, col, lower = 1, cityA, cityB, tmp;
+    for (row = 0; row < NB; row++)
+        for (col = row + 1; col < NB; col++)    // فوق القطر
+            if (dist[row][col] != 0)
+                lower = 0;
+    printf("Lower triangular: %s\n", lower ? "yes" : "no");
+    scanf("%d %d", &cityA, &cityB);
+    if (cityA < cityB) {                        // نقرأ دائمًا تحت القطر
+        tmp = cityA; cityA = cityB; cityB = tmp;
+    }
+    printf("Distance = %d km\n", dist[cityA][cityB]);
+    return 0;
+}
+
+@@
+title: المستودع الأرخص لكل زبون
+level: medium
+domain: ec
+@ statement
+مصفوفة `shipCost[3][5]`: تكلفة الشحن من كل مستودع (سطر) إلى كل زبون (عمود). اكتب برنامجًا يختار لكل زبون **المستودع الأرخص**، ويحسب التكلفة الكلية وعدد الزبائن المخدومين من كل مستودع.
+@ steps
+- لكل عمود: بحث عن أصغر قيمة.
+- `served[bestDepot]++` و`total += shipCost[bestDepot][customer]`.
+@ flow
+do: total = 0
+for: customer = 0 ; customer < 5 ; customer++
+  do: bestDepot = 0
+  for: depot = 1 ; depot < 3 ; depot++
+    if: shipCost[depot][customer] < shipCost[bestDepot][customer]
+      do: bestDepot = depot
+  do: served[bestDepot]++ ; total += shipCost[bestDepot][customer]
+out: total, served
+@ code
+#include <stdio.h>
+
+#define NB_DEPOTS 3
+#define NB_CUST 5
+
+int main(void) {
+    int shipCost[NB_DEPOTS][NB_CUST] = {{400, 650, 300, 900, 500},
+                                        {550, 300, 450, 600, 700},
+                                        {700, 500, 350, 350, 450}};
+    int served[NB_DEPOTS] = {0};
+    int customer, depot, bestDepot, total = 0;
+    for (customer = 0; customer < NB_CUST; customer++) {
+        bestDepot = 0;
+        for (depot = 1; depot < NB_DEPOTS; depot++)
+            if (shipCost[depot][customer] < shipCost[bestDepot][customer])
+                bestDepot = depot;
+        served[bestDepot]++;
+        total += shipCost[bestDepot][customer];
+        printf("Customer %d <- depot %d (%d DA)\n", customer, bestDepot,
+               shipCost[bestDepot][customer]);
+    }
+    printf("Total cost = %d DA\n", total);
+    for (depot = 0; depot < NB_DEPOTS; depot++)
+        printf("Depot %d serves %d customer(s)\n", depot, served[depot]);
+    return 0;
+}
+
+@@
+title: كثافة مصفوفة متفرقة
+level: medium
+domain: ds
+@ statement
+مصفوفة زبائن × منتجات أغلب خاناتها أصفار (**متفرقة**). لتوفير الذاكرة نخزن فقط الخانات غير الصفرية بصيغة **الإحداثيات** `(row, col, value)` في ثلاثة جداول. اكتب برنامجًا يحسب الكثافة وينشئ هذا التمثيل.
+@ steps
+- نمر على المصفوفة؛ كل خانة غير صفرية تضاف إلى الجداول الثلاثة.
+- الكثافة = عدد الخانات غير الصفرية / عدد الخانات.
+@ flow
+do: nonZero = 0
+for: row = 0 ; row < 5 ; row++
+  for: col = 0 ; col < 8 ; col++
+    if: matrix[row][col] != 0
+      do: rows[nonZero] = row ; cols[nonZero] = col ; values[nonZero] = matrix[row][col] ; nonZero++
+out: nonZero / 40, القوائم الثلاث
+@ code
+#include <stdio.h>
+
+#define NB_ROWS 5
+#define NB_COLS 8
+
+int main(void) {
+    int matrix[NB_ROWS][NB_COLS] = {{0, 0, 3, 0, 0, 0, 0, 1},
+                                    {0, 0, 0, 0, 0, 0, 0, 0},
+                                    {2, 0, 0, 0, 5, 0, 0, 0},
+                                    {0, 0, 0, 0, 0, 0, 4, 0},
+                                    {0, 1, 0, 0, 0, 0, 0, 0}};
+    int rows[NB_ROWS * NB_COLS], cols[NB_ROWS * NB_COLS], values[NB_ROWS * NB_COLS];
+    int row, col, nonZero = 0, index;
+    for (row = 0; row < NB_ROWS; row++)
+        for (col = 0; col < NB_COLS; col++)
+            if (matrix[row][col] != 0) {      // نحفظ الإحداثيات والقيمة فقط
+                rows[nonZero] = row;
+                cols[nonZero] = col;
+                values[nonZero] = matrix[row][col];
+                nonZero++;
+            }
+    printf("Density = %d/%d = %.1f %%\n", nonZero, NB_ROWS * NB_COLS,
+           nonZero * 100.0 / (NB_ROWS * NB_COLS));
+    for (index = 0; index < nonZero; index++)
+        printf("(%d,%d)=%d ", rows[index], cols[index], values[index]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: عدد مسارات الروبوت في المستودع
+level: medium
+domain: ec
+@ statement
+روبوت المستودع يتحرك من الزاوية العليا اليسرى إلى السفلى اليمنى، **يمينًا أو أسفل فقط**، وبعض الخانات محجوبة (1). اكتب برنامجًا يحسب **عدد المسارات** الممكنة بالبرمجة الديناميكية: `paths[r][c] = paths[r-1][c] + paths[r][c-1]`.
+@ steps
+- خانة محجوبة: 0 مسار.
+- خانة البداية: مسار واحد إن لم تكن محجوبة.
+- الخانات الأخرى: مجموع الخانة فوقها والخانة على يسارها (إن وجدتا).
+@ flow
+for: row = 0 ; row < 5 ; row++
+  for: col = 0 ; col < 6 ; col++
+    if: blocked[row][col]
+      do: paths = 0
+    else:
+      if: row == 0 && col == 0
+        do: paths = 1
+      else:
+        do: paths = (فوق) + (يسار)
+out: paths[4][5]
+@ code
+#include <stdio.h>
+
+#define NB_ROWS 5
+#define NB_COLS 6
+
+int main(void) {
+    int blocked[NB_ROWS][NB_COLS] = {{0, 0, 0, 0, 0, 0},
+                                     {0, 1, 0, 0, 1, 0},
+                                     {0, 0, 0, 1, 0, 0},
+                                     {1, 0, 0, 0, 0, 0},
+                                     {0, 0, 1, 0, 0, 0}};
+    long paths[NB_ROWS][NB_COLS];
+    int row, col;
+    for (row = 0; row < NB_ROWS; row++) {
+        for (col = 0; col < NB_COLS; col++) {
+            if (blocked[row][col])
+                paths[row][col] = 0;              // لا يمر منها أحد
+            else if (row == 0 && col == 0)
+                paths[row][col] = 1;              // نقطة الانطلاق
+            else
+                paths[row][col] = (row > 0 ? paths[row - 1][col] : 0)
+                                + (col > 0 ? paths[row][col - 1] : 0);
+            printf("%4ld", paths[row][col]);
+        }
+        printf("\n");
+    }
+    printf("Paths to the exit: %ld\n", paths[NB_ROWS - 1][NB_COLS - 1]);
+    return 0;
+}
+
+@@
+title: أرخص مسار للتوصيل في المدينة
+level: medium
+domain: ec
+@ statement
+المدينة شبكة أحياء `cost[4][5]` (زمن عبور كل حي بالدقائق). سائق التوصيل يتحرك **يمينًا أو أسفل**. اكتب برنامجًا يحسب **أقل زمن** من الزاوية العليا اليسرى إلى السفلى اليمنى، ويعيد بناء المسار.
+@ steps
+- `best[r][c] = cost[r][c] + min(best[r-1][c], best[r][c-1])`.
+- إعادة البناء: من النهاية نعود إلى الخانة (فوق أو يسار) ذات القيمة الأصغر.
+@ flow
+for: row = 0 ; row < 4 ; row++
+  for: col = 0 ; col < 5 ; col++
+    do: best = cost + min(فوق, يسار)
+do: row = 3 ; col = 4
+while: row > 0 || col > 0
+  out: (row, col)
+  do: نعود إلى الجار الأصغر
+out: best[3][4]
+@ code
+#include <stdio.h>
+
+#define NB_ROWS 4
+#define NB_COLS 5
+
+int main(void) {
+    int cost[NB_ROWS][NB_COLS] = {{3, 7, 2, 8, 1},
+                                  {4, 1, 9, 2, 6},
+                                  {8, 2, 1, 5, 3},
+                                  {6, 9, 4, 1, 2}};
+    int best[NB_ROWS][NB_COLS], row, col, up, left;
+    for (row = 0; row < NB_ROWS; row++)
+        for (col = 0; col < NB_COLS; col++) {
+            if (row == 0 && col == 0) { best[row][col] = cost[row][col]; continue; }
+            up = (row > 0) ? best[row - 1][col] : -1;     // -1: غير موجود
+            left = (col > 0) ? best[row][col - 1] : -1;
+            if (up < 0 || (left >= 0 && left < up))
+                best[row][col] = cost[row][col] + left;
+            else
+                best[row][col] = cost[row][col] + up;
+        }
+    printf("Minimum time = %d min\nPath (reversed):", best[NB_ROWS - 1][NB_COLS - 1]);
+    row = NB_ROWS - 1; col = NB_COLS - 1;
+    while (row > 0 || col > 0) {          // نعود من النهاية إلى البداية
+        printf(" (%d,%d)", row, col);
+        if (row == 0) col--;
+        else if (col == 0) row--;
+        else if (best[row - 1][col] <= best[row][col - 1]) row--;
+        else col--;
+    }
+    printf(" (0,0)\n");
+    return 0;
+}
+
+@@
+title: أسعار الوحدة من ثلاث فواتير (قاعدة كرامر)
+level: medium
+domain: ec
+@ statement
+لدينا ثلاث فواتير، كل واحدة تحتوي كميات من نفس ثلاثة منتجات ومبلغًا إجماليًا، لكن الأسعار مفقودة. اكتب برنامجًا يحل جملة المعادلات `A × prices = totals` بـ **قاعدة كرامر**: المحدد بطريقة ساروس.
+@ steps
+- `det(A)` بصيغة ساروس للمصفوفة 3×3.
+- لكل مجهول `unknown`: نعوض العمود `unknown` بشعاع المبالغ ونحسب المحدد.
+- `price[unknown] = detReplaced / det`.
+@ flow
+do: det = محدد A
+if: det == 0
+  out: `"no unique solution"`
+else:
+  for: unknown = 0 ; unknown < 3 ; unknown++
+    do: نسخ A مع تعويض العمود unknown بـ totals
+    do: price[unknown] = محدد النسخة / det
+  out: price
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double qty[3][3] = {{2, 1, 3},       // الفاتورة 1: الكميات
+                        {1, 4, 1},
+                        {3, 2, 2}};
+    double totals[3] = {5100, 4300, 6200};
+    double work[3][3], det, detReplaced, price[3];
+    int unknown, row, col;
+    // قاعدة ساروس: مجموع الأقطار ناقص مجموع الأقطار المعاكسة
+    det = qty[0][0] * qty[1][1] * qty[2][2] + qty[0][1] * qty[1][2] * qty[2][0]
+        + qty[0][2] * qty[1][0] * qty[2][1] - qty[0][2] * qty[1][1] * qty[2][0]
+        - qty[0][0] * qty[1][2] * qty[2][1] - qty[0][1] * qty[1][0] * qty[2][2];
+    if (det == 0) {
+        printf("No unique solution\n");
+        return 0;
+    }
+    for (unknown = 0; unknown < 3; unknown++) {
+        for (row = 0; row < 3; row++)
+            for (col = 0; col < 3; col++)
+                work[row][col] = (col == unknown) ? totals[row] : qty[row][col];
+        detReplaced = work[0][0] * work[1][1] * work[2][2] + work[0][1] * work[1][2] * work[2][0]
+                    + work[0][2] * work[1][0] * work[2][1] - work[0][2] * work[1][1] * work[2][0]
+                    - work[0][0] * work[1][2] * work[2][1] - work[0][1] * work[1][0] * work[2][2];
+        price[unknown] = detReplaced / det;
+        printf("Product %d: %.2f DA\n", unknown, price[unknown]);
+    }
+    printf("det = %.0f\n", det);
+    return 0;
+}
+
+@@
+title: ترتيب المتاجر حسب مجموع مبيعاتها
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يرتب **أسطر** مصفوفة المبيعات (متاجر × أيام) تنازليًا حسب مجموع كل سطر، بتبديل الأسطر كاملة، ثم يعرض الترتيب.
+@ steps
+- نحسب `total[store]` لكل سطر.
+- ترتيب بالانتقاء على `total`؛ عند التبديل نبدل أيضًا السطرين كاملين وأرقام المتاجر.
+@ flow
+do: total[store] = مجموع كل سطر
+for: pos = 0 ; pos < NB - 1 ; pos++
+  do: best = فهرس أكبر total بين pos و NB-1
+  do: تبديل total و id والسطرين pos و best
+out: المصفوفة المرتبة
+@ code
+#include <stdio.h>
+
+#define NB 4
+#define NB_DAYS 3
+
+int main(void) {
+    int sales[NB][NB_DAYS] = {{80, 60, 75}, {200, 210, 190}, {120, 95, 140}, {10, 300, 20}};
+    int id[NB] = {0, 1, 2, 3}, total[NB];
+    int store, day, pos, scan, best, tmp;
+    for (store = 0; store < NB; store++) {
+        total[store] = 0;
+        for (day = 0; day < NB_DAYS; day++)
+            total[store] += sales[store][day];
+    }
+    for (pos = 0; pos < NB - 1; pos++) {          // ترتيب بالانتقاء
+        best = pos;
+        for (scan = pos + 1; scan < NB; scan++)
+            if (total[scan] > total[best])
+                best = scan;
+        tmp = total[pos]; total[pos] = total[best]; total[best] = tmp;
+        tmp = id[pos]; id[pos] = id[best]; id[best] = tmp;
+        for (day = 0; day < NB_DAYS; day++) {     // تبديل السطرين كاملين
+            tmp = sales[pos][day];
+            sales[pos][day] = sales[best][day];
+            sales[best][day] = tmp;
+        }
+    }
+    for (store = 0; store < NB; store++) {
+        printf("#%d store %d:", store + 1, id[store]);
+        for (day = 0; day < NB_DAYS; day++)
+            printf(" %3d", sales[store][day]);
+        printf(" = %d\n", total[store]);
+    }
+    return 0;
+}
+
+@@
+title: حجز فترات توصيل متتالية
+level: medium
+domain: ec
+@ statement
+مصفوفة `slots[5][8]` تمثل فترات التوصيل لـ 5 أيام (8 فترات يوميًا): 0 حرة و1 محجوزة. زبون يحتاج `need` فترات **متتالية** في نفس اليوم. اكتب برنامجًا يجد **أول** يوم وفترة بداية ممكنين ويحجزهما.
+@ stdin
+3
+@ steps
+- لكل يوم نعد الفترات الحرة المتتالية `run`؛ نعيده إلى 0 عند فترة محجوزة.
+- عندما يبلغ `run == need`: البداية `slot - need + 1`.
+- نحجز الفترات بوضع 1.
+@ flow
+in: need
+do: found = 0
+for: day = 0 ; day < 5 && !found ; day++
+  do: run = 0
+  for: slot = 0 ; slot < 8 && !found ; slot++
+    if: slots[day][slot] == 0
+      do: run++
+    else:
+      do: run = 0
+    if: run == need
+      do: found = 1 ; حجز الفترات
+out: اليوم والفترات
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int slots[5][8] = {{1, 1, 0, 0, 1, 0, 1, 1},
+                       {0, 1, 1, 0, 0, 1, 0, 0},
+                       {1, 0, 0, 0, 0, 1, 1, 0},
+                       {0, 0, 0, 1, 1, 1, 1, 1},
+                       {1, 1, 1, 1, 1, 1, 1, 1}};
+    int need, day, slot, run, found = 0, start = 0, bookDay = 0, pos;
+    scanf("%d", &need);
+    for (day = 0; day < 5 && !found; day++) {
+        run = 0;                          // طول السلسلة الحرة الحالية
+        for (slot = 0; slot < 8 && !found; slot++) {
+            if (slots[day][slot] == 0) run++;
+            else run = 0;
+            if (run == need) {
+                found = 1;
+                start = slot - need + 1;
+                bookDay = day;
+            }
+        }
+    }
+    if (!found) {
+        printf("No %d consecutive free slots\n", need);
+    } else {
+        for (pos = start; pos < start + need; pos++)
+            slots[bookDay][pos] = 1;      // الحجز
+        printf("Booked day %d, slots %d to %d:", bookDay + 1, start, start + need - 1);
+        for (pos = 0; pos < 8; pos++)
+            printf(" %d", slots[bookDay][pos]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: قوة مصفوفة الانتقال
+level: medium
+domain: ds
+@ statement
+احتمال انتقال زبون بين 3 صفحات من الموقع في خطوة واحدة معطى بالمصفوفة `step`. اكتب برنامجًا يحسب **مصفوفة الانتقال بعد خطوتين** `step × step`، ويتحقق أن مجموع كل سطر يبقى 1.
+@ steps
+- `twoSteps[from][to] = Σ step[from][mid] * step[mid][to]`: نمر بكل صفحة وسيطة.
+- مجموع كل سطر يجب أن يساوي 1 (توزيع احتمالي).
+@ flow
+for: from = 0 ; from < 3 ; from++
+  for: to = 0 ; to < 3 ; to++
+    do: twoSteps = 0
+    for: mid = 0 ; mid < 3 ; mid++
+      do: twoSteps += step[from][mid] * step[mid][to]
+  out: السطر ومجموعه
+@ code
+#include <stdio.h>
+
+#define NB 3
+
+int main(void) {
+    double step[NB][NB] = {{0.2, 0.5, 0.3},       // الرئيسية
+                           {0.1, 0.6, 0.3},       // المنتج
+                           {0.4, 0.2, 0.4}};      // السلة
+    double twoSteps[NB][NB], rowSum;
+    int from, to, mid;
+    for (from = 0; from < NB; from++) {
+        rowSum = 0;
+        for (to = 0; to < NB; to++) {
+            twoSteps[from][to] = 0;
+            for (mid = 0; mid < NB; mid++)        // كل الطرق عبر صفحة وسيطة
+                twoSteps[from][to] += step[from][mid] * step[mid][to];
+            rowSum += twoSteps[from][to];
+            printf(" %.3f", twoSteps[from][to]);
+        }
+        printf("  (sum %.2f)\n", rowSum);
+    }
+    return 0;
+}

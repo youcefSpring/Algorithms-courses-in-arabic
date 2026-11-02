@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+int main(void) {
+    char line[] = "1042;USB-C Charger;2450.50;37";
+    char fields[4][40];
+    int pos, fieldNo = 0, length = 0, id = 0, qty = 0, afterDot = 0;
+    double price = 0, scale = 1;
+    for (pos = 0; line[pos] != '\0'; pos++) {
+        if (line[pos] == ';') {
+            fields[fieldNo][length] = '\0';   // نهاية الحقل
+            fieldNo++;
+            length = 0;
+        } else {
+            fields[fieldNo][length++] = line[pos];
+        }
+    }
+    fields[fieldNo][length] = '\0';           // الحقل الأخير
+    for (pos = 0; fields[0][pos] != '\0'; pos++)
+        id = id * 10 + (fields[0][pos] - '0');
+    for (pos = 0; fields[3][pos] != '\0'; pos++)
+        qty = qty * 10 + (fields[3][pos] - '0');
+    for (pos = 0; fields[2][pos] != '\0'; pos++) {   // السعر العشري
+        if (fields[2][pos] == '.') { afterDot = 1; continue; }
+        if (!afterDot) price = price * 10 + (fields[2][pos] - '0');
+        else { scale /= 10; price += (fields[2][pos] - '0') * scale; }
+    }
+    printf("id=%d name=\"%s\" price=%.2f qty=%d\n", id, fields[1], price, qty);
+    printf("Stock value = %.2f DA\n", price * qty);
+    return 0;
+}

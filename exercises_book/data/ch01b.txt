@@ -1,0 +1,1057 @@
+@@
+title: عكس رمز المنتج
+level: medium
+domain: ec
+@ statement
+لكل منتج رمز من **ثلاثة أرقام**. لإنشاء رمز سري يعكس النظام ترتيب الأرقام (مثلًا 472 يصبح 274). اكتب برنامجًا يقوم بذلك باستعمال `/` و`%` فقط.
+@ stdin
+472
+@ steps
+- رقم الآحاد: `units = code % 10`.
+- رقم العشرات: `tens = (code / 10) % 10`.
+- رقم المئات: `hundreds = code / 100`.
+- الرمز المعكوس: `reversed = units * 100 + tens * 10 + hundreds`.
+@ flow
+in: code
+do: units = code % 10
+do: tens = (code / 10) % 10
+do: hundreds = code / 100
+do: reversed = units * 100 + tens * 10 + hundreds
+out: reversed
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int code, units, tens, hundreds, reversed;
+    scanf("%d", &code);
+    units = code % 10;               // رقم الآحاد
+    tens = (code / 10) % 10;        // نحذف الآحاد ثم نأخذ الرقم الأخير
+    hundreds = code / 100;              // رقم المئات
+    reversed = units * 100 + tens * 10 + hundreds; // نعيد التركيب بالترتيب المعاكس
+    printf("Code %d -> %d\n", code, reversed);
+    return 0;
+}
+
+@@
+title: مجموع التحقق لرقم الطلبية
+level: medium
+domain: ec
+@ statement
+رقم كل طلبية مكون من **أربعة أرقام**. لاكتشاف أخطاء الإدخال نحسب **مجموع أرقامه** ثم رقم التحقق `S % 10`. اكتب برنامجًا يقوم بذلك.
+@ stdin
+5837
+@ steps
+- نستخرج الأرقام الأربعة بالقسمة على 1000 و100 و10 وبباقي القسمة على 10.
+- نجمعها في `digitSum`.
+- رقم التحقق هو `digitSum % 10`.
+@ flow
+in: order
+do: d1 = order / 1000
+do: d2 = (order / 100) % 10
+do: d3 = (order / 10) % 10
+do: d4 = order % 10
+do: digitSum = d1 + d2 + d3 + d4
+out: digitSum, digitSum % 10
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int order, d1, d2, d3, d4, digitSum;
+    scanf("%d", &order);
+    d1 = order / 1000;            // رقم الآلاف
+    d2 = (order / 100) % 10;      // رقم المئات
+    d3 = (order / 10) % 10;       // رقم العشرات
+    d4 = order % 10;              // رقم الآحاد
+    digitSum = d1 + d2 + d3 + d4;    // مجموع الأرقام
+    printf("Digit sum = %d\n", digitSum);
+    printf("Check digit = %d\n", digitSum % 10);
+    return 0;
+}
+
+@@
+title: تقريب السعر إلى منزلتين
+level: medium
+domain: ec
+@ statement
+ينتج حساب الضرائب أحيانًا أسعارًا مثل 1234.5678. اكتب برنامجًا يقرب سعرًا إلى **منزلتين عشريتين** دون دالة `round`، ثم إلى **أقرب 10 دنانير**.
+@ stdin
+1234.5678
+@ steps
+- نضرب في 100 ونضيف 0.5 ثم نحول إلى `int` (يحذف الجزء العشري).
+- نقسم على `100.0` لنرجع إلى الدينار.
+- لأقرب 10: `((int)(price / 10 + 0.5)) * 10`.
+@ flow
+in: price
+do: r2 = (int)(price * 100 + 0.5) / 100.0
+do: r10 = (int)(price / 10 + 0.5) * 10
+out: r2, r10
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double price, r2;
+    int r10;
+    scanf("%lf", &price);
+    // إضافة 0.5 ثم الحذف بالتحويل إلى int = تقريب لأقرب عدد صحيح
+    r2 = (int)(price * 100 + 0.5) / 100.0;
+    r10 = (int)(price / 10 + 0.5) * 10;     // تقريب لأقرب 10 دنانير
+    printf("Rounded (2 decimals) = %.4f\n", r2);
+    printf("Rounded (10 DA) = %d\n", r10);
+    return 0;
+}
+
+@@
+title: مؤشرات الحملة الإعلانية
+level: medium
+domain: ds
+@ statement
+حملة إعلانية حققت عددًا من **مرات الظهور** و**النقرات** وكلفت مبلغًا معينًا. اكتب برنامجًا يحسب نسبة النقر `CTR` وتكلفة النقرة `CPC` وتكلفة الألف ظهور `CPM`.
+@ stdin
+120000 3000 45000
+@ steps
+- `CTR = clicks / impressions * 100`.
+- `CPC = cost / clicks`.
+- `CPM = cost / impressions * 1000`.
+@ flow
+in: imp, clicks, cost
+do: ctr = clicks / imp * 100
+do: cpc = cost / clicks
+do: cpm = cost / imp * 1000
+out: ctr, cpc, cpm
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double imp, clicks, cost, ctr, cpc, cpm;
+    scanf("%lf %lf %lf", &imp, &clicks, &cost);
+    ctr = clicks / imp * 100;     // نسبة النقر بالمئة
+    cpc = cost / clicks;          // تكلفة النقرة الواحدة
+    cpm = cost / imp * 1000;      // تكلفة كل ألف ظهور
+    printf("CTR = %.2f %%\n", ctr);
+    printf("CPC = %.2f DA\n", cpc);
+    printf("CPM = %.2f DA\n", cpm);
+    return 0;
+}
+
+@@
+title: القيمة الدائمة للزبون
+level: medium
+domain: ds
+@ statement
+**القيمة الدائمة للزبون** `CLV` تقدر بـ: متوسط السلة × عدد الطلبيات في السنة × عدد سنوات الوفاء × هامش الربح. اكتب برنامجًا يحسبها.
+@ stdin
+3200 6 4 0.25
+@ steps
+- نقرأ `basket` و`freq` و`years` و`margin`.
+- رقم الأعمال المتوقع: `rev = basket * freq * years`.
+- `clv = rev * margin`.
+@ flow
+in: basket, freq, years, margin
+do: rev = basket * freq * years
+do: clv = rev * margin
+out: rev, clv
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double basket, margin, rev, clv;
+    int freq, years;
+    scanf("%lf %d %d %lf", &basket, &freq, &years, &margin);
+    rev = basket * freq * years;  // رقم الأعمال طوال مدة الوفاء
+    clv = rev * margin;           // الربح الذي يحققه الزبون
+    printf("Expected revenue = %.2f DA\n", rev);
+    printf("CLV = %.2f DA\n", clv);
+    return 0;
+}
+
+@@
+title: متوسط قيمة الطلبية
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ رقم الأعمال (عدد صحيح) وعدد الطلبيات، ثم يعرض متوسط قيمة الطلبية مرة **بقسمة صحيحة** ومرة **بقسمة حقيقية**، ليوضح الفرق بينهما.
+@ stdin
+98765 23
+@ steps
+- القسمة بين عددين صحيحين تحذف الجزء العشري: `rev / nbOrders`.
+- للحصول على قسمة حقيقية نحول: `(double)rev / nbOrders`.
+- الفرق بين النتيجتين هو الجزء الضائع.
+@ flow
+in: rev, nbOrders
+do: quotient = rev / nbOrders
+do: avg = (double)rev / nbOrders
+out: quotient, avg, avg - quotient
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int rev, nbOrders, quotient;
+    double avg;
+    scanf("%d %d", &rev, &nbOrders);
+    quotient = rev / nbOrders;                  // قسمة صحيحة: الجزء العشري يضيع
+    avg = (double)rev / nbOrders;        // قسمة حقيقية
+    printf("Integer division = %d\n", quotient);
+    printf("Real division    = %.4f\n", avg);
+    printf("Lost part        = %.4f\n", avg - quotient);
+    return 0;
+}
+
+@@
+title: أيام تغطية المخزون
+level: medium
+domain: ec
+@ statement
+مخزون منتج في بداية الأسبوع `stock`. بيعت منه `sold` وحدة ووصلت شحنة من `rec` وحدة. اكتب برنامجًا يحسب المخزون الجديد وعدد **الأيام الكاملة** التي يغطيها إذا كان البيع اليومي `daily`.
+@ stdin
+340 215 500 45
+@ steps
+- المخزون الجديد: `stock = stock - sold + rec`.
+- أيام التغطية: `days = stock / daily` (قسمة صحيحة).
+- الوحدات المتبقية بعد آخر يوم كامل: `stock % daily`.
+@ flow
+in: stock, sold, rec, daily
+do: stock = stock - sold + rec
+do: days = stock / daily
+do: rest = stock % daily
+out: stock, days, rest
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int stock, sold, rec, daily, days, rest;
+    scanf("%d %d %d %d", &stock, &sold, &rec, &daily);
+    stock = stock - sold + rec;           // تحديث المخزون
+    days = stock / daily;             // عدد الأيام الكاملة
+    rest = stock % daily;             // ما يبقى بعدها
+    printf("New stock = %d\n", stock);
+    printf("Covers %d full days (%d left)\n", days, rest);
+    return 0;
+}
+
+@@
+title: التنبؤ بنموذج خطي
+level: medium
+domain: ds
+@ statement
+درّب محلل بيانات نموذجًا خطيًا يتنبأ بالمبيعات `y` بدلالة ميزانية الإعلان `x` (بالآلاف): `y = slope*x + intercept`. اكتب برنامجًا يقرأ `slope` و`intercept` وميزانيتين ويعرض التنبؤين والفرق بينهما.
+@ stdin
+3.2 150
+20 35
+@ steps
+- نقرأ معاملي النموذج `slope` و`intercept`.
+- نقرأ الميزانيتين `x1` و`x2`.
+- نحسب `y1 = slope*x1 + intercept` و`y2 = slope*x2 + intercept` والفرق `y2 - y1`.
+@ flow
+in: slope, intercept, x1, x2
+do: y1 = slope * x1 + intercept
+do: y2 = slope * x2 + intercept
+out: y1, y2, y2 - y1
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double slope, intercept, x1, x2, y1, y2;
+    scanf("%lf %lf", &slope, &intercept);     // معاملا النموذج
+    scanf("%lf %lf", &x1, &x2);   // ميزانيتان
+    y1 = slope * x1 + intercept;              // التنبؤ الأول
+    y2 = slope * x2 + intercept;              // التنبؤ الثاني
+    printf("Prediction 1 = %.1f\n", y1);
+    printf("Prediction 2 = %.1f\n", y2);
+    printf("Gain = %.1f\n", y2 - y1);   // = slope × (x2 - x1)
+    return 0;
+}
+
+@@
+title: مستقيم يمر بنقطتين
+level: medium
+domain: ds
+@ statement
+لاحظنا أن سعر 100 دج يحقق 900 مبيعة، وسعر 150 دج يحقق 650 مبيعة. اكتب برنامجًا يقرأ نقطتين `(x1, y1)` و`(x2, y2)` ويحسب **الميل** و**الجزء المقطوع** للمستقيم المار بهما، ثم يتنبأ بالمبيعات عند سعر 120.
+@ stdin
+100 900
+150 650
+@ steps
+- الميل: `slope = (y2 - y1) / (x2 - x1)`.
+- الجزء المقطوع: `intercept = y1 - slope * x1`.
+- التنبؤ: `sales = slope * 120 + intercept`.
+@ flow
+in: x1, y1, x2, y2
+do: slope = (y2 - y1) / (x2 - x1)
+do: intercept = y1 - slope * x1
+do: sales = slope * 120 + intercept
+out: slope, intercept, sales
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double x1, y1, x2, y2, slope, intercept, sales;
+    scanf("%lf %lf %lf %lf", &x1, &y1, &x2, &y2);
+    slope = (y2 - y1) / (x2 - x1);    // الميل: تغير sales لكل وحدة من x
+    intercept = y1 - slope * x1;              // من y1 = slope*x1 + intercept
+    sales = slope * 120 + intercept;              // التنبؤ عند السعر 120
+    printf("Slope a = %.2f\n", slope);
+    printf("Intercept b = %.2f\n", intercept);
+    printf("Sales at 120 DA = %.0f\n", sales);
+    return 0;
+}
+
+@@
+title: حصص الأصناف من رقم الأعمال
+level: medium
+domain: ds
+@ statement
+حقق متجر رقم أعمال في ثلاثة أصناف: إلكترونيات، ملابس، كتب. اكتب برنامجًا يحسب **حصة** كل صنف بالمئة، ويتحقق أن مجموع الحصص 100%.
+@ stdin
+540000 310000 150000
+@ steps
+- المجموع: `total = electronics + clothing + books`.
+- حصة كل صنف: `قيمته / total * 100`.
+- نعرض مجموع الحصص للتحقق.
+@ flow
+in: electronics, clothing, books
+do: total = electronics + clothing + books
+do: pe = electronics / total * 100
+do: pc = clothing / total * 100
+do: pb = books / total * 100
+out: pe, pc, pb, pe + pc + pb
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double electronics, clothing, books, total, pe, pc, pb;
+    scanf("%lf %lf %lf", &electronics, &clothing, &books);
+    total = electronics + clothing + books;                // رقم الأعمال الكلي
+    pe = electronics / total * 100;             // حصة الإلكترونيات
+    pc = clothing / total * 100;             // حصة الملابس
+    pb = books / total * 100;             // حصة الكتب
+    printf("Electronics: %.1f %%\n", pe);
+    printf("Clothing:    %.1f %%\n", pc);
+    printf("Books:       %.1f %%\n", pb);
+    printf("Check sum:   %.1f %%\n", pe + pc + pb);
+    return 0;
+}
+
+@@
+title: الطابع الزمني إلى ساعة
+level: medium
+domain: ds
+@ statement
+تسجل قاعدة البيانات وقت كل نقرة بعدد الثواني منذ منتصف الليل. اكتب برنامجًا يحول هذا العدد إلى الصيغة `hh:mm:ss`.
+@ stdin
+53917
+@ steps
+- الساعات: `hours = timestamp / 3600`.
+- الدقائق: `minutes = (timestamp % 3600) / 60`.
+- الثواني: `seconds = timestamp % 60`.
+@ flow
+in: timestamp
+do: hours = timestamp / 3600
+do: minutes = (timestamp % 3600) / 60
+do: seconds = timestamp % 60
+out: hours:minutes:seconds
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int timestamp, hours, minutes, seconds;
+    scanf("%d", &timestamp);              // ثوانٍ منذ منتصف الليل
+    hours = timestamp / 3600;                 // 3600 ثانية في الساعة
+    minutes = (timestamp % 3600) / 60;          // ما تبقى من الساعة بالدقائق
+    seconds = timestamp % 60;                   // الثواني المتبقية
+    printf("%d s -> %02d:%02d:%02d\n", timestamp, hours, minutes, seconds);
+    return 0;
+}
+
+@@
+title: فاتورة كاملة
+level: medium
+domain: ec
+@ statement
+تحتوي سلة على ثلاثة منتجات (سعر وكمية لكل منها). يضاف الرسم 19% ثم مصاريف شحن ثابتة 600 دج. اكتب برنامجًا يعرض المجموع دون رسم، الرسم، والمبلغ النهائي.
+@ stdin
+1200 2
+450 4
+3999 1
+@ steps
+- نقرأ السعر والكمية لكل منتج.
+- `ht = p1*q1 + p2*q2 + p3*q3`.
+- `tax = ht * TVA` ثم `total = ht + tax + SHIP`.
+@ flow
+in: p1, q1, p2, q2, p3, q3
+do: ht = p1*q1 + p2*q2 + p3*q3
+do: tax = ht * TVA
+do: total = ht + tax + SHIP
+out: ht, tax, total
+@ code
+#include <stdio.h>
+
+#define TVA  0.19                 // نسبة الرسم
+#define SHIP 600.0                // مصاريف الشحن الثابتة
+
+int main(void) {
+    double p1, p2, p3, ht, tax, total;
+    int q1, q2, q3;
+    scanf("%lf %d", &p1, &q1);    // المنتج الأول
+    scanf("%lf %d", &p2, &q2);    // المنتج الثاني
+    scanf("%lf %d", &p3, &q3);    // المنتج الثالث
+    ht = p1 * q1 + p2 * q2 + p3 * q3;   // مجموع الأسطر
+    tax = ht * TVA;
+    total = ht + tax + SHIP;
+    printf("Subtotal HT = %10.2f\n", ht);
+    printf("Tax 19%%     = %10.2f\n", tax);
+    printf("Shipping    = %10.2f\n", SHIP);
+    printf("TOTAL       = %10.2f DA\n", total);
+    return 0;
+}
+
+@@
+title: مقارنة سعر الكيلوغرام
+level: medium
+domain: ec
+@ statement
+يعرض المتجر نفس القهوة في عبوتين: 250 غ بسعر `p1` و1 كغ بسعر `p2`. اكتب برنامجًا يحسب **سعر الكيلوغرام** لكل عبوة والفرق بينهما والتوفير بالمئة عند شراء العبوة الكبيرة.
+@ stdin
+250 380
+1000 1350
+@ steps
+- سعر الكيلوغرام: `price / grams * 1000`.
+- الفرق: `k1 - k2`.
+- التوفير بالمئة: `(k1 - k2) / k1 * 100`.
+@ flow
+in: g1, p1, g2, p2
+do: k1 = p1 / g1 * 1000
+do: k2 = p2 / g2 * 1000
+do: save = (k1 - k2) / k1 * 100
+out: k1, k2, save
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double g1, p1, g2, p2, k1, k2, save;
+    scanf("%lf %lf", &g1, &p1);   // الوزن بالغرام والسعر للعبوة 1
+    scanf("%lf %lf", &g2, &p2);   // العبوة 2
+    k1 = p1 / g1 * 1000;          // سعر الكيلوغرام للعبوة 1
+    k2 = p2 / g2 * 1000;          // سعر الكيلوغرام للعبوة 2
+    save = (k1 - k2) / k1 * 100;  // التوفير النسبي
+    printf("Pack 1: %.2f DA/kg\n", k1);
+    printf("Pack 2: %.2f DA/kg\n", k2);
+    printf("Difference: %.2f DA/kg (%.1f %% saved)\n", k1 - k2, save);
+    return 0;
+}
+
+@@
+title: نقاط الوفاء
+level: medium
+domain: ec
+@ statement
+يحصل الزبون على **نقطة وفاء** عن كل 100 دج مشتريات كاملة، وكل 50 نقطة تساوي قسيمة بـ 500 دج. اكتب برنامجًا يحسب عدد النقاط والمبلغ الناقص للنقطة التالية وعدد القسائم.
+@ stdin
+12370
+@ steps
+- النقاط: `pts = amount / 100`.
+- الناقص للنقطة التالية: `100 - amount % 100`.
+- القسائم: `pts / 50` وقيمتها `× 500`.
+@ flow
+in: amount
+do: pts = amount / 100
+do: missing = 100 - amount % 100
+do: vouchers = pts / 50
+out: pts, missing, vouchers * 500
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int amount, pts, missing, vouchers;
+    scanf("%d", &amount);
+    pts = amount / 100;               // نقطة لكل 100 دج كاملة
+    missing = 100 - amount % 100;     // ما ينقص للوصول إلى المئة التالية
+    vouchers = pts / 50;              // قسيمة لكل 50 نقطة
+    printf("Points = %d\n", pts);
+    printf("Next point in %d DA\n", missing);
+    printf("Vouchers = %d (%d DA)\n", vouchers, vouchers * 500);
+    return 0;
+}
+
+@@
+title: متوسط مربع الخطأ
+level: medium
+domain: ds
+@ statement
+تنبأ نموذج بمبيعات ثلاثة أيام. اكتب برنامجًا يقرأ لكل يوم القيمة الحقيقية `y` والمتوقعة `p`، ويحسب الأخطاء و**متوسط مربع الخطأ** `MSE`.
+@ stdin
+100 92
+80 85
+120 111
+@ steps
+- الخطأ لكل يوم: `e = y - p`.
+- نجمع مربعات الأخطاء.
+- `MSE = مجموع المربعات / 3`.
+@ flow
+in: y1, p1, y2, p2, y3, p3
+do: e1 = y1 - p1 ; e2 = y2 - p2 ; e3 = y3 - p3
+do: mse = (e1*e1 + e2*e2 + e3*e3) / 3
+out: e1, e2, e3, mse
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double y1, p1, y2, p2, y3, p3, e1, e2, e3, mse;
+    scanf("%lf %lf", &y1, &p1);
+    scanf("%lf %lf", &y2, &p2);
+    scanf("%lf %lf", &y3, &p3);
+    e1 = y1 - p1;                 // خطأ اليوم 1
+    e2 = y2 - p2;                 // خطأ اليوم 2
+    e3 = y3 - p3;                 // خطأ اليوم 3
+    // التربيع يجعل كل الأخطاء موجبة ويعاقب الأخطاء الكبيرة
+    mse = (e1 * e1 + e2 * e2 + e3 * e3) / 3;
+    printf("Errors: %.1f %.1f %.1f\n", e1, e2, e3);
+    printf("MSE = %.2f\n", mse);
+    return 0;
+}
+
+@@
+title: السعر بعد التضخم
+level: medium
+domain: ds
+@ statement
+سعر منتج اليوم `price`، ونسبة التضخم السنوية `inflation` بالمئة. اكتب برنامجًا يحسب سعره المتوقع بعد سنتين، وكذلك **القيمة الحقيقية** لمبلغ 10000 دج بعد سنتين (أي قسمته على معامل التضخم مرتين).
+@ stdin
+4500 9
+@ steps
+- المعامل: `factor = 1 + inflation / 100`.
+- السعر بعد سنتين: `price * factor * factor`.
+- القيمة الحقيقية: `10000 / (factor * factor)`.
+@ flow
+in: price, inflation
+do: factor = 1 + inflation / 100
+do: p2 = price * factor * factor
+do: real = 10000 / (factor * factor)
+out: p2, real
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double price, inflation, factor, p2, real;
+    scanf("%lf %lf", &price, &inflation);
+    factor = 1 + inflation / 100;              // معامل التضخم السنوي
+    p2 = price * factor * factor;               // سنتان = ضرب مرتين
+    real = 10000 / (factor * factor);       // القدرة الشرائية لـ 10000 دج
+    printf("Price in 2 years = %.2f DA\n", p2);
+    printf("Real value of 10000 DA = %.2f DA\n", real);
+    return 0;
+}
+
+@@
+title: تبديل دون متغير مساعد
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يبدل كميتي مخزون في مستودعين `stockA` و`stockB` **دون استعمال متغير ثالث**، باستعمال الجمع والطرح فقط.
+@ stdin
+75 320
+@ steps
+- `stockA = stockA + stockB` (stockA تحتوي المجموع).
+- `stockB = stockA - stockB` (stockB تأخذ القيمة القديمة لـ stockA).
+- `stockA = stockA - stockB` (stockA تأخذ القيمة القديمة لـ stockB).
+@ flow
+in: stockA, stockB
+do: stockA = stockA + stockB
+do: stockB = stockA - stockB
+do: stockA = stockA - stockB
+out: stockA, stockB
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int stockA, stockB;
+    scanf("%d %d", &stockA, &stockB);
+    printf("Before: stockA = %d, stockB = %d\n", stockA, stockB);
+    stockA = stockA + stockB;        // stockA = a0 + b0
+    stockB = stockA - stockB;        // stockB = a0 + b0 - b0 = a0
+    stockA = stockA - stockB;        // stockA = a0 + b0 - a0 = b0
+    printf("After:  stockA = %d, stockB = %d\n", stockA, stockB);
+    return 0;
+}
+
+@@
+title: المبلغ بالسنتيم
+level: medium
+domain: ec
+@ statement
+لتجنب أخطاء الأعداد الحقيقية، يخزن نظام الدفع المبالغ بالسنتيم كأعداد صحيحة. اكتب برنامجًا يقرأ مبلغين بالسنتيم ويعرض مجموعهما بالصيغة `DA.cc`.
+@ stdin
+159990 45025
+@ steps
+- نجمع المبلغين كأعداد صحيحة: `totalCents = centsA + centsB`.
+- الدينار: `totalCents / 100`، السنتيم: `totalCents % 100`.
+- نعرض السنتيم برقمين `%02d`.
+@ flow
+in: centsA, centsB
+do: totalCents = centsA + centsB
+do: da = totalCents / 100
+do: cc = totalCents % 100
+out: da.cc
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int centsA, centsB, totalCents;
+    scanf("%d %d", &centsA, &centsB);       // مبلغان بالسنتيم
+    totalCents = centsA + centsB;                    // جمع دقيق بلا أخطاء تقريب
+    // %02d تضمن ظهور الصفر: 5 سنتيم تكتب 05
+    printf("Total = %d.%02d DA\n", totalCents / 100, totalCents % 100);
+    return 0;
+}
+
+@@
+title: رموز الأصناف والحروف
+level: medium
+domain: ec
+@ statement
+يرمز لكل صنف بحرف كبير (A، B، ...). اكتب برنامجًا يقرأ رمز صنف ويعرض **شفرته** ASCII، والحرف **التالي**، و**ترتيب** الصنف (A هو 1)، والحرف الصغير الموافق دون دالة `tolower`.
+@ stdin
+G
+@ steps
+- الحرف في C عدد صحيح، فنعرضه بـ `%d` لنحصل على شفرته.
+- التالي: `category + 1`، الترتيب: `category - 'A' + 1`.
+- الحرف الصغير: `category + ('a' - 'A')` لأن الفرق ثابت (32).
+@ flow
+in: category
+do: code = (int)category
+do: next = category + 1
+do: rank = category - 'A' + 1
+do: low = category + ('a' - 'A')
+out: code, next, rank, low
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char category, next, low;
+    int rank;
+    scanf(" %c", &category);
+    next = category + 1;                 // الحرف الموالي في جدول ASCII
+    rank = category - 'A' + 1;           // المسافة عن A
+    low = category + ('a' - 'A');        // الفرق بين الصغير والكبير ثابت
+    printf("Code ASCII = %d\n", category);
+    printf("Next category = %c\n", next);
+    printf("Rank = %d\n", rank);
+    printf("Lowercase = %c\n", low);
+    return 0;
+}
+
+@@
+title: أسبوع ويوم التسليم
+level: medium
+domain: ec
+@ statement
+يُرقَّم كل يوم من السنة من 1 إلى 365، واليوم 1 يوم أحد. تُطلب سلعة في اليوم `orderDay` وتُسلَّم بعد `delay` يومًا. اكتب برنامجًا يعرض رقم يوم التسليم ورقم أسبوعه ورقم يومه في الأسبوع (0 = أحد).
+@ stdin
+58 17
+@ steps
+- يوم التسليم: `deliveryDay = orderDay + delay`.
+- الأسبوع: `(deliveryDay - 1) / 7 + 1`.
+- يوم الأسبوع: `(deliveryDay - 1) % 7`.
+@ flow
+in: orderDay, delay
+do: deliveryDay = orderDay + delay
+do: week = (deliveryDay - 1) / 7 + 1
+do: wd = (deliveryDay - 1) % 7
+out: deliveryDay, week, wd
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int orderDay, delay, deliveryDay, week, wd;
+    scanf("%d %d", &orderDay, &delay);
+    deliveryDay = orderDay + delay;                    // رقم يوم التسليم في السنة
+    week = (deliveryDay - 1) / 7 + 1;       // نطرح 1 لأن الترقيم يبدأ من 1
+    wd = (deliveryDay - 1) % 7;             // 0 أحد، 1 إثنين، ...
+    printf("Delivery day = %d\n", deliveryDay);
+    printf("Week = %d, weekday = %d\n", week, wd);
+    return 0;
+}
+
+@@
+title: الأكبر بين سعرين دون شرط
+level: hard
+domain: ec
+@ statement
+اكتب برنامجًا يحدد **أكبر** و**أصغر** سعرين صحيحين دون استعمال `if` ولا العامل الشرطي. استعمل الصيغة `max = (priceA + priceB + |priceA - priceB|) / 2` واحسب القيمة المطلقة بعمليات على البتات.
+@ stdin
+1750 2380
+@ steps
+- `diff = priceA - priceB`.
+- قناع الإشارة: `mask = diff >> 31` يساوي 0 إذا كان `diff` موجبًا و-1 إذا كان سالبًا.
+- القيمة المطلقة: `ad = (diff ^ mask) - mask`.
+- `max = (priceA + priceB + ad) / 2` و`min = (priceA + priceB - ad) / 2`.
+@ flow
+in: priceA, priceB
+do: diff = priceA - priceB
+do: mask = diff >> 31
+do: ad = (diff ^ mask) - mask
+do: max = (priceA + priceB + ad) / 2
+do: min = (priceA + priceB - ad) / 2
+out: max, min
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int priceA, priceB, diff, mask, ad, max, min;
+    scanf("%d %d", &priceA, &priceB);
+    diff = priceA - priceB;
+    mask = diff >> 31;               // كل البتات 1 إذا كان diff سالبًا، وإلا 0
+    ad = (diff ^ mask) - mask;       // إذا كان سالبًا: عكس البتات ثم +1 = -diff
+    max = (priceA + priceB + ad) / 2;       // الأكبر
+    min = (priceA + priceB - ad) / 2;       // الأصغر
+    printf("|a - b| = %d\n", ad);
+    printf("Max = %d, Min = %d\n", max, min);
+    return 0;
+}
+
+@@
+title: الانحراف المعياري بطريقة نيوتن
+level: hard
+domain: ds
+@ statement
+لدينا تقييمات ثلاثة منتجات. اكتب برنامجًا يحسب **التباين** ثم **الانحراف المعياري** دون دالة `sqrt`، باستعمال 6 تكرارات مكتوبة يدويًا لطريقة نيوتن: `root = (root + variance / root) / 2`.
+@ stdin
+3.5 4.8 4.1
+@ steps
+- نحسب المتوسط `mean` ثم التباين `variance`.
+- نبدأ بتقدير أولي `root = variance` (أو 1 إذا كان صغيرًا).
+- نطبق صيغة نيوتن ست مرات، فيقترب `root` بسرعة من الجذر.
+- نتحقق بحساب `root * root`.
+@ flow
+in: rating1, rating2, rating3
+do: mean = (rating1 + rating2 + rating3) / 3
+do: variance = ((rating1-mean)*(rating1-mean)+(rating2-mean)*(rating2-mean)+(rating3-mean)*(rating3-mean)) / 3
+do: root = variance + 1
+do: root = (root + variance / root) / 2  (6 مرات)
+out: variance, root, root * root
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double rating1, rating2, rating3, mean, variance, root;
+    scanf("%lf %lf %lf", &rating1, &rating2, &rating3);
+    mean = (rating1 + rating2 + rating3) / 3;                      // المتوسط
+    variance = ((rating1 - mean) * (rating1 - mean) + (rating2 - mean) * (rating2 - mean)
+       + (rating3 - mean) * (rating3 - mean)) / 3;              // التباين
+    root = variance + 1;                                // تقدير أولي أكبر من الجذر
+    // كل تكرار يضاعف تقريبًا عدد الأرقام الصحيحة
+    root = (root + variance / root) / 2;
+    root = (root + variance / root) / 2;
+    root = (root + variance / root) / 2;
+    root = (root + variance / root) / 2;
+    root = (root + variance / root) / 2;
+    root = (root + variance / root) / 2;
+    printf("Variance = %.6f\n", variance);
+    printf("Std dev  = %.6f\n", root);
+    printf("Check r*r = %.6f\n", root * root);      // يجب أن يساوي التباين
+    return 0;
+}
+
+@@
+title: التغاير بين السعر والمبيعات
+level: hard
+domain: ds
+@ statement
+لدينا ثلاث ملاحظات (سعر، مبيعات). اكتب برنامجًا يحسب **التغاير** `cov` بين المتغيرين ويستنتج اتجاه العلاقة بطباعة إشارة التغاير، دون شرط: نطبع `cov > 0` كعدد (1 أو 0).
+@ stdin
+100 520
+150 410
+200 260
+@ steps
+- نحسب المتوسطين `mx` و`my`.
+- التغاير: متوسط الجداءات `(xi - mx) * (yi - my)`.
+- في C يعطي التعبير المنطقي `cov > 0` القيمة 1 أو 0.
+@ flow
+in: x1, y1, x2, y2, x3, y3
+do: mx = (x1 + x2 + x3) / 3 ; my = (y1 + y2 + y3) / 3
+do: cov = مجموع `(xi-mx)*(yi-my)` مقسوم على 3
+do: pos = cov > 0
+out: cov, pos
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double x1, y1, x2, y2, x3, y3, mx, my, cov;
+    int pos;
+    scanf("%lf %lf %lf %lf %lf %lf", &x1, &y1, &x2, &y2, &x3, &y3);
+    mx = (x1 + x2 + x3) / 3;      // متوسط الأسعار
+    my = (y1 + y2 + y3) / 3;      // متوسط المبيعات
+    // التغاير: هل يتحرك المتغيران في نفس الاتجاه؟
+    cov = ((x1 - mx) * (y1 - my) + (x2 - mx) * (y2 - my)
+         + (x3 - mx) * (y3 - my)) / 3;
+    pos = cov > 0;                // تعبير منطقي: 1 صحيح، 0 خطأ
+    printf("Mean price = %.1f, mean sales = %.1f\n", mx, my);
+    printf("Covariance = %.2f\n", cov);
+    printf("Positive relation? %d\n", pos);
+    return 0;
+}
+
+@@
+title: انحدار خطي بالمربعات الصغرى
+level: hard
+domain: ds
+@ statement
+اكتب برنامجًا يحسب معاملي **مستقيم الانحدار** `y = slope*x + intercept` بطريقة المربعات الصغرى لثلاث نقاط (ميزانية إعلان، مبيعات):
+`slope = (nbPoints*Sxy - Sx*Sy) / (nbPoints*Sxx - Sx*Sx)` و`intercept = (Sy - slope*Sx) / nbPoints`.
+@ stdin
+1 3
+2 5
+4 9
+@ steps
+- نحسب المجاميع `Sx` و`Sy` و`Sxy` و`Sxx`.
+- نطبق صيغة الميل `slope` ثم الجزء المقطوع `intercept`.
+- نتحقق بالتنبؤ عند `x = 3`.
+@ flow
+in: x1, y1, x2, y2, x3, y3
+do: Sx = x1+x2+x3 ; Sy = y1+y2+y3
+do: Sxy = x1*y1+x2*y2+x3*y3
+do: Sxx = x1*x1+x2*x2+x3*x3
+do: slope = (3*Sxy - Sx*Sy) / (3*Sxx - Sx*Sx)
+do: intercept = (Sy - slope*Sx) / 3
+out: slope, intercept, slope*3 + intercept
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double x1, y1, x2, y2, x3, y3, Sx, Sy, Sxy, Sxx, slope, intercept;
+    const int nbPoints = 3;                      // عدد النقاط
+    scanf("%lf %lf %lf %lf %lf %lf", &x1, &y1, &x2, &y2, &x3, &y3);
+    Sx = x1 + x2 + x3;                    // مجموع x
+    Sy = y1 + y2 + y3;                    // مجموع y
+    Sxy = x1 * y1 + x2 * y2 + x3 * y3;    // مجموع الجداءات
+    Sxx = x1 * x1 + x2 * x2 + x3 * x3;    // مجموع المربعات
+    slope = (nbPoints * Sxy - Sx * Sy) / (nbPoints * Sxx - Sx * Sx);   // الميل
+    intercept = (Sy - slope * Sx) / nbPoints;                // الجزء المقطوع
+    printf("y = %.4f x + %.4f\n", slope, intercept);
+    printf("Prediction at x = 3: %.4f\n", slope * 3 + intercept);
+    return 0;
+}
+
+@@
+title: مدة المشاهدة الكلية
+level: hard
+domain: ds
+@ statement
+تجمع منصة فيديوهات المنتجات مدة المشاهدة الكلية بالثواني (عدد كبير). اكتب برنامجًا يحولها إلى **أيام وساعات ودقائق وثوانٍ**، ويحسب متوسط المشاهدة لكل زائر بالدقائق والثواني. استعمل النوع `long`.
+@ stdin
+987654 1520
+@ steps
+- الأيام: `totalSec / 86400`، ثم `totalSec % 86400`.
+- الساعات من الباقي: `/ 3600`، ثم الدقائق `/ 60`، ثم الثواني `% 60`.
+- متوسط الزائر: `avg = totalSec / visitors` ثم نفككه إلى دقائق وثوانٍ.
+@ flow
+in: totalSec, visitors
+do: days = totalSec / 86400 ; rest = totalSec % 86400
+do: hours = rest / 3600 ; rest = rest % 3600
+do: minutes = rest / 60 ; seconds = rest % 60
+do: avg = totalSec / visitors
+out: days, hours, minutes, seconds, avg / 60, avg % 60
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long totalSec, rest, days, hours, minutes, seconds, visitors, avg;
+    scanf("%ld %ld", &totalSec, &visitors);     // الثواني الكلية، عدد الزوار
+    days = totalSec / 86400;  rest = totalSec % 86400; // 86400 ثانية في اليوم
+    hours = rest / 3600;   rest = rest % 3600;  // الساعات من الباقي
+    minutes = rest / 60;     seconds = rest % 60;    // الدقائق والثواني
+    avg = totalSec / visitors;                   // متوسط الزائر بالثواني
+    printf("Total: %ld d %ld h %ld min %ld s\n", days, hours, minutes, seconds);
+    printf("Per visitor: %ld min %ld s\n", avg / 60, avg % 60);
+    return 0;
+}
+
+@@
+title: خصائص المنتج بالبتات
+level: hard
+domain: ec
+@ statement
+تخزن خصائص منتج في عدد صحيح بين 0 و15، كل **بت** يمثل خاصية: البت 0 = متوفر، البت 1 = مخفض، البت 2 = شحن مجاني، البت 3 = جديد. اكتب برنامجًا يستخرج قيمة كل خاصية (0 أو 1) ويعرض التمثيل الثنائي.
+@ stdin
+13
+@ steps
+- البت `k` هو `(flags / 2^k) % 2`، أو `(flags >> k) & 1`.
+- نستخرج البتات الأربعة.
+- التمثيل الثنائي يُكتب من البت 3 إلى البت 0.
+@ flow
+in: flags
+do: b0 = flags & 1
+do: b1 = (flags >> 1) & 1
+do: b2 = (flags >> 2) & 1
+do: b3 = (flags >> 3) & 1
+out: b3 b2 b1 b0
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int flags, b0, b1, b2, b3;
+    scanf("%d", &flags);
+    b0 = flags & 1;               // البت 0: متوفر
+    b1 = (flags >> 1) & 1;        // إزاحة لليمين ثم نأخذ آخر بت
+    b2 = (flags >> 2) & 1;        // البت 2: شحن مجاني
+    b3 = (flags >> 3) & 1;        // البت 3: جديد
+    printf("Binary: %d%d%d%d\n", b3, b2, b1, b0);
+    printf("In stock: %d\nOn sale: %d\n", b0, b1);
+    printf("Free shipping: %d\nNew: %d\n", b2, b3);
+    return 0;
+}
+
+@@
+title: المتوسط المتحرك الأسي
+level: hard
+domain: ds
+@ statement
+لتنعيم سلسلة أسعار نستعمل **المتوسط المتحرك الأسي**: `ema = alpha * p + (1 - alpha) * ema`، مع `ema` يبدأ بالسعر الأول. اكتب برنامجًا يطبقه على أربعة أسعار ويعرض القيمة بعد كل سعر.
+@ stdin
+0.5
+100 120 90 130
+@ steps
+- نقرأ `alpha` ثم الأسعار الأربعة.
+- `ema = p1`.
+- نحدّث `ema` بكل سعر جديد بالصيغة.
+@ flow
+in: alpha, p1, p2, p3, p4
+do: ema = p1
+do: ema = alpha*p2 + (1-alpha)*ema
+do: ema = alpha*p3 + (1-alpha)*ema
+do: ema = alpha*p4 + (1-alpha)*ema
+out: ema
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double alpha, p1, p2, p3, p4, ema;
+    scanf("%lf", &alpha);                 // معامل التنعيم بين 0 و1
+    scanf("%lf %lf %lf %lf", &p1, &p2, &p3, &p4);
+    ema = p1;                               // البداية: أول سعر
+    printf("t1: %.2f\n", ema);
+    ema = alpha * p2 + (1 - alpha) * ema;     // وزن alpha للسعر الجديد
+    printf("t2: %.2f\n", ema);
+    ema = alpha * p3 + (1 - alpha) * ema;
+    printf("t3: %.2f\n", ema);
+    ema = alpha * p4 + (1 - alpha) * ema;
+    printf("t4: %.2f\n", ema);
+    return 0;
+}
+
+@@
+title: رقم التحقق لرمز EAN-8
+level: hard
+domain: ec
+@ statement
+رمز الأعمدة **EAN-8** يتكون من 7 أرقام ورقم تحقق. نضرب الأرقام في المواضع الفردية (1، 3، 5، 7) في 3 ونجمعها مع أرقام المواضع الزوجية، ورقم التحقق `(10 - weightedSum % 10) % 10`. اكتب برنامجًا يحسبه لعدد من 7 أرقام.
+@ stdin
+9638507
+@ steps
+- نستخرج الأرقام السبعة من اليسار إلى اليمين بالقسمة على قوى 10.
+- `weightedSum = 3*(d1 + d3 + d5 + d7) + (d2 + d4 + d6)`.
+- `check = (10 - weightedSum % 10) % 10`، و% 10 الأخيرة تحول 10 إلى 0.
+- الرمز الكامل: `code * 10 + check`.
+@ flow
+in: code
+do: d1..d7 بالقسمة على قوى 10
+do: weightedSum = 3*(d1+d3+d5+d7) + d2+d4+d6
+do: check = (10 - weightedSum % 10) % 10
+out: code * 10 + check
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long code;
+    int d1, d2, d3, d4, d5, d6, d7, weightedSum, check;
+    scanf("%ld", &code);
+    d1 = code / 1000000;             // الرقم الأول من اليسار
+    d2 = (code / 100000) % 10;
+    d3 = (code / 10000) % 10;
+    d4 = (code / 1000) % 10;
+    d5 = (code / 100) % 10;
+    d6 = (code / 10) % 10;
+    d7 = code % 10;                  // الرقم السابع
+    weightedSum = 3 * (d1 + d3 + d5 + d7) + (d2 + d4 + d6);   // المجموع الموزون
+    check = (10 - weightedSum % 10) % 10;   // ما يكمل weightedSum إلى مضاعف 10
+    printf("Weighted sum = %d\n", weightedSum);
+    printf("Check digit = %d\n", check);
+    printf("EAN-8 = %ld\n", code * 10 + check);
+    return 0;
+}
+
+@@
+title: مرونة الطلب السعرية
+level: hard
+domain: ds
+@ statement
+تقيس **مرونة الطلب** تأثر المبيعات بتغير السعر. بطريقة نقطة المنتصف:
+`elasticity = ((Q2 - Q1) / ((Q1 + Q2) / 2)) / ((P2 - P1) / ((P1 + P2) / 2))`.
+اكتب برنامجًا يحسبها، ويحسب رقم الأعمال قبل التغيير وبعده.
+@ stdin
+2000 500
+2400 380
+@ steps
+- نقرأ `(P1, Q1)` و`(P2, Q2)`.
+- التغير النسبي للكمية: `dq = (Q2 - Q1) / ((Q1 + Q2) / 2)`.
+- التغير النسبي للسعر: `dp` بنفس الطريقة.
+- `elasticity = dq / dp`، ورقم الأعمال `P * Q`.
+@ flow
+in: P1, Q1, P2, Q2
+do: dq = (Q2 - Q1) / ((Q1 + Q2) / 2)
+do: dp = (P2 - P1) / ((P1 + P2) / 2)
+do: elasticity = dq / dp
+out: elasticity, P1*Q1, P2*Q2
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double P1, Q1, P2, Q2, dq, dp, elasticity;
+    scanf("%lf %lf %lf %lf", &P1, &Q1, &P2, &Q2);
+    dq = (Q2 - Q1) / ((Q1 + Q2) / 2);     // التغير النسبي للكمية
+    dp = (P2 - P1) / ((P1 + P2) / 2);     // التغير النسبي للسعر
+    elasticity = dq / dp;                          // المرونة
+    printf("Elasticity = %.3f\n", elasticity);
+    printf("Revenue before = %.0f DA\n", P1 * Q1);
+    printf("Revenue after  = %.0f DA\n", P2 * Q2);
+    return 0;
+}
+
+@@
+title: تعبئة حاوية الشحن
+level: hard
+domain: ec
+@ statement
+حاوية شحن أبعادها `contLength × contWidth × contHeight` (سم) ونريد ملأها بعلب أبعادها `boxLength × boxWidth × boxHeight` مرتبة في نفس الاتجاه. اكتب برنامجًا يحسب عدد العلب في كل بعد، والعدد الكلي، و**نسبة الحجم المستغل**.
+@ stdin
+600 240 250
+40 30 50
+@ steps
+- عدد العلب في كل بعد: `contLength / boxLength` و`contWidth / boxWidth` و`contHeight / boxHeight` (قسمة صحيحة).
+- العدد الكلي: جداء الأعداد الثلاثة.
+- الحجم المستغل: `nbBoxes * boxLength * boxWidth * boxHeight`، والنسبة بالمئة من `contLength * contWidth * contHeight`.
+@ flow
+in: contLength, contWidth, contHeight, boxLength, boxWidth, boxHeight
+do: nx = contLength / boxLength ; ny = contWidth / boxWidth ; nz = contHeight / boxHeight
+do: nbBoxes = nx * ny * nz
+do: used = nbBoxes * boxLength * boxWidth * boxHeight
+do: pct = used / (contLength * contWidth * contHeight) * 100
+out: nx, ny, nz, nbBoxes, pct
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long contLength, contWidth, contHeight, boxLength, boxWidth, boxHeight, nx, ny, nz, nbBoxes, used;
+    double pct;
+    scanf("%ld %ld %ld", &contLength, &contWidth, &contHeight);     // أبعاد الحاوية
+    scanf("%ld %ld %ld", &boxLength, &boxWidth, &boxHeight);     // أبعاد العلبة
+    nx = contLength / boxLength;                   // علب على الطول
+    ny = contWidth / boxWidth;                   // علب على العرض
+    nz = contHeight / boxHeight;                   // طبقات على الارتفاع
+    nbBoxes = nx * ny * nz;             // العدد الكلي
+    used = nbBoxes * boxLength * boxWidth * boxHeight;         // الحجم المشغول بالعلب
+    pct = (double)used / (contLength * contWidth * contHeight) * 100;
+    printf("Grid: %ld x %ld x %ld\n", nx, ny, nz);
+    printf("Boxes = %ld\n", nbBoxes);
+    printf("Volume used = %.2f %%\n", pct);
+    return 0;
+}

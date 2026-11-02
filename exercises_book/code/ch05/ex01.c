@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+#define NB_STORES 3
+#define NB_DAYS 4
+
+int main(void) {
+    int sales[NB_STORES][NB_DAYS] = {
+        {120, 95, 140, 180},          // المتجر 0
+        { 80, 60,  75,  90},          // المتجر 1
+        {200, 210, 190, 250}          // المتجر 2
+    };
+    int store, day;
+    printf("Store | D1  D2  D3  D4\n");
+    for (store = 0; store < NB_STORES; store++) {     // الأسطر
+        printf("%5d |", store);
+        for (day = 0; day < NB_DAYS; day++)           // الأعمدة
+            printf(" %3d", sales[store][day]);
+        printf("\n");
+    }
+    return 0;
+}

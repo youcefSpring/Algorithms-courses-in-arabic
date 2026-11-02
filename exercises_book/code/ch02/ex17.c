@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int main(void) {
+    double spend;
+    int nbOrders;
+    scanf("%lf %d", &spend, &nbOrders);
+    if (spend > 200000 && nbOrders > 20)         // الشرطان معًا
+        printf("Segment: VIP\n");
+    else if (spend > 50000 || nbOrders > 10)     // يكفي أحدهما
+        printf("Segment: Loyal\n");
+    else if (nbOrders >= 1)
+        printf("Segment: Regular\n");
+    else
+        printf("Segment: Inactive\n");
+    return 0;
+}

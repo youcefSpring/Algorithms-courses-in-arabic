@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+#define NB 6
+#define NB_FEAT 3
+
+int main(void) {
+    double data[NB][NB_FEAT] = {{3, 12, 1500}, {8, 40, 5200}, {5, 22, 2400},
+                                {1,  4,  300}, {9, 50, 6100}, {4, 25, 1900}};
+    double mean[NB_FEAT] = {0}, cov[NB_FEAT][NB_FEAT], product, root;
+    int row, first, second, step;
+    for (row = 0; row < NB; row++)
+        for (first = 0; first < NB_FEAT; first++)
+            mean[first] += data[row][first] / NB;
+    for (first = 0; first < NB_FEAT; first++)
+        for (second = 0; second < NB_FEAT; second++) {
+            cov[first][second] = 0;           // التغاير (دون القسمة على n)
+            for (row = 0; row < NB; row++)
+                cov[first][second] += (data[row][first] - mean[first])
+                                    * (data[row][second] - mean[second]);
+        }
+    for (first = 0; first < NB_FEAT; first++) {
+        for (second = 0; second < NB_FEAT; second++) {
+            product = cov[first][first] * cov[second][second];
+            root = product;                   // الجذر بطريقة نيوتن
+            for (step = 0; step < 60; step++)
+                root = (root + product / root) / 2;
+            printf(" %6.3f", cov[first][second] / root);
+        }
+        printf("\n");
+    }
+    return 0;
+}

@@ -1,0 +1,5 @@
+good: +1
+fast: +1
+broken: -1
+excellent: +1
+Score = 2 -> positive

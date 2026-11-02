@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+#define MAX 50                    (*@\cmt{السعة القصوى للجدول}@*)
+
+int main(void) {
+    double prices[MAX];                (*@\cmt{جدول من \cen{50} عددًا حقيقيًا}@*)
+    int nbPrices, index;
+    scanf("%d", &nbPrices);
+    for (index = 0; index < nbPrices; index++)
+        scanf("%lf", &prices[index]);      (*@\cmt{\&\cen{prices[index]} عنوان الخانة \cen{index}}@*)
+    for (index = 0; index < nbPrices; index++)
+        printf("T[%d] = %.2f DA\n", index, prices[index]);
+    return 0;
+}

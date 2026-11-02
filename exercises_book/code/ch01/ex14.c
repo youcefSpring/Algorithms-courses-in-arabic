@@ -1,0 +1,10 @@
+#include <stdio.h>
+
+int main(void) {
+    double min, max, price, xn;
+    scanf("%lf %lf %lf", &min, &max, &price);
+    // نطرح الأصغر ثم نقسم على المدى
+    xn = (price - min) / (max - min);
+    printf("Normalized value = %.3f\n", xn);
+    return 0;
+}

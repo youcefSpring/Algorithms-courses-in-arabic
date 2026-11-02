@@ -1,0 +1,2 @@
+Before: priceA = 450, priceB = 1200
+After:  priceA = 1200, priceB = 450

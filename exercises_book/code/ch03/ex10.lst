@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+    int rating, tries = 0;
+    do {
+        printf("Rating (1-5): ");
+        scanf("%d", &rating);
+        tries++;
+        if (rating < 1 || rating > 5)
+            printf("invalid!\n");
+    } while (rating < 1 || rating > 5);     (*@\cmt{نعيد ما دام الإدخال خاطئًا}@*)
+    printf("Accepted rating %d after %d tries\n", rating, tries);
+    return 0;
+}

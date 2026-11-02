@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+#define NB 1000000L
+
+int main(void) {
+    unsigned long long seed;
+    long count[11] = {0}, cumul = 0, item;
+    int value, rating, median = -1, p90 = -1;
+    scanf("%llu", &seed);
+    for (item = 0; item < NB; item++) {
+        seed = (seed * 1103515245ULL + 12345ULL) % 2147483648ULL;
+        rating = (int)((seed / 65536) % 11);  (*@\cmt{تقييم من \cen{0} إلى \cen{10}}@*)
+        count[rating]++;                      (*@\cmt{لا نخزن التقييم، فقط نعده}@*)
+    }
+    for (value = 0; value <= 10; value++) {
+        cumul += count[value];                (*@\cmt{كم تقييمًا <= \cen{value}}@*)
+        printf("%2d: %ld\n", value, count[value]);
+        if (median < 0 && cumul >= NB / 2) median = value;
+        if (p90 < 0 && cumul >= NB * 9 / 10) p90 = value;
+    }
+    printf("Median = %d, P90 = %d\n", median, p90);
+    return 0;
+}

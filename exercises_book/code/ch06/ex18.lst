@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+int main(void) {
+    char name[] = "Smart TV 55\" (4K) -- Ultra HD!";
+    char slug[60], ch;
+    int read, write = 0;
+    for (read = 0; name[read] != '\0'; read++) {
+        ch = name[read];
+        if (ch >= 'A' && ch <= 'Z')
+            ch += 'a' - 'A';                  (*@\cmt{حروف صغيرة}@*)
+        if ((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))
+            slug[write++] = ch;
+        else if (write > 0 && slug[write - 1] != '-')
+            slug[write++] = '-';              (*@\cmt{فاصل واحد فقط}@*)
+    }
+    if (write > 0 && slug[write - 1] == '-')
+        write--;
+    slug[write] = '\0';
+    printf("https://shop.dz/p/%s\n", slug);
+    return 0;
+}

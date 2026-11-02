@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbPrices, index;
+    double price, first = -1, second = -1;    (*@\cmt{الأسعار موجبة}@*)
+    scanf("%d", &nbPrices);
+    for (index = 0; index < nbPrices; index++) {
+        scanf("%lf", &price);
+        if (price > first) {
+            second = first;       (*@\cmt{الأكبر القديم ينزل إلى المرتبة الثانية}@*)
+            first = price;
+        } else if (price > second) {
+            second = price;
+        }
+    }
+    printf("Highest = %.0f, second = %.0f\n", first, second);
+    return 0;
+}

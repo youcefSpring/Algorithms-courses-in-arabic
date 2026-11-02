@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+int main(void) {
+    int nbCustomers, index, n1 = 0, n2 = 0, n3 = 0;
+    double spend, s1 = 0, s2 = 0, s3 = 0;
+    scanf("%d", &nbCustomers);
+    for (index = 0; index < nbCustomers; index++) {
+        scanf("%lf", &spend);
+        if (spend < 20000)       { n1++; s1 += spend; }   (*@\cmt{صغار}@*)
+        else if (spend < 100000) { n2++; s2 += spend; }   (*@\cmt{متوسطون}@*)
+        else                 { n3++; s3 += spend; }   (*@\cmt{كبار}@*)
+    }
+    printf("Low:    %d customers", n1);
+    if (n1 > 0) printf(", avg %.0f", s1 / n1);   (*@\cmt{نتجنب القسمة على \cen{0}}@*)
+    printf("\nMedium: %d customers", n2);
+    if (n2 > 0) printf(", avg %.0f", s2 / n2);
+    printf("\nHigh:   %d customers", n3);
+    if (n3 > 0) printf(", avg %.0f", s3 / n3);
+    printf("\n");
+    return 0;
+}

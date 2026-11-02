@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+#define NB_DAYS 10
+
+int main(void) {
+    int sales[NB_DAYS] = {120, 95, 140, 180, 160, 210, 75, 130, 150, 90};
+    int prefix[NB_DAYS + 1];          // خانة إضافية للمجموع الفارغ
+    int day, query, from, to;
+    prefix[0] = 0;
+    for (day = 0; day < NB_DAYS; day++)
+        prefix[day + 1] = prefix[day] + sales[day];   // تراكم
+    for (query = 0; query < 2; query++) {
+        scanf("%d %d", &from, &to);
+        // مجموع الأيام from..to دون حلقة
+        printf("Sales days %d..%d = %d\n", from, to, prefix[to + 1] - prefix[from]);
+    }
+    return 0;
+}

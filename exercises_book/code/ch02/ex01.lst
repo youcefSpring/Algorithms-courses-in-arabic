@@ -1,0 +1,13 @@
+#include <stdio.h>
+
+int main(void) {
+    double amount, ship;
+    scanf("%lf", &amount);
+    if (amount >= 5000)
+        ship = 0;                 (*@\cmt{الشحن مجاني}@*)
+    else
+        ship = 450;               (*@\cmt{مصاريف الشحن العادية}@*)
+    printf("Shipping = %.2f DA\n", ship);
+    printf("To pay = %.2f DA\n", amount + ship);
+    return 0;
+}

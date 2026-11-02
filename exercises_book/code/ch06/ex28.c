@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+int main(void) {
+    char events[] = "VVVVVVVVVVVVCCCAAAAAAABVVVVC";
+    char packed[80], digits[10];
+    int pos = 0, run, write = 0, nbDigits;
+    while (events[pos] != '\0') {
+        run = 1;
+        while (events[pos + run] == events[pos])  // طول السلسلة المتكررة
+            run++;
+        nbDigits = 0;
+        do {                                  // العدد قد يكون > 9
+            digits[nbDigits++] = '0' + run % 10;
+            run /= 10;
+        } while (run > 0);
+        while (nbDigits > 0)
+            packed[write++] = digits[--nbDigits];
+        packed[write++] = events[pos];
+        while (events[pos] == packed[write - 1])
+            pos++;                            // نتجاوز السلسلة
+    }
+    packed[write] = '\0';
+    printf("Original: %s (%d)\nPacked:   %s (%d)\n", events, pos, packed, write);
+    printf("Ratio = %.1f %%\n", write * 100.0 / pos);
+    return 0;
+}

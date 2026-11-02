@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int main(void) {
+    double demandMax, slope, pmin, pmax, price, revenue;
+    scanf("%lf %lf %lf %lf", &demandMax, &slope, &pmin, &pmax);
+    price = demandMax / (2 * slope);                  // قمة القطع المكافئ
+    printf("Unconstrained optimum = %.2f DA\n", price);
+    if (price < pmin)
+        price = pmin;                     // نحصر السعر في المجال المسموح
+    else if (price > pmax)
+        price = pmax;
+    revenue = price * (demandMax - slope * price);
+    printf("Chosen price = %.2f DA\n", price);
+    printf("Revenue = %.2f DA\n", revenue);
+    return 0;
+}

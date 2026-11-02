@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+#define NB 5
+#define INF 1000000
+
+int main(void) {
+    int dist[NB][NB] = {{  0, 120, INF, 300, INF},
+                        {120,   0,  90, INF, 400},
+                        {INF,  90,   0,  60, 150},
+                        {300, INF,  60,   0, 110},
+                        {INF, 400, 150, 110,   0}};
+    int via, from, to;
+    for (via = 0; via < NB; via++)                // المستودع الوسيط
+        for (from = 0; from < NB; from++)
+            for (to = 0; to < NB; to++)
+                if (dist[from][via] < INF && dist[via][to] < INF
+                    && dist[from][via] + dist[via][to] < dist[from][to])
+                    dist[from][to] = dist[from][via] + dist[via][to];   // طريق أقصر
+    for (from = 0; from < NB; from++) {
+        for (to = 0; to < NB; to++)
+            printf("%5d", dist[from][to]);
+        printf("\n");
+    }
+    return 0;
+}

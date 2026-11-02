@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+#define NB_PRICES 7
+
+int main(void) {
+    double prices[NB_PRICES] = {1200, 450, 3990, 89, 700, 2500, 1600};
+    double minPrice = prices[0], maxPrice = prices[0];
+    int index;
+    for (index = 1; index < NB_PRICES; index++) {
+        if (prices[index] < minPrice) minPrice = prices[index];
+        if (prices[index] > maxPrice) maxPrice = prices[index];
+    }
+    for (index = 0; index < NB_PRICES; index++) {
+        (*@\cmt{\cen{0} للأرخص و \cen{1} للأغلى}@*)
+        double scaled = (prices[index] - minPrice) / (maxPrice - minPrice);
+        printf("%7.0f -> %.3f\n", prices[index], scaled);
+    }
+    return 0;
+}

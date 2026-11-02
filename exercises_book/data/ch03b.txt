@@ -1,0 +1,606 @@
+@@
+title: رقم المنتج بالنظام الثنائي
+level: medium
+domain: ec
+@ statement
+تخزن بطاقات RFID أرقام المنتجات بالنظام **الثنائي**. اكتب برنامجًا يحول عددًا عشريًا إلى الثنائي دون جداول: نبني الناتج كعدد يُقرأ بالأرقام 0 و1، ونعد البتات التي قيمتها 1.
+@ stdin
+202
+@ steps
+- ما دام `number > 0`: البت `bit = number % 2` ثم `number = number / 2`.
+- البتات تخرج من اليمين إلى اليسار، فنضعها في الموضع `place` (1، 10، 100، ...): `bin = bin + bit * place`.
+- نضاعف `place` في 10 في كل دورة.
+@ flow
+in: number
+do: bin = 0 ; place = 1 ; ones = 0
+while: number > 0
+  do: bit = number % 2 ; ones += bit
+  do: bin = bin + bit * place
+  do: place = place * 10 ; number = number / 2
+out: bin, ones
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int number, n0, bit, ones = 0;
+    long long bin = 0, place = 1;
+    scanf("%d", &number);
+    n0 = number;
+    while (number > 0) {
+        bit = number % 2;                // البت الأقل وزنًا
+        ones += bit;
+        bin = bin + bit * place;        // نضعه في موضعه العشري
+        place = place * 10;
+        number = number / 2;                // ننتقل إلى البت الموالي
+    }
+    printf("%d in binary = %lld (%d ones)\n", n0, bin, ones);
+    return 0;
+}
+
+@@
+title: شبكة التخفيضات
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يعرض جدولًا ثنائيًا: الأسطر كميات من 1 إلى 5، والأعمدة نسب تخفيض 0% و10% و20% و30%، وكل خانة تحتوي ثمن الكمية بعد التخفيض لسعر وحدة مقروء. استعمل **حلقتين متداخلتين**.
+@ stdin
+1500
+@ steps
+- الحلقة الخارجية على الكمية `qty`.
+- الحلقة الداخلية على النسبة `discount` من 0 إلى 30 بخطوة 10.
+- الخانة: `qty * price * (100 - discount) / 100`.
+@ flow
+in: price
+for: qty = 1 ; qty <= 5 ; qty++
+  for: discount = 0 ; discount <= 30 ; discount += 10
+    out: qty * price * (100 - discount) / 100
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double price;
+    int qty, discount;
+    scanf("%lf", &price);
+    printf("qty |     0%%    10%%    20%%    30%%\n");
+    for (qty = 1; qty <= 5; qty++) {            // سطر لكل كمية
+        printf("%3d |", qty);
+        for (discount = 0; discount <= 30; discount += 10)     // عمود لكل نسبة
+            printf(" %6.0f", qty * price * (100 - discount) / 100);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: عد الزبائن في كل شريحة
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ الإنفاق السنوي لـ `nbCustomers` زبونًا ويعد الزبائن في كل شريحة: أقل من 20000، من 20000 إلى أقل من 100000، و100000 فأكثر، مع متوسط إنفاق كل شريحة.
+@ stdin
+9
+15000 120000 45000 8000 99000 250000 30000 61000 19999
+@ steps
+- ثلاثة عدادات وثلاثة مجاميع.
+- في كل دورة نحدد الشريحة بـ `if / else if`.
+- المتوسط لكل شريحة إذا كان عددها غير صفري.
+@ flow
+in: nbCustomers
+for: index = 0 ; index < nbCustomers ; index++
+  in: spend
+  if: spend < 20000
+    do: n1++ ; s1 += spend
+  else:
+    if: spend < 100000
+      do: n2++ ; s2 += spend
+    else:
+      do: n3++ ; s3 += spend
+out: n1, n2, n3 والمتوسطات
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbCustomers, index, n1 = 0, n2 = 0, n3 = 0;
+    double spend, s1 = 0, s2 = 0, s3 = 0;
+    scanf("%d", &nbCustomers);
+    for (index = 0; index < nbCustomers; index++) {
+        scanf("%lf", &spend);
+        if (spend < 20000)       { n1++; s1 += spend; }   // صغار
+        else if (spend < 100000) { n2++; s2 += spend; }   // متوسطون
+        else                 { n3++; s3 += spend; }   // كبار
+    }
+    printf("Low:    %d customers", n1);
+    if (n1 > 0) printf(", avg %.0f", s1 / n1);   // نتجنب القسمة على 0
+    printf("\nMedium: %d customers", n2);
+    if (n2 > 0) printf(", avg %.0f", s2 / n2);
+    printf("\nHigh:   %d customers", n3);
+    if (n3 > 0) printf(", avg %.0f", s3 / n3);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: محاكاة نفاد المخزون
+level: medium
+domain: ec
+@ statement
+مخزون منتج `stock` وحدة. الطلب اليومي يبدأ بـ `initDemand` وحدة ويرتفع بنسبة `growth`% كل يوم (منتج رائج). اكتب برنامجًا يحاكي الأيام حتى **نفاد المخزون**، ويعرض يوم النفاد والطلب غير الملبى في آخر يوم.
+@ stdin
+1000 40 10
+@ steps
+- ما دام `stock > 0`: نزيد اليوم، الطلب اليوم `dem` (مقرب لعدد صحيح).
+- إذا كان `dem >= stock` فالمخزون ينفد اليوم والناقص `dem - stock`.
+- وإلا `stock = stock - dem` ثم `dem = dem * (1 + growth / 100)`.
+@ flow
+in: stock, initDemand, growth
+do: day = 0 ; dem = initDemand
+while: stock > 0
+  do: day++
+  if: dem >= stock
+    out: day, dem - stock
+    do: stock = 0
+  else:
+    do: stock = stock - dem
+    do: dem = dem * (1 + growth/100)
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double stock, initDemand, growth, dem;
+    int day = 0;
+    scanf("%lf %lf %lf", &stock, &initDemand, &growth);
+    dem = initDemand;
+    while (stock > 0) {
+        day++;
+        dem = (int)(dem + 0.5);   // الطلب عدد صحيح من الوحدات
+        if (dem >= stock) {           // آخر يوم: لا يكفي المخزون
+            printf("Stock out on day %d (unmet demand: %.0f)\n", day, dem - stock);
+            stock = 0;
+        } else {
+            stock = stock - dem;
+            printf("Day %2d: sold %3.0f, left %4.0f\n", day, dem, stock);
+            dem = dem * (1 + growth / 100);   // الطلب يرتفع
+        }
+    }
+    return 0;
+}
+
+@@
+title: التنعيم الأسي لسلسلة زمنية
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ معامل التنعيم `alpha` وعدد الأيام `nbDays` ثم المبيعات، ويعرض لكل يوم القيمة المنعّمة `smooth = alpha * sales + (1 - alpha) * smooth` والتنبؤ لليوم الموالي.
+@ stdin
+0.3 6
+200 260 210 300 280 330
+@ steps
+- القيمة الأولى تهيئ `smooth`.
+- لكل قيمة موالية نطبق الصيغة.
+- التنبؤ لليوم `nbDays + 1` هو آخر قيمة `smooth`.
+@ flow
+in: alpha, nbDays, sales
+do: smooth = sales
+for: day = 2 ; day <= nbDays ; day++
+  in: sales
+  do: smooth = alpha * sales + (1 - alpha) * smooth
+  out: day, smooth
+out: smooth
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double alpha, sales, smooth;
+    int nbDays, day;
+    scanf("%lf %d %lf", &alpha, &nbDays, &sales);
+    smooth = sales;                                // نبدأ بالملاحظة الأولى
+    printf("Day 1: %.2f\n", smooth);
+    for (day = 2; day <= nbDays; day++) {
+        scanf("%lf", &sales);
+        smooth = alpha * sales + (1 - alpha) * smooth;  // مزيج من الجديد والقديم
+        printf("Day %d: %.2f\n", day, smooth);
+    }
+    printf("Forecast day %d: %.2f\n", nbDays + 1, smooth);
+    return 0;
+}
+
+@@
+title: الانحدار الخطي على n نقطة
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ `nbPoints` نقطة (ميزانية الإعلان بالآلاف، المبيعات) ويحسب مستقيم **المربعات الصغرى** `sales = slope budget + intercept` في مرور واحد بجمع `Σbudget` و`Σsales` و`Σxy` و`Σbudget²`.
+@ stdin
+6
+1 52
+2 61
+3 74
+4 79
+5 93
+6 101
+@ steps
+- نجمع المجاميع الأربعة في حلقة واحدة.
+- `slope = (nbPoints Σxy - Σbudget Σsales) / (nbPoints Σbudget² - (Σbudget)²)`.
+- `intercept = (Σsales - slope Σbudget) / nbPoints`.
+@ flow
+in: nbPoints
+do: sx = sy = sxy = sxx = 0
+for: index = 0 ; index < nbPoints ; index++
+  in: budget, sales
+  do: sx += budget ; sy += sales ; sxy += budget*sales ; sxx += budget*budget
+do: slope = (nbPoints*sxy - sx*sy) / (nbPoints*sxx - sx*sx)
+do: intercept = (sy - slope*sx) / nbPoints
+out: slope, intercept
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbPoints, index;
+    double budget, sales, sx = 0, sy = 0, sxy = 0, sxx = 0, slope, intercept;
+    scanf("%d", &nbPoints);
+    for (index = 0; index < nbPoints; index++) {
+        scanf("%lf %lf", &budget, &sales);
+        sx += budget;  sy += sales;        // المجاميع البسيطة
+        sxy += budget * sales;             // مجموع الجداءات
+        sxx += budget * budget;             // مجموع المربعات
+    }
+    slope = (nbPoints * sxy - sx * sy) / (nbPoints * sxx - sx * sx);
+    intercept = (sy - slope * sx) / nbPoints;
+    printf("Sales = %.3f * budget + %.3f\n", slope, intercept);
+    printf("Forecast for budget 8: %.1f\n", slope * 8 + intercept);
+    return 0;
+}
+
+@@
+title: معامل الارتباط
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يحسب **معامل ارتباط بيرسون** بين الوقت المقضي في الموقع (دقائق) ومبلغ الشراء لـ `nbCustomers` زبون:
+`r = (nbCustomers Σxy - Σminutes Σamount) / sqrt((nbCustomers Σminutes² - (Σminutes)²)(nbCustomers Σamount² - (Σamount)²))`، مع حساب الجذر بطريقة نيوتن.
+@ stdin
+6
+3 500
+8 2100
+5 1200
+12 3900
+2 300
+9 2600
+@ steps
+- نجمع `Σminutes`، `Σamount`، `Σxy`، `Σminutes²`، `Σamount²`.
+- البسط `num` والمقدار تحت الجذر `den2`.
+- الجذر بحلقة نيوتن (40 تكرارًا كافية).
+- `r = num / den`.
+@ flow
+in: nbCustomers
+for: index = 0 ; index < nbCustomers ; index++
+  in: minutes, amount
+  do: تحديث المجاميع الخمسة
+do: num = nbCustomers*sxy - sx*sy
+do: den2 = (nbCustomers*sxx - sx*sx)*(nbCustomers*syy - sy*sy)
+do: den = جذر den2 بنيوتن
+out: num / den
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbCustomers, index;
+    double minutes, amount, sx = 0, sy = 0, sxy = 0, sxx = 0, syy = 0;
+    double num, den2, den;
+    scanf("%d", &nbCustomers);
+    for (index = 0; index < nbCustomers; index++) {
+        scanf("%lf %lf", &minutes, &amount);
+        sx += minutes; sy += amount; sxy += minutes * amount;
+        sxx += minutes * minutes; syy += amount * amount;
+    }
+    num = nbCustomers * sxy - sx * sy;
+    den2 = (nbCustomers * sxx - sx * sx) * (nbCustomers * syy - sy * sy);
+    den = den2;                           // الجذر بطريقة نيوتن
+    for (index = 0; index < 40; index++)
+        den = (den + den2 / den) / 2;
+    printf("Pearson r = %.4f\n", num / den);
+    return 0;
+}
+
+@@
+title: ثاني أغلى منتج
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يقرأ `nbPrices` أسعار **مختلفة** ويجد **ثاني أكبر** سعر في مرور واحد، دون ترتيب ودون جداول.
+@ stdin
+7
+450 1290 300 2200 870 1990 99
+@ steps
+- نحتفظ بـ `first` (الأكبر) و`second` (الثاني)، مهيأين بقيمة صغيرة جدًا.
+- إذا كان `price > first`: الأكبر القديم يصبح الثاني و`first = price`.
+- وإلا إذا كان `price > second`: `second = price`.
+@ flow
+in: nbPrices
+do: first = -1 ; second = -1
+for: index = 0 ; index < nbPrices ; index++
+  in: price
+  if: price > first
+    do: second = first ; first = price
+  else:
+    if: price > second
+      do: second = price
+out: first, second
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbPrices, index;
+    double price, first = -1, second = -1;    // الأسعار موجبة
+    scanf("%d", &nbPrices);
+    for (index = 0; index < nbPrices; index++) {
+        scanf("%lf", &price);
+        if (price > first) {
+            second = first;       // الأكبر القديم ينزل إلى المرتبة الثانية
+            first = price;
+        } else if (price > second) {
+            second = price;
+        }
+    }
+    printf("Highest = %.0f, second = %.0f\n", first, second);
+    return 0;
+}
+
+@@
+title: هرم مستويات الوفاء
+level: medium
+domain: ec
+@ statement
+اكتب برنامجًا يرسم **هرمًا** من `levels` أسطر يمثل مستويات الوفاء: السطر `row` يحتوي `levels - row` فراغًا ثم `2i - 1` نجمة، ثم يعرض رقم المستوى.
+@ stdin
+5
+@ steps
+- حلقة خارجية على الأسطر `row` من 1 إلى `levels`.
+- حلقة داخلية أولى للفراغات، وثانية للنجوم.
+@ flow
+in: levels
+for: row = 1 ; row <= levels ; row++
+  for: col = 1 ; col <= levels - row ; col++
+    out: `" "`
+  for: col = 1 ; col <= 2*row - 1 ; col++
+    out: `"*"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int levels, row, col;
+    scanf("%d", &levels);
+    for (row = 1; row <= levels; row++) {
+        for (col = 1; col <= levels - row; col++)      // فراغات للتوسيط
+            printf(" ");
+        for (col = 1; col <= 2 * row - 1; col++)  // عدد فردي من النجوم
+            printf("*");
+        printf("  level %d\n", levels - row + 1);
+    }
+    return 0;
+}
+
+@@
+title: سعر التوازن بالتنصيف
+level: medium
+domain: ds
+@ statement
+الطلب على منتج `D(p) = 5000 / p` (غير خطي) والعرض `S(p) = 2p - 20`. اكتب برنامجًا يجد سعر التوازن (حيث `D(p) - S(p) = 0`) بطريقة **التنصيف** في المجال `[lo, hi]` بدقة 0.001.
+@ stdin
+10 100
+@ steps
+- `gap(p) = 5000 / p - (2p - 20)` موجبة عند `lo` وسالبة عند `hi`.
+- ما دام `hi - lo > 0.001`: `mid = (lo + hi) / 2`.
+- إذا كان `gap(mid) > 0` فالجذر على اليمين: `lo = mid`، وإلا `hi = mid`.
+@ flow
+in: lo, hi
+do: it = 0
+while: hi - lo > 0.001
+  do: mid = (lo + hi) / 2
+  do: gap = 5000/mid - (2*mid - 20)
+  if: gap > 0
+    do: lo = mid
+  else:
+    do: hi = mid
+  do: it++
+out: (lo + hi) / 2, it
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double lo, hi, mid, gap;
+    int it = 0;
+    scanf("%lf %lf", &lo, &hi);
+    while (hi - lo > 0.001) {
+        mid = (lo + hi) / 2;
+        gap = 5000 / mid - (2 * mid - 20);  // الطلب ناقص العرض
+        if (gap > 0)
+            lo = mid;             // الطلب أكبر: السعر يجب أن يرتفع
+        else
+            hi = mid;
+        it++;                     // كل دورة تقسم المجال على 2
+    }
+    mid = (lo + hi) / 2;
+    printf("Equilibrium price = %.3f DA (%d iterations)\n", mid, it);
+    printf("Quantity = %.2f\n", 5000 / mid);
+    return 0;
+}
+
+@@
+title: الفائدة المستمرة بسلسلة تايلور
+level: medium
+domain: ds
+@ statement
+مع الفائدة **المستمرة** يصبح المبلغ `capital × e^(rt)`. اكتب برنامجًا يحسب `e^exponent` بجمع حدود سلسلة تايلور `1 + exponent + exponent²/2! + exponent³/3! + ...` حتى يصبح الحد أصغر من `1e-12`، دون حساب العامليات منفصلة.
+@ stdin
+50000 0.05 10
+@ steps
+- `exponent = rate * years`، `term = 1`، `sum = 1`، `term_k = 0`.
+- الحد التالي من السابق: `term = term * exponent / term_k`.
+- نتوقف عندما يصبح `term < 1e-12`.
+@ flow
+in: capital, rate, years
+do: exponent = rate * years ; term = 1 ; sum = 1 ; term_k = 0
+dowhile: term > 1e-12
+  do: term_k++
+  do: term = term * exponent / term_k
+  do: sum = sum + term
+out: capital * sum, term_k
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double capital, rate, years, exponent, term = 1, sum = 1;
+    int term_k = 0;
+    scanf("%lf %lf %lf", &capital, &rate, &years);
+    exponent = rate * years;
+    do {
+        term_k++;
+        term = term * exponent / term_k;      // exponent^term_k / term_k! من الحد السابق
+        sum += term;
+    } while (term > 1e-12);
+    printf("e^%.2f = %.10f (%d terms)\n", exponent, sum, term_k);
+    printf("Continuous: %.2f DA\n", capital * sum);
+    return 0;
+}
+
+@@
+title: القفزات المفاجئة في الزيارات
+level: medium
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ عدد الزيارات لـ `nbHours` ساعة ويكشف **القفزات**: كل ساعة تختلف زياراتها عن الساعة السابقة بأكثر من 50%. نعرض رقم الساعة ونسبة التغير.
+@ stdin
+8
+400 420 900 880 300 310 650 640
+@ steps
+- نحتفظ بالقيمة السابقة.
+- `change = (visits - prev) / prev * 100` ثم قيمتها المطلقة.
+- إذا كانت `> 50` نعرض تنبيهًا ونعد القفزات.
+@ flow
+in: nbHours, prev
+do: jumps = 0
+for: hour = 2 ; hour <= nbHours ; hour++
+  in: visits
+  do: change = (visits - prev) / prev * 100
+  if: |change| > 50
+    out: hour, change
+    do: jumps++
+  do: prev = visits
+out: jumps
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbHours, hour, jumps = 0;
+    double prev, visits, change, ac;
+    scanf("%d %lf", &nbHours, &prev);
+    for (hour = 2; hour <= nbHours; hour++) {
+        scanf("%lf", &visits);
+        change = (visits - prev) / prev * 100;  // التغير النسبي
+        ac = (change < 0) ? -change : change;
+        if (ac > 50) {
+            printf("Hour %d: jump of %+.1f %%\n", hour, change);
+            jumps++;
+        }
+        prev = visits;
+    }
+    printf("Total jumps: %d\n", jumps);
+    return 0;
+}
+
+@@
+title: تخمين السعر بالبحث الثنائي
+level: medium
+domain: ec
+@ statement
+في لعبة ترويجية يخفي المتجر سعرًا بين 1 و100000. اكتب برنامجًا يقرأ السعر المخفي ثم يجعل الحاسوب **يخمنه** بالبحث الثنائي: في كل محاولة يقترح المنتصف ويُقال له "أكبر" أو "أصغر". اعرض المحاولات.
+@ stdin
+73421
+@ steps
+- `lo = 1`، `hi = 100000`.
+- `guess = (lo + hi) / 2`؛ إذا كان أصغر من السعر: `lo = guess + 1`، إذا كان أكبر: `hi = guess - 1`.
+- نتوقف عند الإصابة؛ عدد المحاولات لا يتجاوز 17.
+@ flow
+in: secret
+do: lo = 1 ; hi = 100000 ; tries = 0
+dowhile: guess != secret
+  do: guess = (lo + hi) / 2 ; tries++
+  if: guess < secret
+    do: lo = guess + 1
+  else:
+    if: guess > secret
+      do: hi = guess - 1
+out: tries
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int secret, lo = 1, hi = 100000, guess, tries = 0;
+    scanf("%d", &secret);
+    do {
+        guess = (lo + hi) / 2;    // نجرب منتصف المجال
+        tries++;
+        printf("Try %2d: %6d -> ", tries, guess);
+        if (guess < secret) {
+            printf("higher\n");
+            lo = guess + 1;       // نتخلص من النصف الأيسر
+        } else if (guess > secret) {
+            printf("lower\n");
+            hi = guess - 1;       // نتخلص من النصف الأيمن
+        } else {
+            printf("found!\n");
+        }
+    } while (guess != secret);
+    printf("Found in %d tries\n", tries);
+    return 0;
+}
+
+@@
+title: يوم بلوغ هدف رقم الأعمال
+level: medium
+domain: ds
+@ statement
+هدف الشهر رقم أعمال `target`. اكتب برنامجًا يقرأ مبيعات الأيام (30 يومًا كحد أقصى) ويتوقف **فور** بلوغ الهدف باستعمال `break`، ويعرض اليوم؛ وإذا لم يُبلغ الهدف يعرض الناقص.
+@ stdin
+100000 30
+8500 12000 9900 15000 7000 11000 13500 9000 14000 6000 3000 2000
+@ steps
+- نجمع المبيعات في `cum`.
+- إذا كان `cum >= target` نحفظ اليوم ونخرج بـ `break`.
+- بعد الحلقة نميز الحالتين بالمتغير `reached`.
+@ flow
+in: target, maxDays
+do: cum = 0 ; reached = 0 ; day = 1
+while: day <= maxDays && !reached
+  in: sales
+  do: cum = cum + sales
+  if: cum >= target
+    do: reached = day
+  do: day++
+if: reached
+  out: reached
+else:
+  out: target - cum
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double target, sales, cum = 0;
+    int maxDays, day, reached = 0;
+    scanf("%lf %d", &target, &maxDays);
+    for (day = 1; day <= maxDays; day++) {
+        if (scanf("%lf", &sales) != 1)  // نهاية البيانات المتوفرة
+            break;
+        cum += sales;
+        if (cum >= target) {
+            reached = day;
+            break;                  // نخرج من الحلقة فورًا
+        }
+    }
+    if (reached)
+        printf("Target reached on day %d (%.0f DA)\n", reached, cum);
+    else
+        printf("Target missed by %.0f DA\n", target - cum);
+    return 0;
+}

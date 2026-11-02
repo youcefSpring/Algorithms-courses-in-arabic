@@ -1,0 +1,42 @@
+#include <stdio.h>
+
+#define NB_USERS 5
+#define NB_ITEMS 5
+
+int main(void) {
+    int ratings[NB_USERS][NB_ITEMS] = {{5, 4, 0, 1, 0},
+                                       {4, 5, 4, 1, 1},
+                                       {1, 1, 2, 5, 4},
+                                       {5, 5, 5, 0, 1},
+                                       {2, 0, 1, 4, 5}};
+    int target, item, other, col, step;
+    double dot, normA, normB, product, root, similarity;
+    double weightedSum = 0, simSum = 0;
+    scanf("%d %d", &target, &item);
+    for (other = 0; other < NB_USERS; other++) {
+        if (other == target || ratings[other][item] == 0)
+            continue;                             (*@\cmt{لم يقيّم المنتج المطلوب}@*)
+        dot = normA = normB = 0;
+        for (col = 0; col < NB_ITEMS; col++)
+            if (ratings[target][col] > 0 && ratings[other][col] > 0) {   (*@\cmt{مشترك}@*)
+                dot += ratings[target][col] * ratings[other][col];
+                normA += ratings[target][col] * ratings[target][col];
+                normB += ratings[other][col] * ratings[other][col];
+            }
+        if (dot == 0)
+            continue;
+        product = normA * normB;
+        root = product;
+        for (step = 0; step < 60; step++)         (*@\cmt{الجذر بطريقة نيوتن}@*)
+            root = (root + product / root) / 2;
+        similarity = dot / root;
+        printf("User %d: similarity %.3f, rating %d\n", other, similarity, ratings[other][item]);
+        weightedSum += similarity * ratings[other][item];
+        simSum += similarity;
+    }
+    if (simSum > 0)
+        printf("Predicted rating of user %d for item %d = %.2f\n", target, item, weightedSum / simSum);
+    else
+        printf("Not enough data\n");
+    return 0;
+}

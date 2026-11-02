@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    char promo[40], ch;
+    int pos, digits = 0, letters = 0, others = 0;
+    scanf("%39s", promo);
+    for (pos = 0; promo[pos] != '\0'; pos++) {
+        ch = promo[pos];
+        if (ch >= '0' && ch <= '9')
+            digits++;
+        else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+            letters++;
+        else
+            others++;                 // - أو _ أو غيرهما
+    }
+    printf("Digits %d, letters %d, others %d\n", digits, letters, others);
+    return 0;
+}

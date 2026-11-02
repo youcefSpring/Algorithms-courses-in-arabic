@@ -1,0 +1,13 @@
+#include <stdio.h>
+
+int main(void) {
+    double visitors, buys, rate;
+    scanf("%lf %lf", &visitors, &buys);
+    rate = buys / visitors * 100;     // معدل التحويل بالمئة
+    printf("Conversion = %.2f %%\n", rate);
+    if (rate > 3.5)
+        printf("New version: SUCCESS\n");
+    else
+        printf("New version: FAILURE\n");
+    return 0;
+}

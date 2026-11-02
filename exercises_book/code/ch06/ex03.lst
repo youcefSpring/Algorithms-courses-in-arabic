@@ -1,0 +1,11 @@
+#include <stdio.h>
+
+int main(void) {
+    char code[] = "tv-sam55-qled-2026";
+    int pos;
+    for (pos = 0; code[pos] != '\0'; pos++)
+        if (code[pos] >= 'a' && code[pos] <= 'z')
+            code[pos] = code[pos] - 'a' + 'A';    (*@\cmt{الإزاحة بين الصغير والكبير}@*)
+    printf("SKU: %s\n", code);
+    return 0;
+}

@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+#define NB_ROWS 4
+#define NB_COLS 5
+
+int main(void) {
+    int cost[NB_ROWS][NB_COLS] = {{3, 7, 2, 8, 1},
+                                  {4, 1, 9, 2, 6},
+                                  {8, 2, 1, 5, 3},
+                                  {6, 9, 4, 1, 2}};
+    int best[NB_ROWS][NB_COLS], row, col, up, left;
+    for (row = 0; row < NB_ROWS; row++)
+        for (col = 0; col < NB_COLS; col++) {
+            if (row == 0 && col == 0) { best[row][col] = cost[row][col]; continue; }
+            up = (row > 0) ? best[row - 1][col] : -1;     // -1: غير موجود
+            left = (col > 0) ? best[row][col - 1] : -1;
+            if (up < 0 || (left >= 0 && left < up))
+                best[row][col] = cost[row][col] + left;
+            else
+                best[row][col] = cost[row][col] + up;
+        }
+    printf("Minimum time = %d min\nPath (reversed):", best[NB_ROWS - 1][NB_COLS - 1]);
+    row = NB_ROWS - 1; col = NB_COLS - 1;
+    while (row > 0 || col > 0) {          // نعود من النهاية إلى البداية
+        printf(" (%d,%d)", row, col);
+        if (row == 0) col--;
+        else if (col == 0) row--;
+        else if (best[row - 1][col] <= best[row][col - 1]) row--;
+        else col--;
+    }
+    printf(" (0,0)\n");
+    return 0;
+}

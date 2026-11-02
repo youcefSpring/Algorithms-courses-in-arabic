@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    double amount, mean, std, zscore, az;
+    scanf("%lf %lf %lf", &amount, &mean, &std);
+    zscore = (amount - mean) / std;         (*@\cmt{الدرجة المعيارية}@*)
+    az = zscore;
+    if (az < 0)                   (*@\cmt{القيمة المطلقة دون دالة \cen{fabs}}@*)
+        az = -az;
+    printf("z = %.2f -> ", zscore);
+    if (az > 3)
+        printf("outlier\n");
+    else if (az >= 2)
+        printf("suspicious\n");
+    else
+        printf("normal\n");
+    return 0;
+}

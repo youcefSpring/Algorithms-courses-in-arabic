@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+#define NB 6
+#define LEN 30
+
+int main(void) {
+    char names[NB][LEN] = {"Mouse", "Keyboard", "Monitor", "Cable", "Microphone", "Camera"};
+    char tmp[LEN];
+    int pass, index, pos, diff;
+    for (pass = 0; pass < NB - 1; pass++) {
+        for (index = 0; index < NB - 1 - pass; index++) {
+            pos = 0;                          (*@\cmt{مقارنة يدوية}@*)
+            while (names[index][pos] == names[index + 1][pos] && names[index][pos] != '\0')
+                pos++;
+            diff = names[index][pos] - names[index + 1][pos];
+            if (diff > 0) {                   (*@\cmt{الأول بعد الثاني في القاموس}@*)
+                for (pos = 0; (tmp[pos] = names[index][pos]) != '\0'; pos++) ;
+                for (pos = 0; (names[index][pos] = names[index + 1][pos]) != '\0'; pos++) ;
+                for (pos = 0; (names[index + 1][pos] = tmp[pos]) != '\0'; pos++) ;
+            }
+        }
+    }
+    for (index = 0; index < NB; index++)
+        printf("%d. %s\n", index + 1, names[index]);
+    return 0;
+}

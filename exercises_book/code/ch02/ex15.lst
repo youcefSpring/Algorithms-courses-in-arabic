@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+    int year, feb;
+    scanf("%d", &year);
+    (*@\cmt{|| : يكفي أن يتحقق أحد الطرفين}@*)
+    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
+        feb = 29;
+    else
+        feb = 28;
+    printf("%d: %s year, February has %d days\n",
+           year, feb == 29 ? "leap" : "common", feb);
+    return 0;
+}

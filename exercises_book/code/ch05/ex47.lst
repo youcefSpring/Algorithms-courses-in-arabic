@@ -1,0 +1,51 @@
+#include <stdio.h>
+
+#define NB 12
+#define NB_K 2
+
+int main(void) {
+    double points[NB][2] = {{1, 2.0}, {2, 1.5}, {1, 1.0}, {3, 2.5}, {2, 2.2}, {9, 8.0},
+                            {8, 7.5}, {10, 9.0}, {9, 7.0}, {7, 8.5}, {3, 1.8}, {8, 9.2}};
+    double centers[NB_K][2], sum[NB_K][2], dx, dy, dist, bestDist, inertia = 0;
+    int label[NB], count[NB_K], row, cluster, closest, changed, axis;
+    for (cluster = 0; cluster < NB_K; cluster++)
+        for (axis = 0; axis < 2; axis++)
+            centers[cluster][axis] = points[cluster][axis];   (*@\cmt{أول نقطتين}@*)
+    for (row = 0; row < NB; row++)
+        label[row] = -1;
+    do {
+        changed = 0;
+        for (row = 0; row < NB; row++) {
+            closest = 0; bestDist = -1;
+            for (cluster = 0; cluster < NB_K; cluster++) {
+                dx = points[row][0] - centers[cluster][0];
+                dy = points[row][1] - centers[cluster][1];
+                dist = dx * dx + dy * dy;
+                if (bestDist < 0 || dist < bestDist) { bestDist = dist; closest = cluster; }
+            }
+            if (closest != label[row]) { label[row] = closest; changed = 1; }
+        }
+        for (cluster = 0; cluster < NB_K; cluster++) {
+            sum[cluster][0] = sum[cluster][1] = 0; count[cluster] = 0;
+        }
+        for (row = 0; row < NB; row++) {          (*@\cmt{مجموع الإحداثيات لكل مجموعة}@*)
+            sum[label[row]][0] += points[row][0];
+            sum[label[row]][1] += points[row][1];
+            count[label[row]]++;
+        }
+        for (cluster = 0; cluster < NB_K; cluster++)
+            if (count[cluster] > 0)
+                for (axis = 0; axis < 2; axis++)
+                    centers[cluster][axis] = sum[cluster][axis] / count[cluster];
+    } while (changed);
+    for (row = 0; row < NB; row++) {
+        dx = points[row][0] - centers[label[row]][0];
+        dy = points[row][1] - centers[label[row]][1];
+        inertia += dx * dx + dy * dy;
+    }
+    for (cluster = 0; cluster < NB_K; cluster++)
+        printf("Cluster %d: center (%.2f, %.2f), %d customers\n", cluster,
+               centers[cluster][0], centers[cluster][1], count[cluster]);
+    printf("Inertia = %.3f\n", inertia);
+    return 0;
+}

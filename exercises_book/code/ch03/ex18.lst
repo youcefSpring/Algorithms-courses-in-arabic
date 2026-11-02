@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+int main(void) {
+    int number, divisor, prime;
+    scanf("%d", &number);
+    prime = (number >= 2);             (*@\cmt{\cen{0} و \cen{1} ليسا أوليين}@*)
+    (*@\cmt{يكفي البحث حتى الجذر: إذا كان \cen{number} = \cen{a} × \cen{b} فأحدهما <= الجذر}@*)
+    for (divisor = 2; prime && divisor * divisor <= number; divisor++) {
+        if (number % divisor == 0)
+            prime = 0;            (*@\cmt{وجدنا قاسمًا}@*)
+    }
+    if (prime)
+        printf("%d is prime\n", number);
+    else
+        printf("%d is not prime\n", number);
+    return 0;
+}

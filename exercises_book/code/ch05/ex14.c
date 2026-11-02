@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+#define NB_CUST 4
+#define NB_ITEMS 5
+
+int main(void) {
+    int cart[NB_CUST][NB_ITEMS] = {{1, 0, 2, 0, 1},
+                                   {0, 3, 0, 1, 0},
+                                   {2, 1, 0, 0, 4},
+                                   {0, 0, 1, 2, 2}};
+    double price[NB_ITEMS] = {1500, 350, 2200, 999, 120};
+    double bill[NB_CUST];
+    int customer, item, best = 0;
+    for (customer = 0; customer < NB_CUST; customer++) {
+        bill[customer] = 0;
+        for (item = 0; item < NB_ITEMS; item++)
+            bill[customer] += cart[customer][item] * price[item];  // كمية × سعر
+        printf("Customer %d: %.2f DA\n", customer, bill[customer]);
+        if (bill[customer] > bill[best])
+            best = customer;
+    }
+    printf("Top spender: customer %d\n", best);
+    return 0;
+}

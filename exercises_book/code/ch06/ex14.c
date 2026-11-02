@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "   Free    shipping   on   all   orders   ";
+    int read, write = 0;
+    for (read = 0; text[read] != '\0'; read++)
+        // نكتب الحرف إلا إذا كان فراغًا مكررًا أو فراغًا في البداية
+        if (text[read] != ' ' || (write > 0 && text[write - 1] != ' '))
+            text[write++] = text[read];
+    if (write > 0 && text[write - 1] == ' ')
+        write--;                          // فراغ النهاية
+    text[write] = '\0';
+    printf("[%s]\n", text);
+    return 0;
+}

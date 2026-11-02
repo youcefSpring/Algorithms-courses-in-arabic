@@ -1,0 +1,48 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{البنية الشرطية}: تنفذ مجموعة تعليمات \textbf{فقط إذا} تحقق شرط (\code{if}).
+    \item \textbf{البديل}: \code{else} ينفذ عندما يكون الشرط خاطئًا، و\code{else if} يسمح بسلسلة من الحالات.
+    \item \textbf{الاختيار المتعدد}: \code{switch} يقارن متغيرًا صحيحًا أو حرفًا بقيم ثابتة (\code{case}) و\code{break} ينهي الحالة.
+    \item \textbf{الشرط}: تعبير منطقي قيمته \en{1} (صحيح) أو \en{0} (خطأ)، يُبنى بـ \code{== != < <= > >=} ويُركب بـ \code{\&\& || !}.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.95]
+    \begin{scope}
+        \node[fdec, text width=2.4cm] (d) at (0,0) {\fc{amount >= 5000}};
+        \node[fproc, text width=1.6cm] (y) at (2.2,-1.5) {\fc{ship = 0}};
+        \node[fproc, text width=1.6cm] (n) at (-2.2,-1.5) {\fc{ship = 450}};
+        \draw[sahm] (d.east) -| (y.north); \draw[sahm] (d.west) -| (n.north);
+        \node[flbl, anchor=south west] at (d.east) {نعم};
+        \node[flbl, anchor=south east] at (d.west) {لا};
+        \draw[sahm] (y.south) |- (0,-2.6); \draw[sahm] (n.south) |- (0,-2.6);
+        \node[font=\small\bfseries] at (0,-3.2) {\code{if ... else}};
+    \end{scope}
+    \begin{scope}[xshift=-8.5cm]
+        \node[fio, text width=1.3cm] (c) at (0,0.2) {\fc{switch(c)}};
+        \foreach \v/\x in {1/-2.4, 2/-0.8, 3/0.8, default/2.4} {
+            \node[fproc, text width=1.1cm, font=\scriptsize] (k\v) at (\x,-1.5) {\fc{case \v}};
+            \draw[sahm] (c.south) -- (k\v.north);
+        }
+        \node[font=\small\bfseries] at (0,-3.2) {\code{switch}};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.9\linewidth}{|c|c|c|X|}
+\hline
+\ras{\code{A}} & \ras{\code{B}} & \ras{\code{A \&\& B}} & \ras{\code{A || B}} \\ \hline
+\en{0} & \en{0} & \en{0} & \en{0} \\ \hline
+\en{0} & \en{1} & \en{0} & \en{1} \\ \hline
+\en{1} & \en{0} & \en{0} & \en{1} \\ \hline
+\en{1} & \en{1} & \en{1} & \en{1} \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad أخطاء شائعة}
+\code{if (x = 5)} إسناد وليس مقارنة (اكتب \code{==})، ونسيان \code{break} في \code{switch} يجعل التنفيذ ينزل إلى الحالة الموالية.
+\end{obox}
+
+\insertstats{02}

@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "Long battery life. The battery charges fast; spare battery included.";
+    char word[30];
+    int start, match, count = 0;
+    scanf("%29s", word);
+    for (start = 0; text[start] != '\0'; start++) {
+        match = 0;
+        (*@\cmt{نتقدم ما دامت الحروف متطابقة}@*)
+        while (word[match] != '\0' && text[start + match] == word[match])
+            match++;
+        if (word[match] == '\0') {            (*@\cmt{كل حروف الكلمة تطابقت}@*)
+            printf("Found at position %d\n", start);
+            count++;
+        }
+    }
+    printf("\"%s\" appears %d time(s)\n", word, count);
+    return 0;
+}

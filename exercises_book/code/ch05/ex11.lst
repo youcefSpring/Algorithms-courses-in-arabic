@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+#define NB_USERS 3
+#define NB_ITEMS 5
+
+int main(void) {
+    int purchases[NB_USERS][NB_ITEMS] = {{1, 0, 2, 0, 1},
+                                         {0, 3, 0, 1, 0},
+                                         {2, 1, 0, 0, 4}};
+    int transposed[NB_ITEMS][NB_USERS];
+    int user, item;
+    for (user = 0; user < NB_USERS; user++)
+        for (item = 0; item < NB_ITEMS; item++)
+            transposed[item][user] = purchases[user][item];   (*@\cmt{تبديل الفهرسين}@*)
+    for (item = 0; item < NB_ITEMS; item++) {
+        printf("Item %d:", item);
+        for (user = 0; user < NB_USERS; user++)
+            printf(" %d", transposed[item][user]);
+        printf("\n");
+    }
+    return 0;
+}

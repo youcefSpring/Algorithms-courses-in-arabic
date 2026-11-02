@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int main(void) {
+    double amount, rate, final;
+    scanf("%lf", &amount);
+    (*@\cmt{نبدأ بأعلى شريحة: كل \cen{else if} تعني أن الشروط السابقة فشلت}@*)
+    if (amount >= 50000)
+        rate = 15;
+    else if (amount >= 10000)
+        rate = 10;
+    else if (amount >= 2000)
+        rate = 5;
+    else
+        rate = 0;
+    final = amount * (1 - rate / 100);
+    printf("Discount rate = %.0f %%\n", rate);
+    printf("Final amount = %.2f DA\n", final);
+    return 0;
+}

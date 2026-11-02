@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int main(void) {
+    double price;
+    int qty, discount;
+    scanf("%lf", &price);
+    printf("qty |     0%%    10%%    20%%    30%%\n");
+    for (qty = 1; qty <= 5; qty++) {            // سطر لكل كمية
+        printf("%3d |", qty);
+        for (discount = 0; discount <= 30; discount += 10)     // عمود لكل نسبة
+            printf(" %6.0f", qty * price * (100 - discount) / 100);
+        printf("\n");
+    }
+    return 0;
+}

@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int main(void) {
+    int em, ey, cm, cy, exp, now;
+    scanf("%d %d", &em, &ey);         // تاريخ الانتهاء
+    scanf("%d %d", &cm, &cy);         // التاريخ الحالي
+    // تحويل التاريخ إلى عدد أشهر يسهل المقارنة
+    exp = ey * 12 + em;
+    now = cy * 12 + cm;
+    if (exp >= now)
+        printf("Card valid (%d months left)\n", exp - now);
+    else
+        printf("Card expired\n");
+    return 0;
+}

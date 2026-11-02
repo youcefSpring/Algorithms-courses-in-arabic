@@ -1,0 +1,47 @@
+#include <stdio.h>
+
+#define NB_ROWS 6
+#define NB_COLS 8
+
+int main(void) {
+    int zone[NB_ROWS][NB_COLS] = {{1, 1, 0, 0, 0, 1, 1, 0},
+                                  {1, 0, 0, 1, 0, 0, 1, 0},
+                                  {0, 0, 1, 1, 1, 0, 0, 0},
+                                  {1, 0, 0, 1, 0, 0, 1, 1},
+                                  {1, 1, 0, 0, 0, 0, 1, 0},
+                                  {0, 1, 0, 1, 1, 0, 0, 0}};
+    int region[NB_ROWS][NB_COLS] = {{0}};
+    int stackRow[NB_ROWS * NB_COLS], stackCol[NB_ROWS * NB_COLS];
+    int moveRow[4] = {-1, 1, 0, 0}, moveCol[4] = {0, 0, -1, 1};
+    int row, col, top, curRow, curCol, nextRow, nextCol, dir, size, nbRegions = 0;
+    for (row = 0; row < NB_ROWS; row++)
+        for (col = 0; col < NB_COLS; col++) {
+            if (zone[row][col] != 1 || region[row][col] != 0)
+                continue;
+            nbRegions++;                          (*@\cmt{منطقة جديدة}@*)
+            region[row][col] = nbRegions;
+            top = 0; size = 0;
+            stackRow[top] = row; stackCol[top] = col; top++;
+            while (top > 0) {
+                top--;
+                curRow = stackRow[top]; curCol = stackCol[top];
+                size++;
+                for (dir = 0; dir < 4; dir++) {   (*@\cmt{الجيران الأربعة}@*)
+                    nextRow = curRow + moveRow[dir];
+                    nextCol = curCol + moveCol[dir];
+                    if (nextRow >= 0 && nextRow < NB_ROWS && nextCol >= 0 && nextCol < NB_COLS
+                        && zone[nextRow][nextCol] == 1 && region[nextRow][nextCol] == 0) {
+                        region[nextRow][nextCol] = nbRegions;   (*@\cmt{نعلّم قبل الدفع}@*)
+                        stackRow[top] = nextRow; stackCol[top] = nextCol; top++;
+                    }
+                }
+            }
+            printf("Region %d: %d block(s)\n", nbRegions, size);
+        }
+    for (row = 0; row < NB_ROWS; row++) {
+        for (col = 0; col < NB_COLS; col++)
+            printf("%2d", region[row][col]);
+        printf("\n");
+    }
+    return 0;
+}

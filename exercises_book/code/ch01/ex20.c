@@ -1,0 +1,11 @@
+#include <stdio.h>
+
+int main(void) {
+    int days, weeks, rw, mo, rm;
+    scanf("%d", &days);
+    weeks = days / 7;   rw = days % 7;      // أسابيع كاملة + أيام
+    mo = days / 30; rm = days % 30;     // أشهر تقريبية + أيام
+    printf("%d days = %d weeks + %d days\n", days, weeks, rw);
+    printf("%d days = %d months + %d days\n", days, mo, rm);
+    return 0;
+}

@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int main(void) {
+    char first[30], second[30];
+    int count[26] = {0}, pos, letter, ok = 1;
+    scanf("%29s %29s", first, second);
+    for (pos = 0; first[pos] != '\0'; pos++)
+        count[first[pos] - 'a']++;        (*@\cmt{+\cen{1} لكل حرف من الأولى}@*)
+    for (pos = 0; second[pos] != '\0'; pos++)
+        count[second[pos] - 'a']--;       (*@\cmt{-\cen{1} لكل حرف من الثانية}@*)
+    for (letter = 0; letter < 26; letter++)
+        if (count[letter] != 0)
+            ok = 0;
+    printf("%s / %s: %s\n", first, second, ok ? "anagrams" : "different");
+    return 0;
+}

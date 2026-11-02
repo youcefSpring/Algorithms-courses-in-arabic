@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+#define NB 10
+
+int main(void) {
+    double spend[NB] = {1200, 800, 45000, 3000, 950, 2200, 18000, 600, 1500, 7000};
+    double key, weighted = 0, total = 0, gini, top = 0;
+    int rank, scan;
+    for (rank = 1; rank < NB; rank++) {           // ترتيب بالإدراج
+        key = spend[rank];
+        for (scan = rank - 1; scan >= 0 && spend[scan] > key; scan--)
+            spend[scan + 1] = spend[scan];
+        spend[scan + 1] = key;
+    }
+    for (rank = 0; rank < NB; rank++) {
+        weighted += (rank + 1) * spend[rank];     // الرتبة تبدأ من 1
+        total += spend[rank];
+    }
+    gini = 2 * weighted / (NB * total) - (NB + 1.0) / NB;
+    for (rank = NB - NB / 5; rank < NB; rank++)   // أكبر 20%
+        top += spend[rank];
+    printf("Gini = %.3f\n", gini);
+    printf("Top 20%% customers = %.1f%% of revenue\n", top * 100 / total);
+    return 0;
+}

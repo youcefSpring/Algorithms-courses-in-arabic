@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+    int first, last, orderId, count = 0;
+    scanf("%d %d", &first, &last);
+    for (orderId = first; orderId <= last; orderId++) {
+        if (orderId % 2 == 0) {         // رقم زوجي
+            printf("%d ", orderId);
+            count++;
+        }
+    }
+    printf("\nEven order numbers: %d\n", count);
+    return 0;
+}

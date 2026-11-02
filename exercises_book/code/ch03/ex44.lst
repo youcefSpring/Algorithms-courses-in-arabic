@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+int main(void) {
+    double lr, weight = 0, bias = 0, dw, db, mse, feature, target, err;
+    int epochs, epoch, index, nbPoints = 10;
+    scanf("%lf %d", &lr, &epochs);
+    for (epoch = 1; epoch <= epochs; epoch++) {
+        dw = db = mse = 0;
+        for (index = 0; index < nbPoints; index++) {
+            feature = index;
+            target = 3 * index + 7 + ((index * 7) % 5 - 2);  (*@\cmt{بيانات مع ضجيج}@*)
+            err = weight * feature + bias - target;                (*@\cmt{خطأ التنبؤ}@*)
+            dw += err * feature;                      (*@\cmt{مساهمة النقطة في التدرج}@*)
+            db += err;
+            mse += err * err;
+        }
+        weight -= lr * 2 * dw / nbPoints;     (*@\cmt{خطوة في عكس اتجاه التدرج}@*)
+        bias -= lr * 2 * db / nbPoints;
+        if (epoch % 500 == 0)
+            printf("Epoch %4d: weight = %.4f, bias = %.4f, MSE = %.4f\n", epoch, weight, bias, mse / nbPoints);
+    }
+    return 0;
+}

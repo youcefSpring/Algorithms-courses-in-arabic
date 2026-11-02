@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+#define NB 10
+#define NB_NEIGHBOURS 3
+
+int main(void) {
+    double visitsData[NB] = {1, 2, 3, 8, 9, 7, 5, 10, 4, 6};
+    double basketData[NB] = {1.0, 1.5, 2.0, 6.0, 5.5, 4.0, 3.5, 7.0, 2.5, 5.0};
+    int label[NB]         = {0, 0, 0, 1, 1, 1, 0, 1, 0, 1};
+    double dist[NB], visits, basket, dv, db;
+    int used[NB] = {0}, index, round, nearest, votes = 0;
+    scanf("%lf %lf", &visits, &basket);
+    for (index = 0; index < NB; index++) {
+        dv = visits - visitsData[index];
+        db = basket - basketData[index];
+        dist[index] = dv * dv + db * db;      // مربع المسافة يكفي للمقارنة
+    }
+    for (round = 0; round < NB_NEIGHBOURS; round++) {     // نختار الأقرب NB_NEIGHBOURS مرات
+        nearest = -1;
+        for (index = 0; index < NB; index++)
+            if (!used[index] && (nearest < 0 || dist[index] < dist[nearest]))
+                nearest = index;
+        used[nearest] = 1;
+        votes += label[nearest];
+        printf("Neighbour %d: customer %d (d2 = %.2f, class %d)\n",
+               round + 1, nearest, dist[nearest], label[nearest]);
+    }
+    if (votes * 2 > NB_NEIGHBOURS)                        // الأغلبية
+        printf("Prediction: premium subscriber\n");
+    else
+        printf("Prediction: standard\n");
+    return 0;
+}

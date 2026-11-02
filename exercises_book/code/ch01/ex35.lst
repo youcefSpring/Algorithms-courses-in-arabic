@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int main(void) {
+    double y1, p1, y2, p2, y3, p3, e1, e2, e3, mse;
+    scanf("%lf %lf", &y1, &p1);
+    scanf("%lf %lf", &y2, &p2);
+    scanf("%lf %lf", &y3, &p3);
+    e1 = y1 - p1;                 (*@\cmt{خطأ اليوم \cen{1}}@*)
+    e2 = y2 - p2;                 (*@\cmt{خطأ اليوم \cen{2}}@*)
+    e3 = y3 - p3;                 (*@\cmt{خطأ اليوم \cen{3}}@*)
+    (*@\cmt{التربيع يجعل كل الأخطاء موجبة ويعاقب الأخطاء الكبيرة}@*)
+    mse = (e1 * e1 + e2 * e2 + e3 * e3) / 3;
+    printf("Errors: %.1f %.1f %.1f\n", e1, e2, e3);
+    printf("MSE = %.2f\n", mse);
+    return 0;
+}

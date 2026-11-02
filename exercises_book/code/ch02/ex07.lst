@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+#define CODE 2026                 (*@\cmt{رمز القسيمة الصالح}@*)
+
+int main(void) {
+    double amount;
+    int code;
+    scanf("%lf %d", &amount, &code);
+    if (code == CODE) {           (*@\cmt{== للمقارنة، و = للإسناد}@*)
+        amount = amount * 0.85;   (*@\cmt{تخفيض \cen{15\%}}@*)
+        printf("Coupon accepted\n");
+    }
+    printf("To pay = %.2f DA\n", amount);
+    return 0;
+}

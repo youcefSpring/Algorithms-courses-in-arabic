@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+#define NB 9
+
+int main(void) {
+    int prices[NB] = {450, 900, 1200, 1800, 2100, 2600, 3200, 3800, 4500};
+    int budget, left = 0, right = NB - 1, sum, found = 0;
+    scanf("%d", &budget);
+    while (left < right && !found) {
+        sum = prices[left] + prices[right];
+        if (sum == budget)
+            found = 1;
+        else if (sum < budget)
+            left++;               // نحتاج مجموعًا أكبر
+        else
+            right--;              // نحتاج مجموعًا أصغر
+    }
+    if (found)
+        printf("%d + %d = %d DA\n", prices[left], prices[right], budget);
+    else
+        printf("No pair matches %d DA\n", budget);
+    return 0;
+}

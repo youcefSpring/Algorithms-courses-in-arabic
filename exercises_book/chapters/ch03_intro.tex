@@ -1,0 +1,51 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الحلقة التكرارية}: تعيد تنفيذ مجموعة تعليمات ما دام شرط ما محققًا.
+    \item \code{for}: عندما يكون \textbf{عدد التكرارات معروفًا} مسبقًا (تهيئة؛ شرط؛ تحديث).
+    \item \code{while}: الشرط يُختبر \textbf{قبل} كل دورة، فقد لا تُنفذ الحلقة أبدًا.
+    \item \code{do ... while}: الشرط يُختبر \textbf{بعد} الدورة، فتُنفذ \textbf{مرة واحدة على الأقل}.
+    \item \textbf{المجمِّع والعداد}: متغير يُهيأ قبل الحلقة (\code{sum = 0}، \code{count = 0}) ويُحدَّث داخلها.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+    \begin{scope}
+        \node[fproc, text width=1.4cm] (i) at (0,0) {\fc{i = 0}};
+        \node[fdec, text width=0.9cm] (c) at (0,-1.3) {\fc{i < n}};
+        \node[fproc, text width=1.6cm] (b) at (0,-2.7) {جسم الحلقة};
+        \node[fproc, text width=1.4cm] (u) at (0,-3.7) {\fc{i++}};
+        \draw[sahm] (i) -- (c); \draw[sahm] (c) -- (b); \draw[sahm] (b) -- (u);
+        \draw[sahm] (u.south) -- ++(0,-0.3) -- ++(-1.7,0) |- (0,-0.6);
+        \draw[sahm] (c.east) -- ++(0.8,0) |- (0.3,-4.6);
+        \node[flbl, anchor=south west] at (c.east) {لا};
+        \node[font=\small\bfseries] at (0,-5.1) {\code{for / while}};
+    \end{scope}
+    \begin{scope}[xshift=-6cm]
+        \node[fproc, text width=1.6cm] (b2) at (0,-0.6) {جسم الحلقة};
+        \node[fdec, text width=1cm] (c2) at (0,-2.2) {شرط؟};
+        \draw[sahm] (0,0.3) -- (b2); \draw[sahm] (b2) -- (c2);
+        \draw[sahm] (c2.west) -- ++(-0.7,0) |- (0,0.05);
+        \node[flbl, anchor=south east] at (c2.west) {نعم};
+        \draw[sahm] (c2.south) -- ++(0,-0.8);
+        \node[flbl, anchor=west] at ([yshift=-0.3cm]c2.south) {لا};
+        \node[font=\small\bfseries] at (0,-5.1) {\code{do ... while}};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|X|}
+\hline
+\ras{الحلقة} & \ras{متى نستعملها؟} & \ras{مثال من التمارين} \\ \hline
+\code{for} & عدد معروف من التكرارات & المرور على \en{n} سعرًا \\ \hline
+\code{while} & التوقف عند تحقق شرط & الادخار حتى بلوغ السعر \\ \hline
+\code{do while} & تنفيذ مرة على الأقل & إعادة طلب إدخال صالح \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad الحلقة اللانهائية}
+إذا لم يتغير متغير الشرط داخل الحلقة فلن تتوقف أبدًا. تأكد دائمًا أن كل دورة \textbf{تقرّب} الحلقة من نهايتها.
+\end{obox}
+
+\insertstats{03}

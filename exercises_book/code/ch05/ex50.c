@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+#define LEN_A 8
+#define LEN_B 7
+
+int main(void) {
+    int pagesA[LEN_A] = {1, 4, 2, 7, 3, 9, 5, 6};     // الصفحة 1 = الرئيسية
+    int pagesB[LEN_B] = {1, 2, 4, 7, 9, 6, 5};
+    int table[LEN_A + 1][LEN_B + 1], common[LEN_B];
+    int posA, posB, length;
+    for (posA = 0; posA <= LEN_A; posA++)
+        for (posB = 0; posB <= LEN_B; posB++) {
+            if (posA == 0 || posB == 0)
+                table[posA][posB] = 0;                // متتالية فارغة
+            else if (pagesA[posA - 1] == pagesB[posB - 1])
+                table[posA][posB] = table[posA - 1][posB - 1] + 1;
+            else if (table[posA - 1][posB] >= table[posA][posB - 1])
+                table[posA][posB] = table[posA - 1][posB];
+            else
+                table[posA][posB] = table[posA][posB - 1];
+        }
+    length = table[LEN_A][LEN_B];
+    posA = LEN_A; posB = LEN_B;
+    while (posA > 0 && posB > 0) {                    // إعادة البناء
+        if (pagesA[posA - 1] == pagesB[posB - 1]) {
+            common[table[posA][posB] - 1] = pagesA[posA - 1];
+            posA--; posB--;
+        } else if (table[posA - 1][posB] >= table[posA][posB - 1]) {
+            posA--;
+        } else {
+            posB--;
+        }
+    }
+    printf("LCS length = %d\nCommon path:", length);
+    for (posA = 0; posA < length; posA++)
+        printf(" %d", common[posA]);
+    printf("\n");
+    return 0;
+}

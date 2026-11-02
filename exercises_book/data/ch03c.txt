@@ -1,0 +1,509 @@
+@@
+title: الأرقام الأولية حتى N
+level: hard
+domain: ec
+@ statement
+اكتب برنامجًا يعرض كل الأعداد **الأولية** الأصغر من أو تساوي `limit` (لاستعمالها كأرقام خوادم)، ويعد عددها ومجموعها، باستعمال حلقتين متداخلتين واختبار القواسم الفردية فقط.
+@ stdin
+100
+@ steps
+- العدد 2 أولي؛ ثم نختبر الأعداد الفردية فقط `number = 3, 5, 7, ...`.
+- لكل `number`: حلقة داخلية على القواسم الفردية `divisor` ما دام `divisor * divisor <= number`.
+- نتوقف عند أول قاسم (`isp = 0`).
+@ flow
+in: limit
+do: count = 1 ; sum = 2
+for: number = 3 ; number <= limit ; number += 2
+  do: isp = 1 ; divisor = 3
+  while: isp && divisor * divisor <= number
+    if: number % divisor == 0
+      do: isp = 0
+    do: divisor += 2
+  if: isp
+    do: count++ ; sum += number
+out: count, sum
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int limit, number, divisor, isp, count = 0, sum = 0;
+    scanf("%d", &limit);
+    if (limit >= 2) {                     // 2 هو العدد الأولي الزوجي الوحيد
+        printf("2 ");
+        count = 1; sum = 2;
+    }
+    for (number = 3; number <= limit; number += 2) {     // الأعداد الفردية فقط
+        isp = 1;
+        for (divisor = 3; isp && divisor * divisor <= number; divisor += 2)
+            if (number % divisor == 0)
+                isp = 0;              // له قاسم: ليس أوليًا
+        if (isp) {
+            printf("%d ", number);
+            count++;
+            sum += number;
+        }
+    }
+    printf("\n%d primes, sum = %d\n", count, sum);
+    return 0;
+}
+
+@@
+title: التجميع بـ K-Means في بعد واحد
+level: hard
+domain: ds
+@ statement
+نريد تقسيم 20 زبونًا إلى **مجموعتين** حسب إنفاقهم بخوارزمية **K-Means**. الإنفاق مولَّد بصيغة: `spend(customer) = (customer * 37) % 50 + (customer % 2) * 60` لـ `customer` من 0 إلى 19 (لا نخزنها، نعيد حسابها). نبدأ بمركزين `c1` و`c2` مقروءين ونكرر: نسند كل نقطة لأقرب مركز ثم نحسب المراكز الجديدة كمتوسطات، حتى الاستقرار.
+@ stdin
+10 20
+@ steps
+- في كل تكرار: نمر على النقاط؛ إذا كانت `|spend - c1| <= |spend - c2|` تنتمي للمجموعة 1.
+- نجمع مجموع وعدد كل مجموعة، ثم المركز الجديد = المتوسط.
+- نتوقف عندما لا يتغير المركزان (أو بعد 20 تكرارًا).
+@ flow
+in: c1, c2
+do: changed = 1 ; it = 0
+while: changed && it < 20
+  do: s1 = s2 = n1 = n2 = 0
+  for: customer = 0 ; customer < 20 ; customer++
+    do: spend = (customer*37) % 50 + (customer%2)*60
+    if: |spend - c1| <= |spend - c2|
+      do: s1 += spend ; n1++
+    else:
+      do: s2 += spend ; n2++
+  do: m1 = s1/n1 ; m2 = s2/n2
+  do: changed = (m1 != c1 || m2 != c2)
+  do: c1 = m1 ; c2 = m2 ; it++
+out: c1, c2, it
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double c1, c2, m1, m2, s1, s2, spend, d1, d2;
+    int customer, n1, n2, it = 0, changed = 1;
+    scanf("%lf %lf", &c1, &c2);           // المركزان الابتدائيان
+    while (changed && it < 20) {
+        s1 = s2 = 0; n1 = n2 = 0;
+        for (customer = 0; customer < 20; customer++) {
+            spend = (customer * 37) % 50 + (customer % 2) * 60;   // إنفاق الزبون customer
+            d1 = spend - c1; if (d1 < 0) d1 = -d1;  // المسافة إلى c1
+            d2 = spend - c2; if (d2 < 0) d2 = -d2;  // المسافة إلى c2
+            if (d1 <= d2) { s1 += spend; n1++; }    // أقرب إلى c1
+            else          { s2 += spend; n2++; }
+        }
+        m1 = (n1 > 0) ? s1 / n1 : c1;   // المركز الجديد = المتوسط
+        m2 = (n2 > 0) ? s2 / n2 : c2;
+        changed = (m1 != c1 || m2 != c2);
+        c1 = m1; c2 = m2;
+        it++;
+        printf("Iter %d: c1 = %.2f (%d), c2 = %.2f (%d)\n", it, c1, n1, c2, n2);
+    }
+    printf("Converged after %d iterations\n", it);
+    return 0;
+}
+
+@@
+title: محاكاة مونت كارلو بمولد عشوائي يدوي
+level: hard
+domain: ds
+@ statement
+دون الدالة `rand`، نبني **مولد أعداد شبه عشوائية خطيًا** (LCG): `seed = (seed * 1103515245 + 12345) % 2147483648`، و`uniform = seed / 2147483648.0` عدد بين 0 و1. كل زبون يشتري 1 إلى 5 قطع (`1 + (int)(uniform * 5)`) وكل قطعة سعرها بين 500 و3000. اكتب برنامجًا يحاكي `nbBaskets` سلة ويقدر **احتمال** أن تتجاوز السلة 6000 دج ومتوسط السلة.
+@ stdin
+2026 20000
+@ steps
+- نستعمل `unsigned long long` للمولد لتجنب تجاوز السعة.
+- لكل سلة: نولد عدد القطع، ثم لكل قطعة نولد سعرًا `500 + uniform * 2500`.
+- نعد السلات التي تتجاوز 6000 ونجمع المبالغ.
+- الاحتمال ≈ `count / nbBaskets`.
+@ flow
+in: seed, nbBaskets
+do: big = 0 ; total = 0
+for: basketNo = 0 ; basketNo < nbBaskets ; basketNo++
+  do: nbItems = 1 + (int)(uniform*5)
+  do: basket = 0
+  for: item = 0 ; item < nbItems ; item++
+    do: basket += 500 + uniform * 2500
+  do: total += basket
+  if: basket > 6000
+    do: big++
+out: big / nbBaskets, total / nbBaskets
+@ code
+#include <stdio.h>
+
+int main(void) {
+    unsigned long long seed;
+    int nbBaskets, basketNo, item, nbItems, big = 0;
+    double uniform, basket, total = 0;
+    scanf("%llu %d", &seed, &nbBaskets);
+    for (basketNo = 0; basketNo < nbBaskets; basketNo++) {
+        seed = (seed * 1103515245ULL + 12345ULL) % 2147483648ULL;
+        uniform = seed / 2147483648.0;          // عدد شبه عشوائي في [0, 1)
+        nbItems = 1 + (int)(uniform * 5);             // عدد القطع: 1 إلى 5
+        basket = 0;
+        for (item = 0; item < nbItems; item++) {
+            seed = (seed * 1103515245ULL + 12345ULL) % 2147483648ULL;
+            uniform = seed / 2147483648.0;
+            basket += 500 + uniform * 2500;     // سعر بين 500 و 3000
+        }
+        total += basket;
+        if (basket > 6000)
+            big++;
+    }
+    printf("P(basket > 6000) ~ %.4f\n", (double)big / nbBaskets);
+    printf("Mean basket ~ %.2f DA\n", total / nbBaskets);
+    return 0;
+}
+
+@@
+title: الانحدار بالنزول التدريجي
+level: hard
+domain: ds
+@ statement
+بدل الصيغة المغلقة، ندرب نموذج `target = weight feature + bias` بخوارزمية **النزول التدريجي** (Gradient Descent). البيانات: `feature(index) = index` و`target(index) = 3i + 7 + ((index * 7) % 5 - 2)` لـ `index` من 0 إلى 9. في كل حقبة نحسب المشتقتين `dw = (2/nbPoints) Σ (ŷ - target) feature` و`db = (2/nbPoints) Σ (ŷ - target)` ثم `weight -= lr * dw` و`bias -= lr * db`. اكتب برنامجًا يدرب النموذج ويعرض الخطأ.
+@ stdin
+0.01 3000
+@ steps
+- نهيئ `weight = 0` و`bias = 0`.
+- لكل حقبة: نمر على النقاط ونجمع التدرجين والخطأ التربيعي.
+- نحدّث المعاملين بمعدل التعلم `lr`.
+- نعرض التقدم كل 500 حقبة.
+@ flow
+in: lr, epochs
+do: weight = 0 ; bias = 0
+for: epoch = 1 ; epoch <= epochs ; epoch++
+  do: dw = 0 ; db = 0 ; mse = 0
+  for: index = 0 ; index < 10 ; index++
+    do: err = weight*feature(index) + bias - target(index)
+    do: dw += err*feature ; db += err ; mse += err*err
+  do: weight -= lr * 2*dw/nbPoints ; bias -= lr * 2*db/nbPoints
+out: weight, bias, mse / nbPoints
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double lr, weight = 0, bias = 0, dw, db, mse, feature, target, err;
+    int epochs, epoch, index, nbPoints = 10;
+    scanf("%lf %d", &lr, &epochs);
+    for (epoch = 1; epoch <= epochs; epoch++) {
+        dw = db = mse = 0;
+        for (index = 0; index < nbPoints; index++) {
+            feature = index;
+            target = 3 * index + 7 + ((index * 7) % 5 - 2);  // بيانات مع ضجيج
+            err = weight * feature + bias - target;                // خطأ التنبؤ
+            dw += err * feature;                      // مساهمة النقطة في التدرج
+            db += err;
+            mse += err * err;
+        }
+        weight -= lr * 2 * dw / nbPoints;     // خطوة في عكس اتجاه التدرج
+        bias -= lr * 2 * db / nbPoints;
+        if (epoch % 500 == 0)
+            printf("Epoch %4d: weight = %.4f, bias = %.4f, MSE = %.4f\n", epoch, weight, bias, mse / nbPoints);
+    }
+    return 0;
+}
+
+@@
+title: التحقق من رقم البطاقة بخوارزمية Luhn
+level: hard
+domain: ec
+@ statement
+قبل إرسال الدفع للبنك نتحقق من رقم البطاقة بخوارزمية **Luhn**: من اليمين، نضاعف رقمًا من كل اثنين (الثاني، الرابع، ...)، وإذا تجاوز الناتج 9 نطرح 9، ثم نجمع كل الأرقام؛ الرقم صالح إذا كان المجموع يقبل القسمة على 10. اكتب البرنامج لرقم من 16 خانة.
+@ stdin
+4539578763621486
+@ steps
+- نقرأ الرقم في `unsigned long long`.
+- حلقة: `digit = number % 10` ثم `number /= 10`، مع موضع `pos` يبدأ من 1 من اليمين.
+- إذا كان `pos` زوجيًا: `digit = 2d` ثم `digit -= 9` إذا تجاوز 9.
+- نجمع، ونتحقق من `sum % 10 == 0`.
+@ flow
+in: number
+do: sum = 0 ; pos = 1
+while: number > 0
+  do: digit = number % 10 ; number = number / 10
+  if: pos % 2 == 0
+    do: digit = 2 * digit
+    if: digit > 9
+      do: digit = digit - 9
+  do: sum += digit ; pos++
+if: sum % 10 == 0
+  out: `"valid"`
+else:
+  out: `"invalid"`
+@ code
+#include <stdio.h>
+
+int main(void) {
+    unsigned long long number;
+    int digit, sum = 0, pos = 1;
+    scanf("%llu", &number);
+    while (number > 0) {
+        digit = number % 10;               // نقرأ الأرقام من اليمين
+        number = number / 10;
+        if (pos % 2 == 0) {       // رقم من كل اثنين
+            digit = 2 * digit;
+            if (digit > 9)
+                digit = digit - 9;        // = مجموع رقمي الناتج
+        }
+        sum += digit;
+        pos++;
+    }
+    printf("Luhn sum = %d\n", sum);
+    if (sum % 10 == 0)
+        printf("Card number is valid\n");
+    else
+        printf("Card number is INVALID\n");
+    return 0;
+}
+
+@@
+title: مثلث باسكال لعدد الحزم
+level: hard
+domain: ec
+@ statement
+يعطي **مثلث باسكال** في السطر `row` والعمود `col` عدد الحزم `C(row,col)`. اكتب برنامجًا يعرض الأسطر من 0 إلى `maxRow`، ويحسب كل عنصر من سابقه في نفس السطر: `C(row,col) = C(row,col-1) * (row - col + 1) / col`، ثم يعرض مجموع كل سطر (يساوي `2^row`).
+@ stdin
+10
+@ steps
+- حلقة خارجية على السطر `row`.
+- في كل سطر: `coef = 1`، وحلقة داخلية تحدّث `coef` وتطبعه.
+- نجمع عناصر السطر للتحقق.
+@ flow
+in: maxRow
+for: row = 0 ; row <= maxRow ; row++
+  do: coef = 1 ; rowSum = 1
+  for: col = 1 ; col <= row ; col++
+    do: coef = coef * (row - col + 1) / col
+    do: rowSum = rowSum + coef
+  out: السطر و rowSum
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int maxRow, row, col;
+    long coef, rowSum;
+    scanf("%d", &maxRow);
+    for (row = 0; row <= maxRow; row++) {
+        coef = 1; rowSum = 1;
+        printf("n=%2d: 1", row);
+        for (col = 1; col <= row; col++) {
+            coef = coef * (row - col + 1) / col;  // العنصر من سابقه، القسمة دقيقة
+            rowSum += coef;
+            printf(" %ld", coef);
+        }
+        printf("  (sum %ld)\n", rowSum);   // = 2 أس row
+    }
+    return 0;
+}
+
+@@
+title: التحويل إلى النظام الست عشري
+level: hard
+domain: ec
+@ statement
+تُعرض أرقام الشحنات بالنظام **الست عشري** (0-9 ثم A-F). اكتب برنامجًا يحول عددًا موجبًا إلى الست عشري دون جداول ودون `printf("%X")`: نحدد أولًا أكبر قوة للعدد 16 لا تتجاوز العدد، ثم نستخرج الأرقام من اليسار إلى اليمين.
+@ stdin
+3054198966
+@ steps
+- `power = 1`، وما دام `power * 16 <= number`: `power *= 16`.
+- ما دام `power > 0`: الرقم `digit = number / power`، ثم `number %= power` و`power /= 16`.
+- نطبع `'0' + digit` إذا كان `digit < 10`، وإلا `'A' + digit - 10`.
+@ flow
+in: number
+do: power = 1
+while: power * 16 <= number
+  do: power = power * 16
+while: power > 0
+  do: digit = number / power ; number = number % power
+  if: digit < 10
+    out: '0' + digit
+  else:
+    out: 'A' + digit - 10
+  do: power = power / 16
+@ code
+#include <stdio.h>
+
+int main(void) {
+    unsigned long long number, power = 1;
+    int digit;
+    scanf("%llu", &number);
+    printf("%llu = 0x", number);
+    while (power * 16 <= number)           // أكبر قوة لـ 16 لا تتجاوز number
+        power *= 16;
+    while (power > 0) {
+        digit = number / power;                // الرقم الحالي من اليسار
+        number = number % power;
+        if (digit < 10)
+            putchar('0' + digit);     // 0..9
+        else
+            putchar('A' + digit - 10);// A..F
+        power /= 16;
+    }
+    printf("\n");
+    return 0;
+}
+
+@@
+title: الجذر الصحيح بالبحث الثنائي
+level: hard
+domain: ds
+@ statement
+لتنظيم صور المنتجات في **شبكة مربعة**، نحتاج أكبر عدد صحيح `r` بحيث `r² <= number`. اكتب برنامجًا يجده بالبحث الثنائي (دون أعداد حقيقية)، ثم يحدد إن كان `number` مربعًا كاملًا، وأبعاد الشبكة اللازمة `r × c`.
+@ stdin
+1000000007
+@ steps
+- `lo = 0`، `hi = number` (أو مليارين كحد أقصى).
+- `mid = lo + (hi - lo) / 2`؛ إذا كان `mid * mid <= number` فـ `ans = mid` و`lo = mid + 1`، وإلا `hi = mid - 1`.
+- عدد الأعمدة: `c = (number + r - 1) / r`، وإذا لم يكن مربعًا كاملًا نستعمل `r + 1` أسطر.
+@ flow
+in: number
+do: lo = 0 ; hi = number ; ans = 0
+while: lo <= hi
+  do: mid = lo + (hi - lo) / 2
+  if: mid * mid <= number
+    do: ans = mid ; lo = mid + 1
+  else:
+    do: hi = mid - 1
+out: ans, ans * ans == number
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long long number, lo, hi, mid, ans = 0;
+    scanf("%lld", &number);
+    lo = 0;
+    hi = (number < 3000000000LL) ? number : 3000000000LL;  // حد أعلى آمن للمربع
+    while (lo <= hi) {
+        mid = lo + (hi - lo) / 2;     // يتجنب تجاوز السعة عند الجمع
+        if (mid * mid <= number) {
+            ans = mid;                // مرشح صالح، نبحث عن أكبر
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    printf("isqrt(%lld) = %lld\n", number, ans);
+    if (ans * ans == number)
+        printf("Perfect square: grid %lld x %lld\n", ans, ans);
+    else
+        printf("Not a square: grid %lld x %lld\n", ans + 1, (number + ans) / (ans + 1));
+    return 0;
+}
+
+@@
+title: محاكاة سياسة التموين (s, S)
+level: hard
+domain: ec
+@ statement
+سياسة **(s, S)**: في نهاية كل يوم، إذا نزل المخزون تحت `minLevel` نطلب ما يرفعه إلى `maxLevel`، ويصل الطلب بعد يومين. الطلب اليومي عشوائي بين 0 و39 بمولد LCG (`seed = (seed * 75) % 65537`, `demand = seed % 40`). التكاليف: 2 دج تخزين لكل وحدة في اليوم، 50 دج لكل وحدة ناقصة، و500 دج لكل طلبية. اكتب برنامجًا يحاكي 60 يومًا ويعرض التكاليف وعدد أيام النفاد.
+@ stdin
+60 150 7
+@ steps
+- متغيرات: `stock`، كمية الطلب المعلق `pending`، وأيام الانتظار `wait`.
+- كل يوم: نستقبل الطلب إذا حان وقته، نولد الطلب، نبيع ما نستطيع ونحسب النقص.
+- تكلفة التخزين على المخزون المتبقي.
+- إذا كان `stock < minLevel` ولا يوجد طلب معلق: نطلب `maxLevel - stock`.
+@ flow
+in: minLevel, maxLevel, seed
+do: stock = maxLevel ; pending = 0 ; cost = 0
+for: day = 1 ; day <= 60 ; day++
+  if: pending > 0 && --wait == 0
+    do: stock += pending ; pending = 0
+  do: demand = عشوائي 0..39
+  if: demand > stock
+    do: cost += 50*(demand - stock) ; stock = 0 ; out++
+  else:
+    do: stock -= demand
+  do: cost += 2 * stock
+  if: stock < minLevel && pending == 0
+    do: pending = maxLevel - stock ; wait = 2 ; cost += 500
+out: cost, out
+@ code
+#include <stdio.h>
+
+int main(void) {
+    long minLevel, maxLevel, seed, stock, pending = 0, demand;
+    int day, wait = 0, outdays = 0, orders = 0;
+    double hold = 0, shortc = 0, orderc = 0;
+    scanf("%ld %ld %ld", &minLevel, &maxLevel, &seed);
+    stock = maxLevel;
+    for (day = 1; day <= 60; day++) {
+        if (pending > 0) {            // طلبية في الطريق
+            wait--;
+            if (wait == 0) {          // وصلت
+                stock += pending;
+                pending = 0;
+            }
+        }
+        seed = (seed * 75) % 65537;   // مولد عشوائي يدوي
+        demand = seed % 40;                // طلب اليوم 0..39
+        if (demand > stock) {              // نفاد: الطلب أكبر من المخزون
+            shortc += 50.0 * (demand - stock);
+            stock = 0;
+            outdays++;
+        } else {
+            stock -= demand;
+        }
+        hold += 2.0 * stock;          // تكلفة التخزين اليومية
+        if (stock < minLevel && pending == 0) {
+            pending = maxLevel - stock;      // نطلب ما يكمل إلى maxLevel
+            wait = 2;
+            orders++;
+            orderc += 500;
+        }
+    }
+    printf("Orders placed: %d\n", orders);
+    printf("Stock-out days: %d\n", outdays);
+    printf("Holding = %.0f, shortage = %.0f, ordering = %.0f\n", hold, shortc, orderc);
+    printf("Total cost = %.0f DA\n", hold + shortc + orderc);
+    return 0;
+}
+
+@@
+title: أفضل يوم للشراء والبيع
+level: hard
+domain: ds
+@ statement
+يتابع تاجر سعر منتج يوميًا لمدة `nbDays` يومًا ويريد **الشراء مرة والبيع مرة** لاحقًا لتحقيق أكبر ربح. اكتب برنامجًا يحل المسألة في **مرور واحد**: نحتفظ بأدنى سعر رأيناه حتى الآن ويوم حدوثه.
+@ stdin
+10
+320 280 300 250 310 390 360 240 330 370
+@ steps
+- `minP` = أدنى سعر حتى اليوم، و`minDay` يومه.
+- كل يوم: الربح الممكن إذا بعنا اليوم هو `price - minP`.
+- إذا كان أكبر من `best` نحفظه مع يومي الشراء والبيع.
+- ثم نحدّث `minP` إذا كان سعر اليوم أصغر.
+@ flow
+in: nbDays, price
+do: minP = price ; minDay = 1 ; best = 0
+for: day = 2 ; day <= nbDays ; day++
+  in: price
+  if: price - minP > best
+    do: best = price - minP ; buy = minDay ; sell = day
+  if: price < minP
+    do: minP = price ; minDay = day
+out: best, buy, sell
+@ code
+#include <stdio.h>
+
+int main(void) {
+    int nbDays, day, minDay = 1, buy = 0, sell = 0;
+    double price, minP, best = 0;
+    scanf("%d %lf", &nbDays, &price);
+    minP = price;
+    for (day = 2; day <= nbDays; day++) {
+        scanf("%lf", &price);
+        if (price - minP > best) {    // البيع اليوم أفضل من كل ما سبق
+            best = price - minP;
+            buy = minDay;
+            sell = day;
+        }
+        if (price < minP) {           // سعر شراء أفضل للأيام القادمة
+            minP = price;
+            minDay = day;
+        }
+    }
+    if (best > 0)
+        printf("Buy day %d, sell day %d: profit %.0f DA\n", buy, sell, best);
+    else
+        printf("No profitable trade\n");
+    return 0;
+}

@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    long contLength, contWidth, contHeight, boxLength, boxWidth, boxHeight, nx, ny, nz, nbBoxes, used;
+    double pct;
+    scanf("%ld %ld %ld", &contLength, &contWidth, &contHeight);     (*@\cmt{أبعاد الحاوية}@*)
+    scanf("%ld %ld %ld", &boxLength, &boxWidth, &boxHeight);     (*@\cmt{أبعاد العلبة}@*)
+    nx = contLength / boxLength;                   (*@\cmt{علب على الطول}@*)
+    ny = contWidth / boxWidth;                   (*@\cmt{علب على العرض}@*)
+    nz = contHeight / boxHeight;                   (*@\cmt{طبقات على الارتفاع}@*)
+    nbBoxes = nx * ny * nz;             (*@\cmt{العدد الكلي}@*)
+    used = nbBoxes * boxLength * boxWidth * boxHeight;         (*@\cmt{الحجم المشغول بالعلب}@*)
+    pct = (double)used / (contLength * contWidth * contHeight) * 100;
+    printf("Grid: %ld x %ld x %ld\n", nx, ny, nz);
+    printf("Boxes = %ld\n", nbBoxes);
+    printf("Volume used = %.2f %%\n", pct);
+    return 0;
+}

@@ -1,0 +1,16 @@
+Try  1:  50000 -> higher
+Try  2:  75000 -> lower
+Try  3:  62500 -> higher
+Try  4:  68750 -> higher
+Try  5:  71875 -> higher
+Try  6:  73437 -> lower
+Try  7:  72656 -> higher
+Try  8:  73046 -> higher
+Try  9:  73241 -> higher
+Try 10:  73339 -> higher
+Try 11:  73388 -> higher
+Try 12:  73412 -> higher
+Try 13:  73424 -> lower
+Try 14:  73418 -> higher
+Try 15:  73421 -> found!
+Found in 15 tries
