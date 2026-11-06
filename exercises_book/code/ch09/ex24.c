@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+typedef struct { int client; double amount; } Order;
+typedef struct { int client; double total; int orders; int picked; } Spending;
+
+int main(void) {
+    Order orders[12] = {{7, 4500}, {3, 12000}, {7, 8200}, {9, 1500}, {3, 3300}, {5, 22000},
+                        {9, 6400}, {7, 2100}, {1, 9800}, {5, 1200}, {3, 7600}, {1, 400}};
+    Spending list[12];
+    int nb = 0, idx, pos, rank, best;
+    for (idx = 0; idx < 12; idx++) {
+        for (pos = 0; pos < nb && list[pos].client != orders[idx].client; pos++) {}
+        if (pos == nb) {                              // زبون جديد
+            list[nb].client = orders[idx].client;
+            list[nb].total = 0;
+            list[nb].orders = 0;
+            list[nb].picked = 0;
+            nb++;
+        }
+        list[pos].total += orders[idx].amount;
+        list[pos].orders++;
+    }
+    printf("%d distinct customers\n", nb);
+    for (rank = 0; rank < 3; rank++) {
+        best = -1;
+        for (pos = 0; pos < nb; pos++)
+            if (!list[pos].picked && (best < 0 || list[pos].total > list[best].total)) best = pos;
+        list[best].picked = 1;
+        printf("#%d customer %d: %.0f DA in %d orders\n", rank + 1, list[best].client,
+               list[best].total, list[best].orders);
+    }
+    return 0;
+}

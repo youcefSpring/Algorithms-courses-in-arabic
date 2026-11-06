@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int rank; struct Node *next; } Node;
+
+Node *reverse(Node *head) {
+    Node *prev = NULL, *next;
+    while (head != NULL) { next = head->next; head->next = prev; prev = head; head = next; }
+    return prev;
+}
+
+void reorder(Node *head) {
+    Node *slow = head, *fast = head, *first, *second, *nextFirst, *nextSecond;
+    if (head == NULL) return;
+    while (fast->next != NULL && fast->next->next != NULL) { slow = slow->next; fast = fast->next->next; }
+    second = reverse(slow->next);               // النصف الثاني مقلوبًا
+    slow->next = NULL;
+    for (first = head; second != NULL; first = nextFirst, second = nextSecond) {
+        nextFirst = first->next;
+        nextSecond = second->next;
+        first->next = second;                   // تناوب
+        second->next = nextFirst;
+    }
+}
+
+void runCase(int size) {
+    Node *head = NULL, *node, *walk, *next;
+    int idx;
+    for (idx = size - 1; idx >= 0; idx--) { node = malloc(sizeof(Node)); node->rank = idx; node->next = head; head = node; }
+    reorder(head);
+    printf("%d items:", size);
+    for (walk = head; walk != NULL; walk = walk->next) printf(" L%d", walk->rank);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+}
+
+int main(void) {
+    runCase(8);
+    runCase(7);
+    runCase(2);
+    return 0;
+}

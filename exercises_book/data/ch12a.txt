@@ -1,0 +1,1232 @@
+@@
+title: أول قائمة متصلة للمنتجات
+level: easy
+domain: ec
+@ statement
+عرّف عقدة `Node` (رمز المنتج، السعر، مؤشر على العقدة التالية). أنشئ ثلاث عقد بـ `malloc`، اربطها يدويًا، ثم امرّ على القائمة من الرأس حتى `NULL` لعرضها، وحرر العقد.
+@ steps
+- كل عقدة تحتوي على بياناتها و `next`؛ العقدة الأخيرة `next = NULL`.
+- المرور: `for (walk = head; walk != NULL; walk = walk->next)`.
+@ flow
+do: first, second, third = malloc ; ربطها
+for: walk = head ; walk != NULL ; walk = walk->next
+  out: walk->code, walk->price
+do: تحرير العقد الثلاث
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int code; double price; struct Node *next; } Node;
+
+Node *newNode(int code, double price) {
+    Node *node = malloc(sizeof(Node));
+    node->code = code;
+    node->price = price;
+    node->next = NULL;
+    return node;
+}
+
+int main(void) {
+    Node *head = newNode(101, 1500);
+    Node *walk;
+    head->next = newNode(205, 32000);            // الربط يدويًا
+    head->next->next = newNode(330, 450);
+    for (walk = head; walk != NULL; walk = walk->next)
+        printf("[%d %.0f] -> ", walk->code, walk->price);
+    printf("NULL\n");
+    free(head->next->next);
+    free(head->next);
+    free(head);
+    return 0;
+}
+
+@@
+title: الإدراج في رأس القائمة
+level: easy
+domain: ec
+@ statement
+اكتب دالة `pushFront(head, number)` تضيف طلبية جديدة **في رأس** القائمة وتعيد الرأس الجديد. أضف 5 طلبيات ولاحظ أن ترتيب العرض معكوس (آخر طلبية أولًا).
+@ steps
+- العقدة الجديدة تشير إلى الرأس القديم: `node->next = head`.
+- الرأس الجديد هو العقدة الجديدة.
+- الإدراج في الرأس يتم في وقت ثابت.
+@ flow
+do: head = NULL
+for: idx = 0 ; idx < 5 ; idx++
+  call: head = pushFront(head, 7781 + idx)
+out: القائمة
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; struct Node *next; } Node;
+
+Node *pushFront(Node *head, int number) {
+    Node *node = malloc(sizeof(Node));
+    node->number = number;
+    node->next = head;                  // تشير إلى الرأس القديم
+    return node;                        // الرأس الجديد
+}
+
+int main(void) {
+    Node *head = NULL, *walk, *next;
+    int idx;
+    for (idx = 0; idx < 5; idx++) head = pushFront(head, 7781 + idx);
+    for (walk = head; walk != NULL; walk = walk->next) printf("#%d -> ", walk->number);
+    printf("NULL\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: عدد العقد ومجموع الأسعار
+level: easy
+domain: ds
+@ statement
+اكتب دالتين: `length(head)` تعد عقد القائمة و `sumPrices(head)` تجمع أسعارها، ثم احسب متوسط سعر المنتجات في سلة مبنية كقائمة متصلة.
+@ steps
+- مرور واحد لكل دالة حتى `NULL`.
+- المتوسط = المجموع / العدد (مع التحقق من أن القائمة غير فارغة).
+@ flow
+call: count = length(head)
+call: total = sumPrices(head)
+if: count > 0
+  out: count, total, total / count
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { double price; struct Node *next; } Node;
+
+Node *pushFront(Node *head, double price) {
+    Node *node = malloc(sizeof(Node));
+    node->price = price;
+    node->next = head;
+    return node;
+}
+
+int length(const Node *head) {
+    int count = 0;
+    for (; head != NULL; head = head->next) count++;
+    return count;
+}
+
+double sumPrices(const Node *head) {
+    double total = 0;
+    for (; head != NULL; head = head->next) total += head->price;
+    return total;
+}
+
+int main(void) {
+    double prices[6] = {1500, 3200, 899, 450, 12500, 2200};
+    Node *head = NULL, *next;
+    int idx, count;
+    for (idx = 0; idx < 6; idx++) head = pushFront(head, prices[idx]);
+    count = length(head);
+    if (count > 0)
+        printf("%d items, total %.2f, average %.2f DA\n", count, sumPrices(head), sumPrices(head) / count);
+    while (head != NULL) { next = head->next; free(head); head = next; }
+    return 0;
+}
+
+@@
+title: البحث عن منتج في القائمة
+level: easy
+domain: ec
+@ statement
+اكتب دالة `find(head, code)` تعيد **مؤشرًا على العقدة** التي تحمل الرمز المطلوب أو `NULL`. استعمل المؤشر المعاد لتعديل مخزون المنتج مباشرة داخل القائمة.
+@ steps
+- نمر حتى نجد الرمز أو نصل إلى `NULL`.
+- العقدة المعادة جزء من القائمة: تعديلها يعدل القائمة.
+@ flow
+call: node = find(head, 205)
+if: node != NULL
+  do: node->stock = node->stock - 2
+  out: node->stock
+call: missing = find(head, 999)
+out: missing == NULL
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int code, stock; struct Node *next; } Node;
+
+Node *pushFront(Node *head, int code, int stock) {
+    Node *node = malloc(sizeof(Node));
+    node->code = code; node->stock = stock; node->next = head;
+    return node;
+}
+
+Node *find(Node *head, int code) {
+    for (; head != NULL; head = head->next)
+        if (head->code == code) return head;     // العقدة نفسها
+    return NULL;
+}
+
+int main(void) {
+    Node *head = NULL, *node, *next;
+    head = pushFront(head, 101, 12);
+    head = pushFront(head, 205, 5);
+    head = pushFront(head, 330, 40);
+    node = find(head, 205);
+    if (node != NULL) {
+        node->stock -= 2;                        // تعديل داخل القائمة
+        printf("Product 205: stock now %d\n", node->stock);
+    }
+    printf("Product 999: %s\n", find(head, 999) == NULL ? "not found" : "found");
+    printf("Check via list: 205 -> %d\n", find(head, 205)->stock);
+    while (head != NULL) { next = head->next; free(head); head = next; }
+    return 0;
+}
+
+@@
+title: طابور الطلبيات بمؤشر الذيل
+level: easy
+domain: ec
+@ statement
+للحفاظ على ترتيب الوصول، أضف الطلبيات **في نهاية** القائمة. لتفادي المرور على كل القائمة في كل إضافة، احتفظ بمؤشر `tail` على العقدة الأخيرة. اكتب `pushBack(&head, &tail, number)`.
+@ steps
+- إذا كانت القائمة فارغة: `head = tail = node`.
+- وإلا: `tail->next = node` ثم `tail = node`.
+- الدالة تعدل `head` و `tail`، لذلك نمرر عنوانيهما.
+@ flow
+do: head = tail = NULL
+for: idx = 0 ; idx < 5 ; idx++
+  call: pushBack(&head, &tail, 7781 + idx)
+out: القائمة بترتيب الوصول
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; struct Node *next; } Node;
+
+void pushBack(Node **head, Node **tail, int number) {
+    Node *node = malloc(sizeof(Node));
+    node->number = number;
+    node->next = NULL;
+    if (*head == NULL) *head = *tail = node;      // أول عقدة
+    else { (*tail)->next = node; *tail = node; }  // بعد الأخيرة مباشرة
+}
+
+int main(void) {
+    Node *head = NULL, *tail = NULL, *walk, *next;
+    int idx;
+    for (idx = 0; idx < 5; idx++) pushBack(&head, &tail, 7781 + idx);
+    for (walk = head; walk != NULL; walk = walk->next) printf("#%d -> ", walk->number);
+    printf("NULL\nhead #%d, tail #%d\n", head->number, tail->number);
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: تحرير القائمة كاملة
+level: easy
+domain: ec
+@ statement
+اكتب دالة `freeList(head)` تحرر كل عقد القائمة **بالترتيب الصحيح** وتعيد عدد العقد المحررة. لماذا لا يمكن كتابة `free(walk); walk = walk->next;`؟
+@ steps
+- بعد `free(walk)` لا يجوز قراءة `walk->next`: نحفظه قبل التحرير.
+- `next = walk->next; free(walk); walk = next;`.
+@ flow
+do: walk = head ; count = 0
+while: walk != NULL
+  do: next = walk->next
+  do: free(walk) ; count++
+  do: walk = next
+out: count
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int code; struct Node *next; } Node;
+
+int freeList(Node *head) {
+    Node *walk = head, *next;
+    int count = 0;
+    while (walk != NULL) {
+        next = walk->next;              // نحفظ التالي قبل التحرير
+        free(walk);
+        count++;
+        walk = next;
+    }
+    return count;
+}
+
+int main(void) {
+    Node *head = NULL, *node;
+    int idx;
+    for (idx = 0; idx < 7; idx++) {
+        node = malloc(sizeof(Node));
+        node->code = 100 + idx;
+        node->next = head;
+        head = node;
+    }
+    printf("Freed %d nodes\n", freeList(head));
+    head = NULL;                        // القائمة أصبحت فارغة
+    printf("List empty: %s\n", head == NULL ? "yes" : "no");
+    return 0;
+}
+
+@@
+title: أغلى منتج في القائمة
+level: easy
+domain: ec
+@ statement
+اكتب دالة `mostExpensive(head)` تعيد مؤشرًا على العقدة ذات أكبر سعر (أو `NULL` لقائمة فارغة)، واعرض اسمها وسعرها.
+@ steps
+- `best = head` ثم نقارن كل عقدة تالية.
+- نعيد العقدة لا السعر فقط، لنصل إلى كل حقولها.
+@ flow
+do: best = head
+for: walk = head->next ; walk != NULL ; walk = walk->next
+  if: walk->price > best->price
+    do: best = walk
+out: best->name, best->price
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { char name[12]; double price; struct Node *next; } Node;
+
+Node *pushFront(Node *head, const char *name, double price) {
+    Node *node = malloc(sizeof(Node));
+    int pos;
+    for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+    node->price = price;
+    node->next = head;
+    return node;
+}
+
+Node *mostExpensive(Node *head) {
+    Node *best = head, *walk;
+    if (head == NULL) return NULL;
+    for (walk = head->next; walk != NULL; walk = walk->next)
+        if (walk->price > best->price) best = walk;
+    return best;
+}
+
+int main(void) {
+    Node *head = NULL, *best, *next;
+    head = pushFront(head, "Mouse", 1500);
+    head = pushFront(head, "Laptop", 89000);
+    head = pushFront(head, "Monitor", 32000);
+    head = pushFront(head, "Cable", 450);
+    best = mostExpensive(head);
+    printf("Most expensive: %s (%.0f DA)\n", best->name, best->price);
+    while (head != NULL) { next = head->next; free(head); head = next; }
+    return 0;
+}
+
+@@
+title: سحب الطلبية من رأس القائمة
+level: easy
+domain: ec
+@ statement
+اكتب دالة `popFront(&head)` تحذف العقدة الأولى وتحررها وتعيد رقم الطلبية التي كانت فيها (أو -1 إذا كانت القائمة فارغة). عالج الطلبيات واحدة واحدة حتى تفرغ القائمة.
+@ steps
+- نحفظ العقدة الأولى، نجعل الرأس يشير إلى الثانية، ثم نحرر الأولى.
+- القائمة الفارغة حالة خاصة.
+@ flow
+while: head != NULL
+  call: number = popFront(&head)
+  out: number
+call: popFront(&head)
+out: -1
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; struct Node *next; } Node;
+
+int popFront(Node **head) {
+    Node *first = *head;
+    int number;
+    if (first == NULL) return -1;             // قائمة فارغة
+    number = first->number;
+    *head = first->next;                      // الرأس ينتقل إلى الثانية
+    free(first);
+    return number;
+}
+
+int main(void) {
+    Node *head = NULL, *node;
+    int idx;
+    for (idx = 3; idx >= 0; idx--) {
+        node = malloc(sizeof(Node));
+        node->number = 7781 + idx;
+        node->next = head;
+        head = node;
+    }
+    while (head != NULL) printf("Processing order #%d\n", popFront(&head));
+    printf("Pop on empty list: %d\n", popFront(&head));
+    return 0;
+}
+
+@@
+title: عرض القائمة معكوسة عوديًا
+level: easy
+domain: ds
+@ statement
+القائمة الأحادية لا تسمح بالرجوع إلى الخلف. اكتب دالة **عودية** `printReverse(node)` تعرض القائمة من آخرها إلى أولها دون تعديلها: نستدعي على العقدة التالية أولًا ثم نطبع.
+@ steps
+- الحالة الأساسية: `node == NULL`.
+- الطباعة بعد الاستدعاء تعكس الترتيب.
+@ flow
+call: printForward(head)
+call: printReverse(head)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int day; double sales; struct Node *next; } Node;
+
+void printReverse(const Node *node) {
+    if (node == NULL) return;
+    printReverse(node->next);                 // الباقي أولًا
+    printf("d%d:%.0f ", node->day, node->sales);
+}
+
+int main(void) {
+    double sales[5] = {1200, 980, 1430, 1100, 1650};
+    Node *head = NULL, *node, *walk, *next;
+    int idx;
+    for (idx = 4; idx >= 0; idx--) {
+        node = malloc(sizeof(Node));
+        node->day = idx + 1;
+        node->sales = sales[idx];
+        node->next = head;
+        head = node;
+    }
+    printf("Forward: ");
+    for (walk = head; walk != NULL; walk = walk->next) printf("d%d:%.0f ", walk->day, walk->sales);
+    printf("\nReverse: ");
+    printReverse(head);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: بناء قائمة من جدول
+level: easy
+domain: ec
+@ statement
+اكتب دالة `fromArray(values, size)` تبني قائمة متصلة **بنفس ترتيب** الجدول (الإدراج من آخر عنصر إلى أوله في الرأس)، ودالة `printList` تعرضها بالأسهم.
+@ steps
+- الإدراج في الرأس يعكس الترتيب، لذلك نمر على الجدول من النهاية.
+- لا نحتاج إلى مؤشر ذيل بهذه الطريقة.
+@ flow
+do: head = NULL
+for: idx = size - 1 ; idx >= 0 ; idx--
+  do: node = malloc ; node->next = head ; head = node
+call: printList(head)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int code; struct Node *next; } Node;
+
+Node *fromArray(const int *values, int size) {
+    Node *head = NULL, *node;
+    int idx;
+    for (idx = size - 1; idx >= 0; idx--) {     // من النهاية للحفاظ على الترتيب
+        node = malloc(sizeof(Node));
+        node->code = values[idx];
+        node->next = head;
+        head = node;
+    }
+    return head;
+}
+
+void printList(const Node *head) {
+    for (; head != NULL; head = head->next) printf("%d -> ", head->code);
+    printf("NULL\n");
+}
+
+int main(void) {
+    int codes[6] = {101, 205, 330, 412, 500, 618};
+    Node *head = fromArray(codes, 6), *next;
+    printList(head);
+    while (head != NULL) { next = head->next; free(head); head = next; }
+    return 0;
+}
+
+@@
+title: الإدراج المرتب حسب السعر
+level: medium
+domain: ec
+@ statement
+اكتب دالة `insertSorted(head, name, price)` تدرج منتجًا في مكانه الصحيح لتبقى القائمة **مرتبة تصاعديًا** حسب السعر، وتعيد الرأس (قد يتغير). أدرج منتجات بترتيب عشوائي.
+@ steps
+- حالة خاصة: قائمة فارغة أو سعر أصغر من الرأس → إدراج في الرأس.
+- وإلا نتقدم بـ `walk` ما دام `walk->next->price < price`، ثم ندرج بعد `walk`.
+@ flow
+if: head == NULL || price < head->price
+  do: node->next = head ; head = node
+else:
+  do: walk = head
+  while: walk->next != NULL && walk->next->price < price
+    do: walk = walk->next
+  do: node->next = walk->next ; walk->next = node
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { char name[12]; double price; struct Node *next; } Node;
+
+Node *insertSorted(Node *head, const char *name, double price) {
+    Node *node = malloc(sizeof(Node)), *walk;
+    int pos;
+    for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+    node->price = price;
+    if (head == NULL || price < head->price) {        // في الرأس
+        node->next = head;
+        return node;
+    }
+    walk = head;
+    while (walk->next != NULL && walk->next->price < price) walk = walk->next;
+    node->next = walk->next;                          // الربط بالتالي أولًا
+    walk->next = node;
+    return head;
+}
+
+int main(void) {
+    const char *names[6] = {"Monitor", "Mouse", "Laptop", "Cable", "Keyboard", "Webcam"};
+    double prices[6] = {32000, 1500, 89000, 450, 3200, 4100};
+    Node *head = NULL, *walk, *next;
+    int idx;
+    for (idx = 0; idx < 6; idx++) head = insertSorted(head, names[idx], prices[idx]);
+    for (walk = head; walk != NULL; walk = walk->next) printf("%s(%.0f) ", walk->name, walk->price);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: حذف منتج برمزه
+level: medium
+domain: ec
+@ statement
+اكتب دالة `removeCode(head, code)` تحذف العقدة ذات الرمز المطلوب أينما كانت (رأس، وسط، نهاية) وتحررها، وتعيد الرأس الجديد. اختبر الحالات الثلاث وحالة الرمز غير الموجود.
+@ steps
+- نحتاج إلى العقدة **السابقة** `prev` لنربطها بعقدة ما بعد المحذوفة.
+- إذا كانت المحذوفة هي الرأس: الرأس الجديد `head->next`.
+@ flow
+do: prev = NULL ; walk = head
+while: walk != NULL && walk->code != code
+  do: prev = walk ; walk = walk->next
+if: walk != NULL
+  if: prev == NULL
+    do: head = walk->next
+  else:
+    do: prev->next = walk->next
+  do: free(walk)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int code; struct Node *next; } Node;
+
+Node *removeCode(Node *head, int code) {
+    Node *prev = NULL, *walk = head;
+    while (walk != NULL && walk->code != code) { prev = walk; walk = walk->next; }
+    if (walk == NULL) return head;               // غير موجود
+    if (prev == NULL) head = walk->next;         // حذف الرأس
+    else prev->next = walk->next;                // تخطي العقدة
+    free(walk);
+    return head;
+}
+
+void printList(const char *label, const Node *head) {
+    printf("%-12s", label);
+    for (; head != NULL; head = head->next) printf("%d ", head->code);
+    printf("\n");
+}
+
+int main(void) {
+    int codes[5] = {101, 205, 330, 412, 500}, idx;
+    Node *head = NULL, *node;
+    for (idx = 4; idx >= 0; idx--) { node = malloc(sizeof(Node)); node->code = codes[idx]; node->next = head; head = node; }
+    printList("start:", head);
+    head = removeCode(head, 330); printList("remove 330:", head);
+    head = removeCode(head, 101); printList("remove 101:", head);
+    head = removeCode(head, 500); printList("remove 500:", head);
+    head = removeCode(head, 999); printList("remove 999:", head);
+    while (head != NULL) head = removeCode(head, head->code);
+    return 0;
+}
+
+@@
+title: قلب القائمة في مكانها
+level: medium
+domain: ds
+@ statement
+اكتب دالة `reverse(head)` تقلب اتجاه كل الروابط **في مكانها** (دون حجز عقد جديدة) بثلاثة مؤشرات `prev` و `walk` و `next`، وتعيد الرأس الجديد. استعملها لعرض سجل الأسعار من الأحدث إلى الأقدم.
+@ steps
+- في كل خطوة: نحفظ `next = walk->next`، نقلب `walk->next = prev`، ثم نتقدم `prev = walk` و `walk = next`.
+- في النهاية `prev` هو الرأس الجديد.
+@ flow
+do: prev = NULL ; walk = head
+while: walk != NULL
+  do: next = walk->next
+  do: walk->next = prev
+  do: prev = walk ; walk = next
+out: prev
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int week; double price; struct Node *next; } Node;
+
+Node *reverse(Node *head) {
+    Node *prev = NULL, *walk = head, *next;
+    while (walk != NULL) {
+        next = walk->next;            // نحفظ الباقي
+        walk->next = prev;            // نقلب الرابط
+        prev = walk;
+        walk = next;
+    }
+    return prev;
+}
+
+void printList(const Node *head) {
+    for (; head != NULL; head = head->next) printf("w%d:%.0f ", head->week, head->price);
+    printf("\n");
+}
+
+int main(void) {
+    double prices[5] = {32000, 33500, 31000, 34500, 30000};
+    Node *head = NULL, *node, *next;
+    int idx;
+    for (idx = 4; idx >= 0; idx--) {
+        node = malloc(sizeof(Node)); node->week = idx + 1; node->price = prices[idx];
+        node->next = head; head = node;
+    }
+    printList(head);
+    head = reverse(head);
+    printList(head);
+    while (head != NULL) { next = head->next; free(head); head = next; }
+    return 0;
+}
+
+@@
+title: دمج قائمتين مرتبتين بالروابط
+level: medium
+domain: ec
+@ statement
+قائمتا أسعار مرتبتان من مورّدين. اكتب `mergeLists(first, second)` تدمجهما في قائمة مرتبة واحدة **بإعادة ربط العقد** الموجودة (دون `malloc`)، مستعملة **عقدة حارسة** وهمية لتبسيط الكود.
+@ steps
+- `dummy` عقدة محلية؛ `tail` يشير إلى آخر عقدة في النتيجة.
+- نربط `tail->next` بالأصغر بين رأسي القائمتين ونتقدم فيها.
+- في النهاية نربط باقي القائمة غير المنتهية؛ النتيجة `dummy.next`.
+@ flow
+do: tail = &dummy
+while: first != NULL && second != NULL
+  if: first->price <= second->price
+    do: tail->next = first ; first = first->next
+  else:
+    do: tail->next = second ; second = second->next
+  do: tail = tail->next
+do: tail->next = الباقي
+out: dummy.next
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int price; struct Node *next; } Node;
+
+Node *mergeLists(Node *first, Node *second) {
+    Node dummy, *tail = &dummy;                 // عقدة حارسة
+    while (first != NULL && second != NULL) {
+        if (first->price <= second->price) { tail->next = first; first = first->next; }
+        else { tail->next = second; second = second->next; }
+        tail = tail->next;
+    }
+    tail->next = first != NULL ? first : second;   // الباقي كما هو
+    return dummy.next;
+}
+
+Node *fromArray(const int *values, int size) {
+    Node *head = NULL, *node;
+    while (size-- > 0) { node = malloc(sizeof(Node)); node->price = values[size]; node->next = head; head = node; }
+    return head;
+}
+
+int main(void) {
+    int supplierA[4] = {450, 1500, 3200, 7800}, supplierB[5] = {300, 899, 1200, 4100, 9900};
+    Node *head = mergeLists(fromArray(supplierA, 4), fromArray(supplierB, 5)), *walk, *next;
+    for (walk = head; walk != NULL; walk = walk->next) printf("%d ", walk->price);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: حذف المكررات من قائمة مرتبة
+level: medium
+domain: ds
+@ statement
+قائمة معرّفات الزبائن الزائرين مرتبة وتحتوي على مكررات. اكتب `removeDuplicates(head)` تحذف العقد المكررة وتحررها، وتعيد عدد العقد المحذوفة.
+@ steps
+- بما أن القائمة مرتبة: المكررات متجاورة.
+- إذا كانت `walk->next` بنفس القيمة: نتخطاها ونحررها، وإلا نتقدم.
+@ flow
+do: walk = head
+while: walk != NULL && walk->next != NULL
+  if: walk->id == walk->next->id
+    do: extra = walk->next ; walk->next = extra->next ; free(extra) ; removed++
+  else:
+    do: walk = walk->next
+out: removed
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int id; struct Node *next; } Node;
+
+int removeDuplicates(Node *head) {
+    Node *walk = head, *extra;
+    int removed = 0;
+    while (walk != NULL && walk->next != NULL) {
+        if (walk->id == walk->next->id) {
+            extra = walk->next;
+            walk->next = extra->next;          // نتخطى المكررة
+            free(extra);
+            removed++;
+        } else {
+            walk = walk->next;                 // نتقدم فقط عند الاختلاف
+        }
+    }
+    return removed;
+}
+
+int main(void) {
+    int ids[12] = {501, 501, 502, 507, 507, 507, 510, 511, 511, 520, 520, 520};
+    Node *head = NULL, *node, *walk, *next;
+    int idx, removed;
+    for (idx = 11; idx >= 0; idx--) { node = malloc(sizeof(Node)); node->id = ids[idx]; node->next = head; head = node; }
+    removed = removeDuplicates(head);
+    printf("Removed %d duplicates:", removed);
+    for (walk = head; walk != NULL; walk = walk->next) printf(" %d", walk->id);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: العقدة الوسطى بمؤشرين
+level: medium
+domain: ds
+@ statement
+لإيجاد **وسيط** قائمة طلبيات مرتبة دون معرفة طولها، استعمل مؤشرين: `slow` يتقدم بخطوة و `fast` بخطوتين. عندما يصل `fast` إلى النهاية يكون `slow` في المنتصف. جرّب على قائمة فردية وأخرى زوجية الطول.
+@ steps
+- `while (fast != NULL && fast->next != NULL)`: `slow = slow->next; fast = fast->next->next;`.
+- مرور واحد بدل مرورين (العد ثم التقدم إلى المنتصف).
+@ flow
+do: slow = head ; fast = head
+while: fast != NULL && fast->next != NULL
+  do: slow = slow->next
+  do: fast = fast->next->next
+out: slow->amount
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int amount; struct Node *next; } Node;
+
+Node *middle(Node *head) {
+    Node *slow = head, *fast = head;
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;              // خطوة
+        fast = fast->next->next;        // خطوتان
+    }
+    return slow;
+}
+
+Node *fromArray(const int *values, int size) {
+    Node *head = NULL, *node;
+    while (size-- > 0) { node = malloc(sizeof(Node)); node->amount = values[size]; node->next = head; head = node; }
+    return head;
+}
+
+void freeList(Node *head) { Node *next; while (head != NULL) { next = head->next; free(head); head = next; } }
+
+int main(void) {
+    int oddList[7] = {450, 899, 1200, 1500, 3200, 4100, 7800};
+    int evenList[6] = {300, 650, 990, 2200, 5400, 9900};
+    Node *first = fromArray(oddList, 7), *second = fromArray(evenList, 6);
+    printf("7 orders -> middle %d\n", middle(first)->amount);
+    printf("6 orders -> middle (second of the two) %d\n", middle(second)->amount);
+    freeList(first);
+    freeList(second);
+    return 0;
+}
+
+@@
+title: كشف الحلقة في سلسلة التحويلات
+level: medium
+domain: ds
+@ statement
+روابط إعادة التوجيه بين صفحات المنتجات تشكل قائمة؛ خطأ في الإعداد قد يصنع **حلقة** لا نهائية. اكتب `hasCycle(head)` بخوارزمية **فلويد** (السلحفاة والأرنب): إذا التقى المؤشران فهناك حلقة. احسب أيضًا طول الحلقة.
+@ steps
+- `slow` بخطوة و `fast` بخطوتين؛ إذا وصل `fast` إلى `NULL` فلا حلقة.
+- بعد اللقاء: نعد الخطوات حتى يعود أحدهما إلى نقطة اللقاء = طول الحلقة.
+@ flow
+do: slow = fast = head
+while: fast != NULL && fast->next != NULL
+  do: slow = slow->next ; fast = fast->next->next
+  if: slow == fast
+    do: حساب طول الحلقة
+    out: طول الحلقة
+out: 0
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int page; struct Node *next; } Node;
+
+int cycleLength(Node *head) {
+    Node *slow = head, *fast = head, *walk;
+    int len;
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {                           // التقيا داخل الحلقة
+            for (len = 1, walk = slow->next; walk != slow; walk = walk->next) len++;
+            return len;
+        }
+    }
+    return 0;                                         // وصلنا إلى NULL
+}
+
+int main(void) {
+    Node nodes[7];
+    int idx;
+    for (idx = 0; idx < 7; idx++) { nodes[idx].page = 100 + idx; nodes[idx].next = idx < 6 ? &nodes[idx + 1] : NULL; }
+    printf("Redirect chain OK: cycle length %d\n", cycleLength(&nodes[0]));
+    nodes[6].next = &nodes[3];                        // خطأ: 106 -> 103
+    printf("After misconfiguration: cycle length %d\n", cycleLength(&nodes[0]));
+    return 0;
+}
+
+@@
+title: العنصر رقم k من النهاية
+level: medium
+domain: ec
+@ statement
+اعرض الطلبية رقم `k` **من النهاية** في سجل اليوم بمرور واحد: نقدّم مؤشرًا أولًا `k` خطوات، ثم نحرك المؤشرين معًا حتى يصل الأول إلى النهاية.
+@ stdin
+3
+@ steps
+- إذا كانت القائمة أقصر من `k`: نعيد `NULL`.
+- المسافة الثابتة `k` بين المؤشرين تجعل الثاني على العنصر المطلوب.
+@ flow
+in: k
+do: lead = head
+for: step = 0 ; step < k ; step++
+  do: lead = lead->next
+do: follow = head
+while: lead != NULL
+  do: lead = lead->next ; follow = follow->next
+out: follow
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; struct Node *next; } Node;
+
+Node *kthFromEnd(Node *head, int rank) {
+    Node *lead = head, *follow = head;
+    int step;
+    for (step = 0; step < rank; step++) {
+        if (lead == NULL) return NULL;          // القائمة أقصر من k
+        lead = lead->next;
+    }
+    while (lead != NULL) { lead = lead->next; follow = follow->next; }   // نفس المسافة
+    return follow;
+}
+
+int main(void) {
+    Node *head = NULL, *node, *found, *next;
+    int idx, rank;
+    for (idx = 9; idx >= 0; idx--) { node = malloc(sizeof(Node)); node->number = 7781 + idx; node->next = head; head = node; }
+    scanf("%d", &rank);
+    found = kthFromEnd(head, rank);
+    if (found != NULL) printf("Order %d from the end: #%d\n", rank, found->number);
+    printf("Order 20 from the end: %s\n", kthFromEnd(head, 20) == NULL ? "none" : "?");
+    while (head != NULL) { next = head->next; free(head); head = next; }
+    return 0;
+}
+
+@@
+title: فصل الطلبيات حسب نوع التوصيل
+level: medium
+domain: ec
+@ statement
+لدينا قائمة طلبيات واحدة، لكل طلبية نوع توصيل (`'E'` سريع، `'S'` عادي). اكتب `splitByType(head, &express, &standard)` توزع العقد الموجودة على قائمتين **مع الحفاظ على الترتيب الأصلي**، دون حجز عقد جديدة.
+@ steps
+- عقدتان حارستان ومؤشرا ذيل لكل قائمة.
+- نفصل كل عقدة ونربطها في ذيل قائمتها.
+- في النهاية نضع `NULL` في ذيل كل قائمة.
+@ flow
+do: tailE = &dummyE ; tailS = &dummyS
+while: head != NULL
+  if: head->type == 'E'
+    do: tailE->next = head ; tailE = head
+  else:
+    do: tailS->next = head ; tailS = head
+  do: head = head->next
+do: tailE->next = NULL ; tailS->next = NULL
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; char type; struct Node *next; } Node;
+
+void splitByType(Node *head, Node **express, Node **standard) {
+    Node dummyE, dummyS, *tailE = &dummyE, *tailS = &dummyS;
+    while (head != NULL) {
+        if (head->type == 'E') { tailE->next = head; tailE = head; }
+        else { tailS->next = head; tailS = head; }
+        head = head->next;
+    }
+    tailE->next = NULL;                         // نغلق القائمتين
+    tailS->next = NULL;
+    *express = dummyE.next;
+    *standard = dummyS.next;
+}
+
+void printFree(const char *label, Node *head) {
+    Node *next;
+    printf("%s", label);
+    for (; head != NULL; head = next) { printf(" #%d", head->number); next = head->next; free(head); }
+    printf("\n");
+}
+
+int main(void) {
+    char types[8] = {'S', 'E', 'S', 'S', 'E', 'E', 'S', 'E'};
+    Node *head = NULL, *node, *express, *standard;
+    int idx;
+    for (idx = 7; idx >= 0; idx--) {
+        node = malloc(sizeof(Node)); node->number = 7781 + idx; node->type = types[idx];
+        node->next = head; head = node;
+    }
+    splitByType(head, &express, &standard);
+    printFree("Express: ", express);
+    printFree("Standard:", standard);
+    return 0;
+}
+
+@@
+title: سجل التصفح بقائمة مزدوجة
+level: medium
+domain: ec
+@ statement
+زرّا **رجوع** و**تقدم** في متصفح المتجر: عرّف عقدة مزدوجة (`prev` و `next`)، و`current` يشير إلى الصفحة الحالية. زيارة صفحة جديدة تحذف كل ما بعد `current` ثم تضيف الصفحة. نفّذ سلسلة أوامر.
+@ stdin
+v:home v:phones v:galaxy b b v:laptops b f f
+@ steps
+- `v:page`: نحرر العقد بعد `current`، ننشئ عقدة ونربطها في الاتجاهين.
+- `b`: `current = current->prev` إن وُجد؛ `f`: `current = current->next` إن وُجد.
+@ flow
+while: scanf(command) == 1
+  if: command زيارة
+    do: تحرير ما بعد current ; إضافة عقدة جديدة ; current = node
+  else:
+    if: command == b && current->prev != NULL
+      do: current = current->prev
+    else:
+      if: command == f && current->next != NULL
+        do: current = current->next
+  out: current->page
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Page { char name[16]; struct Page *prev, *next; } Page;
+
+int main(void) {
+    char command[24];
+    Page *current = NULL, *node, *walk, *next, *first = NULL;
+    int pos;
+    while (scanf("%23s", command) == 1) {
+        if (command[0] == 'v') {
+            if (current != NULL)                                // نحذف تاريخ التقدم
+                for (walk = current->next; walk != NULL; walk = next) { next = walk->next; free(walk); }
+            node = malloc(sizeof(Page));
+            for (pos = 0; (node->name[pos] = command[pos + 2]) != '\0'; pos++) {}
+            node->prev = current;
+            node->next = NULL;
+            if (current != NULL) current->next = node; else first = node;
+            current = node;
+        } else if (command[0] == 'b' && current->prev != NULL) {
+            current = current->prev;
+        } else if (command[0] == 'f' && current->next != NULL) {
+            current = current->next;
+        }
+        printf("%-10s -> now on %s\n", command, current->name);
+    }
+    for (walk = first; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: توزيع دائري للطلبيات على السائقين
+level: medium
+domain: ec
+@ statement
+السائقون مرتبون في **قائمة دائرية** (آخر عقدة تشير إلى الأولى). تُسند كل طلبية جديدة إلى السائق التالي في الدور (Round Robin). اكتب `addDriver` (الإدراج بعد الذيل) و `nextDriver`، ثم وزّع 10 طلبيات وعدّ نصيب كل سائق.
+@ steps
+- نحتفظ بمؤشر `tail`؛ الرأس هو `tail->next`.
+- الإدراج: `node->next = tail->next; tail->next = node; tail = node`.
+- في القائمة الدائرية لا يوجد `NULL`: نتوقف عند العودة إلى البداية.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  call: addDriver(&tail, names[idx])
+do: turn = tail->next
+for: order = 0 ; order < 10 ; order++
+  out: order, turn->name
+  do: turn->load++ ; turn = turn->next
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Driver { char name[10]; int load; struct Driver *next; } Driver;
+
+void addDriver(Driver **tail, const char *name) {
+    Driver *node = malloc(sizeof(Driver));
+    int pos;
+    for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+    node->load = 0;
+    if (*tail == NULL) node->next = node;               // سائق وحيد: يشير إلى نفسه
+    else { node->next = (*tail)->next; (*tail)->next = node; }
+    *tail = node;
+}
+
+int main(void) {
+    const char *names[4] = {"Yacine", "Bilal", "Rania", "Hakim"};
+    Driver *tail = NULL, *turn, *walk, *next;
+    int idx, order;
+    for (idx = 0; idx < 4; idx++) addDriver(&tail, names[idx]);
+    turn = tail->next;                                  // الرأس
+    for (order = 0; order < 10; order++) {
+        printf("order #%d -> %s\n", 7781 + order, turn->name);
+        turn->load++;
+        turn = turn->next;                              // الدور التالي (دائري)
+    }
+    walk = tail->next;
+    do { printf("%s: %d  ", walk->name, walk->load); walk = walk->next; } while (walk != tail->next);
+    printf("\n");
+    walk = tail->next;
+    tail->next = NULL;                                  // نكسر الحلقة قبل التحرير
+    for (; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: مكدس التراجع بقائمة متصلة
+level: medium
+domain: ec
+@ statement
+محرر وصف المنتج يحفظ كل نسخة في **مكدس** مبني بقائمة متصلة (الإدراج والسحب من الرأس). اكتب `push(&top, price)` و `pop(&top)` و `peek(top)`، ونفّذ تعديلات على السعر ثم عمليات تراجع.
+@ stdin
+e3200 e2990 e2750 u e2800 u u u u
+@ steps
+- `push` = الإدراج في الرأس، `pop` = الحذف من الرأس: كلاهما في وقت ثابت.
+- القيمة الحالية هي قمة المكدس؛ التراجع يسحب القمة.
+- لا نسحب آخر نسخة (السعر الأصلي).
+@ flow
+call: push(&top, 3500)
+while: scanf(command) == 1
+  if: command == e
+    call: push(&top, value)
+  else:
+    if: top->next != NULL
+      call: pop(&top)
+  out: peek(top)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { double price; struct Node *next; } Node;
+
+void push(Node **top, double price) {
+    Node *node = malloc(sizeof(Node));
+    node->price = price;
+    node->next = *top;
+    *top = node;
+}
+
+double pop(Node **top) {
+    Node *old = *top;
+    double price = old->price;
+    *top = old->next;
+    free(old);
+    return price;
+}
+
+double peek(const Node *top) { return top->price; }
+
+int main(void) {
+    Node *top = NULL;
+    char command[16];
+    double value;
+    int pos;
+    push(&top, 3500);                                   // السعر الأصلي
+    while (scanf("%15s", command) == 1) {
+        if (command[0] == 'e') {
+            for (value = 0, pos = 1; command[pos] != '\0'; pos++) value = value * 10 + (command[pos] - '0');
+            push(&top, value);
+        } else if (top->next != NULL) {
+            pop(&top);                                  // تراجع
+        } else {
+            printf("%-6s nothing to undo\n", command);
+            continue;
+        }
+        printf("%-6s price = %.0f\n", command, peek(top));
+    }
+    while (top != NULL) pop(&top);
+    return 0;
+}
+
+@@
+title: طابور معالجة الطلبيات بقائمة
+level: medium
+domain: ec
+@ statement
+اكتب طابورًا بقائمة متصلة مع مؤشري `front` و `rear` داخل هيكل `Queue`: `enqueue` في الذيل و `dequeue` من الرأس، كلاهما في وقت ثابت. حاكِ وصول ومعالجة الطلبيات واعرض حجم الطابور بعد كل حدث.
+@ stdin
+++-+++--+---
+@ steps
+- `enqueue`: إذا كان الطابور فارغًا فالعقدة هي `front` و `rear` معًا.
+- `dequeue`: إذا أصبح فارغًا نعيد `rear = NULL` أيضًا.
+@ flow
+in: events
+for: idx = 0 ; events[idx] != '\0' ; idx++
+  if: events[idx] == '+'
+    call: enqueue(&queue, next++)
+  else:
+    call: number = dequeue(&queue)
+  out: queue.size
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; struct Node *next; } Node;
+typedef struct { Node *front, *rear; int size; } Queue;
+
+void enqueue(Queue *queue, int number) {
+    Node *node = malloc(sizeof(Node));
+    node->number = number;
+    node->next = NULL;
+    if (queue->rear == NULL) queue->front = node;      // كان فارغًا
+    else queue->rear->next = node;
+    queue->rear = node;
+    queue->size++;
+}
+
+int dequeue(Queue *queue) {
+    Node *old = queue->front;
+    int number;
+    if (old == NULL) return -1;
+    number = old->number;
+    queue->front = old->next;
+    if (queue->front == NULL) queue->rear = NULL;      // أصبح فارغًا
+    free(old);
+    queue->size--;
+    return number;
+}
+
+int main(void) {
+    Queue queue = {NULL, NULL, 0};
+    char events[40];
+    int idx, nextNumber = 7781;
+    scanf("%39s", events);
+    for (idx = 0; events[idx] != '\0'; idx++) {
+        if (events[idx] == '+') {
+            enqueue(&queue, nextNumber);
+            printf("+ arrive #%d", nextNumber++);
+        } else {
+            printf("- serve  #%d", dequeue(&queue));
+        }
+        printf("   (waiting %d)\n", queue.size);
+    }
+    while (queue.size > 0) dequeue(&queue);
+    return 0;
+}
+
+@@
+title: جمع كثيرات حدود التكلفة بالقوائم
+level: medium
+domain: ds
+@ statement
+تُمثَّل دالة التكلفة كثير حدود بقائمة حدود (المعامل، الأس) **مرتبة تنازليًا حسب الأس**، دون تخزين الحدود المعدومة. اكتب `addPoly(first, second)` تعيد قائمة جديدة لمجموع كثيري حدود (تكلفة الإنتاج + تكلفة التخزين).
+@ steps
+- مثل الدمج: نقارن أسّي الرأسين.
+- نفس الأس: نجمع المعاملين (ونتجاهل الحد إذا أصبح 0).
+- الأس الأكبر يُنسخ أولًا.
+@ flow
+while: first != NULL || second != NULL
+  if: second == NULL || (first != NULL && first->power > second->power)
+    do: إضافة حد first ; first = first->next
+  else:
+    if: first == NULL || second->power > first->power
+      do: إضافة حد second ; second = second->next
+    else:
+      do: إضافة (first->coef + second->coef) إن لم يكن 0
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Term { double coef; int power; struct Term *next; } Term;
+
+void append(Term **tail, double coef, int power) {
+    Term *node = malloc(sizeof(Term));
+    node->coef = coef; node->power = power; node->next = NULL;
+    (*tail)->next = node;
+    *tail = node;
+}
+
+Term *addPoly(const Term *first, const Term *second) {
+    Term dummy, *tail = &dummy;
+    dummy.next = NULL;
+    while (first != NULL || second != NULL) {
+        if (second == NULL || (first != NULL && first->power > second->power)) {
+            append(&tail, first->coef, first->power); first = first->next;
+        } else if (first == NULL || second->power > first->power) {
+            append(&tail, second->coef, second->power); second = second->next;
+        } else {                                              // نفس الأس
+            if (first->coef + second->coef != 0) append(&tail, first->coef + second->coef, first->power);
+            first = first->next; second = second->next;
+        }
+    }
+    return dummy.next;
+}
+
+Term *build(const double *coefs, const int *powers, int size) {
+    Term dummy, *tail = &dummy;
+    int idx;
+    dummy.next = NULL;
+    for (idx = 0; idx < size; idx++) append(&tail, coefs[idx], powers[idx]);
+    return dummy.next;
+}
+
+void printPoly(const char *label, const Term *poly) {
+    printf("%s", label);
+    for (; poly != NULL; poly = poly->next) printf(" %+gq^%d", poly->coef, poly->power);
+    printf("\n");
+}
+
+void freePoly(Term *poly) { Term *next; for (; poly != NULL; poly = next) { next = poly->next; free(poly); } }
+
+int main(void) {
+    double coefA[4] = {0.002, -0.5, 60, 1500}, coefB[3] = {0.5, -20, 300};
+    int powA[4] = {3, 2, 1, 0}, powB[3] = {2, 1, 0};
+    Term *production = build(coefA, powA, 4), *storage = build(coefB, powB, 3);
+    Term *total = addPoly(production, storage);
+    printPoly("production:", production);
+    printPoly("storage:   ", storage);
+    printPoly("total:     ", total);
+    freePoly(production); freePoly(storage); freePoly(total);
+    return 0;
+}

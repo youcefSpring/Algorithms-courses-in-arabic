@@ -1,0 +1,92 @@
+#include <stdio.h>
+
+typedef struct { int code; char name[12]; double price; int deleted; } Record;
+
+const char *DB = "products.db";
+
+void insertProduct(int code, const char *name, double price) {
+    FILE *file = fopen(DB, "ab");
+    Record record = {0, "", 0, 0};
+    int pos;
+    record.code = code;
+    for (pos = 0; pos < 11 && name[pos] != '\0'; pos++) record.name[pos] = name[pos];
+    record.price = price;
+    fwrite(&record, sizeof(Record), 1, file);
+    fclose(file);
+}
+
+long findRecord(FILE *file, int code, Record *record) {
+    long position;
+    rewind(file);
+    while (1) {
+        position = ftell(file);
+        if (fread(record, sizeof(Record), 1, file) != 1) return -1;
+        if (record->code == code && !record->deleted) return position;
+    }
+}
+
+void deleteProduct(int code) {
+    FILE *file = fopen(DB, "r+b");
+    Record record;
+    long position = findRecord(file, code, &record);
+    if (position >= 0) {
+        record.deleted = 1;                                   (*@\cmt{حذف منطقي}@*)
+        fseek(file, position, SEEK_SET);
+        fwrite(&record, sizeof(Record), 1, file);
+    }
+    fclose(file);
+}
+
+void updatePrice(int code, double price) {
+    FILE *file = fopen(DB, "r+b");
+    Record record;
+    long position = findRecord(file, code, &record);
+    if (position >= 0) {
+        record.price = price;
+        fseek(file, position, SEEK_SET);                      (*@\cmt{تعديل في المكان}@*)
+        fwrite(&record, sizeof(Record), 1, file);
+    }
+    fclose(file);
+}
+
+void listProducts(const char *label) {
+    FILE *file = fopen(DB, "rb");
+    Record record;
+    int total = 0, alive = 0;
+    printf("%s:", label);
+    while (fread(&record, sizeof(Record), 1, file) == 1) {
+        total++;
+        if (!record.deleted) { alive++; printf(" %d %s %.0f;", record.code, record.name, record.price); }
+    }
+    fseek(file, 0, SEEK_END);
+    printf("\n  %d live / %d records, file %ld bytes\n", alive, total, ftell(file));
+    fclose(file);
+}
+
+void compact(void) {
+    FILE *input = fopen(DB, "rb"), *output = fopen("products.tmp", "wb");
+    Record record;
+    while (fread(&record, sizeof(Record), 1, input) == 1)
+        if (!record.deleted) fwrite(&record, sizeof(Record), 1, output);
+    fclose(input);
+    fclose(output);
+    remove(DB);                                               (*@\cmt{نستبدل القديم بالجديد}@*)
+    rename("products.tmp", DB);
+}
+
+int main(void) {
+    FILE *file = fopen(DB, "wb");
+    fclose(file);
+    insertProduct(101, "Mouse", 1500);
+    insertProduct(102, "Keyboard", 3200);
+    insertProduct(103, "Monitor", 32000);
+    insertProduct(104, "Cable", 450);
+    insertProduct(105, "Webcam", 4100);
+    deleteProduct(102);
+    deleteProduct(104);
+    updatePrice(103, 29900);
+    listProducts("before compact");
+    compact();
+    listProducts("after compact");
+    return 0;
+}

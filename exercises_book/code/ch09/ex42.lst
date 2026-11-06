@@ -1,0 +1,57 @@
+#include <stdio.h>
+
+#define CAP 20
+
+typedef struct { int number; int priority; char client[10]; } Order;
+typedef struct { Order items[CAP]; int size; } Heap;
+
+int higher(Order first, Order second) {
+    if (first.priority != second.priority) return first.priority > second.priority;
+    return first.number < second.number;            (*@\cmt{الأقدم أولًا}@*)
+}
+
+void swapOrders(Heap heap[], int first, int second) {
+    Order tmp = heap[0].items[first];
+    heap[0].items[first] = heap[0].items[second];
+    heap[0].items[second] = tmp;
+}
+
+void push(Heap heap[], Order order) {
+    int idx = heap[0].size++;
+    heap[0].items[idx] = order;
+    while (idx > 0 && higher(heap[0].items[idx], heap[0].items[(idx - 1) / 2])) {
+        swapOrders(heap, idx, (idx - 1) / 2);       (*@\cmt{صعود}@*)
+        idx = (idx - 1) / 2;
+    }
+}
+
+Order pop(Heap heap[]) {
+    Order top = heap[0].items[0];
+    int idx = 0, child;
+    heap[0].items[0] = heap[0].items[--heap[0].size];
+    while (2 * idx + 1 < heap[0].size) {            (*@\cmt{نزول}@*)
+        child = 2 * idx + 1;
+        if (child + 1 < heap[0].size && higher(heap[0].items[child + 1], heap[0].items[child]))
+            child++;
+        if (!higher(heap[0].items[child], heap[0].items[idx])) break;
+        swapOrders(heap, idx, child);
+        idx = child;
+    }
+    return top;
+}
+
+int main(void) {
+    Order incoming[8] = {{101, 1, "Amina"}, {102, 3, "Karim"}, {103, 2, "Lina"}, {104, 3, "Omar"},
+                         {105, 1, "Sara"}, {106, 2, "Nadir"}, {107, 3, "Rania"}, {108, 1, "Yacine"}};
+    Heap heap[1];
+    Order order;
+    int idx;
+    heap[0].size = 0;
+    for (idx = 0; idx < 8; idx++) push(heap, incoming[idx]);
+    printf("Root after inserts: #%d\n", heap[0].items[0].number);
+    while (heap[0].size > 0) {
+        order = pop(heap);
+        printf("Process #%d (priority %d, %s)\n", order.number, order.priority, order.client);
+    }
+    return 0;
+}

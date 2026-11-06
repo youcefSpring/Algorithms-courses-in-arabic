@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("receipt.txt", "w");
+    int ch;                                    (*@\cmt{\cen{int} لكي يسع \cen{EOF}}@*)
+    if (file == NULL) return 1;
+    fprintf(file, "TechShop - receipt #2045\n");
+    fprintf(file, "Mouse     1500.00\n");
+    fprintf(file, "Cable      450.00\n");
+    fprintf(file, "TOTAL     1950.00 DA\n");
+    fclose(file);
+    file = fopen("receipt.txt", "r");          (*@\cmt{نعيد الفتح للقراءة}@*)
+    if (file == NULL) return 1;
+    while ((ch = fgetc(file)) != EOF)
+        putchar(ch);
+    fclose(file);
+    return 0;
+}

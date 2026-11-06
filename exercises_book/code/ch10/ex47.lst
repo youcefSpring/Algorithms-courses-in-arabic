@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int lenA, lenB, row, col, width, size;
+    char *first, *second, *common;
+    int *table;
+    scanf("%d", &lenA);
+    first = malloc(lenA + 1);
+    scanf("%s", first);
+    scanf("%d", &lenB);
+    second = malloc(lenB + 1);
+    scanf("%s", second);
+    width = lenB + 1;
+    table = malloc((lenA + 1) * width * sizeof(int));        (*@\cmt{جدول بالحجم المضبوط}@*)
+    for (row = 0; row <= lenA; row++)
+        for (col = 0; col <= lenB; col++) {
+            if (row == 0 || col == 0) table[row * width + col] = 0;
+            else if (first[row - 1] == second[col - 1])
+                table[row * width + col] = table[(row - 1) * width + col - 1] + 1;
+            else
+                table[row * width + col] = table[(row - 1) * width + col] > table[row * width + col - 1]
+                                         ? table[(row - 1) * width + col] : table[row * width + col - 1];
+        }
+    size = table[lenA * width + lenB];
+    common = malloc(size + 1);
+    common[size] = '\0';
+    row = lenA; col = lenB;
+    while (row > 0 && col > 0) {
+        if (first[row - 1] == second[col - 1]) { common[--size] = first[row - 1]; row--; col--; }
+        else if (table[(row - 1) * width + col] >= table[row * width + col - 1]) row--;
+        else col--;
+    }
+    printf("A: %s\nB: %s\nCommon path: %s (%d pages)\n", first, second, common,
+           table[lenA * width + lenB]);
+    printf("Similarity: %.2f\n", 2.0 * table[lenA * width + lenB] / (lenA + lenB));
+    free(first); free(second); free(common); free(table);
+    return 0;
+}

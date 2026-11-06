@@ -1,0 +1,4 @@
+INFO 3, WARN 1, ERROR 2
+--- errors.log ---
+10:00:02 ERROR payment timeout #7781
+10:02:33 ERROR stock negative sku=MS-110

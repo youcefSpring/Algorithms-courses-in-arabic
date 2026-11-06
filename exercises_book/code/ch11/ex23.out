@@ -1,0 +1,5 @@
+[
+  {"code": 101, "name": "Mouse", "price": 1500.00, "inStock": true},
+  {"code": 205, "name": "Monitor 27\" 4K", "price": 54000.00, "inStock": true},
+  {"code": 330, "name": "Hub", "price": 3100.00, "inStock": false}
+]

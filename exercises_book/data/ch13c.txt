@@ -1,0 +1,831 @@
+@@
+title: فهرس أسعار متوازن ذاتيًا AVL
+level: hard
+domain: ec
+@ statement
+الأسعار تصل غالبًا **مرتبة** (منتجات جديدة أغلى)، فتصبح شجرة البحث العادية سلسلة. اكتب شجرة **AVL**: كل عقدة تحفظ ارتفاعها، وبعد كل إدراج نحسب **معامل التوازن** ونطبّق **الدورانات** (يمين، يسار، يسار-يمين، يمين-يسار) عند الحاجة. أدرج 15 سعرًا مرتبًا وقارن الارتفاع بشجرة عادية.
+@ steps
+- `balance = height(left) - height(right)`؛ يجب أن يبقى بين -1 و 1.
+- يسار-يسار: دوران يمين. يمين-يمين: دوران يسار.
+- يسار-يمين: دوران يسار على الابن الأيسر ثم يمين. يمين-يسار: العكس.
+- بعد كل دوران نحدث ارتفاع العقدتين.
+@ flow
+call: node->left/right = insert(...)
+do: update(node) ; balance = h(left) - h(right)
+if: balance > 1
+  if: price > node->left->price
+    call: node->left = rotateLeft(node->left)
+  call: node = rotateRight(node)
+else:
+  if: balance < -1
+    if: price < node->right->price
+      call: node->right = rotateRight(node->right)
+    call: node = rotateLeft(node)
+out: node
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price, height; struct Tree *left, *right; } Tree;
+
+int rotations = 0;
+
+int heightOf(const Tree *node) { return node ? node->height : 0; }
+void update(Tree *node) { int lh = heightOf(node->left), rh = heightOf(node->right); node->height = 1 + (lh > rh ? lh : rh); }
+
+Tree *rotateRight(Tree *node) {
+    Tree *pivot = node->left;
+    node->left = pivot->right;
+    pivot->right = node;
+    update(node); update(pivot);
+    rotations++;
+    return pivot;
+}
+
+Tree *rotateLeft(Tree *node) {
+    Tree *pivot = node->right;
+    node->right = pivot->left;
+    pivot->left = node;
+    update(node); update(pivot);
+    rotations++;
+    return pivot;
+}
+
+Tree *insert(Tree *node, int price) {
+    int balance;
+    if (node == NULL) {
+        node = malloc(sizeof(Tree));
+        node->price = price; node->height = 1; node->left = node->right = NULL;
+        return node;
+    }
+    if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    update(node);
+    balance = heightOf(node->left) - heightOf(node->right);
+    if (balance > 1) {                                         // ثقيلة يسارًا
+        if (price > node->left->price) node->left = rotateLeft(node->left);
+        return rotateRight(node);
+    }
+    if (balance < -1) {                                        // ثقيلة يمينًا
+        if (price < node->right->price) node->right = rotateRight(node->right);
+        return rotateLeft(node);
+    }
+    return node;
+}
+
+Tree *plainInsert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->height = 1; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = plainInsert(node->left, price);
+    else node->right = plainInsert(node->right, price);
+    return node;
+}
+
+int realHeight(const Tree *node) { int lh, rh; if (!node) return 0; lh = realHeight(node->left); rh = realHeight(node->right); return 1 + (lh > rh ? lh : rh); }
+void preorder(const Tree *node) { if (node) { printf("%d ", node->price); preorder(node->left); preorder(node->right); } }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *avl = NULL, *plain = NULL;
+    int idx;
+    for (idx = 1; idx <= 15; idx++) {
+        avl = insert(avl, idx * 1000);
+        plain = plainInsert(plain, idx * 1000);
+    }
+    printf("15 sorted prices inserted\n");
+    printf("plain BST height: %d\n", realHeight(plain));
+    printf("AVL height: %d after %d rotations, root %d\n", realHeight(avl), rotations, avl->price);
+    printf("AVL preorder: ");
+    preorder(avl);
+    printf("\n");
+    freeTree(avl);
+    freeTree(plain);
+    return 0;
+}
+
+@@
+title: ترميز هوفمان لرموز الحالات
+level: hard
+domain: ds
+@ statement
+سجلات الطلبيات تخزن حالة كل طلبية بحرف (`D` مسلّمة، `S` مشحونة، `P` مدفوعة، `C` ملغاة، `R` مرتجعة) بتكرارات مختلفة جدًا. **ترميز هوفمان** يعطي الحروف المتكررة رموزًا ثنائية أقصر. ابنِ شجرة هوفمان (دمج أصغر شجرتين وزنًا بشكل متكرر)، واستخرج الرموز، واحسب نسبة الضغط مقارنة بـ 3 بتات ثابتة.
+@ steps
+- في البداية كل حرف ورقة بوزن تكراره.
+- نكرر: نختار أصغر شجرتين، ننشئ عقدة أب وزنها مجموع وزنيهما، حتى تبقى شجرة واحدة.
+- رمز الحرف: المسار من الجذر (يسار = 0، يمين = 1).
+@ flow
+while: nbTrees > 1
+  do: first, second = أصغر شجرتين وزنًا
+  do: parent = عقدة جديدة (first, second, first->weight + second->weight)
+  do: استبدال الشجرتين بـ parent
+call: printCodes(root, code, 0)
+out: البتات الكلية ونسبة الضغط
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char symbol; long weight; struct Tree *left, *right; } Tree;
+
+long totalBits = 0;
+
+Tree *newTree(char symbol, long weight, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->symbol = symbol; node->weight = weight; node->left = left; node->right = right;
+    return node;
+}
+
+void printCodes(const Tree *node, char *code, int depth) {
+    if (node->left == NULL) {                              // ورقة
+        code[depth] = '\0';
+        printf("  %c  weight %5ld  code %-5s (%d bits)\n", node->symbol, node->weight, code, depth);
+        totalBits += node->weight * depth;
+        return;
+    }
+    code[depth] = '0'; printCodes(node->left, code, depth + 1);
+    code[depth] = '1'; printCodes(node->right, code, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    char symbols[5] = {'D', 'S', 'P', 'C', 'R'};
+    long counts[5] = {6200, 1800, 1300, 450, 250}, total = 0;
+    Tree *forest[5];
+    char code[10];
+    int nbTrees = 5, idx, first, second, tmp;
+    for (idx = 0; idx < 5; idx++) { forest[idx] = newTree(symbols[idx], counts[idx], NULL, NULL); total += counts[idx]; }
+    while (nbTrees > 1) {
+        first = 0; second = 1;
+        if (forest[second]->weight < forest[first]->weight) { tmp = first; first = second; second = tmp; }
+        for (idx = 2; idx < nbTrees; idx++) {               // أصغر وزنين
+            if (forest[idx]->weight < forest[first]->weight) { second = first; first = idx; }
+            else if (forest[idx]->weight < forest[second]->weight) second = idx;
+        }
+        forest[first] = newTree('*', forest[first]->weight + forest[second]->weight, forest[first], forest[second]);
+        forest[second] = forest[--nbTrees];                 // نزيل الثانية
+    }
+    printCodes(forest[0], code, 0);
+    printf("Huffman: %ld bits, fixed 3-bit: %ld bits\n", totalBits, total * 3);
+    printf("Average %.3f bits/symbol, saving %.1f%%\n", (double)totalBits / total,
+           100.0 * (1 - (double)totalBits / (total * 3)));
+    freeTree(forest[0]);
+    return 0;
+}
+
+@@
+title: الإكمال التلقائي لأسماء المنتجات بشجرة البادئات
+level: hard
+domain: ec
+@ statement
+مربع البحث يقترح الأسماء أثناء الكتابة. **شجرة البادئات** (Trie): كل عقدة تمثل حرفًا ولها حتى 26 ابنًا؛ المسار من الجذر يكوّن بادئة، والعقدة تحمل علامة "نهاية اسم" وشعبيته. اكتب `insertWord` و `suggest(prefix)` التي تعرض كل الأسماء المكملة للبادئة مرتبة أبجديًا، مع الأكثر شعبية.
+@ stdin
+3 mo ch xy
+@ steps
+- الإدراج: لكل حرف ننزل إلى الابن `ch - 'a'` (وننشئه إن لم يوجد).
+- الاقتراح: ننزل حسب البادئة، ثم نمر عمقًا أولًا على كل الفرع ونطبع الكلمات المكتملة.
+- الترتيب الأبجدي تلقائي لأن الأبناء مرتبون حسب الحرف.
+@ flow
+for: idx = 0 ; idx < NBW ; idx++
+  call: insertWord(root, words[idx], popularity[idx])
+in: nbQueries
+for: query = 0 ; query < nbQueries ; query++
+  in: prefix
+  do: node = النزول حسب البادئة
+  if: node != NULL
+    call: collect(node, buffer)
+  else:
+    out: `"no suggestion"`
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Trie { struct Trie *child[26]; int isWord, popularity; } Trie;
+
+Trie *newTrie(void) {
+    Trie *node = malloc(sizeof(Trie));
+    int idx;
+    for (idx = 0; idx < 26; idx++) node->child[idx] = NULL;
+    node->isWord = 0;
+    node->popularity = 0;
+    return node;
+}
+
+void insertWord(Trie *root, const char *word, int popularity) {
+    for (; *word != '\0'; word++) {
+        if (root->child[*word - 'a'] == NULL) root->child[*word - 'a'] = newTrie();
+        root = root->child[*word - 'a'];                // حرف واحد في كل مستوى
+    }
+    root->isWord = 1;
+    root->popularity = popularity;
+}
+
+char bestWord[32];
+int bestScore;
+
+void collect(const Trie *node, char *buffer, int depth) {
+    int idx, pos;
+    if (node->isWord) {
+        buffer[depth] = '\0';
+        printf(" %s", buffer);
+        if (node->popularity > bestScore) {
+            bestScore = node->popularity;
+            for (pos = 0; (bestWord[pos] = buffer[pos]) != '\0'; pos++) {}
+        }
+    }
+    for (idx = 0; idx < 26; idx++)
+        if (node->child[idx] != NULL) {
+            buffer[depth] = (char)('a' + idx);
+            collect(node->child[idx], buffer, depth + 1);
+        }
+}
+
+void freeTrie(Trie *node) { int idx; for (idx = 0; idx < 26; idx++) if (node->child[idx]) freeTrie(node->child[idx]); free(node); }
+
+int main(void) {
+    const char *words[10] = {"mouse", "monitor", "modem", "mousepad", "charger", "cable",
+                             "chair", "camera", "microphone", "motherboard"};
+    int popularity[10] = {950, 720, 130, 410, 880, 990, 300, 560, 610, 240};
+    Trie *root = newTrie(), *node;
+    char prefix[32], buffer[32];
+    int idx, nbQueries, query, depth;
+    for (idx = 0; idx < 10; idx++) insertWord(root, words[idx], popularity[idx]);
+    scanf("%d", &nbQueries);
+    for (query = 0; query < nbQueries; query++) {
+        scanf("%31s", prefix);
+        for (node = root, depth = 0; node != NULL && prefix[depth] != '\0'; depth++) {
+            buffer[depth] = prefix[depth];
+            node = node->child[prefix[depth] - 'a'];
+        }
+        printf("\"%s\" ->", prefix);
+        if (node == NULL) { printf(" no suggestion\n"); continue; }
+        bestScore = -1;
+        collect(node, buffer, depth);
+        printf("\n   top: %s (%d)\n", bestWord, bestScore);
+    }
+    freeTrie(root);
+    return 0;
+}
+
+@@
+title: منتجان مجموع سعريهما يساوي القسيمة
+level: hard
+domain: ec
+@ statement
+قسيمة هدية بقيمة ثابتة؛ نبحث عن **منتجين** مجموع سعريهما يساويها بالضبط. أسعار الكتالوج في شجرة بحث. بدل نسخها إلى جدول، استعمل **مكررين** على الشجرة: أحدهما يعطي الأسعار تصاعديًا والآخر تنازليًا (كل منهما بمكدس)، وطبّق تقنية **المؤشرين** المتقاربين.
+@ stdin
+3 7400 33200 100
+@ steps
+- المكرر التصاعدي: مكدس يُملأ بالنزول يسارًا؛ `next` يسحب ثم ينزل يسار الفرع الأيمن.
+- التنازلي: العكس (النزول يمينًا).
+- إذا كان المجموع أصغر من الهدف نتقدم بالتصاعدي، أكبر: بالتنازلي، مساوٍ: وجدنا.
+@ flow
+do: low = nextAscending() ; high = nextDescending()
+while: low < high
+  if: low + high == target
+    out: low, high
+  else:
+    if: low + high < target
+      do: low = nextAscending()
+    else:
+      do: high = nextDescending()
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+typedef struct { Tree *items[32]; int top, forward; } Iterator;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void pushSide(Iterator *iter, Tree *node) {
+    while (node != NULL) {
+        iter->items[iter->top++] = node;
+        node = iter->forward ? node->left : node->right;     // النزول إلى الطرف
+    }
+}
+
+void startIter(Iterator *iter, Tree *root, int forward) { iter->top = 0; iter->forward = forward; pushSide(iter, root); }
+
+int nextValue(Iterator *iter) {
+    Tree *node = iter->items[--iter->top];
+    pushSide(iter, iter->forward ? node->right : node->left);
+    return node->price;
+}
+
+int main(void) {
+    int prices[10] = {4500, 1200, 32000, 899, 3200, 12500, 89000, 2900, 6800, 450};
+    Tree *root = NULL;
+    Iterator ascending, descending;
+    int idx, nbQueries, target, low, high, steps, found;
+    for (idx = 0; idx < 10; idx++) root = insert(root, prices[idx]);
+    scanf("%d", &nbQueries);
+    for (idx = 0; idx < nbQueries; idx++) {
+        scanf("%d", &target);
+        startIter(&ascending, root, 1);
+        startIter(&descending, root, 0);
+        low = nextValue(&ascending);
+        high = nextValue(&descending);
+        found = 0;
+        steps = 0;
+        while (low < high && !found) {
+            steps++;
+            if (low + high == target) found = 1;
+            else if (low + high < target) low = nextValue(&ascending);   // نحتاج أكثر
+            else high = nextValue(&descending);                          // نحتاج أقل
+        }
+        if (found) printf("%6d DA = %d + %d (%d steps)\n", target, low, high, steps);
+        else printf("%6d DA: no pair\n", target);
+    }
+    while (root != NULL) {                                    // تحرير تكراري بسيط
+        Tree *node = root;
+        if (node->left) { root = node->left; node->left = root->right; root->right = node; }
+        else { root = node->right; free(node); }
+    }
+    return 0;
+}
+
+@@
+title: شجرة المقاطع لأدنى سعر في فترة
+level: hard
+domain: ds
+@ statement
+لدينا سعر منتج لكل يوم من 16 يومًا، ونريد الإجابة بسرعة عن "ما أدنى سعر بين اليوم `a` واليوم `b`؟" مع تحديث الأسعار أحيانًا. **شجرة المقاطع**: كل عقدة تحفظ أدنى قيمة في مجالها؛ الاستعلام والتحديث بتعقيد `log n`. نخزنها في جدول (`node`، أبناؤها `2node` و `2node+1`).
+@ steps
+- البناء: الأوراق = الأيام، وكل عقدة = أدنى ابنيها.
+- الاستعلام: إذا كان مجال العقدة داخل `[a, b]` نعيد قيمتها؛ خارجه نعيد ∞؛ وإلا ننزل في الابنين.
+- التحديث: نعدل الورقة ثم نعيد حساب أسلافها.
+@ flow
+call: build(1, 0, n - 1)
+call: query(1, 0, n - 1, from, to)
+call: update(1, 0, n - 1, day, value)
+call: query(1, 0, n - 1, from, to)
+@ code
+#include <stdio.h>
+
+#define NBD 16
+#define INF 1000000000
+
+int prices[NBD] = {320, 335, 310, 345, 300, 290, 315, 280, 295, 305, 330, 285, 300, 310, 325, 340};
+int tree[4 * NBD], visits;
+
+int minOf(int first, int second) { return first < second ? first : second; }
+
+void build(int node, int low, int high) {
+    int middle = (low + high) / 2;
+    if (low == high) { tree[node] = prices[low]; return; }          // ورقة = يوم
+    build(2 * node, low, middle);
+    build(2 * node + 1, middle + 1, high);
+    tree[node] = minOf(tree[2 * node], tree[2 * node + 1]);
+}
+
+int query(int node, int low, int high, int from, int to) {
+    int middle = (low + high) / 2;
+    visits++;
+    if (to < low || high < from) return INF;                        // خارج المجال
+    if (from <= low && high <= to) return tree[node];               // داخل المجال كليًا
+    return minOf(query(2 * node, low, middle, from, to), query(2 * node + 1, middle + 1, high, from, to));
+}
+
+void update(int node, int low, int high, int day, int value) {
+    int middle = (low + high) / 2;
+    if (low == high) { tree[node] = value; return; }
+    if (day <= middle) update(2 * node, low, middle, day, value);
+    else update(2 * node + 1, middle + 1, high, day, value);
+    tree[node] = minOf(tree[2 * node], tree[2 * node + 1]);         // نحدث الأسلاف
+}
+
+void ask(int from, int to) {
+    int result;
+    visits = 0;
+    result = query(1, 0, NBD - 1, from, to);
+    printf("min price days %2d-%2d: %d (visited %d nodes)\n", from + 1, to + 1, result, visits);
+}
+
+int main(void) {
+    build(1, 0, NBD - 1);
+    ask(0, 15);
+    ask(0, 4);
+    ask(8, 13);
+    update(1, 0, NBD - 1, 10, 260);
+    printf("flash sale: day 11 -> 260\n");
+    ask(8, 13);
+    ask(2, 9);
+    return 0;
+}
+
+@@
+title: تعلم شجرة قرار عوديًا
+level: hard
+domain: ds
+@ statement
+بدل كتابة شجرة القرار يدويًا، **نتعلمها** من البيانات: لكل عقدة نختار الخاصية والعتبة اللتين تعطيان أقل **مؤشر جيني** مرجح، ثم نقسم البيانات ونبني الفرعين **عوديًا**، حتى تصبح العقدة نقية أو نبلغ العمق الأقصى 3. اعرض الشجرة المتعلمة ودقتها.
+@ steps
+- العقدة تستقبل جدول فهارس العينات التي تصلها.
+- `bestSplit`: كل خاصية × كل قيمة كعتبة (`<=` يسارًا).
+- التوقف: كل العينات من نفس الصنف، أو العمق = 3، أو لا يوجد تقسيم يحسن.
+- الورقة تحمل صنف الأغلبية.
+@ flow
+call: root = grow(كل العينات, depth 0)
+if: نقية || depth == MAXD
+  out: ورقة بصنف الأغلبية
+else:
+  do: (feature, threshold) = bestSplit(samples)
+  do: تقسيم العينات إلى left و right
+  call: node->left = grow(left, depth + 1)
+  call: node->right = grow(right, depth + 1)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBS 14
+#define MAXD 3
+
+typedef struct Tree { int feature, label; double threshold; struct Tree *left, *right; } Tree;
+
+double data[NBS][2] = {{2, 0}, {3, 1}, {8, 0}, {9, 2}, {4, 3}, {10, 1}, {1, 1}, {7, 3},
+                       {6, 0}, {5, 2}, {9, 0}, {3, 2}, {8, 3}, {2, 3}};      // (pages, cart)
+int labels[NBS] = {0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1};
+const char *names[2] = {"pages", "cart"};
+
+double gini(const int *samples, int count) {
+    int idx, buyers = 0;
+    double ratio;
+    if (count == 0) return 0;
+    for (idx = 0; idx < count; idx++) buyers += labels[samples[idx]];
+    ratio = (double)buyers / count;
+    return 2 * ratio * (1 - ratio);
+}
+
+Tree *grow(const int *samples, int count, int depth) {
+    Tree *node = malloc(sizeof(Tree));
+    int left[NBS], right[NBS], nLeft, nRight, feat, cand, idx, buyers = 0;
+    double score, bestScore = gini(samples, count), threshold;
+    for (idx = 0; idx < count; idx++) buyers += labels[samples[idx]];
+    node->label = buyers * 2 >= count;                         // صنف الأغلبية
+    node->feature = -1;
+    node->left = node->right = NULL;
+    if (buyers == 0 || buyers == count || depth == MAXD) return node;
+    for (feat = 0; feat < 2; feat++)
+        for (cand = 0; cand < count; cand++) {
+            threshold = data[samples[cand]][feat];
+            for (nLeft = nRight = 0, idx = 0; idx < count; idx++)
+                if (data[samples[idx]][feat] <= threshold) left[nLeft++] = samples[idx]; else right[nRight++] = samples[idx];
+            if (nLeft == 0 || nRight == 0) continue;
+            score = (nLeft * gini(left, nLeft) + nRight * gini(right, nRight)) / count;
+            if (score < bestScore - 1e-12) { bestScore = score; node->feature = feat; node->threshold = threshold; }
+        }
+    if (node->feature < 0) return node;                         // لا تحسين
+    for (nLeft = nRight = 0, idx = 0; idx < count; idx++)
+        if (data[samples[idx]][node->feature] <= node->threshold) left[nLeft++] = samples[idx]; else right[nRight++] = samples[idx];
+    node->left = grow(left, nLeft, depth + 1);                  // بناء عودي
+    node->right = grow(right, nRight, depth + 1);
+    return node;
+}
+
+void show(const Tree *node, int depth) {
+    if (node->feature < 0) { printf("%*s-> %s\n", 2 * depth, "", node->label ? "BUY" : "no buy"); return; }
+    printf("%*sif %s <= %.0f:\n", 2 * depth, "", names[node->feature], node->threshold);
+    show(node->left, depth + 1);
+    printf("%*selse:\n", 2 * depth, "");
+    show(node->right, depth + 1);
+}
+
+int predict(const Tree *node, const double *row) {
+    while (node->feature >= 0) node = row[node->feature] <= node->threshold ? node->left : node->right;
+    return node->label;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int samples[NBS], idx, correct = 0;
+    Tree *root;
+    for (idx = 0; idx < NBS; idx++) samples[idx] = idx;
+    root = grow(samples, NBS, 0);
+    show(root, 0);
+    for (idx = 0; idx < NBS; idx++) correct += predict(root, data[idx]) == labels[idx];
+    printf("training accuracy: %d/%d\n", correct, NBS);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: أقرب مستودع بشجرة k-d
+level: hard
+domain: ec
+@ statement
+لكل طلبية نبحث عن **أقرب مستودع** من بين عدة مستودعات. **شجرة k-d** ثنائية البعد تقسم المستوى بالتناوب حسب `x` ثم `y`. اكتب `build` (الوسيط في كل مستوى) و `nearest` العودية مع **التقليم**: لا ننزل في الجانب الآخر إلا إذا كان خط القسمة أقرب من أفضل مسافة وجدناها. عدّ العقد المزارة.
+@ steps
+- البناء: نرتب النقاط حسب المحور `depth % 2` ونأخذ الوسيط جذرًا.
+- البحث: ننزل أولًا في الجانب الذي يحتوي على نقطة الطلب.
+- عند العودة: إذا `(diff)² < bestDist` نستكشف الجانب الآخر.
+@ flow
+if: node == NULL
+  out: لا شيء
+else:
+  do: تحديث best بالمسافة إلى node
+  do: diff = query[axis] - node->point[axis]
+  call: nearest(الجانب القريب)
+  if: diff * diff < bestDist
+    call: nearest(الجانب البعيد)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBW 10
+
+typedef struct KdNode { double point[2]; char name[6]; struct KdNode *left, *right; } KdNode;
+
+KdNode warehouses[NBW] = {{{2, 3}, "W1", 0, 0}, {{5, 4}, "W2", 0, 0}, {{9, 6}, "W3", 0, 0}, {{4, 7}, "W4", 0, 0},
+                          {{8, 1}, "W5", 0, 0}, {{7, 2}, "W6", 0, 0}, {{1, 9}, "W7", 0, 0}, {{6, 8}, "W8", 0, 0},
+                          {{3, 1}, "W9", 0, 0}, {{10, 10}, "W10", 0, 0}};
+KdNode *view[NBW];
+const KdNode *best;
+double bestDist;
+int visited;
+
+KdNode *build(int low, int high, int depth) {
+    int axis = depth % 2, idx, back, middle;
+    KdNode *key;
+    if (low > high) return NULL;
+    for (idx = low + 1; idx <= high; idx++) {                    // ترتيب حسب المحور
+        key = view[idx];
+        for (back = idx - 1; back >= low && view[back]->point[axis] > key->point[axis]; back--) view[back + 1] = view[back];
+        view[back + 1] = key;
+    }
+    middle = (low + high) / 2;
+    view[middle]->left = build(low, middle - 1, depth + 1);
+    view[middle]->right = build(middle + 1, high, depth + 1);
+    return view[middle];
+}
+
+void nearest(const KdNode *node, const double *query, int depth) {
+    double dx, dy, dist, diff;
+    int axis = depth % 2;
+    if (node == NULL) return;
+    visited++;
+    dx = node->point[0] - query[0];
+    dy = node->point[1] - query[1];
+    dist = dx * dx + dy * dy;
+    if (dist < bestDist) { bestDist = dist; best = node; }
+    diff = query[axis] - node->point[axis];
+    nearest(diff <= 0 ? node->left : node->right, query, depth + 1);   // الجانب القريب
+    if (diff * diff < bestDist)                                        // التقليم
+        nearest(diff <= 0 ? node->right : node->left, query, depth + 1);
+}
+
+int main(void) {
+    double orders[3][2] = {{6, 3}, {2, 8}, {9, 9}};
+    KdNode *root;
+    int idx;
+    for (idx = 0; idx < NBW; idx++) view[idx] = &warehouses[idx];
+    root = build(0, NBW - 1, 0);
+    printf("root %s (%.0f,%.0f)\n", root->name, root->point[0], root->point[1]);
+    for (idx = 0; idx < 3; idx++) {
+        bestDist = 1e18;
+        visited = 0;
+        nearest(root, orders[idx], 0);
+        printf("order at (%.0f,%.0f) -> %s, dist^2 %.0f, visited %d/%d\n", orders[idx][0], orders[idx][1],
+               best->name, bestDist, visited, NBW);
+    }
+    return 0;
+}
+
+@@
+title: مرور موريس دون مكدس
+level: hard
+domain: ds
+@ statement
+على جهاز مدمج بذاكرة محدودة جدًا، نريد المرور الوسطي على شجرة الأسعار **دون عودية ودون مكدس**. طريقة **موريس** تنشئ روابط مؤقتة: لكل عقدة لها فرع أيسر، نجعل أقصى عقدة يمين ذلك الفرع (السلف الوسطي) تشير إليها، ثم نزيل الرابط عند العودة. تحقق أن الشجرة تعود كما كانت.
+@ steps
+- إذا لم يكن للعقدة ابن أيسر: نزورها ونذهب يمينًا.
+- وإلا نجد السلف `pred` (أقصى يمين الفرع الأيسر):
+- إذا كان `pred->right == NULL`: نضع الرابط المؤقت `pred->right = node` وننزل يسارًا.
+- إذا كان يشير إلى `node`: نزيل الرابط، نزور `node`، ونذهب يمينًا.
+@ flow
+do: node = root
+while: node != NULL
+  if: node->left == NULL
+    out: node->price
+    do: node = node->right
+  else:
+    do: pred = أقصى يمين node->left (دون الرابط المؤقت)
+    if: pred->right == NULL
+      do: pred->right = node ; node = node->left
+    else:
+      do: pred->right = NULL
+      out: node->price
+      do: node = node->right
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+int countThreads = 0;
+
+void morris(Tree *root) {
+    Tree *node = root, *pred;
+    while (node != NULL) {
+        if (node->left == NULL) {
+            printf("%d ", node->price);
+            node = node->right;                          // قد يكون رابطًا مؤقتًا
+        } else {
+            for (pred = node->left; pred->right != NULL && pred->right != node; pred = pred->right) {}
+            if (pred->right == NULL) {
+                pred->right = node;                      // رابط مؤقت للعودة
+                countThreads++;
+                node = node->left;
+            } else {
+                pred->right = NULL;                      // نزيل الرابط
+                printf("%d ", node->price);
+                node = node->right;
+            }
+        }
+    }
+    printf("\n");
+}
+
+void inorder(const Tree *node) { if (node) { inorder(node->left); printf("%d ", node->price); inorder(node->right); } }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[10] = {4500, 1200, 32000, 899, 3200, 12500, 89000, 450, 2000, 6800}, idx;
+    Tree *root = NULL;
+    for (idx = 0; idx < 10; idx++) root = insert(root, prices[idx]);
+    printf("Morris:    ");
+    morris(root);
+    printf("temporary links created and removed: %d\n", countThreads);
+    printf("recursive: ");
+    inorder(root);                                       // الشجرة سليمة
+    printf("\n");
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: شجرة فينويك للمبيعات التراكمية
+level: hard
+domain: ds
+@ statement
+لوحة القيادة تعرض المبيعات التراكمية حتى أي يوم، والمبيعات تُحدّث باستمرار (مرتجعات، طلبيات متأخرة). **شجرة فينويك** (Binary Indexed Tree) تجعل التحديث والاستعلام عن مجموع البادئة بتعقيد `log n`، بالاعتماد على **أدنى بت مرفوع** `idx & -idx`. قارن عدد العمليات بالطريقة البسيطة.
+@ steps
+- الخانة `tree[idx]` تجمع المجال `(idx - lowbit(idx), idx]` (الفهرسة من 1).
+- `add(idx, delta)`: `while (idx <= n) { tree[idx] += delta; idx += idx & -idx; }`.
+- `prefix(idx)`: `while (idx > 0) { sum += tree[idx]; idx -= idx & -idx; }`.
+- مجموع `[a, b] = prefix(b) - prefix(a - 1)`.
+@ flow
+for: day = 1 ; day <= NBD ; day++
+  call: add(day, sales[day])
+call: prefix(20)
+call: add(7, -1200)
+call: prefix(20) - prefix(10)
+@ code
+#include <stdio.h>
+
+#define NBD 30
+
+long tree[NBD + 1];
+int operations = 0;
+
+void add(int idx, long delta) {
+    for (; idx <= NBD; idx += idx & -idx) { tree[idx] += delta; operations++; }   // نصعد
+}
+
+long prefix(int idx) {
+    long sum = 0;
+    for (; idx > 0; idx -= idx & -idx) { sum += tree[idx]; operations++; }         // نهبط
+    return sum;
+}
+
+int main(void) {
+    long sales[NBD + 1], total;
+    int day;
+    for (day = 1; day <= NBD; day++) {
+        sales[day] = 1000 + (day * 389) % 900;
+        add(day, sales[day]);
+    }
+    printf("build: %d operations\n", operations);
+    operations = 0;
+    total = prefix(20);                                // نحسب قبل الطباعة
+    printf("total days 1-20: %ld (%d ops, naive 20)\n", total, operations);
+    operations = 0;
+    add(7, -1200);                                     // مرتجع في اليوم 7
+    printf("refund on day 7 applied (%d ops)\n", operations);
+    operations = 0;
+    total = prefix(20) - prefix(10);
+    printf("days 11-20: %ld (%d ops, naive 10)\n", total, operations);
+    printf("days 1-10 after refund: %ld\n", prefix(10));
+    printf("tree[8] covers days 1-8: %ld\n", tree[8]);
+    return 0;
+}
+
+@@
+title: بناء شجرة العبارة من صيغة نصية
+level: hard
+domain: ec
+@ statement
+حوّل صيغة سعر مكتوبة نصيًا مثل `(4500-500)*3+400/2` إلى **شجرة عبارة** بخوارزمية **ساحة التحويل** (Shunting-yard) لدايكسترا: مكدس للعمليات ومكدس للشجيرات. ثم احسب قيمة الشجرة، واعرضها بالترميز **البعدي** (البولندي العكسي)، واعرض ارتفاعها.
+@ stdin
+(4500-500)*3+400/2
+@ steps
+- عدد: ننشئ ورقة ونكدسها في مكدس الشجيرات.
+- عملية: ما دامت قمة مكدس العمليات أولويتها ≥ أولوية العملية الحالية: نطبقها (نسحب شجيرتين وننشئ عقدة).
+- `(` تُكدس، `)` تطبق العمليات حتى `(`.
+- في النهاية نطبق كل العمليات الباقية؛ الشجيرة الوحيدة هي الجذر.
+@ flow
+in: formula
+for: pos = 0 ; formula[pos] != '\0' ; pos++
+  if: رقم
+    do: قراءة العدد ; تكديس ورقة
+  else:
+    if: formula[pos] == '('
+      do: تكديس '('
+    else:
+      if: formula[pos] == ')'
+        do: تطبيق العمليات حتى '('
+      else:
+        do: تطبيق العمليات ذات الأولوية الأعلى أو المساوية ; تكديس العملية
+do: تطبيق الباقي
+call: evaluate(root)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char op; double value; struct Tree *left, *right; } Tree;
+
+Tree *nodes[50];
+char ops[50];
+int nodeTop = 0, opTop = 0;
+
+int priority(char op) { return (op == '*' || op == '/') ? 2 : (op == '+' || op == '-') ? 1 : 0; }
+
+void reduce(void) {
+    Tree *node = malloc(sizeof(Tree));
+    node->op = ops[--opTop];
+    node->right = nodes[--nodeTop];                  // الترتيب مهم: الأيمن أولًا
+    node->left = nodes[--nodeTop];
+    node->value = 0;
+    nodes[nodeTop++] = node;
+}
+
+double evaluate(const Tree *node) {
+    double left, right;
+    if (node->op == 0) return node->value;
+    left = evaluate(node->left);
+    right = evaluate(node->right);
+    return node->op == '+' ? left + right : node->op == '-' ? left - right
+         : node->op == '*' ? left * right : left / right;
+}
+
+void postfix(const Tree *node) {
+    if (node->op == 0) { printf("%g ", node->value); return; }
+    postfix(node->left);
+    postfix(node->right);
+    printf("%c ", node->op);
+}
+
+int height(const Tree *node) { int lh, rh; if (!node) return 0; lh = height(node->left); rh = height(node->right); return 1 + (lh > rh ? lh : rh); }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    char formula[100], ch;
+    Tree *leaf;
+    int pos;
+    scanf("%99s", formula);
+    for (pos = 0; formula[pos] != '\0'; pos++) {
+        ch = formula[pos];
+        if (ch >= '0' && ch <= '9') {
+            leaf = malloc(sizeof(Tree));
+            leaf->op = 0; leaf->left = leaf->right = NULL; leaf->value = 0;
+            while (formula[pos] >= '0' && formula[pos] <= '9') leaf->value = leaf->value * 10 + (formula[pos++] - '0');
+            pos--;
+            nodes[nodeTop++] = leaf;
+        } else if (ch == '(') {
+            ops[opTop++] = ch;
+        } else if (ch == ')') {
+            while (ops[opTop - 1] != '(') reduce();
+            opTop--;                                       // نحذف '('
+        } else {
+            while (opTop > 0 && priority(ops[opTop - 1]) >= priority(ch)) reduce();   // الأولوية
+            ops[opTop++] = ch;
+        }
+    }
+    while (opTop > 0) reduce();
+    printf("formula: %s\npostfix: ", formula);
+    postfix(nodes[0]);
+    printf("\nvalue:   %.2f DA\ntree height: %d\n", evaluate(nodes[0]), height(nodes[0]));
+    freeTree(nodes[0]);
+    return 0;
+}

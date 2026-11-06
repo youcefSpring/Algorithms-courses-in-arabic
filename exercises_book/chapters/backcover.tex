@@ -1,0 +1,31 @@
+% Back cover (always lands on an even page)
+\cleardoublepage
+\thispagestyle{empty}\null\clearpage
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+    \fill[coverPaper] (current page.south west) rectangle (current page.north east);
+    \fill[coverInk] (current page.north west) rectangle ([xshift=2.1cm]current page.south west);
+    \fill[coverGold] ([xshift=2.1cm]current page.north west) rectangle ([xshift=2.25cm]current page.south west);
+    \node[anchor=north, text width=13.5cm, align=right, lawn=coverInk]
+        at ([xshift=1.1cm, yshift=-3.2cm]current page.north) {%
+        {\khatt\bfseries\LARGE\color{coverInk} تعلّم الخوارزميات بحلّ المسائل}\par
+        \vspace{2pt}{\color{coverGold}\rule{5cm}{0.8pt}}\par\vspace{10pt}
+        \color{coverInk}\large
+        يرافق هذا الكتاب طالب السنة الأولى في مقياس الخوارزميات ولغة \en{C}،
+        من أول متغير إلى الأشجار الثنائية، عبر \textbf{\en{650} تمرينًا محلولًا}
+        مأخوذة من مسائل واقعية في \textbf{التجارة الإلكترونية} و\textbf{علم البيانات}.\par
+        \vspace{10pt}
+        \faCheckCircle\ \en{13} فصلًا، في كل فصل \en{50} تمرينًا: \en{10} سهلة، \en{30} متوسطة، \en{10} صعبة.\par
+        \faCheckCircle\ لكل تمرين: نص المسألة، خطوات الحل، برنامج \en{C} مشروح سطرًا بسطر،
+        نتيجة التنفيذ الحقيقية، ومخطط انسيابي.\par
+        \faCheckCircle\ كل الخوارزميات مكتوبة يدويًا، دون أي دالة جاهزة.\par
+        \faCheckCircle\ برامج مترجمة ومختبرة بالمعيار \en{C99}.\par
+        \vspace{14pt}
+        {\khatt\bfseries\Large\color{coverInk}\teacher}\par
+        {\color{coverInk!70} أستاذ مقياس الخوارزميات وهياكل المعطيات}};
+    % ISBN / barcode area
+    \node[draw=coverInk!60, fill=white, minimum width=5.2cm, minimum height=2.8cm,
+        anchor=south east, font=\small\color{coverInk!70}]
+        at ([xshift=-1.6cm, yshift=1.8cm]current page.south east)
+        {\en{ISBN}\quad\en{\bookISBN}};
+\end{tikzpicture}

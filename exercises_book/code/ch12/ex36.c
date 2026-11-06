@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; double amount; struct Node *next; } Node;
+
+Node *copyList(const Node *head) {
+    Node dummy, *tail = &dummy;
+    for (; head != NULL; head = head->next) {
+        tail->next = malloc(sizeof(Node));     // عقدة جديدة مستقلة
+        tail = tail->next;
+        tail->number = head->number;
+        tail->amount = head->amount;
+    }
+    tail->next = NULL;
+    return dummy.next;
+}
+
+void show(const char *label, const Node *head) {
+    printf("%s", label);
+    for (; head != NULL; head = head->next) printf(" #%d:%.0f", head->number, head->amount);
+    printf("\n");
+}
+
+void freeList(Node *head) { Node *next; for (; head != NULL; head = next) { next = head->next; free(head); } }
+
+int main(void) {
+    double amounts[4] = {12500, 3200, 899, 45000};
+    Node *original = NULL, *copy, *node, *walk;
+    int idx;
+    for (idx = 3; idx >= 0; idx--) {
+        node = malloc(sizeof(Node)); node->number = 7781 + idx; node->amount = amounts[idx];
+        node->next = original; original = node;
+    }
+    copy = copyList(original);
+    for (walk = copy; walk != NULL; walk = walk->next) walk->amount *= 0.9;   // خصم على النسخة
+    node = copy->next;
+    copy->next = node->next;                                                 // حذف الثانية من النسخة
+    free(node);
+    show("original:", original);
+    show("copy:    ", copy);
+    freeList(original);
+    freeList(copy);
+    return 0;
+}

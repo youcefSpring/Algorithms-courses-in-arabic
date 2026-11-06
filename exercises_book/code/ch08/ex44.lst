@@ -1,0 +1,45 @@
+#include <stdio.h>
+
+int grid[9][9] = {{5, 3, 0, 0, 7, 0, 0, 0, 0}, {6, 0, 0, 1, 9, 5, 0, 0, 0},
+                  {0, 9, 8, 0, 0, 0, 0, 6, 0}, {8, 0, 0, 0, 6, 0, 0, 0, 3},
+                  {4, 0, 0, 8, 0, 3, 0, 0, 1}, {7, 0, 0, 0, 2, 0, 0, 0, 6},
+                  {0, 6, 0, 0, 0, 0, 2, 8, 0}, {0, 0, 0, 4, 1, 9, 0, 0, 5},
+                  {0, 0, 0, 0, 8, 0, 0, 7, 9}};
+long tries = 0;
+
+int allowed(int row, int col, int digit) {
+    int idx, boxRow = row / 3 * 3, boxCol = col / 3 * 3;
+    for (idx = 0; idx < 9; idx++) {
+        if (grid[row][idx] == digit || grid[idx][col] == digit) return 0;
+        if (grid[boxRow + idx / 3][boxCol + idx % 3] == digit) return 0;   (*@\cmt{المربع \cen{3x3}}@*)
+    }
+    return 1;
+}
+
+int solve(int cell) {
+    int row = cell / 9, col = cell % 9, digit;
+    if (cell == 81) return 1;                         (*@\cmt{كل الخانات مملوءة}@*)
+    if (grid[row][col] != 0) return solve(cell + 1);
+    for (digit = 1; digit <= 9; digit++)
+        if (allowed(row, col, digit)) {
+            grid[row][col] = digit;
+            tries++;
+            if (solve(cell + 1)) return 1;
+        }
+    grid[row][col] = 0;                               (*@\cmt{تراجع}@*)
+    return 0;
+}
+
+int main(void) {
+    int row, col;
+    if (solve(0)) {
+        for (row = 0; row < 9; row++) {
+            for (col = 0; col < 9; col++)
+                printf("%d%s", grid[row][col], col % 3 == 2 && col < 8 ? " | " : " ");
+            printf("\n");
+            if (row % 3 == 2 && row < 8) printf("------+-------+------\n");
+        }
+        printf("Solved with %ld placements\n", tries);
+    }
+    return 0;
+}

@@ -1,0 +1,7 @@
+  S  weight  1800  code 00    (2 bits)
+  R  weight   250  code 0100  (4 bits)
+  C  weight   450  code 0101  (4 bits)
+  P  weight  1300  code 011   (3 bits)
+  D  weight  6200  code 1     (1 bits)
+Huffman: 16500 bits, fixed 3-bit: 30000 bits
+Average 1.650 bits/symbol, saving 45.0%

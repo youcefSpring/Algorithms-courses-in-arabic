@@ -772,7 +772,7 @@
 \end{statement}
 \parthead{\faListOl}{خطوات الحل}
 \begin{stepsbox}\begin{enumerate}
-\item \par{\centering\small\code{cost[order][supplier] = Σ quantities[order][prod] * unitPrice[prod][supplier]}\par}.
+\item \par{\centering\scriptsize\code{cost[order][supplier] = Σ quantities[order][prod] * unitPrice[prod][supplier]}\par}.
 \item ثلاث حلقات متداخلة: السطر، العمود، ثم المجموع.
 \item الأرخص: مقارنة عمودي كل سطر.
 \end{enumerate}\end{stepsbox}
@@ -1131,7 +1131,7 @@
 \begin{stepsbox}\begin{enumerate}
 \item نحسب متوسط كل عمود.
 \item \par{\centering\small\code{cov[first][second] = Σ (x - mean)(y - mean)}\par}.
-\item \par{\centering\small\code{corr = cov[first][second] / جذر(cov[first][first] * cov[second][second])}\par}.
+\item \par{\centering\scriptsize\code{corr = cov[first][second] / جذر(cov[first][first] * cov[second][second])}\par}.
 \end{enumerate}\end{stepsbox}
 \parthead{\faCode}{البرنامج بلغة \en{C}}
 \ccode[\small]{code/ch05/ex18.lst}
@@ -1723,8 +1723,8 @@
 \end{statement}
 \parthead{\faListOl}{خطوات الحل}
 \begin{stepsbox}\begin{enumerate}
-\item \par{\centering\small\code{prefix[r+1][c+1] = sales[r][c] + prefix[r][c+1] + prefix[r+1][c] - prefix[r][c]}\par}.
-\item المستطيل: \par{\centering\small\code{prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]}\par}.
+\item \par{\centering\scriptsize\code{prefix[r+1][c+1] = sales[r][c] + prefix[r][c+1] + prefix[r+1][c] - prefix[r][c]}\par}.
+\item المستطيل: \par{\centering\scriptsize\code{prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]}\par}.
 \end{enumerate}\end{stepsbox}
 \parthead{\faCode}{البرنامج بلغة \en{C}}
 \ccode[\footnotesize]{code/ch05/ex27.lst}

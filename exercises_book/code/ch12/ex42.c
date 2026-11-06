@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CAP 3
+#define MAXCODE 100
+
+typedef struct Node { int code; struct Node *prev, *next; } Node;
+
+Node *head = NULL, *tail = NULL, *slots[MAXCODE];
+int size = 0;
+
+void detach(Node *node) {
+    if (node->prev) node->prev->next = node->next; else head = node->next;
+    if (node->next) node->next->prev = node->prev; else tail = node->prev;
+}
+
+void pushFront(Node *node) {
+    node->prev = NULL;
+    node->next = head;
+    if (head) head->prev = node; else tail = node;
+    head = node;
+}
+
+int main(void) {
+    Node *node, *walk;
+    int code, hits = 0, misses = 0;
+    while (scanf("%d", &code) == 1) {
+        node = slots[code];
+        if (node != NULL) {                            // إصابة
+            hits++;
+            detach(node);
+            pushFront(node);
+            printf("get %d: HIT  |", code);
+        } else {                                       // إخفاق
+            misses++;
+            node = malloc(sizeof(Node));
+            node->code = code;
+            pushFront(node);
+            slots[code] = node;
+            if (++size > CAP) {                        // طرد الأقل استعمالًا
+                walk = tail;
+                detach(walk);
+                slots[walk->code] = NULL;
+                printf("get %d: MISS evict %d |", code, walk->code);
+                free(walk);
+                size--;
+            } else {
+                printf("get %d: MISS |", code);
+            }
+        }
+        for (walk = head; walk != NULL; walk = walk->next) printf(" %d", walk->code);
+        printf("\n");
+    }
+    printf("hits %d, misses %d, hit rate %.0f%%\n", hits, misses, 100.0 * hits / (hits + misses));
+    while (head != NULL) { node = head; detach(node); free(node); }
+    return 0;
+}

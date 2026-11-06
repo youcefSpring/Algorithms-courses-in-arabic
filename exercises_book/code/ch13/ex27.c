@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = left; node->right = right;
+    return node;
+}
+
+int depthAndDiameter(const Tree *node, int *best) {
+    int leftH, rightH;
+    if (node == NULL) return 0;
+    leftH = depthAndDiameter(node->left, best);
+    rightH = depthAndDiameter(node->right, best);
+    if (leftH + rightH > *best) *best = leftH + rightH;     // مسار يمر بهذه العقدة
+    return 1 + (leftH > rightH ? leftH : rightH);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(0,
+        newTree(1, newTree(3, newTree(7, newTree(9, NULL, NULL), NULL), NULL), newTree(4, NULL, newTree(8, NULL, newTree(10, NULL, NULL)))),
+        newTree(2, newTree(5, NULL, NULL), NULL));
+    int best = 0, height = depthAndDiameter(root, &best);
+    printf("Network height: %d levels\n", height);
+    printf("Longest delivery chain: %d links\n", best);
+    freeTree(root);
+    return 0;
+}

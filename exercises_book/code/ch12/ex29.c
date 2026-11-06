@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int code, stock; struct Node *next; } Node;
+
+Node *partition(Node *head, int threshold) {
+    Node dummyLow, dummyHigh, *tailLow = &dummyLow, *tailHigh = &dummyHigh;
+    for (; head != NULL; head = head->next) {
+        if (head->stock < threshold) { tailLow->next = head; tailLow = head; }
+        else { tailHigh->next = head; tailHigh = head; }
+    }
+    tailHigh->next = NULL;
+    tailLow->next = dummyHigh.next;          // الربط بين المجموعتين
+    return dummyLow.next;
+}
+
+int main(void) {
+    int stocks[8] = {25, 3, 40, 8, 12, 0, 9, 31};
+    Node *head = NULL, *node, *walk, *next;
+    int idx;
+    for (idx = 7; idx >= 0; idx--) {
+        node = malloc(sizeof(Node)); node->code = 101 + idx; node->stock = stocks[idx];
+        node->next = head; head = node;
+    }
+    head = partition(head, 10);
+    for (walk = head; walk != NULL; walk = walk->next) printf("%d:%d ", walk->code, walk->stock);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}

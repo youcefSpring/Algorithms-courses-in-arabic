@@ -1,0 +1,58 @@
+#include <stdio.h>
+
+typedef struct { double ads, discount, sales; } Week;
+typedef struct { double cell[3][4]; } Matrix3;
+typedef struct { double coef[3]; } Model;
+
+Matrix3 buildNormal(Week weeks[], int size) {
+    Matrix3 system;
+    double feature[3];
+    int idx, row, col;
+    for (row = 0; row < 3; row++) for (col = 0; col < 4; col++) system.cell[row][col] = 0;
+    for (idx = 0; idx < size; idx++) {
+        feature[0] = 1; feature[1] = weeks[idx].ads; feature[2] = weeks[idx].discount;
+        for (row = 0; row < 3; row++) {
+            for (col = 0; col < 3; col++) system.cell[row][col] += feature[row] * feature[col];
+            system.cell[row][3] += feature[row] * weeks[idx].sales;   // X^T y
+        }
+    }
+    return system;
+}
+
+Model solve(Matrix3 system) {
+    Model model;
+    double factor, sum;
+    int pivot, row, col;
+    for (pivot = 0; pivot < 3; pivot++)                 // حذف غاوس
+        for (row = pivot + 1; row < 3; row++) {
+            factor = system.cell[row][pivot] / system.cell[pivot][pivot];
+            for (col = pivot; col < 4; col++) system.cell[row][col] -= factor * system.cell[pivot][col];
+        }
+    for (row = 2; row >= 0; row--) {                    // تعويض تراجعي
+        sum = system.cell[row][3];
+        for (col = row + 1; col < 3; col++) sum -= system.cell[row][col] * model.coef[col];
+        model.coef[row] = sum / system.cell[row][row];
+    }
+    return model;
+}
+
+double predict(Model model, double ads, double discount) {
+    return model.coef[0] + model.coef[1] * ads + model.coef[2] * discount;
+}
+
+int main(void) {
+    Week weeks[8] = {{10, 0, 205}, {15, 5, 290}, {8, 10, 230}, {20, 0, 320},
+                     {25, 10, 430}, {12, 15, 300}, {30, 5, 455}, {18, 20, 400}};
+    Model model = solve(buildNormal(weeks, 8));
+    double error = 0, diff;
+    int idx;
+    printf("sales = %.2f + %.2f * ads + %.2f * discount\n", model.coef[0], model.coef[1], model.coef[2]);
+    for (idx = 0; idx < 8; idx++) {
+        diff = weeks[idx].sales - predict(model, weeks[idx].ads, weeks[idx].discount);
+        error += diff * diff;
+    }
+    printf("Mean squared error: %.2f\n", error / 8);
+    printf("Forecast (ads 22, discount 10%%): %.1f\n", predict(model, 22, 10));
+    printf("Forecast (ads 35, discount 0%%):  %.1f\n", predict(model, 35, 0));
+    return 0;
+}

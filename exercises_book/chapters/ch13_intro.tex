@@ -1,0 +1,43 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الشجرة الثنائية}: عقد مرتبطة، لكل عقدة \textbf{ابن أيسر} و\textbf{ابن أيمن} على الأكثر؛ العقدة العليا هي \textbf{الجذر} والعقد دون أبناء \textbf{أوراق}.
+    \item \textbf{الارتفاع}: عدد العقد في أطول مسار من الجذر إلى ورقة.
+    \item \textbf{شجرة البحث الثنائية} (BST): كل قيم الفرع الأيسر أصغر من العقدة، وكل قيم الفرع الأيمن أكبر.
+    \item \textbf{طرق المرور}: قبلي (عقدة، يسار، يمين)، وسطي (يسار، عقدة، يمين)، بعدي (يسار، يمين، عقدة)، وبالعرض (مستوى بمستوى بطابور).
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    level distance=1.2cm,
+    level 1/.style={sibling distance=3.6cm},
+    level 2/.style={sibling distance=1.8cm},
+    every node/.style={circle, draw=brandTeal, fill=brandTeal!10, very thick,
+        minimum size=0.9cm, font=\small\bfseries},
+    edge from parent/.style={draw=brandMuted, thick}]
+    \node[draw=brandOrange, fill=brandOrange!15] {\en{50}}
+        child {node {\en{30}} child {node {\en{20}}} child {node {\en{40}}}}
+        child {node {\en{70}} child {node {\en{60}}} child {node {\en{80}}}};
+\end{tikzpicture}
+
+{\small المرور الوسطي لشجرة البحث يعطي القيم مرتبة: \en{20 30 40 50 60 70 80}}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{العملية في BST} & \ras{التكلفة} \\ \hline
+بحث، إدراج، حذف & تتناسب مع الارتفاع: \en{log n} إذا كانت متوازنة، \en{n} إذا أصبحت سلسلة \\ \hline
+الأصغر / الأكبر & النزول إلى أقصى اليسار / أقصى اليمين \\ \hline
+عد أو جمع في مجال & تقليم الفروع التي لا يمكن أن تحتوي على قيم المجال \\ \hline
+التوازن الذاتي (AVL) & دورانات بعد كل إدراج تبقي الارتفاع لوغاريتميًا \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad العودية طبيعية في الأشجار}
+كل عقدة هي جذر لشجرة فرعية، لذلك أغلب الدوال تتبع نفس النمط: حالة أساسية \code{node == NULL}،
+ثم معالجة العقدة واستدعاء الدالة على الفرعين. لتحرير الشجرة نستعمل المرور \textbf{البعدي}.
+\end{obox}
+
+\chaprefs{clrs,weiss,knuth3,sedgewick}
+\insertstats{13}

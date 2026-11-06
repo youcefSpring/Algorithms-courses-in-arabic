@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("ratings.txt", "w");
+    int counts[6] = {0}, value, invalid = 0, total = 0, sum = 0, star, mark, status;
+    int ch;
+    fprintf(file, "5\n4\n5\n3\nabc\n5\n2\n4\n7\n5\n1\n4\n0\n5\n4\n");
+    fclose(file);
+    file = fopen("ratings.txt", "r");
+    while ((status = fscanf(file, "%d", &value)) != EOF) {
+        if (status == 1) {
+            if (value >= 1 && value <= 5) { counts[value]++; total++; sum += value; }
+            else invalid++;
+        } else {
+            fscanf(file, "%*s");                     (*@\cmt{نتخطى كلمة غير رقمية}@*)
+            invalid++;
+        }
+    }
+    fclose(file);
+    file = fopen("report.txt", "w");
+    for (star = 5; star >= 1; star--) {
+        fprintf(file, "%d | ", star);
+        for (mark = 0; mark < counts[star]; mark++) fputc('*', file);
+        fprintf(file, " %d\n", counts[star]);
+    }
+    fprintf(file, "valid %d, invalid %d, mean %.2f\n", total, invalid, (double)sum / total);
+    fclose(file);
+    file = fopen("report.txt", "r");
+    while ((ch = fgetc(file)) != EOF) putchar(ch);
+    fclose(file);
+    return 0;
+}

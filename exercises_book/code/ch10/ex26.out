@@ -1,0 +1,9 @@
+n=1 value 120 ms -> mean 120.00 var     0.00
+n=2 value 135 ms -> mean 127.50 var    56.25
+n=3 value  98 ms -> mean 117.67 var   230.89
+n=4 value 410 ms -> mean 190.75 var 16196.69
+n=5 value 125 ms -> mean 177.60 var 13649.04
+n=6 value 140 ms -> mean 171.33 var 11570.56
+n=7 value 101 ms -> mean 161.29 var 10523.35
+n=8 value 132 ms -> mean 157.62 var  9301.73
+min 98, max 410

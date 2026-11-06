@@ -1,0 +1,966 @@
+@@
+title: دالة السعر مع الرسم على القيمة المضافة
+level: easy
+domain: ec
+@ statement
+اكتب دالة `priceWithTax(price)` تعيد السعر بعد إضافة الرسم على القيمة المضافة **19%**، ثم استعملها في `main` لعرض السعر النهائي لثلاثة منتجات.
+@ steps
+- الدالة تأخذ `double` وتعيد `double`: `return price * 1.19;`.
+- في `main` نستدعيها لكل منتج ونعرض النتيجة.
+@ flow
+do: prices = {1200, 4500, 89.9}
+for: item = 0 ; item < 3 ; item++
+  call: final = priceWithTax(prices[item])
+  out: prices[item], final
+@ code
+#include <stdio.h>
+
+double priceWithTax(double price) {
+    return price * 1.19;              // 19% TVA
+}
+
+int main(void) {
+    double prices[3] = {1200, 4500, 89.9};
+    int item;
+    for (item = 0; item < 3; item++)
+        printf("%8.2f DA -> %8.2f DA\n", prices[item], priceWithTax(prices[item]));
+    return 0;
+}
+
+@@
+title: دالة الأكبر بين عرضين
+level: easy
+domain: ec
+@ statement
+يقارن الزبون بين عرضي سعر لنفس المنتج من بائعين. اكتب دالة `minPrice(first, second)` تعيد **الأصغر** بينهما، ودالة `maxPrice` تعيد الأكبر، ثم احسب الفرق (التوفير).
+@ stdin
+5400 4950
+@ steps
+- كل دالة تحتوي على `if` واحدة وتعيد إحدى القيمتين.
+- التوفير = `maxPrice - minPrice`.
+@ flow
+in: first, second
+call: low = minPrice(first, second)
+call: high = maxPrice(first, second)
+out: low, high - low
+@ code
+#include <stdio.h>
+
+double minPrice(double first, double second) {
+    if (first < second)
+        return first;
+    return second;
+}
+
+double maxPrice(double first, double second) {
+    return first > second ? first : second;     // نفس الفكرة بالعامل الشرطي
+}
+
+int main(void) {
+    double first, second;
+    scanf("%lf %lf", &first, &second);
+    printf("Best offer: %.2f DA\n", minPrice(first, second));
+    printf("You save:   %.2f DA\n", maxPrice(first, second) - minPrice(first, second));
+    return 0;
+}
+
+@@
+title: دالة تحويل العملة
+level: easy
+domain: ec
+@ statement
+اكتب دالة `toEuro(dinars, rate)` تحول مبلغًا بالدينار إلى الأورو، ودالة `toDinar(euros, rate)` تقوم بالتحويل العكسي، ثم تحقق أن التحويل ذهابًا وإيابًا يعيد المبلغ الأصلي.
+@ stdin
+25000 148.5
+@ steps
+- `toEuro` تقسم على سعر الصرف، و `toDinar` تضرب فيه.
+- نمرر سعر الصرف كمعامل بدل متغير عام.
+@ flow
+in: dinars, rate
+call: euros = toEuro(dinars, rate)
+call: back = toDinar(euros, rate)
+out: euros, back
+@ code
+#include <stdio.h>
+
+double toEuro(double dinars, double rate) {
+    return dinars / rate;
+}
+
+double toDinar(double euros, double rate) {
+    return euros * rate;
+}
+
+int main(void) {
+    double dinars, rate, euros;
+    scanf("%lf %lf", &dinars, &rate);
+    euros = toEuro(dinars, rate);                 // استدعاء أول
+    printf("%.2f DA = %.2f EUR\n", dinars, euros);
+    printf("Back: %.2f DA\n", toDinar(euros, rate));  // التحويل العكسي
+    return 0;
+}
+
+@@
+title: دالة توفر المنتج في المخزون
+level: easy
+domain: ec
+@ statement
+اكتب دالة `isAvailable(stock, ordered)` تعيد 1 إذا كان المخزون يكفي للكمية المطلوبة و0 في الحالة المعاكسة، واستعملها لفحص أربع طلبيات.
+@ steps
+- الدالة تعيد `int` يُستعمل كقيمة منطقية.
+- في `main`: `if (isAvailable(...))`.
+@ flow
+for: order = 0 ; order < 4 ; order++
+  call: ok = isAvailable(stock[order], ordered[order])
+  if: ok
+    out: `"OK"`
+  else:
+    out: `"out of stock"`
+@ code
+#include <stdio.h>
+
+int isAvailable(int stock, int ordered) {
+    return ordered <= stock;          // 1 أو 0
+}
+
+int main(void) {
+    int stock[4] = {10, 0, 5, 7};
+    int ordered[4] = {3, 1, 5, 9};
+    int order;
+    for (order = 0; order < 4; order++) {
+        if (isAvailable(stock[order], ordered[order]))
+            printf("Order %d: OK\n", order + 1);
+        else
+            printf("Order %d: out of stock (%d left)\n", order + 1, stock[order]);
+    }
+    return 0;
+}
+
+@@
+title: دالة رسم خط فاصل في الفاتورة
+level: easy
+domain: ec
+@ statement
+اكتب دالة من نوع `void` اسمها `printLine(symbol, width)` ترسم سطرًا من الرمز المعطى بالطول المعطى، واستعملها لتأطير رأس فاتورة.
+@ steps
+- الدالة لا تعيد شيئًا (`void`) بل تطبع فقط.
+- نستدعيها قبل العنوان وبعده بعرضين ورمزين مختلفين.
+@ flow
+call: printLine('=', 30)
+out: `"INVOICE #2045"`
+call: printLine('-', 30)
+@ code
+#include <stdio.h>
+
+void printLine(char symbol, int width) {
+    int col;
+    for (col = 0; col < width; col++)
+        putchar(symbol);
+    putchar('\n');                    // لا قيمة معادة
+}
+
+int main(void) {
+    printLine('=', 30);
+    printf("  INVOICE #2045  - TechShop\n");
+    printLine('-', 30);
+    printf("  Total: 12500.00 DA\n");
+    printLine('=', 30);
+    return 0;
+}
+
+@@
+title: دالة متوسط ثلاثة تقييمات
+level: easy
+domain: ds
+@ statement
+لكل منتج ثلاثة تقييمات من 5. اكتب دالة `average3(first, second, third)` تعيد المتوسط، ثم اعرض متوسط ثلاثة منتجات.
+@ steps
+- نقسم على `3.0` لنحصل على نتيجة عشرية.
+- نستدعي الدالة ثلاث مرات بقيم مختلفة.
+@ flow
+call: avgA = average3(4, 5, 3)
+call: avgB = average3(2, 3, 2)
+call: avgC = average3(5, 5, 4)
+out: avgA, avgB, avgC
+@ code
+#include <stdio.h>
+
+double average3(int first, int second, int third) {
+    return (first + second + third) / 3.0;   // 3.0 لتفادي القسمة الصحيحة
+}
+
+int main(void) {
+    printf("Headphones: %.2f\n", average3(4, 5, 3));
+    printf("Charger:    %.2f\n", average3(2, 3, 2));
+    printf("Keyboard:   %.2f\n", average3(5, 5, 4));
+    return 0;
+}
+
+@@
+title: دالة تكلفة التوصيل حسب المسافة
+level: easy
+domain: ec
+@ statement
+تكلفة التوصيل: 300 دج حتى 10 كم، ثم 25 دج لكل كيلومتر إضافي، والتوصيل مجاني إذا تجاوز مبلغ الطلبية 10000 دج. اكتب دالة `deliveryFee(distance, amount)` تطبق هذه القواعد.
+@ stdin
+24 7800
+@ steps
+- إذا `amount > 10000`: نعيد 0.
+- إذا `distance <= 10`: نعيد 300، وإلا `300 + (distance - 10) * 25`.
+@ flow
+in: distance, amount
+call: fee = deliveryFee(distance, amount)
+out: fee
+@ code
+#include <stdio.h>
+
+int deliveryFee(int distance, double amount) {
+    if (amount > 10000)
+        return 0;                          // توصيل مجاني
+    if (distance <= 10)
+        return 300;
+    return 300 + (distance - 10) * 25;     // كيلومترات إضافية
+}
+
+int main(void) {
+    int distance;
+    double amount;
+    scanf("%d %lf", &distance, &amount);
+    printf("Delivery fee: %d DA\n", deliveryFee(distance, amount));
+    printf("Same order above 10000 DA: %d DA\n", deliveryFee(distance, 12000));
+    return 0;
+}
+
+@@
+title: دالة المربع في حساب الخطأ
+level: easy
+domain: ds
+@ statement
+اكتب دالة `square(value)` تعيد مربع عدد، واستعملها لحساب **مجموع مربعات الأخطاء** بين المبيعات المتوقعة والحقيقية لخمسة أيام.
+@ steps
+- `square` تعيد `value * value`.
+- الخطأ اليومي = الحقيقي - المتوقع، ونجمع مربعاته.
+@ flow
+do: sse = 0
+for: day = 0 ; day < 5 ; day++
+  call: sse = sse + square(real[day] - predicted[day])
+out: sse
+@ code
+#include <stdio.h>
+
+double square(double value) {
+    return value * value;
+}
+
+int main(void) {
+    double real[5] = {120, 135, 128, 150, 142};
+    double predicted[5] = {118, 130, 133, 147, 145};
+    double sse = 0;
+    int day;
+    for (day = 0; day < 5; day++)
+        sse += square(real[day] - predicted[day]);   // الخطأ مرفوع للمربع
+    printf("Sum of squared errors: %.1f\n", sse);
+    printf("Mean squared error:    %.1f\n", sse / 5);
+    return 0;
+}
+
+@@
+title: دالة السنة الكبيسة
+level: easy
+domain: ds
+@ statement
+لحساب عدد أيام شهر فيفري في تقارير المبيعات، اكتب دالة `isLeap(year)` تعيد 1 إذا كانت السنة كبيسة، ثم دالة `daysInFebruary(year)`.
+@ stdin
+2024 2026 2100 2000
+@ steps
+- كبيسة إذا قبلت القسمة على 4 دون 100، أو قبلت القسمة على 400.
+- `daysInFebruary` تستدعي `isLeap`: دالة تستعمل دالة أخرى.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  in: year
+  call: days = daysInFebruary(year)
+  out: year, days
+@ code
+#include <stdio.h>
+
+int isLeap(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+}
+
+int daysInFebruary(int year) {
+    return isLeap(year) ? 29 : 28;     // دالة تستدعي دالة
+}
+
+int main(void) {
+    int year, idx;
+    for (idx = 0; idx < 4; idx++) {
+        scanf("%d", &year);
+        printf("February %d: %d days\n", year, daysInFebruary(year));
+    }
+    return 0;
+}
+
+@@
+title: دالة النسبة المئوية للتغير
+level: easy
+domain: ds
+@ statement
+اكتب دالة `percentChange(oldValue, newValue)` تعيد نسبة التغير بين مبيعات شهرين، واستعملها لعرض تطور المبيعات على أربعة أشهر.
+@ steps
+- النسبة = `(newValue - oldValue) / oldValue * 100`.
+- نستدعيها بين كل شهر والشهر الذي يليه.
+@ flow
+for: month = 1 ; month < 4 ; month++
+  call: change = percentChange(sales[month-1], sales[month])
+  out: month, change
+@ code
+#include <stdio.h>
+
+double percentChange(double oldValue, double newValue) {
+    return (newValue - oldValue) / oldValue * 100;
+}
+
+int main(void) {
+    double sales[4] = {80000, 92000, 87400, 104880};
+    int month;
+    for (month = 1; month < 4; month++)
+        printf("Month %d -> %d: %+.1f%%\n", month, month + 1,
+               percentChange(sales[month - 1], sales[month]));   // + لعرض الإشارة
+    return 0;
+}
+
+@@
+title: دالة الجذر التربيعي بطريقة نيوتن
+level: medium
+domain: ds
+@ statement
+اكتب دالة `mySqrt(value)` تحسب الجذر التربيعي **دون** `sqrt` بطريقة **نيوتن**: `guess = (guess + value / guess) / 2` حتى يصبح الفرق بين تقريبين متتاليين أقل من `1e-9`. استعملها لحساب الانحراف المعياري لمبيعات أسبوع.
+@ steps
+- نبدأ بـ `guess = value` (أو 1 إذا كان `value < 1`)، ونعيد 0 إذا كان `value == 0`.
+- نكرر صيغة نيوتن حتى الاستقرار.
+- الانحراف المعياري = `mySqrt(التباين)`.
+@ flow
+do: mean = مجموع sales / 7
+do: variance = مجموع (sales - mean)² / 7
+call: std = mySqrt(variance)
+out: mean, std
+@ code
+#include <stdio.h>
+
+double mySqrt(double value) {
+    double guess, previous;
+    if (value <= 0) return 0;
+    guess = value > 1 ? value : 1;
+    do {
+        previous = guess;
+        guess = (guess + value / guess) / 2;      // صيغة نيوتن
+    } while (previous - guess > 1e-9 || guess - previous > 1e-9);
+    return guess;
+}
+
+int main(void) {
+    double sales[7] = {52, 61, 48, 70, 66, 59, 64};
+    double mean = 0, variance = 0;
+    int day;
+    for (day = 0; day < 7; day++) mean += sales[day];
+    mean /= 7;
+    for (day = 0; day < 7; day++)
+        variance += (sales[day] - mean) * (sales[day] - mean);
+    variance /= 7;
+    printf("sqrt(2) = %.9f\n", mySqrt(2));
+    printf("Mean = %.2f, std = %.3f\n", mean, mySqrt(variance));
+    return 0;
+}
+
+@@
+title: دالة القوة للفائدة المركبة
+level: medium
+domain: ec
+@ statement
+اكتب دالة `power(base, exponent)` (أس صحيح موجب) دون `pow`، واستعملها لحساب قيمة رصيد محفظة الزبون بعد `years` سنة بفائدة سنوية `rate%`: `capital * (1 + rate/100)^years`.
+@ stdin
+50000 6 5
+@ steps
+- `power` تضرب `base` في نفسها `exponent` مرة في حلقة.
+- نعرض الرصيد بعد كل سنة من 1 إلى `years`.
+@ flow
+in: capital, rate, years
+for: year = 1 ; year <= years ; year++
+  call: value = capital * power(1 + rate / 100, year)
+  out: year, value
+@ code
+#include <stdio.h>
+
+double power(double base, int exponent) {
+    double result = 1;
+    int step;
+    for (step = 0; step < exponent; step++)
+        result *= base;                       // ضرب متكرر
+    return result;
+}
+
+int main(void) {
+    double capital, rate;
+    int years, year;
+    scanf("%lf %lf %d", &capital, &rate, &years);
+    for (year = 1; year <= years; year++)
+        printf("Year %d: %.2f DA\n", year, capital * power(1 + rate / 100, year));
+    return 0;
+}
+
+@@
+title: دالة مجموع جدول ومتوسطه
+level: medium
+domain: ds
+@ statement
+اكتب دالتين تستقبلان **جدولًا** وعدد عناصره: `sumArray(values, size)` و `meanArray(values, size)`، حيث تستدعي الثانية الأولى. استعملهما على مبيعات فرعين بأحجام مختلفة.
+@ steps
+- الجدول يُمرَّر بـ `double values[]` مع حجمه في معامل منفصل.
+- `meanArray` تعيد `sumArray(values, size) / size`.
+@ flow
+call: sumA = sumArray(branchA, 5)
+call: meanA = meanArray(branchA, 5)
+call: meanB = meanArray(branchB, 3)
+out: sumA, meanA, meanB
+@ code
+#include <stdio.h>
+
+double sumArray(double values[], int size) {
+    double total = 0;
+    int idx;
+    for (idx = 0; idx < size; idx++)
+        total += values[idx];
+    return total;
+}
+
+double meanArray(double values[], int size) {
+    return sumArray(values, size) / size;    // إعادة استعمال الدالة الأولى
+}
+
+int main(void) {
+    double branchA[5] = {1200, 980, 1430, 1100, 1290};
+    double branchB[3] = {640, 710, 690};
+    printf("Branch A: total %.0f, mean %.2f\n", sumArray(branchA, 5), meanArray(branchA, 5));
+    printf("Branch B: total %.0f, mean %.2f\n", sumArray(branchB, 3), meanArray(branchB, 3));
+    return 0;
+}
+
+@@
+title: دالة البحث عن منتج بالرمز
+level: medium
+domain: ec
+@ statement
+اكتب دالة `findProduct(codes, size, target)` تعيد **فهرس** المنتج ذي الرمز المطلوب أو `-1` إذا لم يوجد، ثم استعملها لعرض سعر المنتجات المطلوبة.
+@ stdin
+3 2045 1111 7781
+@ steps
+- بحث تسلسلي: نعيد الفهرس فور العثور على الرمز (`return` داخل الحلقة).
+- بعد الحلقة نعيد `-1`.
+@ flow
+in: nbQueries
+for: query = 0 ; query < nbQueries ; query++
+  in: target
+  call: idx = findProduct(codes, 6, target)
+  if: idx >= 0
+    out: prices[idx]
+  else:
+    out: `"not found"`
+@ code
+#include <stdio.h>
+
+int findProduct(int codes[], int size, int target) {
+    int idx;
+    for (idx = 0; idx < size; idx++)
+        if (codes[idx] == target)
+            return idx;                 // نخرج فور العثور
+    return -1;                          // غير موجود
+}
+
+int main(void) {
+    int codes[6] = {1001, 2045, 3310, 5120, 7781, 9002};
+    double prices[6] = {450, 12500, 899, 3200, 27000, 650};
+    int nbQueries, query, target, idx;
+    scanf("%d", &nbQueries);
+    for (query = 0; query < nbQueries; query++) {
+        scanf("%d", &target);
+        idx = findProduct(codes, 6, target);
+        if (idx >= 0)
+            printf("Product %d: %.2f DA\n", target, prices[idx]);
+        else
+            printf("Product %d: not found\n", target);
+    }
+    return 0;
+}
+
+@@
+title: دالة ترتيب الأسعار
+level: medium
+domain: ec
+@ statement
+اكتب دالة `sortPrices(prices, size)` ترتب جدول الأسعار تصاعديًا بالترتيب بالفقاعات، ودالة `printPrices` تعرضه. لاحظ أن الجدول الممرر **يتغير فعلًا** بعد الاستدعاء.
+@ steps
+- الجدول يُمرَّر بعنوانه، لذلك التعديلات داخل الدالة تبقى بعد الخروج منها.
+- الترتيب بالفقاعات: نقارن كل عنصرين متجاورين ونبدلهما إذا كانا في غير الترتيب.
+@ flow
+call: printPrices(prices, 7)
+call: sortPrices(prices, 7)
+call: printPrices(prices, 7)
+@ code
+#include <stdio.h>
+
+void sortPrices(double prices[], int size) {
+    int pass, idx;
+    double tmp;
+    for (pass = 0; pass < size - 1; pass++)
+        for (idx = 0; idx < size - 1 - pass; idx++)
+            if (prices[idx] > prices[idx + 1]) {
+                tmp = prices[idx];                // تبديل
+                prices[idx] = prices[idx + 1];
+                prices[idx + 1] = tmp;
+            }
+}
+
+void printPrices(double prices[], int size) {
+    int idx;
+    for (idx = 0; idx < size; idx++)
+        printf("%.0f ", prices[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    double prices[7] = {4500, 1200, 899, 27000, 650, 3200, 12500};
+    printf("Before: ");
+    printPrices(prices, 7);
+    sortPrices(prices, 7);                        // يعدل الجدول الأصلي
+    printf("After:  ");
+    printPrices(prices, 7);
+    return 0;
+}
+
+@@
+title: دالة طول السلسلة ودالة المقارنة
+level: medium
+domain: ec
+@ statement
+اكتب دالتين بديلتين لـ `strlen` و `strcmp`: `textLength(text)` و `textCompare(first, second)` (تعيد سالبًا أو 0 أو موجبًا)، واستعملهما للتحقق من اسم مستخدم وكلمة مروره.
+@ stdin
+admin shop2026
+@ steps
+- `textLength`: نعد الحروف حتى `'\0'`.
+- `textCompare`: نتقدم ما دام الحرفان متساويين وغير منتهيين، ثم نعيد فرق الحرفين.
+@ flow
+in: user, password
+call: lenOk = textLength(password) >= 8
+call: same = textCompare(user, "admin") == 0
+if: same && lenOk && textCompare(password, "shop2026") == 0
+  out: `"Access granted"`
+else:
+  out: `"Access denied"`
+@ code
+#include <stdio.h>
+
+int textLength(char text[]) {
+    int len = 0;
+    while (text[len] != '\0')
+        len++;
+    return len;
+}
+
+int textCompare(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos])
+        pos++;
+    return first[pos] - second[pos];        // أول اختلاف يحدد النتيجة
+}
+
+int main(void) {
+    char user[30], password[30];
+    scanf("%29s %29s", user, password);
+    printf("Password length: %d\n", textLength(password));
+    printf("compare(\"apple\", \"apply\") = %d\n", textCompare("apple", "apply"));
+    if (textCompare(user, "admin") == 0 && textLength(password) >= 8
+        && textCompare(password, "shop2026") == 0)
+        printf("Access granted\n");
+    else
+        printf("Access denied\n");
+    return 0;
+}
+
+@@
+title: دالة القاسم المشترك الأكبر لتوزيع العلب
+level: medium
+domain: ec
+@ statement
+لدى المخزن 84 قلمًا و 120 دفترًا و 156 ممحاة. نريد تكوين أكبر عدد من **العلب المتطابقة** دون بقايا. اكتب دالة `gcd(first, second)` بخوارزمية **إقليدس** واستعملها لحساب القاسم المشترك الأكبر للثلاثة.
+@ steps
+- إقليدس: ما دام `second != 0`: `(first, second) = (second, first % second)`.
+- `gcd` لثلاثة أعداد = `gcd(gcd(first, second), third)`.
+- كل علبة تحتوي على `count / boxes` من كل صنف.
+@ flow
+call: boxes = gcd(gcd(pens, notebooks), erasers)
+out: boxes
+out: pens / boxes, notebooks / boxes, erasers / boxes
+@ code
+#include <stdio.h>
+
+int gcd(int first, int second) {
+    int rest;
+    while (second != 0) {
+        rest = first % second;          // إقليدس
+        first = second;
+        second = rest;
+    }
+    return first;
+}
+
+int main(void) {
+    int pens = 84, notebooks = 120, erasers = 156;
+    int boxes = gcd(gcd(pens, notebooks), erasers);   // استدعاء متداخل
+    printf("Number of identical boxes: %d\n", boxes);
+    printf("Each box: %d pens, %d notebooks, %d erasers\n",
+           pens / boxes, notebooks / boxes, erasers / boxes);
+    return 0;
+}
+
+@@
+title: دالة العدد الأولي لأرقام القسائم
+level: medium
+domain: ec
+@ statement
+يُعتبر رقم القسيمة صالحًا إذا كان **عددًا أوليًا**. اكتب دالة `isPrime(number)` تختبر القواسم حتى الجذر التربيعي فقط (`div * div <= number`)، ثم اعرض القسائم الصالحة بين 1000 و 1100.
+@ steps
+- الأعداد أقل من 2 ليست أولية؛ العدد 2 أولي؛ الأعداد الزوجية الأخرى ليست أولية.
+- نجرب القواسم الفردية `divisor` ما دام `divisor * divisor <= number`.
+@ flow
+do: count = 0
+for: code = 1000 ; code <= 1100 ; code++
+  call: ok = isPrime(code)
+  if: ok
+    out: code
+    do: count++
+out: count
+@ code
+#include <stdio.h>
+
+int isPrime(int number) {
+    int divisor;
+    if (number < 2) return 0;
+    if (number % 2 == 0) return number == 2;
+    for (divisor = 3; divisor * divisor <= number; divisor += 2)   // حتى الجذر فقط
+        if (number % divisor == 0)
+            return 0;
+    return 1;
+}
+
+int main(void) {
+    int code, count = 0;
+    for (code = 1000; code <= 1100; code++)
+        if (isPrime(code)) {
+            printf("%d ", code);
+            count++;
+        }
+    printf("\n%d valid coupons\n", count);
+    return 0;
+}
+
+@@
+title: دالة تحويل المدة إلى ساعات ودقائق
+level: medium
+domain: ds
+@ statement
+يسجل الموقع مدة كل جلسة بالثواني. اكتب دالة `printDuration(seconds)` تعرضها بصيغة `hh:mm:ss`، ودالة `toSeconds(hours, minutes, secs)` للتحويل العكسي، ثم احسب متوسط مدة الجلسات.
+@ steps
+- الساعات `seconds / 3600`، الدقائق `(seconds % 3600) / 60`، الثواني `seconds % 60`.
+- `%02d` يضيف صفرًا على اليسار.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  call: printDuration(sessions[idx])
+do: avg = مجموع sessions / 4
+call: printDuration(avg)
+@ code
+#include <stdio.h>
+
+void printDuration(int seconds) {
+    printf("%02d:%02d:%02d\n", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
+}
+
+int toSeconds(int hours, int minutes, int secs) {
+    return hours * 3600 + minutes * 60 + secs;
+}
+
+int main(void) {
+    int sessions[4] = {754, 3725, 192, toSeconds(1, 5, 30)};
+    int idx, total = 0;
+    for (idx = 0; idx < 4; idx++) {
+        printf("Session %d: ", idx + 1);
+        printDuration(sessions[idx]);
+        total += sessions[idx];
+    }
+    printf("Average:   ");
+    printDuration(total / 4);
+    return 0;
+}
+
+@@
+title: دالة الخصم حسب فئة الزبون
+level: medium
+domain: ec
+@ statement
+اكتب دالة `discountRate(category)` تعيد نسبة الخصم حسب فئة الزبون (`'B'` برونزي 5%، `'S'` فضي 10%، `'G'` ذهبي 15%، غير ذلك 0%) باستعمال `switch`، ودالة `finalAmount(amount, category)` تطبق الخصم ثم تضيف رسم التغليف 150 دج.
+@ stdin
+4
+8000 G
+2500 B
+12000 S
+900 X
+@ steps
+- `switch (category)` مع `return` في كل حالة (لا حاجة إلى `break`).
+- `finalAmount = amount * (1 - rate) + 150`.
+@ flow
+in: nbOrders
+for: order = 0 ; order < nbOrders ; order++
+  in: amount, category
+  call: total = finalAmount(amount, category)
+  out: total
+@ code
+#include <stdio.h>
+
+double discountRate(char category) {
+    switch (category) {
+        case 'B': return 0.05;
+        case 'S': return 0.10;
+        case 'G': return 0.15;
+        default:  return 0.0;            // زبون عادي
+    }
+}
+
+double finalAmount(double amount, char category) {
+    return amount * (1 - discountRate(category)) + 150;
+}
+
+int main(void) {
+    int nbOrders, order;
+    double amount;
+    char category;
+    scanf("%d", &nbOrders);
+    for (order = 0; order < nbOrders; order++) {
+        scanf("%lf %c", &amount, &category);
+        printf("%8.2f (%c, -%2.0f%%) -> %8.2f DA\n", amount, category,
+               discountRate(category) * 100, finalAmount(amount, category));
+    }
+    return 0;
+}
+
+@@
+title: دالة التحقق من رقم البطاقة بخوارزمية لون
+level: medium
+domain: ec
+@ statement
+قبل إرسال رقم البطاقة إلى البنك نتحقق منه محليًا بخوارزمية **لون (Luhn)**. اكتب دالة `luhnValid(number)` تأخذ الرقم كسلسلة وتعيد 1 إذا كان صالحًا.
+@ stdin
+4539148803436467 4539148803436468
+@ steps
+- نمر على الأرقام من اليمين إلى اليسار؛ نضاعف رقمًا من كل اثنين (الثاني، الرابع، ...).
+- إذا تجاوز الرقم المضاعف 9 نطرح منه 9.
+- الرقم صالح إذا كان المجموع يقبل القسمة على 10.
+@ flow
+in: card
+do: sum = 0 ; double = 0
+for: pos = length - 1 ; pos >= 0 ; pos--
+  do: digit = card[pos] - '0'
+  if: double
+    do: digit = digit * 2 ; إذا digit > 9 نطرح 9
+  do: sum = sum + digit ; double = !double
+out: sum % 10 == 0
+@ code
+#include <stdio.h>
+
+int luhnValid(char number[]) {
+    int length = 0, pos, digit, sum = 0, doubled = 0;
+    while (number[length] != '\0') length++;
+    for (pos = length - 1; pos >= 0; pos--) {     // من اليمين
+        digit = number[pos] - '0';
+        if (doubled) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        doubled = !doubled;                       // رقم من كل اثنين
+    }
+    return sum % 10 == 0;
+}
+
+int main(void) {
+    char card[25];
+    int idx;
+    for (idx = 0; idx < 2; idx++) {
+        scanf("%24s", card);
+        printf("%s: %s\n", card, luhnValid(card) ? "valid" : "invalid");
+    }
+    return 0;
+}
+
+@@
+title: دالة التطبيع بين الصفر والواحد
+level: medium
+domain: ds
+@ statement
+قبل تدريب نموذج، نطبّع أعمدة البيانات إلى المجال `[0, 1]`. اكتب دالة `minMaxNormalize(values, normalized, size)` تملأ جدولًا ثانيًا بالقيم `(value - min) / (max - min)`، واستعملها على أسعار وعلى أعمار الزبائن.
+@ steps
+- مرور أول لإيجاد `min` و `max`.
+- إذا كان `max == min` نضع 0 لكل القيم لتفادي القسمة على 0.
+- النتيجة تُكتب في الجدول الثاني (الجدول الأصلي لا يتغير).
+@ flow
+do: min = max = values[0]
+for: idx = 1 ; idx < size ; idx++
+  do: تحديث min و max
+for: idx = 0 ; idx < size ; idx++
+  do: normalized[idx] = (values[idx] - min) / (max - min)
+@ code
+#include <stdio.h>
+
+void minMaxNormalize(double values[], double normalized[], int size) {
+    double low = values[0], high = values[0];
+    int idx;
+    for (idx = 1; idx < size; idx++) {
+        if (values[idx] < low) low = values[idx];
+        if (values[idx] > high) high = values[idx];
+    }
+    for (idx = 0; idx < size; idx++)
+        normalized[idx] = high == low ? 0 : (values[idx] - low) / (high - low);
+}
+
+void printRow(char label[], double values[], int size) {
+    int idx;
+    printf("%s", label);
+    for (idx = 0; idx < size; idx++) printf(" %.3f", values[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    double prices[5] = {1200, 450, 3900, 2600, 900}, agesD[5] = {19, 34, 52, 27, 41};
+    double result[5];
+    minMaxNormalize(prices, result, 5);
+    printRow("prices:", result, 5);
+    minMaxNormalize(agesD, result, 5);           // نفس الدالة لعمود آخر
+    printRow("ages:  ", result, 5);
+    return 0;
+}
+
+@@
+title: دالة عدّ المنتجات تحت عتبة
+level: medium
+domain: ec
+@ statement
+اكتب دالة `countBelow(stock, size, threshold)` تعيد عدد المنتجات التي مخزونها أقل من العتبة، ودالة `printBelow` تعرض فهارسها. استعملهما لثلاث عتبات (5، 10، 20) لتقرير إعادة التموين.
+@ steps
+- دالة تعيد عددًا، وأخرى `void` تعرض.
+- نستدعيهما في حلقة على جدول العتبات.
+@ flow
+for: level = 0 ; level < 3 ; level++
+  call: count = countBelow(stock, 8, thresholds[level])
+  out: thresholds[level], count
+  call: printBelow(stock, 8, thresholds[level])
+@ code
+#include <stdio.h>
+
+int countBelow(int stock[], int size, int threshold) {
+    int idx, count = 0;
+    for (idx = 0; idx < size; idx++)
+        if (stock[idx] < threshold) count++;
+    return count;
+}
+
+void printBelow(int stock[], int size, int threshold) {
+    int idx;
+    printf("   items:");
+    for (idx = 0; idx < size; idx++)
+        if (stock[idx] < threshold) printf(" #%d(%d)", idx, stock[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    int stock[8] = {12, 3, 25, 8, 0, 17, 9, 30};
+    int thresholds[3] = {5, 10, 20}, level;
+    for (level = 0; level < 3; level++) {
+        printf("Below %2d: %d products\n", thresholds[level],
+               countBelow(stock, 8, thresholds[level]));
+        printBelow(stock, 8, thresholds[level]);
+    }
+    return 0;
+}
+
+@@
+title: دالة الأس الأسي بسلسلة تايلور
+level: medium
+domain: ds
+@ statement
+النمو المستمر للمستخدمين يتبع `users = start * e^(rate * t)`. اكتب دالة `myExp(value)` تحسب `e^value` دون `exp` بمجموع سلسلة تايلور `1 + value + value²/2! + value³/3! + ...` حتى يصبح الحد أقل من `1e-12`.
+@ steps
+- كل حد يُحسب من الذي قبله: `term = term * value / rank`.
+- نتوقف عندما يصبح الحد (بالقيمة المطلقة) صغيرًا جدًا.
+@ flow
+do: sum = 1 ; term = 1 ; rank = 1
+while: |term| > 1e-12
+  do: term = term * value / rank
+  do: sum = sum + term ; rank++
+out: sum
+@ code
+#include <stdio.h>
+
+double myExp(double value) {
+    double sum = 1, term = 1;
+    int rank = 1;
+    while (term > 1e-12 || term < -1e-12) {
+        term = term * value / rank;       // الحد التالي من السابق
+        sum += term;
+        rank++;
+    }
+    return sum;
+}
+
+int main(void) {
+    double start = 1500, rate = 0.08;
+    int month;
+    printf("e = %.10f\n", myExp(1));
+    for (month = 0; month <= 12; month += 3)
+        printf("Month %2d: %.0f users\n", month, start * myExp(rate * month));
+    return 0;
+}
+
+@@
+title: دالة التقريب إلى أقرب مضاعف
+level: medium
+domain: ec
+@ statement
+تُعرض الأسعار التسويقية مقربة. اكتب دالة `roundTo(price, step)` تقرب السعر إلى **أقرب** مضاعف لـ `step`، ودالة `charmPrice(price)` تعطي السعر "النفسي" (مثلًا 4990 بدل 5000).
+@ stdin
+4873 50
+@ steps
+- `roundTo`: `(int)((price + step / 2.0) / step) * step`.
+- `charmPrice`: نقرب إلى أقرب 100 ثم نطرح 10.
+@ flow
+in: price, step
+call: rounded = roundTo(price, step)
+call: charm = charmPrice(price)
+out: rounded, charm
+@ code
+#include <stdio.h>
+
+int roundTo(double price, int step) {
+    return (int)((price + step / 2.0) / step) * step;   // نصف الخطوة للتقريب
+}
+
+int charmPrice(double price) {
+    return roundTo(price, 100) - 10;
+}
+
+int main(void) {
+    double price;
+    int step;
+    scanf("%lf %d", &price, &step);
+    printf("Rounded to %d: %d DA\n", step, roundTo(price, step));
+    printf("Rounded to 1000: %d DA\n", roundTo(price, 1000));
+    printf("Charm price: %d DA\n", charmPrice(price));
+    return 0;
+}

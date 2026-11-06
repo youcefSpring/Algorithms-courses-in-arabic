@@ -1,0 +1,10 @@
+Search 3200:
+  [0..11] middle 5
+  [6..11] middle 8
+  found at index 8
+Search 700:
+  [0..11] middle 5
+  [0..4] middle 2
+  [3..4] middle 3
+  [4..4] middle 4
+  not found

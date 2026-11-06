@@ -1,8 +1,8 @@
 % Style of the exercises book (same palette and fonts as the slides).
 % Compile from exercises_book/ with:  tectonic book.tex
 
-\usepackage[a4paper, top=2.2cm, bottom=2.2cm, left=2cm, right=2cm,
-    headheight=15pt]{geometry}
+\usepackage[a4paper, top=2.2cm, bottom=2.2cm, inner=2.3cm, outer=1.8cm,
+    bindingoffset=0.4cm, headheight=15pt]{geometry}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
@@ -18,6 +18,7 @@
 \usepackage{enumitem}
 \usepackage{adjustbox}
 \usepackage{fancyhdr}
+\usepackage{emptypage}
 \usepackage{titlesec}
 \usepackage{polyglossia}
 \usepackage{hyperref}
@@ -64,6 +65,14 @@
 \definecolor{lvEasy}{HTML}{2E9E5B}
 \definecolor{lvMedium}{HTML}{F08C2E}
 \definecolor{lvHard}{HTML}{C62828}
+% cover palette
+\definecolor{coverPaper}{HTML}{FBF8F1}
+\definecolor{coverInk}{HTML}{1F3A4D}
+\definecolor{coverGold}{HTML}{B8893B}
+
+% Publication data (fill in before printing)
+\newcommand{\bookISBN}{...........................}
+\newcommand{\bookDepot}{...........................}
 
 \hypersetup{colorlinks=true, linkcolor=brandDark, urlcolor=tealDeep}
 
@@ -74,13 +83,14 @@
 \newcommand{\audience}{طلبة السنة الأولى}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{4pt}
+\raggedbottom    % no vertical stretching between blocks (twoside defaults to flushbottom)
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[R]{\color{brandMuted}\small\khatt\leftmark}
-\fancyhead[L]{\color{brandMuted}\small كتاب التمارين المحلولة}
+\fancyhead[RO,LE]{\color{brandMuted}\small\khatt\leftmark}
+\fancyhead[LO,RE]{\color{brandMuted}\small كتاب التمارين المحلولة}
 \fancyfoot[C]{\color{brandMuted}\small\textenglish{\thepage}}
-\fancyfoot[R]{\color{brandMuted}\small\faUserTie\ \teacher}
-\fancyfoot[L]{\color{brandMuted}\small\audience}
+\fancyfoot[RO,LE]{\color{brandMuted}\small\faUserTie\ \teacher}
+\fancyfoot[LO,RE]{\color{brandMuted}\small\audience}
 \renewcommand{\headrule}{{\color{brandTeal}\hrule height 0.8pt}}
 \renewcommand{\chaptermark}[1]{\markboth{الفصل \textenglish{\thechapter}: #1}{}}
 \fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrule}{}%
@@ -151,12 +161,13 @@
 % \exhead{number}{level 1|2|3}{title}{domain}
 \newcommand{\exhead}[4]{%
     \par\addvspace{10pt}%
-    \begin{tcolorbox}[enhanced, colback=brandDark, colframe=brandDark,
-        arc=4pt, boxrule=0pt, left=3mm, right=3mm, top=1.6mm, bottom=1.6mm,
-        coltext=white, before skip=0pt, after skip=4pt]
-        {\khatt\bfseries\large\color{brandTeal}تمرين \textenglish{#1}}%
+    \begin{tcolorbox}[enhanced, colback=brandTeal!9, colframe=brandTeal!45,
+        arc=3pt, boxrule=0.5pt, rightrule=4pt, left=3mm, right=3mm,
+        top=1.4mm, bottom=1.4mm, coltext=brandDark, before skip=0pt,
+        after skip=4pt]
+        {\khatt\bfseries\large\color{tealDeep}تمرين \textenglish{#1}}%
         \quad{\khatt\bfseries\large #3}\hfill
-        {\small\color{brandOrange}#4}\quad\lvbadge{#2}
+        {\small\color{brandOrange!85!black}#4}\quad\lvbadge{#2}
     \end{tcolorbox}%
     \phantomsection\addcontentsline{toc}{section}{\textenglish{#1}\quad #3}}
 
@@ -184,10 +195,13 @@
     xleftmargin=18pt,
     numbers=left, numberstyle=\scriptsize\color{brandMuted}, numbersep=8pt,
     aboveskip=0pt, belowskip=0pt, escapeinside={(*@}{@*)},
+    breaklines=true, breakatwhitespace=true, breakindent=24pt,
+    postbreak=\mbox{\textcolor{brandMuted}{$\hookrightarrow$}\space},
     morekeywords={bool, true, false, NULL, FILE, size_t}}
 \lstdefinestyle{outstyle}{
     language={}, basicstyle=\codefont\small\color{brandDark},
     columns=fullflexible, keepspaces=true, showstringspaces=false,
+    breaklines=true,
     aboveskip=0pt, belowskip=0pt}
 
 % Arabic comment inside a listing (red): // + RTL text
@@ -199,11 +213,11 @@
     top=3pt, bottom=3pt, before skip=2pt, after skip=4pt,
     overlay unbroken and first={\node[anchor=north east, font=\scriptsize\bfseries,
         text=brandMuted] at (frame.north east) {\textenglish{C}};}}
-\newtcolorbox{outbox}{enhanced, breakable, colback=brandDark,
-    colframe=brandDark, boxrule=0pt, arc=2pt, left=6pt, right=6pt,
+\newtcolorbox{outbox}{enhanced, breakable, colback=white,
+    colframe=brandMuted!45, boxrule=0.4pt, leftrule=3pt, arc=2pt, left=6pt, right=6pt,
     top=3pt, bottom=3pt, before skip=2pt, after skip=4pt}
 \lstdefinestyle{outdark}{style=outstyle,
-    basicstyle=\codefont\small\color{brandLight}}
+    basicstyle=\codefont\small\color{brandDark}}
 
 \newcommand{\ccode}[2][\small]{\begin{codebox}\begin{english}\lstinputlisting[style=cstyle, basicstyle=\codefont#1]{#2}\end{english}\end{codebox}}
 \newcommand{\cout}[1]{\begin{outbox}\begin{english}\lstinputlisting[style=outdark]{#1}\end{english}\end{outbox}}

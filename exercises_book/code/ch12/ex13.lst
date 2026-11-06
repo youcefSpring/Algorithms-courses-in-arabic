@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int week; double price; struct Node *next; } Node;
+
+Node *reverse(Node *head) {
+    Node *prev = NULL, *walk = head, *next;
+    while (walk != NULL) {
+        next = walk->next;            (*@\cmt{نحفظ الباقي}@*)
+        walk->next = prev;            (*@\cmt{نقلب الرابط}@*)
+        prev = walk;
+        walk = next;
+    }
+    return prev;
+}
+
+void printList(const Node *head) {
+    for (; head != NULL; head = head->next) printf("w%d:%.0f ", head->week, head->price);
+    printf("\n");
+}
+
+int main(void) {
+    double prices[5] = {32000, 33500, 31000, 34500, 30000};
+    Node *head = NULL, *node, *next;
+    int idx;
+    for (idx = 4; idx >= 0; idx--) {
+        node = malloc(sizeof(Node)); node->week = idx + 1; node->price = prices[idx];
+        node->next = head; head = node;
+    }
+    printList(head);
+    head = reverse(head);
+    printList(head);
+    while (head != NULL) { next = head->next; free(head); head = next; }
+    return 0;
+}

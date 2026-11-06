@@ -1,0 +1,5 @@
+Month  1: active  800.0  idle  150.0  churned   50.0  (sum 1000.0)
+Month  3: active  606.5  idle  200.2  churned  193.2  (sum 1000.0)
+Month  6: active  448.0  idle  162.7  churned  389.3  (sum 1000.0)
+Month 12: active  253.7  idle   92.9  churned  653.5  (sum 1000.0)
+P^12 first row: 0.2537 0.0929 0.6535

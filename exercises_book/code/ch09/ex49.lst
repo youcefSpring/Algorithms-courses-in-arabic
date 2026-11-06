@@ -1,0 +1,62 @@
+#include <stdio.h>
+
+#define MAXD 80
+
+typedef struct { int digits[MAXD]; int length; } BigNum;
+
+BigNum fromInt(long value) {
+    BigNum number;
+    number.length = 0;
+    do {
+        number.digits[number.length++] = (int)(value % 10);
+        value /= 10;
+    } while (value > 0);
+    return number;
+}
+
+BigNum multiplySmall(BigNum number, int factor) {
+    int pos, carry = 0, product;
+    for (pos = 0; pos < number.length; pos++) {
+        product = number.digits[pos] * factor + carry;
+        number.digits[pos] = product % 10;
+        carry = product / 10;                          (*@\cmt{الحمل}@*)
+    }
+    while (carry > 0) {
+        number.digits[number.length++] = carry % 10;
+        carry /= 10;
+    }
+    return number;
+}
+
+BigNum addBig(BigNum first, BigNum second) {
+    BigNum sum;
+    int pos, carry = 0, digit;
+    sum.length = first.length > second.length ? first.length : second.length;
+    for (pos = 0; pos < sum.length; pos++) {
+        digit = carry + (pos < first.length ? first.digits[pos] : 0)
+                      + (pos < second.length ? second.digits[pos] : 0);
+        sum.digits[pos] = digit % 10;
+        carry = digit / 10;
+    }
+    if (carry) sum.digits[sum.length++] = carry;
+    return sum;
+}
+
+void printBig(char label[], BigNum number) {
+    int pos;
+    printf("%s", label);
+    for (pos = number.length - 1; pos >= 0; pos--) putchar('0' + number.digits[pos]);
+    printf(" (%d digits)\n", number.length);
+}
+
+int main(void) {
+    BigNum fact = fromInt(1), power = fromInt(1);
+    int factor, step;
+    for (factor = 2; factor <= 30; factor++) fact = multiplySmall(fact, factor);
+    for (step = 0; step < 100; step++) power = multiplySmall(power, 2);
+    printBig("30!   = ", fact);
+    printBig("2^100 = ", power);
+    printBig("sum   = ", addBig(fact, power));
+    printBig("long max = ", fromInt(9223372036854775807L));
+    return 0;
+}

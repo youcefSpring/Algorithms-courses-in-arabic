@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int nbClients, client, idx, cells = 0, longest = 0;
+    double **orders, sum;
+    int *lengths;
+    scanf("%d", &nbClients);
+    orders = malloc(nbClients * sizeof(double *));
+    lengths = malloc(nbClients * sizeof(int));
+    for (client = 0; client < nbClients; client++) {
+        scanf("%d", &lengths[client]);
+        orders[client] = malloc(lengths[client] * sizeof(double));   (*@\cmt{سطر بطوله الحقيقي}@*)
+        for (sum = 0, idx = 0; idx < lengths[client]; idx++) {
+            scanf("%lf", &orders[client][idx]);
+            sum += orders[client][idx];
+        }
+        cells += lengths[client];
+        if (lengths[client] > longest) longest = lengths[client];
+        printf("Client %d: %d orders, total %.0f\n", client + 1, lengths[client], sum);
+    }
+    printf("Cells used %d vs rectangular %d\n", cells, nbClients * longest);
+    for (client = 0; client < nbClients; client++) free(orders[client]);
+    free(orders);
+    free(lengths);
+    return 0;
+}

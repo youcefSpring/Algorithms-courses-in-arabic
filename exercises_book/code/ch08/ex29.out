@@ -1,0 +1,4 @@
+4 units: 5 ways
+10 units: 42 ways
+30 units: 5604 ways
+30 units with batches of at most 5: 674 ways

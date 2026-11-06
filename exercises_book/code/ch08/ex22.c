@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+#define NB 4
+
+char names[NB][10] = {"Mouse", "Keyboard", "Headset", "Webcam"};
+double prices[NB] = {1500, 3200, 2800, 4100};
+int chosen[NB], affordable = 0;
+
+void subsets(int index) {
+    int idx;
+    double total = 0;
+    if (index == NB) {                         // حزمة كاملة
+        printf("{");
+        for (idx = 0; idx < NB; idx++)
+            if (chosen[idx]) { printf(" %s", names[idx]); total += prices[idx]; }
+        printf(" } = %.0f\n", total);
+        if (total <= 6000) affordable++;
+        return;
+    }
+    chosen[index] = 0;                         // دون المنتج
+    subsets(index + 1);
+    chosen[index] = 1;                         // مع المنتج
+    subsets(index + 1);
+}
+
+int main(void) {
+    subsets(0);
+    printf("Bundles up to 6000 DA: %d\n", affordable);
+    return 0;
+}

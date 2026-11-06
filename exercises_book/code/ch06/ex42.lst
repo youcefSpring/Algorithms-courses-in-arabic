@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "abababcabababab";
+    char pattern[] = "abab";
+    int fail[20], patLen = 0, pos, matched, count = 0;
+    while (pattern[patLen] != '\0') patLen++;
+    fail[0] = 0;                                   (*@\cmt{جدول البادئات}@*)
+    matched = 0;
+    for (pos = 1; pos < patLen; pos++) {
+        while (matched > 0 && pattern[pos] != pattern[matched])
+            matched = fail[matched - 1];
+        if (pattern[pos] == pattern[matched]) matched++;
+        fail[pos] = matched;
+    }
+    printf("fail table:");
+    for (pos = 0; pos < patLen; pos++) printf(" %d", fail[pos]);
+    printf("\n");
+    matched = 0;                                   (*@\cmt{البحث في النص}@*)
+    for (pos = 0; text[pos] != '\0'; pos++) {
+        while (matched > 0 && text[pos] != pattern[matched])
+            matched = fail[matched - 1];           (*@\cmt{لا نرجع في النص أبدًا}@*)
+        if (text[pos] == pattern[matched]) matched++;
+        if (matched == patLen) {
+            printf("Match at position %d\n", pos - patLen + 1);
+            count++;
+            matched = fail[matched - 1];           (*@\cmt{نسمح بالتداخل}@*)
+        }
+    }
+    printf("%d occurrence(s)\n", count);
+    return 0;
+}

@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char key; struct Tree *left, *right; } Tree;
+
+const char pre[] = "ABDEGCFH", in[] = "DBGEACHF";
+
+Tree *build(int preStart, int inStart, int size) {
+    Tree *node;
+    int rootPos, leftSize;
+    if (size == 0) return NULL;
+    node = malloc(sizeof(Tree));
+    node->key = pre[preStart];                             (*@\cmt{الجذر}@*)
+    for (rootPos = inStart; in[rootPos] != node->key; rootPos++) {}
+    leftSize = rootPos - inStart;
+    node->left = build(preStart + 1, inStart, leftSize);
+    node->right = build(preStart + 1 + leftSize, rootPos + 1, size - 1 - leftSize);
+    return node;
+}
+
+void postorder(const Tree *node) { if (node) { postorder(node->left); postorder(node->right); putchar(node->key); } }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = build(0, 0, 8);
+    printf("preorder:  %s\ninorder:   %s\npostorder: ", pre, in);
+    postorder(root);
+    printf("\nroot %c, left child %c, right child %c\n", root->key, root->left->key, root->right->key);
+    freeTree(root);
+    return 0;
+}

@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+double mySqrt(double value) {
+    double guess, previous;
+    if (value <= 0) return 0;
+    guess = value > 1 ? value : 1;
+    do {
+        previous = guess;
+        guess = (guess + value / guess) / 2;      // صيغة نيوتن
+    } while (previous - guess > 1e-9 || guess - previous > 1e-9);
+    return guess;
+}
+
+int main(void) {
+    double sales[7] = {52, 61, 48, 70, 66, 59, 64};
+    double mean = 0, variance = 0;
+    int day;
+    for (day = 0; day < 7; day++) mean += sales[day];
+    mean /= 7;
+    for (day = 0; day < 7; day++)
+        variance += (sales[day] - mean) * (sales[day] - mean);
+    variance /= 7;
+    printf("sqrt(2) = %.9f\n", mySqrt(2));
+    printf("Mean = %.2f, std = %.3f\n", mean, mySqrt(variance));
+    return 0;
+}

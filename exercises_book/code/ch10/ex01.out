@@ -1,0 +1,3 @@
+price = 4500.00, *ptr = 4500.00
+same address: yes
+after -10% via pointer: price = 4050.00

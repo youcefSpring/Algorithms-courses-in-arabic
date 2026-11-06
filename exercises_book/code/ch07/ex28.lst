@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+void printBinary(int value, int bits) {
+    int bit;
+    for (bit = bits - 1; bit >= 0; bit--)
+        putchar(((value >> bit) & 1) ? '1' : '0');   (*@\cmt{البت الأعلى أولًا}@*)
+}
+
+int hasFlag(int value, int bit) {
+    return (value >> bit) & 1;
+}
+
+int main(void) {
+    int flags[3] = {5, 11, 6};
+    char names[4][16] = {"in-stock", "new", "on-sale", "free-ship"};
+    int item, bit;
+    for (item = 0; item < 3; item++) {
+        printf("Product %d: %2d = ", item + 1, flags[item]);
+        printBinary(flags[item], 4);
+        printf(" ->");
+        for (bit = 0; bit < 4; bit++)
+            if (hasFlag(flags[item], bit))
+                printf(" %s", names[bit]);
+        printf("\n");
+    }
+    return 0;
+}

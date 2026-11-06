@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Term { double coef; int power; struct Term *next; } Term;
+
+void addTerm(Term **poly, double coef, int power) {
+    Term **link = poly, *node;
+    while (*link != NULL && (*link)->power > power) link = &(*link)->next;
+    if (*link != NULL && (*link)->power == power) {
+        (*link)->coef += coef;                           (*@\cmt{حد متشابه}@*)
+        if ((*link)->coef == 0) { node = *link; *link = node->next; free(node); }
+        return;
+    }
+    if (coef == 0) return;
+    node = malloc(sizeof(Term));
+    node->coef = coef;
+    node->power = power;
+    node->next = *link;                                  (*@\cmt{إدراج مرتب}@*)
+    *link = node;
+}
+
+Term *multiplyPoly(const Term *first, const Term *second) {
+    Term *result = NULL;
+    const Term *termA, *termB;
+    for (termA = first; termA != NULL; termA = termA->next)
+        for (termB = second; termB != NULL; termB = termB->next)
+            addTerm(&result, termA->coef * termB->coef, termA->power + termB->power);
+    return result;
+}
+
+void printPoly(const char *label, const Term *poly) {
+    printf("%s", label);
+    for (; poly != NULL; poly = poly->next) printf(" %+g t^%d", poly->coef, poly->power);
+    printf("\n");
+}
+
+void freePoly(Term *poly) { Term *next; for (; poly != NULL; poly = next) { next = poly->next; free(poly); } }
+
+int main(void) {
+    Term *price = NULL, *quantity = NULL, *revenue;
+    addTerm(&price, 3000, 0); addTerm(&price, -50, 1);                   (*@\cmt{السعر ينخفض}@*)
+    addTerm(&quantity, 200, 0); addTerm(&quantity, 15, 1); addTerm(&quantity, -0.5, 2);
+    revenue = multiplyPoly(price, quantity);
+    printPoly("price(t)   =", price);
+    printPoly("quantity(t)=", quantity);
+    printPoly("revenue(t) =", revenue);
+    freePoly(price); freePoly(quantity); freePoly(revenue);
+    return 0;
+}

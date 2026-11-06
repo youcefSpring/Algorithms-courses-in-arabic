@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int price, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->price = price; node->left = left; node->right = right;
+    return node;
+}
+
+int path[20];
+
+int hasPathSum(const Tree *node, int remaining, int depth) {
+    int idx;
+    if (node == NULL) return 0;
+    path[depth] = node->price;
+    remaining -= node->price;
+    if (node->left == NULL && node->right == NULL) {           // ورقة
+        if (remaining != 0) return 0;
+        printf("Bundle:");
+        for (idx = 0; idx <= depth; idx++) printf(" %d", path[idx]);
+        printf("\n");
+        return 1;
+    }
+    return hasPathSum(node->left, remaining, depth + 1) || hasPathSum(node->right, remaining, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(5000, newTree(3200, newTree(1500, NULL, NULL), newTree(450, NULL, NULL)),
+                               newTree(4100, newTree(600, NULL, NULL), newTree(2200, newTree(899, NULL, NULL), NULL)));
+    int budget;
+    scanf("%d", &budget);
+    if (!hasPathSum(root, budget, 0)) printf("No bundle for %d DA\n", budget);
+    if (!hasPathSum(root, 12000, 0)) printf("No bundle for 12000 DA\n");
+    freeTree(root);
+    return 0;
+}

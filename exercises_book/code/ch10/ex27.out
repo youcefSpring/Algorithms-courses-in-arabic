@@ -1,0 +1,7 @@
+add 32000 -> last 1 avg 32000.00
+add 33500 -> last 2 avg 32750.00
+add 31000 -> last 3 avg 32166.67
+add 34500 -> last 4 avg 32750.00
+add 30000 -> last 4 avg 32250.00
+add 29000 -> last 4 avg 31125.00
+add 31500 -> last 4 avg 31250.00

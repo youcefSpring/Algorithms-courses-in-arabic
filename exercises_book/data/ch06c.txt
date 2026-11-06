@@ -1,0 +1,603 @@
+@@
+title: مسافة التحرير بين كلمتي بحث
+level: hard
+domain: ec
+@ statement
+محرك البحث في المتجر يقترح التصحيح عندما يخطئ الزبون في الكتابة. اكتب برنامجًا يحسب **مسافة ليفنشتاين** بين كلمة البحث `"labtop"` وكل منتج من قائمة، أي أقل عدد من العمليات (إدراج، حذف، تبديل حرف) لتحويل الأولى إلى الثانية، ثم يقترح الأقرب.
+@ steps
+- `dist[row][col]` = مسافة التحرير بين أول `row` حرفًا من الكلمة وأول `col` حرفًا من المنتج.
+- الحالات الابتدائية: `dist[row][0] = row` و `dist[0][col] = col`.
+- إذا تساوى الحرفان: `dist[row][col] = dist[row-1][col-1]`، وإلا 1 + أصغر الخانات الثلاث المجاورة.
+- المنتج ذو أصغر مسافة هو الاقتراح.
+@ flow
+for: item = 0 ; item < NB ; item++
+  do: dist[row][0] = row ; dist[0][col] = col
+  for: row = 1 ; row <= lenA ; row++
+    for: col = 1 ; col <= lenB ; col++
+      if: query[row-1] == name[col-1]
+        do: dist[row][col] = dist[row-1][col-1]
+      else:
+        do: dist[row][col] = 1 + min(حذف, إدراج, تبديل)
+  if: dist[lenA][lenB] < best
+    do: best = dist[lenA][lenB] ; bestItem = item
+out: names[bestItem]
+@ code
+#include <stdio.h>
+
+#define NB 5
+#define MAXLEN 20
+
+int main(void) {
+    char query[] = "labtop";
+    char names[NB][MAXLEN] = {"laptop", "tablet", "desktop", "lamp", "backup"};
+    int dist[MAXLEN][MAXLEN];
+    int item, row, col, lenA = 0, lenB, best = 1000, bestItem = 0, smallest;
+    while (query[lenA] != '\0') lenA++;
+    for (item = 0; item < NB; item++) {
+        lenB = 0;
+        while (names[item][lenB] != '\0') lenB++;
+        for (row = 0; row <= lenA; row++) dist[row][0] = row;   // حذف كل الحروف
+        for (col = 0; col <= lenB; col++) dist[0][col] = col;   // إدراج كل الحروف
+        for (row = 1; row <= lenA; row++)
+            for (col = 1; col <= lenB; col++) {
+                if (query[row - 1] == names[item][col - 1]) {
+                    dist[row][col] = dist[row - 1][col - 1];   // لا تكلفة
+                } else {
+                    smallest = dist[row - 1][col];               // حذف
+                    if (dist[row][col - 1] < smallest) smallest = dist[row][col - 1];         // إدراج
+                    if (dist[row - 1][col - 1] < smallest) smallest = dist[row - 1][col - 1]; // تبديل
+                    dist[row][col] = 1 + smallest;
+                }
+            }
+        printf("%-8s -> distance %d\n", names[item], dist[lenA][lenB]);
+        if (dist[lenA][lenB] < best) {
+            best = dist[lenA][lenB];
+            bestItem = item;
+        }
+    }
+    printf("Did you mean \"%s\"?\n", names[bestItem]);
+    return 0;
+}
+
+@@
+title: البحث السريع عن نمط بخوارزمية KMP
+level: hard
+domain: ds
+@ statement
+نبحث في سجل نصي طويل عن كل مواضع ظهور نمط مثل `"abab"`. البحث الساذج يعيد المقارنة من الصفر عند كل فشل. اكتب برنامجًا يطبق خوارزمية **كنوث-موريس-برات (KMP)**: نحسب أولًا جدول **أطول بادئة هي لاحقة** `fail[]` للنمط، ثم نمر على النص مرة واحدة.
+@ steps
+- `fail[pos]` = طول أطول بادئة حقيقية للنمط `pattern[0..pos]` تكون لاحقة له أيضًا.
+- أثناء البحث: عند عدم التطابق نرجع في النمط إلى `fail[matched-1]` بدل الرجوع في النص.
+- عندما يبلغ `matched` طول النمط نسجل موضعًا ونكمل من `fail[matched-1]`.
+@ flow
+do: حساب جدول fail للنمط
+do: matched = 0
+for: pos = 0 ; text[pos] != '\0' ; pos++
+  while: matched > 0 && text[pos] != pattern[matched]
+    do: matched = fail[matched - 1]
+  if: text[pos] == pattern[matched]
+    do: matched++
+  if: matched == patLen
+    out: pos - patLen + 1
+    do: matched = fail[matched - 1]
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "abababcabababab";
+    char pattern[] = "abab";
+    int fail[20], patLen = 0, pos, matched, count = 0;
+    while (pattern[patLen] != '\0') patLen++;
+    fail[0] = 0;                                   // جدول البادئات
+    matched = 0;
+    for (pos = 1; pos < patLen; pos++) {
+        while (matched > 0 && pattern[pos] != pattern[matched])
+            matched = fail[matched - 1];
+        if (pattern[pos] == pattern[matched]) matched++;
+        fail[pos] = matched;
+    }
+    printf("fail table:");
+    for (pos = 0; pos < patLen; pos++) printf(" %d", fail[pos]);
+    printf("\n");
+    matched = 0;                                   // البحث في النص
+    for (pos = 0; text[pos] != '\0'; pos++) {
+        while (matched > 0 && text[pos] != pattern[matched])
+            matched = fail[matched - 1];           // لا نرجع في النص أبدًا
+        if (text[pos] == pattern[matched]) matched++;
+        if (matched == patLen) {
+            printf("Match at position %d\n", pos - patLen + 1);
+            count++;
+            matched = fail[matched - 1];           // نسمح بالتداخل
+        }
+    }
+    printf("%d occurrence(s)\n", count);
+    return 0;
+}
+
+@@
+title: أطول جزء مشترك بين وصفين
+level: hard
+domain: ds
+@ statement
+لكشف الأوصاف المنسوخة بين منتجين، اكتب برنامجًا يحسب **أطول متتالية جزئية مشتركة (LCS)** بين نصين بالبرمجة الديناميكية، ثم يعيد بناءها ويحسب نسبة التشابه `2*LCS/(lenA+lenB)`.
+@ steps
+- `lcs[row][col]` = طول LCS بين أول `row` حرفًا من `first` وأول `col` حرفًا من `second`.
+- إذا تساوى الحرفان: `lcs[row-1][col-1] + 1`، وإلا أكبر `lcs[row-1][col]` و `lcs[row][col-1]`.
+- إعادة البناء: نبدأ من الخانة الأخيرة ونصعد قطريًا عند التطابق، وإلا نحو الخانة الأكبر.
+@ flow
+for: row = 1 ; row <= lenA ; row++
+  for: col = 1 ; col <= lenB ; col++
+    if: first[row-1] == second[col-1]
+      do: lcs[row][col] = lcs[row-1][col-1] + 1
+    else:
+      do: lcs[row][col] = max(lcs[row-1][col], lcs[row][col-1])
+do: إعادة البناء من (lenA, lenB) إلى (0, 0)
+out: common, 2*LCS/(lenA+lenB)
+@ code
+#include <stdio.h>
+
+#define MAXLEN 40
+
+int main(void) {
+    char first[] = "fast usb charger 20w";
+    char second[] = "usb-c fast charger";
+    int lcs[MAXLEN][MAXLEN];
+    char common[MAXLEN];
+    int lenA = 0, lenB = 0, row, col, size;
+    while (first[lenA] != '\0') lenA++;
+    while (second[lenB] != '\0') lenB++;
+    for (row = 0; row <= lenA; row++)
+        for (col = 0; col <= lenB; col++) {
+            if (row == 0 || col == 0)
+                lcs[row][col] = 0;                         // نص فارغ
+            else if (first[row - 1] == second[col - 1])
+                lcs[row][col] = lcs[row - 1][col - 1] + 1;
+            else
+                lcs[row][col] = lcs[row - 1][col] > lcs[row][col - 1]
+                                ? lcs[row - 1][col] : lcs[row][col - 1];
+        }
+    size = lcs[lenA][lenB];
+    common[size] = '\0';
+    row = lenA; col = lenB;
+    while (row > 0 && col > 0) {                           // إعادة البناء من النهاية
+        if (first[row - 1] == second[col - 1]) {
+            common[--size] = first[row - 1];
+            row--; col--;
+        } else if (lcs[row - 1][col] >= lcs[row][col - 1]) {
+            row--;
+        } else {
+            col--;
+        }
+    }
+    printf("LCS length: %d\n", lcs[lenA][lenB]);
+    printf("LCS: \"%s\"\n", common);
+    printf("Similarity: %.2f\n", 2.0 * lcs[lenA][lenB] / (lenA + lenB));
+    return 0;
+}
+
+@@
+title: أكثر الكلمات تكرارًا في التعليقات
+level: hard
+domain: ds
+@ statement
+اكتب برنامجًا يقرأ نص تعليقات الزبائن، ويقطعه إلى كلمات (بالحروف الصغيرة، ويتجاهل علامات الترقيم)، ويحسب تكرار كل كلمة **دون** دوال السلاسل، ثم يعرض **أكثر 5 كلمات** تكرارًا مرتبة تنازليًا.
+@ steps
+- نستخرج الكلمة الحالية حرفًا بحرف في `word` ونحولها إلى الحروف الصغيرة.
+- نبحث عنها في جدول الكلمات بمقارنة يدوية؛ إن وُجدت نزيد عدادها وإلا نضيفها.
+- نرتب الجدول تنازليًا حسب العداد بالترتيب بالإدراج (مع تبديل الكلمات).
+@ flow
+for: pos = 0 ; text[pos] != '\0' ; pos++
+  if: الحرف حرف أبجدي
+    do: word[len++] = حرف صغير
+  else:
+    if: len > 0
+      do: البحث عن word في words وزيادة عدادها أو إضافتها
+      do: len = 0
+do: ترتيب الكلمات تنازليًا حسب counts
+out: أول 5 كلمات
+@ code
+#include <stdio.h>
+
+#define MAXW 60
+#define WLEN 16
+
+int main(void) {
+    char text[] = "Great phone, great battery! Battery lasts long. "
+                  "Screen is great, camera is good. Good price, great value.";
+    char words[MAXW][WLEN], word[WLEN], tmpWord[WLEN];
+    int counts[MAXW], nbWords = 0, len = 0, pos, idx, found, same, letter, tmpCount, back;
+    char ch;
+    for (pos = 0; ; pos++) {
+        ch = text[pos];
+        if (ch >= 'A' && ch <= 'Z') ch = ch - 'A' + 'a';        // حروف صغيرة
+        if (ch >= 'a' && ch <= 'z') {
+            if (len < WLEN - 1) word[len++] = ch;
+        } else if (len > 0) {                                     // نهاية كلمة
+            word[len] = '\0';
+            found = -1;
+            for (idx = 0; idx < nbWords && found < 0; idx++) {
+                same = 1;                                         // مقارنة يدوية
+                for (letter = 0; word[letter] != '\0' || words[idx][letter] != '\0'; letter++)
+                    if (word[letter] != words[idx][letter]) { same = 0; break; }
+                if (same) found = idx;
+            }
+            if (found >= 0) {
+                counts[found]++;
+            } else if (nbWords < MAXW) {
+                for (letter = 0; letter <= len; letter++) words[nbWords][letter] = word[letter];
+                counts[nbWords++] = 1;
+            }
+            len = 0;
+        }
+        if (text[pos] == '\0') break;
+    }
+    for (idx = 1; idx < nbWords; idx++) {                         // ترتيب بالإدراج تنازليًا
+        tmpCount = counts[idx];
+        for (letter = 0; letter < WLEN; letter++) tmpWord[letter] = words[idx][letter];
+        back = idx - 1;
+        while (back >= 0 && counts[back] < tmpCount) {
+            counts[back + 1] = counts[back];
+            for (letter = 0; letter < WLEN; letter++) words[back + 1][letter] = words[back][letter];
+            back--;
+        }
+        counts[back + 1] = tmpCount;
+        for (letter = 0; letter < WLEN; letter++) words[back + 1][letter] = tmpWord[letter];
+    }
+    printf("%d distinct words. Top 5:\n", nbWords);
+    for (idx = 0; idx < 5 && idx < nbWords; idx++)
+        printf("%d. %-8s %d\n", idx + 1, words[idx], counts[idx]);
+    return 0;
+}
+
+@@
+title: حساب عبارة سعر مكتوبة كنص
+level: hard
+domain: ec
+@ statement
+تسمح لوحة الإدارة بكتابة السعر كعبارة مثل `"2*1500+3*250-10*20"`. اكتب برنامجًا يقيّم العبارة يدويًا مع احترام **أولوية الضرب والقسمة** على الجمع والطرح، دون أي دالة تحويل.
+@ stdin
+2*1500+3*250-10*20/4
+@ steps
+- نقرأ العدد الحالي رقمًا برقم: `number = number*10 + (ch-'0')`.
+- نحتفظ بـ `term` (حاصل الضرب/القسمة الجاري) و `total` (مجموع الحدود) والعملية السابقة `op`.
+- عند `+` أو `-` أو نهاية النص: نطبق `op` على `term`، ثم نضيف `term` بإشارته إلى `total`.
+- عند `*` أو `/`: نطبق `op` على `term` فقط.
+@ flow
+in: expr
+do: total = 0 ; term = 0 ; sign = 1 ; op = '+'
+for: pos = 0 ; pos <= length ; pos++
+  if: expr[pos] رقم
+    do: number = number * 10 + رقم
+  else:
+    do: term = تطبيق op على term و number
+    if: expr[pos] هو + أو - أو نهاية
+      do: total = total + sign * term
+      do: sign = إشارة العملية الجديدة
+    do: op = expr[pos] ; number = 0
+out: total
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char expr[100], ch, op = '+';
+    long total = 0, term = 0, number = 0;
+    int pos, sign = 1;
+    scanf("%99s", expr);
+    for (pos = 0; ; pos++) {
+        ch = expr[pos];
+        if (ch >= '0' && ch <= '9') {
+            number = number * 10 + (ch - '0');        // تحويل يدوي
+            continue;
+        }
+        if (op == '*')      term = term * number;     // أولوية الضرب
+        else if (op == '/') term = term / number;
+        else                term = number;            // بداية حد جديد
+        if (ch == '+' || ch == '-' || ch == '\0') {
+            total += sign * term;                     // الحد اكتمل
+            sign = (ch == '-') ? -1 : 1;
+            op = '+';
+        } else {
+            op = ch;                                  // * أو /
+        }
+        number = 0;
+        if (ch == '\0') break;
+    }
+    printf("%s = %ld DA\n", expr, total);
+    return 0;
+}
+
+@@
+title: مطابقة رموز المنتجات بالأحرف البديلة
+level: hard
+domain: ec
+@ statement
+يكتب مسير المخزون أنماطًا مثل `"TV-*-202?"` حيث `?` يطابق **حرفًا واحدًا** و `*` يطابق **أي سلسلة** (حتى الفارغة). اكتب برنامجًا يحدد الرموز المطابقة للنمط بالبرمجة الديناميكية.
+@ steps
+- `match[row][col]` = هل يطابق أول `row` حرفًا من النمط أول `col` حرفًا من الرمز؟
+- `match[0][0] = 1`، والنمط المكوّن من `*` فقط يطابق الفراغ.
+- `*`: `match[row-1][col]` (لا شيء) أو `match[row][col-1]` (حرف إضافي).
+- `?` أو حرفان متساويان: `match[row-1][col-1]`.
+@ flow
+for: item = 0 ; item < NB ; item++
+  do: match[0][0] = 1
+  for: row = 1 ; row <= patLen ; row++
+    for: col = 0 ; col <= codeLen ; col++
+      if: pattern[row-1] == '*'
+        do: match[row][col] = match[row-1][col] || match[row][col-1]
+      else:
+        do: match[row][col] = col>0 && (? أو تساوي) && match[row-1][col-1]
+  if: match[patLen][codeLen]
+    out: codes[item]
+@ code
+#include <stdio.h>
+
+#define NB 6
+#define MAXLEN 24
+
+int main(void) {
+    char pattern[] = "TV-*-202?";
+    char codes[NB][MAXLEN] = {"TV-SAM-2024", "TV-LG-OLED-2025", "PC-HP-2024",
+                              "TV--2023", "TV-SONY-2019", "TV-TCL-20245"};
+    int match[MAXLEN][MAXLEN];
+    int item, row, col, patLen = 0, codeLen;
+    char pchar;
+    while (pattern[patLen] != '\0') patLen++;
+    printf("Pattern %s\n", pattern);
+    for (item = 0; item < NB; item++) {
+        codeLen = 0;
+        while (codes[item][codeLen] != '\0') codeLen++;
+        match[0][0] = 1;
+        for (col = 1; col <= codeLen; col++) match[0][col] = 0;   // نمط فارغ
+        for (row = 1; row <= patLen; row++) {
+            pchar = pattern[row - 1];
+            for (col = 0; col <= codeLen; col++) {
+                if (pchar == '*')
+                    match[row][col] = match[row - 1][col] || (col > 0 && match[row][col - 1]);
+                else
+                    match[row][col] = col > 0 && match[row - 1][col - 1] &&
+                                      (pchar == '?' || pchar == codes[item][col - 1]);
+            }
+        }
+        printf("  %-16s %s\n", codes[item], match[patLen][codeLen] ? "MATCH" : "-");
+    }
+    return 0;
+}
+
+@@
+title: أطول اسم متناظر داخل نص
+level: hard
+domain: ds
+@ statement
+اكتب برنامجًا يجد **أطول سلسلة جزئية متناظرة** (تُقرأ من اليمين ومن اليسار) داخل سلسلة DNA أو رمز، بطريقة **التوسع حول المركز**: كل موضع (وكل فراغ بين حرفين) مركز محتمل.
+@ steps
+- عدد المراكز `2*length - 1`: حرف واحد (طول فردي) أو حرفان متجاوران (طول زوجي).
+- من كل مركز نوسع يسارًا ويمينًا ما دام الحرفان متساويين.
+- نحتفظ بأطول مجال `[bestStart, bestStart + bestLen)`.
+@ flow
+for: center = 0 ; center < 2*length - 1 ; center++
+  do: left = center / 2 ; right = left + center % 2
+  while: left >= 0 && right < length && text[left] == text[right]
+    do: left-- ; right++
+  if: right - left - 1 > bestLen
+    do: bestLen = right - left - 1 ; bestStart = left + 1
+out: text[bestStart .. bestStart + bestLen - 1]
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "GATTACATCGCTAGCGATCCA";
+    int length = 0, center, left, right, bestLen = 0, bestStart = 0, pos;
+    while (text[length] != '\0') length++;
+    for (center = 0; center < 2 * length - 1; center++) {
+        left = center / 2;                 // مركز زوجي: حرف، فردي: بين حرفين
+        right = left + center % 2;
+        while (left >= 0 && right < length && text[left] == text[right]) {
+            left--;                        // نتوسع ما دام التناظر قائمًا
+            right++;
+        }
+        if (right - left - 1 > bestLen) {
+            bestLen = right - left - 1;
+            bestStart = left + 1;
+        }
+    }
+    printf("Text: %s\n", text);
+    printf("Longest palindrome (%d chars) at %d: ", bestLen, bestStart);
+    for (pos = bestStart; pos < bestStart + bestLen; pos++)
+        putchar(text[pos]);
+    putchar('\n');
+    return 0;
+}
+
+@@
+title: ترميز Base64 لمفتاح الواجهة البرمجية
+level: hard
+domain: ec
+@ statement
+بوابة الدفع تطلب إرسال `user:key` مرمّزًا بـ **Base64**. اكتب برنامجًا يرمّز السلسلة يدويًا: كل 3 بايتات (24 بتًا) تتحول إلى 4 رموز من 6 بتات، مع الحشو بـ `=` في النهاية.
+@ steps
+- نجمع 3 بايتات في عدد واحد: `(b0 << 16) | (b1 << 8) | b2`.
+- نستخرج 4 مجموعات من 6 بتات بالإزاحة و `& 63` ونستعمل كل واحدة فهرسًا في جدول الرموز.
+- إذا بقي بايت أو بايتان: نكمل بأصفار ونستبدل الرموز الناقصة بـ `=`.
+@ flow
+for: pos = 0 ; pos < length ; pos = pos + 3
+  do: remain = length - pos
+  do: block = b0 << 16 | b1 << 8 | b2 (0 إن لم يوجد)
+  do: out = table[block>>18 & 63] , table[block>>12 & 63]
+  if: remain > 1
+    do: out = table[block>>6 & 63]
+  else:
+    do: out = '='
+  if: remain > 2
+    do: out = table[block & 63]
+  else:
+    do: out = '='
+out: encoded
+@ code
+#include <stdio.h>
+
+int main(void) {
+    char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    char input[] = "shop42:Key#2026";
+    char encoded[64];
+    unsigned long block;
+    int length = 0, pos, outPos = 0, remain;
+    while (input[length] != '\0') length++;
+    for (pos = 0; pos < length; pos += 3) {
+        remain = length - pos;
+        block = (unsigned long)(unsigned char)input[pos] << 16;            // البايت الأول
+        if (remain > 1) block |= (unsigned long)(unsigned char)input[pos + 1] << 8;
+        if (remain > 2) block |= (unsigned long)(unsigned char)input[pos + 2];
+        encoded[outPos++] = table[(block >> 18) & 63];                     // 6 بتات
+        encoded[outPos++] = table[(block >> 12) & 63];
+        encoded[outPos++] = remain > 1 ? table[(block >> 6) & 63] : '=';   // حشو
+        encoded[outPos++] = remain > 2 ? table[block & 63] : '=';
+    }
+    encoded[outPos] = '\0';
+    printf("Input : %s (%d bytes)\n", input, length);
+    printf("Base64: %s (%d chars)\n", encoded, outPos);
+    printf("Header: Authorization: Basic %s\n", encoded);
+    return 0;
+}
+
+@@
+title: تنسيق وصف المنتج بعرض ثابت
+level: hard
+domain: ec
+@ statement
+الملصق الحراري للطرد يطبع **24 حرفًا** في السطر. اكتب برنامجًا يوزع كلمات الوصف على الأسطر دون قطع أي كلمة، ثم **يضبط** كل سطر (عدا الأخير) بتوزيع الفراغات الإضافية بين الكلمات بالتساوي (الفراغات الزائدة تذهب إلى اليسار أولًا).
+@ steps
+- نجمع مواضع بداية الكلمات وأطوالها.
+- نأخذ أكبر عدد من الكلمات يسعه السطر: مجموع الأطوال + عدد الفجوات ≤ 24.
+- الفراغات = `WIDTH - مجموع الأطوال`، تُقسم على عدد الفجوات، والباقي يوزع على الفجوات الأولى.
+- السطر الأخير أو سطر بكلمة واحدة: محاذاة عادية إلى اليسار.
+@ flow
+do: استخراج الكلمات (start, len)
+do: first = 0
+while: first < nbWords
+  do: last = first ; lineLen = len[first]
+  while: last + 1 < nbWords && lineLen + 1 + len[last+1] <= WIDTH
+    do: last++ ; lineLen += 1 + len[last]
+  if: last == nbWords - 1 || last == first
+    out: كلمات السطر بفراغ واحد
+  else:
+    do: gaps = last - first ; spaces = WIDTH - مجموع الأطوال
+    out: كل فجوة: spaces / gaps (+1 للفجوات الأولى)
+  do: first = last + 1
+@ code
+#include <stdio.h>
+
+#define WIDTH 24
+
+int main(void) {
+    char text[] = "Wireless noise cancelling headphones with long battery life and fast charging case";
+    int start[40], len[40], nbWords = 0, pos = 0;
+    int first, last, lineLen, letters, gaps, spaces, word, gap, extra, col;
+    while (text[pos] != '\0') {                         // استخراج الكلمات
+        while (text[pos] == ' ') pos++;
+        if (text[pos] == '\0') break;
+        start[nbWords] = pos;
+        while (text[pos] != ' ' && text[pos] != '\0') pos++;
+        len[nbWords] = pos - start[nbWords];
+        nbWords++;
+    }
+    printf("+------------------------+\n");
+    for (first = 0; first < nbWords; first = last + 1) {
+        last = first;
+        lineLen = len[first];
+        letters = len[first];
+        while (last + 1 < nbWords && lineLen + 1 + len[last + 1] <= WIDTH) {
+            last++;
+            lineLen += 1 + len[last];
+            letters += len[last];
+        }
+        gaps = last - first;
+        spaces = WIDTH - letters;
+        col = 0;
+        putchar('|');
+        for (word = first; word <= last; word++) {
+            for (pos = 0; pos < len[word]; pos++) putchar(text[start[word] + pos]);
+            col += len[word];
+            if (word < last) {
+                if (last == nbWords - 1) extra = 1;     // السطر الأخير: فراغ واحد
+                else extra = spaces / gaps + (word - first < spaces % gaps ? 1 : 0);
+                for (gap = 0; gap < extra; gap++) putchar(' ');
+                col += extra;
+            }
+        }
+        while (col++ < WIDTH) putchar(' ');             // إكمال السطر
+        printf("|\n");
+    }
+    printf("+------------------------+\n");
+    return 0;
+}
+
+@@
+title: ضغط النص بالقاموس على طريقة LZW
+level: hard
+domain: ds
+@ statement
+لتقليل حجم سجلات النقرات، اكتب برنامجًا يضغط سلسلة من الحروف `A..Z` بخوارزمية **LZW**: القاموس يبدأ بالحروف المفردة (الرموز 0..25)، ثم يضيف كل تسلسل جديد يصادفه. اعرض الرموز الناتجة ونسبة الضغط.
+@ steps
+- القاموس: جدول سلاسل `dict[code]`، والرموز 0..25 للحروف.
+- `current` = أطول تسلسل موجود في القاموس؛ نجرب `current + next`.
+- إن وُجد في القاموس نمدد `current`، وإلا نُخرج رمز `current`، ونضيف `current + next`، ونبدأ من `next`.
+- نسبة الضغط: (عدد الرموز × 9 بتات) / (عدد الحروف × 8 بتات).
+@ flow
+do: dict[0..25] = A..Z ; current = text[0]
+for: pos = 1 ; pos <= length ; pos++
+  do: candidate = current + text[pos]
+  if: pos < length && candidate في القاموس
+    do: current = candidate
+  else:
+    out: رمز current
+    do: dict[size++] = candidate
+    do: current = text[pos]
+out: نسبة الضغط
+@ code
+#include <stdio.h>
+
+#define MAXD 128
+#define MAXL 16
+
+int main(void) {
+    char text[] = "ABABABABCABCABCABCABAB";
+    char dict[MAXD][MAXL], candidate[MAXL];
+    int size = 26, length = 0, pos, code, letter, curLen, found, same, outCodes = 0, currentCode;
+    for (code = 0; code < 26; code++) {               // القاموس الابتدائي
+        dict[code][0] = (char)('A' + code);
+        dict[code][1] = '\0';
+    }
+    while (text[length] != '\0') length++;
+    candidate[0] = text[0];
+    curLen = 1;
+    currentCode = text[0] - 'A';
+    printf("Codes:");
+    for (pos = 1; pos <= length; pos++) {
+        candidate[curLen] = text[pos];                // current + next
+        candidate[curLen + 1] = '\0';
+        found = -1;
+        for (code = 0; pos < length && code < size && found < 0; code++) {
+            same = 1;
+            for (letter = 0; letter <= curLen + 1; letter++)
+                if (dict[code][letter] != candidate[letter]) { same = 0; break; }
+            if (same) found = code;
+        }
+        if (found >= 0) {
+            currentCode = found;                      // نمدد التسلسل
+            curLen++;
+        } else {
+            printf(" %d", currentCode);
+            outCodes++;
+            if (size < MAXD && curLen + 1 < MAXL) {   // تسلسل جديد في القاموس
+                for (letter = 0; letter <= curLen + 1; letter++) dict[size][letter] = candidate[letter];
+                size++;
+            }
+            candidate[0] = text[pos];
+            curLen = 1;
+            currentCode = text[pos] - 'A';
+        }
+    }
+    printf("\n%d chars -> %d codes, dictionary size %d\n", length, outCodes, size);
+    printf("Compression ratio: %.2f\n", (outCodes * 9.0) / (length * 8.0));
+    return 0;
+}

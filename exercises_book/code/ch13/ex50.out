@@ -1,0 +1,4 @@
+formula: (4500-500)*3+400/2
+postfix: 4500 500 - 3 * 400 2 / + 
+value:   12200.00 DA
+tree height: 4

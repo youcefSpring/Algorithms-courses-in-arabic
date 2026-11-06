@@ -1,0 +1,4 @@
+root W2 (5,4)
+order at (6,3) -> W2, dist^2 2, visited 8/10
+order at (2,8) -> W7, dist^2 2, visited 4/10
+order at (9,9) -> W10, dist^2 2, visited 4/10

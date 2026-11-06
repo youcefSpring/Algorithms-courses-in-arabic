@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+void range(double values[], int size, double *low, double *high) {
+    int idx;
+    *low = *high = values[0];
+    for (idx = 1; idx < size; idx++) {
+        if (values[idx] < *low) *low = values[idx];
+        if (values[idx] > *high) *high = values[idx];
+    }
+}
+
+int main(void) {
+    double temps[8] = {4.2, 3.8, 5.1, 6.9, 4.4, 2.7, 3.3, 5.6};
+    double coldest, hottest;
+    range(temps, 8, &coldest, &hottest);     // نتيجتان عبر العناوين
+    printf("Cold room range: %.1f C to %.1f C\n", coldest, hottest);
+    return 0;
+}

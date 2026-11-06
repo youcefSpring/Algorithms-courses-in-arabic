@@ -1,0 +1,40 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{المؤشر}: متغير يحمل \textbf{عنوان} متغير آخر: \code{double *ptr = \&price;}
+    \item \code{*ptr} القيمة الموجودة في العنوان (قراءة وكتابة)، و\code{\&price} عنوان المتغير.
+    \item \textbf{حساب المؤشرات}: \code{ptr + 1} يشير إلى العنصر التالي في الجدول، و\code{end - start} عدد العناصر بينهما.
+    \item \textbf{الحجز الديناميكي}: \code{malloc(count * sizeof(double))} يحجز كتلة أثناء التنفيذ، و\code{free} يعيدها.
+    \item \textbf{مؤشر الدالة}: \code{double (*policy)(double)} يسمح باختيار الدالة المستدعاة أثناء التنفيذ.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    cell/.style={draw=brandTeal, fill=white, very thick, minimum width=1.9cm,
+        minimum height=0.8cm, font=\small\bfseries}]
+    \node[cell] (p) at (0,0) {\en{4500}};
+    \node[font=\small, below=2pt of p] {\code{price} \en{@ 0x7ff0}};
+    \node[cell, draw=brandOrange, fill=brandOrange!10] (q) at (4.5,0) {\en{0x7ff0}};
+    \node[font=\small, below=2pt of q] {\code{ptr}};
+    \draw[sahm, brandOrange] (q.west) -- node[above, font=\scriptsize] {\code{*ptr}} (p.east);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{الحاجة} & \ras{الحل بالمؤشرات} \\ \hline
+دالة تعدل متغيرًا & نمرر عنوانه: \code{sell(\&stock, 3)} \\ \hline
+عدة نتائج من دالة & نكتبها عبر مؤشرات: \code{range(values, size, \&low, \&high)} \\ \hline
+حجم غير معروف مسبقًا & \code{malloc} ثم مضاعفة السعة عند الامتلاء (دون \code{realloc}) \\ \hline
+دالة تحجز للمستدعي & مؤشر على مؤشر: \code{double **result} \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad قواعد الذاكرة}
+تحقق دائمًا من أن \code{malloc} لم يعد \code{NULL}. لكل \code{malloc} يوجد \code{free} واحد بالضبط،
+ولا نستعمل الكتلة بعد تحريرها، ولا نحررها مرتين.
+\end{obox}
+
+\chaprefs{kr,king,weiss}
+\insertstats{10}

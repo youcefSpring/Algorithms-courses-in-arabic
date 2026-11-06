@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+long memo[60][60];
+
+long choose(int total, int pick) {
+    if (pick == 0 || pick == total) return 1;
+    if (memo[total][pick] != 0) return memo[total][pick];
+    memo[total][pick] = choose(total - 1, pick - 1) + choose(total - 1, pick);
+    return memo[total][pick];
+}
+
+int main(void) {
+    int total, pick;
+    for (total = 0; total <= 6; total++) {
+        printf("%*s", 2 * (6 - total), "");         // إزاحة لشكل المثلث
+        for (pick = 0; pick <= total; pick++)
+            printf("%4ld", choose(total, pick));
+        printf("\n");
+    }
+    printf("Bundles of 3 among 20 products: %ld\n", choose(20, 3));
+    printf("Bundles of 10 among 50 products: %ld\n", choose(50, 10));
+    return 0;
+}

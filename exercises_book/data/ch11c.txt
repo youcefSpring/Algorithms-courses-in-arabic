@@ -1,0 +1,804 @@
+@@
+title: الترتيب الخارجي لملف كبير
+level: hard
+domain: ds
+@ statement
+عندما يكون ملف المبالغ أكبر من الذاكرة، نستعمل **الترتيب الخارجي**: (1) نقرأ الملف على دفعات صغيرة (4 قيم هنا)، نرتب كل دفعة في الذاكرة ونكتبها في ملف مؤقت `runK.txt`؛ (2) **ندمج** كل الملفات المؤقتة معًا باختيار الأصغر من رؤوسها في كل خطوة.
+@ steps
+- المرحلة 1: كل دفعة تُرتب بالإدراج وتُكتب في ملف منفصل.
+- المرحلة 2: نفتح كل الملفات المؤقتة؛ لكل ملف قيمة "رأس" حالية.
+- في كل خطوة نكتب أصغر رأس ونقرأ القيمة التالية من نفس الملف.
+@ flow
+while: قراءة دفعة من 4 قيم ممكنة
+  do: ترتيب الدفعة ; كتابتها في runK.txt ; nbRuns++
+do: فتح كل الملفات المؤقتة وقراءة رؤوسها
+while: يوجد رأس متاح
+  do: best = الملف ذو أصغر رأس
+  do: fprintf(out, head[best]) ; قراءة التالي من best
+@ code
+#include <stdio.h>
+
+#define CHUNK 4
+#define MAXR 10
+
+void runName(int idx, char *name) {
+    name[0] = 'r'; name[1] = 'u'; name[2] = 'n'; name[3] = (char)('0' + idx);
+    name[4] = '.'; name[5] = 't'; name[6] = 'x'; name[7] = 't'; name[8] = '\0';
+}
+
+int main(void) {
+    FILE *file = fopen("amounts.txt", "w"), *runs[MAXR], *out;
+    int data[14] = {4500, 120, 9800, 3300, 760, 15000, 230, 8900, 4100, 50, 6200, 1100, 7300, 990};
+    int buffer[CHUNK], count, idx, back, key, nbRuns = 0, heads[MAXR], alive[MAXR], best, value;
+    char name[9];
+    for (idx = 0; idx < 14; idx++) fprintf(file, "%d\n", data[idx]);
+    fclose(file);
+    file = fopen("amounts.txt", "r");
+    do {                                                   // المرحلة 1: دفعات مرتبة
+        for (count = 0; count < CHUNK && fscanf(file, "%d", &buffer[count]) == 1; count++) {}
+        if (count == 0) break;
+        for (idx = 1; idx < count; idx++) {
+            key = buffer[idx];
+            for (back = idx - 1; back >= 0 && buffer[back] > key; back--) buffer[back + 1] = buffer[back];
+            buffer[back + 1] = key;
+        }
+        runName(nbRuns, name);
+        out = fopen(name, "w");
+        printf("%s:", name);
+        for (idx = 0; idx < count; idx++) { fprintf(out, "%d\n", buffer[idx]); printf(" %d", buffer[idx]); }
+        printf("\n");
+        fclose(out);
+        nbRuns++;
+    } while (count == CHUNK);
+    fclose(file);
+    for (idx = 0; idx < nbRuns; idx++) {                   // المرحلة 2: دمج متعدد
+        runName(idx, name);
+        runs[idx] = fopen(name, "r");
+        alive[idx] = fscanf(runs[idx], "%d", &heads[idx]) == 1;
+    }
+    out = fopen("sorted.txt", "w");
+    while (1) {
+        best = -1;
+        for (idx = 0; idx < nbRuns; idx++)
+            if (alive[idx] && (best < 0 || heads[idx] < heads[best])) best = idx;
+        if (best < 0) break;
+        fprintf(out, "%d\n", heads[best]);
+        alive[best] = fscanf(runs[best], "%d", &heads[best]) == 1;
+    }
+    for (idx = 0; idx < nbRuns; idx++) fclose(runs[idx]);
+    fclose(out);
+    out = fopen("sorted.txt", "r");
+    printf("merged:");
+    while (fscanf(out, "%d", &value) == 1) printf(" %d", value);
+    printf("\n");
+    fclose(out);
+    return 0;
+}
+
+@@
+title: ملف ثنائي مفهرس والبحث بالقفز
+level: hard
+domain: ec
+@ statement
+ملف المنتجات `data.bin` مكتوب بترتيب الإضافة. نبني ملف فهرس `index.bin` يحتوي على أزواج (الرمز، رقم السجل) **مرتبة حسب الرمز**. للبحث عن منتج: **بحث ثنائي داخل ملف الفهرس** بـ `fseek` (دون تحميله)، ثم قفزة واحدة إلى السجل في ملف البيانات. عدّ عمليات القراءة.
+@ steps
+- الفهرس: نقرأ الرموز، نرتب الأزواج في الذاكرة مرة واحدة، ونكتبها.
+- البحث الثنائي: `middle` رقم مدخل الفهرس → `fseek(index, middle * sizeof(Entry))`.
+- بعد العثور: `fseek(data, entry.record * sizeof(Product))`.
+@ flow
+do: كتابة data.bin وبناء index.bin المرتب
+in: code
+do: low = 0 ; high = nbEntries - 1
+while: low <= high
+  do: middle = (low + high) / 2 ; قراءة المدخل middle من index.bin
+  if: entry.code == code
+    do: قراءة السجل entry.record من data.bin
+    out: product
+  else:
+    do: تضييق المجال
+@ code
+#include <stdio.h>
+
+typedef struct { int code; char name[16]; double price; } Product;
+typedef struct { int code; int record; } Entry;
+
+int findProduct(int code, Product *found, int *reads) {
+    FILE *index = fopen("index.bin", "rb"), *data;
+    Entry entry;
+    long size;
+    int low = 0, high, middle;
+    fseek(index, 0, SEEK_END);
+    size = ftell(index);
+    high = (int)(size / (long)sizeof(Entry)) - 1;
+    *reads = 0;
+    while (low <= high) {
+        middle = (low + high) / 2;
+        fseek(index, middle * (long)sizeof(Entry), SEEK_SET);    // قفز داخل الفهرس
+        fread(&entry, sizeof(Entry), 1, index);
+        (*reads)++;
+        if (entry.code == code) {
+            fclose(index);
+            data = fopen("data.bin", "rb");
+            fseek(data, entry.record * (long)sizeof(Product), SEEK_SET);   // قفزة واحدة
+            fread(found, sizeof(Product), 1, data);
+            (*reads)++;
+            fclose(data);
+            return 1;
+        }
+        if (entry.code < code) low = middle + 1; else high = middle - 1;
+    }
+    fclose(index);
+    return 0;
+}
+
+int main(void) {
+    Product items[8] = {{5120, "Speaker", 6800}, {1001, "Cable", 450}, {7781, "Laptop", 89000},
+                        {2045, "Phone", 32000}, {3310, "Mouse", 1500}, {9002, "Watch", 15000},
+                        {1500, "Hub", 3100}, {4400, "Webcam", 4100}};
+    Entry entries[8], key;
+    Product found;
+    FILE *file = fopen("data.bin", "wb");
+    int idx, back, queries[3] = {4400, 9002, 6000}, reads;
+    fwrite(items, sizeof(Product), 8, file);
+    fclose(file);
+    for (idx = 0; idx < 8; idx++) { entries[idx].code = items[idx].code; entries[idx].record = idx; }
+    for (idx = 1; idx < 8; idx++) {                               // ترتيب الفهرس
+        key = entries[idx];
+        for (back = idx - 1; back >= 0 && entries[back].code > key.code; back--) entries[back + 1] = entries[back];
+        entries[back + 1] = key;
+    }
+    file = fopen("index.bin", "wb");
+    fwrite(entries, sizeof(Entry), 8, file);
+    fclose(file);
+    for (idx = 0; idx < 3; idx++) {
+        if (findProduct(queries[idx], &found, &reads))
+            printf("%d -> %s %.0f DA (%d reads)\n", queries[idx], found.name, found.price, reads);
+        else
+            printf("%d -> not found (%d reads)\n", queries[idx], reads);
+    }
+    return 0;
+}
+
+@@
+title: كشف تلف الملفات بمجموع CRC-32
+level: hard
+domain: ds
+@ statement
+قبل استيراد ملف أسعار من مورد، نتحقق من سلامته بمقارنة **CRC-32** المحسوب مع القيمة المرسلة. اكتب دالة `crcFile(path)` تحسب CRC-32 (كثير الحدود المعكوس `0xEDB88320`) بايتًا ببايت، ثم أفسد بايتًا واحدًا في الملف وبيّن أن المجموع يتغير.
+@ steps
+- `crc = 0xFFFFFFFF`؛ لكل بايت: `crc ^= byte` ثم 8 مرات: إذا كان البت الأدنى 1: `crc = (crc >> 1) ^ 0xEDB88320` وإلا `crc >>= 1`.
+- النتيجة النهائية `crc ^ 0xFFFFFFFF`.
+- القيمة المعروفة لـ `"123456789"` هي `CBF43926` (للتحقق من التطبيق).
+@ flow
+do: crc = 0xFFFFFFFF
+while: (byte = fgetc(file)) != EOF
+  do: crc = crc ^ byte
+  for: bit = 0 ; bit < 8 ; bit++
+    if: crc & 1
+      do: crc = (crc >> 1) ^ 0xEDB88320
+    else:
+      do: crc = crc >> 1
+out: crc ^ 0xFFFFFFFF
+@ code
+#include <stdio.h>
+
+unsigned long crcFile(const char *path) {
+    FILE *file = fopen(path, "rb");
+    unsigned long crc = 0xFFFFFFFFUL;
+    int byte, bit;
+    if (file == NULL) return 0;
+    while ((byte = fgetc(file)) != EOF) {
+        crc ^= (unsigned long)byte;
+        for (bit = 0; bit < 8; bit++)
+            crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320UL : crc >> 1;   // قسمة متعددة الحدود
+    }
+    fclose(file);
+    return (crc ^ 0xFFFFFFFFUL) & 0xFFFFFFFFUL;
+}
+
+int main(void) {
+    FILE *file = fopen("check.txt", "w");
+    unsigned long sent;
+    fprintf(file, "123456789");
+    fclose(file);
+    printf("CRC32(\"123456789\") = %08lX (expected CBF43926)\n", crcFile("check.txt"));
+    file = fopen("supplier.csv", "w");
+    fprintf(file, "MS-110;1500\nKB-204;3200\nMN-270;32000\n");
+    fclose(file);
+    sent = crcFile("supplier.csv");                              // القيمة المرسلة مع الملف
+    printf("supplier.csv CRC = %08lX\n", sent);
+    file = fopen("supplier.csv", "r+b");
+    fseek(file, 20, SEEK_SET);
+    fputc('9', file);                                            // تلف بايت واحد
+    fclose(file);
+    printf("after corruption = %08lX -> %s\n", crcFile("supplier.csv"),
+           crcFile("supplier.csv") == sent ? "OK" : "FILE CORRUPTED");
+    return 0;
+}
+
+@@
+title: مصنف بايز للتعليقات المزيفة
+level: hard
+domain: ds
+@ statement
+ملف تدريب `train.txt` يحتوي على تعليقات موسومة (`F` مزيف، `R` حقيقي) متبوعة بكلماتها. درّب **مصنف بايز الساذج**: احسب لكل كلمة عدد ظهورها في كل فئة، ثم صنّف تعليقات جديدة بمقارنة **مجموع لوغاريتمات** الاحتمالات (مع تنعيم لابلاس). اللوغاريتم مكتوب يدويًا.
+@ steps
+- `P(word | class) = (count + 1) / (wordsInClass + vocabulary)` (لابلاس).
+- `score(class) = log P(class) + Σ log P(word | class)`.
+- `myLog(value)`: نخفض `value` بالقسمة على `e` حتى يقترب من 1، ثم سلسلة `log(1+t)`.
+@ flow
+while: fscanf(train, label) == 1
+  do: قراءة كلمات السطر وزيادة عداداتها في فئة label
+for: query = 0 ; query < 3 ; query++
+  do: scoreF = log P(F) + Σ log P(word|F)
+  do: scoreR = log P(R) + Σ log P(word|R)
+  out: الفئة ذات النتيجة الأكبر
+@ code
+#include <stdio.h>
+
+#define MAXW 60
+
+char vocab[MAXW][16];
+int countF[MAXW], countR[MAXW], nbWords = 0;
+
+double myLog(double value) {
+    double result = 0, term, power, sum = 0;
+    int rank;
+    while (value > 1.5) { value /= 2.718281828459045; result += 1; }    // log(x) = 1 + log(x/e)
+    while (value < 0.5) { value *= 2.718281828459045; result -= 1; }
+    term = value - 1;
+    power = term;
+    for (rank = 1; rank < 40; rank++) { sum += (rank % 2 ? power : -power) / rank; power *= term; }
+    return result + sum;
+}
+
+int wordIndex(const char *word, int add) {
+    int idx, pos;
+    for (idx = 0; idx < nbWords; idx++) {
+        for (pos = 0; word[pos] != '\0' && word[pos] == vocab[idx][pos]; pos++) {}
+        if (word[pos] == vocab[idx][pos]) return idx;
+    }
+    if (!add || nbWords == MAXW) return -1;
+    for (pos = 0; (vocab[nbWords][pos] = word[pos]) != '\0'; pos++) {}
+    countF[nbWords] = countR[nbWords] = 0;
+    return nbWords++;
+}
+
+int main(void) {
+    FILE *file = fopen("train.txt", "w");
+    char label, word[16];
+    const char *queries[3][5] = {{"best", "product", "ever", "buy", "now"},
+                                 {"battery", "lasts", "two", "days", "ok"},
+                                 {"amazing", "deal", "buy", "best", "fast"}};
+    int docsF = 0, docsR = 0, wordsF = 0, wordsR = 0, idx, query, ch;
+    double scoreF, scoreR;
+    fprintf(file, "F best product ever buy now amazing\nF amazing deal best price buy\nF buy now best ever\n");
+    fprintf(file, "R battery lasts one day\nR screen ok but slow delivery\nR good price fast delivery\n");
+    fprintf(file, "R product works battery ok\n");
+    fclose(file);
+    file = fopen("train.txt", "r");
+    while (fscanf(file, " %c", &label) == 1) {
+        if (label == 'F') docsF++; else docsR++;
+        while ((ch = fgetc(file)) != '\n' && ch != EOF) {
+            if (ch == ' ') continue;
+            ungetc(ch, file);
+            fscanf(file, "%15s", word);
+            idx = wordIndex(word, 1);
+            if (label == 'F') { countF[idx]++; wordsF++; } else { countR[idx]++; wordsR++; }
+        }
+    }
+    fclose(file);
+    printf("Trained on %d fake / %d real reviews, vocabulary %d\n", docsF, docsR, nbWords);
+    for (query = 0; query < 3; query++) {
+        scoreF = myLog((double)docsF / (docsF + docsR));
+        scoreR = myLog((double)docsR / (docsF + docsR));
+        for (idx = 0; idx < 5; idx++) {
+            int pos = wordIndex(queries[query][idx], 0);
+            int inF = pos >= 0 ? countF[pos] : 0, inR = pos >= 0 ? countR[pos] : 0;
+            scoreF += myLog((inF + 1.0) / (wordsF + nbWords));      // تنعيم لابلاس
+            scoreR += myLog((inR + 1.0) / (wordsR + nbWords));
+        }
+        printf("\"%s %s %s %s %s\": F %.2f R %.2f -> %s\n", queries[query][0], queries[query][1],
+               queries[query][2], queries[query][3], queries[query][4], scoreF, scoreR,
+               scoreF > scoreR ? "FAKE" : "real");
+    }
+    return 0;
+}
+
+@@
+title: تقسيم سجل النقرات إلى جلسات
+level: hard
+domain: ds
+@ statement
+سجل النقرات `clicks.log` مرتب زمنيًا بأسطر `seconds user page`. **الجلسة** هي سلسلة نقرات لنفس المستخدم لا يفصل بين نقرتين متتاليتين فيها أكثر من 30 دقيقة (1800 ثانية). احسب لكل مستخدم عدد جلساته، ومتوسط مدة الجلسة، ومتوسط الصفحات لكل جلسة، واكتب الجلسات في `sessions.txt`.
+@ steps
+- لكل مستخدم نحفظ: وقت آخر نقرة، بداية الجلسة الحالية، عدد صفحاتها.
+- نقرة جديدة: إذا تجاوز الفاصل 1800 ثانية نغلق الجلسة السابقة (نكتبها) ونبدأ جديدة.
+- في النهاية نغلق كل الجلسات المفتوحة.
+@ flow
+while: fscanf(file, time, user, page) == 3
+  if: user جديد
+    do: فتح جلسة جديدة
+  else:
+    if: time - last[user] > 1800
+      do: closeSession(user) ; فتح جلسة جديدة
+  do: last[user] = time ; pages[user]++
+for: user = 0 ; user < nbUsers ; user++
+  call: closeSession(user)
+out: إحصاءات كل مستخدم
+@ code
+#include <stdio.h>
+
+#define TIMEOUT 1800
+#define MAXU 10
+
+typedef struct { int id; long start, last; int pages, sessions, totalPages; long totalTime; } UserState;
+
+UserState users[MAXU];
+int nbUsers = 0;
+FILE *out;
+
+void closeSession(UserState *user) {
+    fprintf(out, "user %d: %ld -> %ld (%ld s, %d pages)\n", user->id, user->start, user->last,
+            user->last - user->start, user->pages);
+    user->sessions++;
+    user->totalPages += user->pages;
+    user->totalTime += user->last - user->start;
+}
+
+int main(void) {
+    FILE *file = fopen("clicks.log", "w");
+    long data[14][2] = {{0, 7}, {60, 7}, {200, 9}, {400, 7}, {500, 9}, {2100, 9}, {2600, 7},
+                        {2700, 7}, {2900, 9}, {5000, 7}, {5100, 9}, {5200, 7}, {7300, 9}, {7400, 9}};
+    char page[20];
+    long time;
+    int idx, userId, ch;
+    for (idx = 0; idx < 14; idx++) fprintf(file, "%ld %ld /p%d\n", data[idx][0], data[idx][1], idx);
+    fclose(file);
+    file = fopen("clicks.log", "r");
+    out = fopen("sessions.txt", "w");
+    while (fscanf(file, "%ld %d %19s", &time, &userId, page) == 3) {
+        for (idx = 0; idx < nbUsers && users[idx].id != userId; idx++) {}
+        if (idx == nbUsers) {                                  // مستخدم جديد
+            users[idx].id = userId;
+            users[idx].sessions = users[idx].totalPages = 0;
+            users[idx].totalTime = 0;
+            users[idx].start = time;
+            users[idx].pages = 0;
+            nbUsers++;
+        } else if (time - users[idx].last > TIMEOUT) {        // انقطاع طويل: جلسة جديدة
+            closeSession(&users[idx]);
+            users[idx].start = time;
+            users[idx].pages = 0;
+        }
+        users[idx].last = time;
+        users[idx].pages++;
+    }
+    for (idx = 0; idx < nbUsers; idx++) closeSession(&users[idx]);
+    fclose(file);
+    fclose(out);
+    out = fopen("sessions.txt", "r");
+    while ((ch = fgetc(out)) != EOF) putchar(ch);
+    fclose(out);
+    for (idx = 0; idx < nbUsers; idx++)
+        printf("user %d: %d sessions, avg %.1f s, avg %.1f pages\n", users[idx].id, users[idx].sessions,
+               (double)users[idx].totalTime / users[idx].sessions,
+               (double)users[idx].totalPages / users[idx].sessions);
+    return 0;
+}
+
+@@
+title: مطابقة كشف البنك مع الطلبيات
+level: hard
+domain: ec
+@ statement
+**المطابقة المحاسبية**: ملف الطلبيات `orders.txt` (المرجع، المبلغ) وكشف البنك `bank.txt` (المرجع، المبلغ المستلم). الملفان **مرتبان حسب المرجع**. بمرور واحد متزامن على الملفين (مثل الدمج)، صنّف كل مرجع: مطابق، فرق في المبلغ، طلبية دون دفع، أو دفع دون طلبية، واكتب التقرير في `reconciliation.txt`.
+@ steps
+- نقرأ سطرًا من كل ملف؛ نقارن المرجعين.
+- متساويان: نقارن المبلغين ثم نتقدم في الملفين.
+- مرجع الطلبية أصغر: طلبية غير مدفوعة، نتقدم في الطلبيات فقط؛ والعكس للبنك.
+@ flow
+do: قراءة أول سطر من كل ملف
+while: hasOrder || hasBank
+  if: hasOrder && hasBank && refO == refB
+    if: amountO == amountB
+      do: matched++
+    else:
+      do: كتابة "mismatch"
+    do: قراءة التالي من الملفين
+  else:
+    if: hasOrder && (!hasBank || refO < refB)
+      do: كتابة "unpaid" ; قراءة التالي من orders
+    else:
+      do: كتابة "unknown payment" ; قراءة التالي من bank
+@ code
+#include <stdio.h>
+
+int main(void) {
+    FILE *orders = fopen("orders.txt", "w"), *bank = fopen("bank.txt", "w"), *report;
+    int refO, refB, hasOrder, hasBank, matched = 0, issues = 0, ch;
+    double amountO, amountB, missing = 0;
+    fprintf(orders, "7781 12500\n7782 3200\n7783 899.5\n7785 45000\n7786 1500\n7788 2200\n");
+    fprintf(bank, "7781 12500\n7783 899.5\n7784 650\n7785 44000\n7786 1500\n7788 2200\n7790 300\n");
+    fclose(orders); fclose(bank);
+    orders = fopen("orders.txt", "r");
+    bank = fopen("bank.txt", "r");
+    report = fopen("reconciliation.txt", "w");
+    hasOrder = fscanf(orders, "%d %lf", &refO, &amountO) == 2;
+    hasBank = fscanf(bank, "%d %lf", &refB, &amountB) == 2;
+    while (hasOrder || hasBank) {
+        if (hasOrder && hasBank && refO == refB) {
+            if (amountO == amountB) matched++;
+            else { fprintf(report, "%d MISMATCH  expected %.2f got %.2f\n", refO, amountO, amountB); issues++; missing += amountO - amountB; }
+            hasOrder = fscanf(orders, "%d %lf", &refO, &amountO) == 2;
+            hasBank = fscanf(bank, "%d %lf", &refB, &amountB) == 2;
+        } else if (hasOrder && (!hasBank || refO < refB)) {            // لا دفع لهذه الطلبية
+            fprintf(report, "%d UNPAID    %.2f\n", refO, amountO);
+            issues++;
+            missing += amountO;
+            hasOrder = fscanf(orders, "%d %lf", &refO, &amountO) == 2;
+        } else {                                                       // دفع دون طلبية
+            fprintf(report, "%d UNKNOWN   payment %.2f\n", refB, amountB);
+            issues++;
+            hasBank = fscanf(bank, "%d %lf", &refB, &amountB) == 2;
+        }
+    }
+    fclose(orders); fclose(bank); fclose(report);
+    report = fopen("reconciliation.txt", "r");
+    while ((ch = fgetc(report)) != EOF) putchar(ch);
+    fclose(report);
+    printf("%d matched, %d issues, %.2f DA not received\n", matched, issues, missing);
+    return 0;
+}
+
+@@
+title: ترميز ملف بـ Base64 وفك ترميزه
+level: hard
+domain: ec
+@ statement
+لإرفاق ملف ثنائي (صورة منتج مصغرة) في رسالة JSON، نرمّزه بـ **Base64**. اكتب `encodeFile(source, target)` التي تقرأ 3 بايتات في كل مرة وتكتب 4 رموز (مع الحشو `=`)، و `decodeFile` التي تعكس العملية بجدول بحث معكوس، ثم تحقق أن الملف المسترجع مطابق للأصل.
+@ steps
+- الترميز: كتلة 24 بت → 4 مجموعات من 6 بتات → جدول الرموز.
+- فك الترميز: نبني جدولًا معكوسًا `reverse[symbol] = value`، نقرأ 4 رموز، نعيد 3 بايتات (أو أقل إذا وُجد `=`).
+- التحقق بمقارنة الملفين بايتًا ببايت.
+@ flow
+while: قراءة حتى 3 بايتات ممكنة
+  do: block = b0 << 16 | b1 << 8 | b2
+  do: كتابة 4 رموز أو حشو '='
+while: قراءة 4 رموز ممكنة
+  do: block = تجميع 4 قيم من 6 بتات
+  do: كتابة 1 إلى 3 بايتات حسب الحشو
+call: same = compareFiles(original, decoded)
+@ code
+#include <stdio.h>
+
+const char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+long encodeFile(const char *source, const char *target) {
+    FILE *input = fopen(source, "rb"), *output = fopen(target, "w");
+    int bytes[3], count, ch;
+    long written = 0, block;
+    while (1) {
+        for (count = 0; count < 3 && (ch = fgetc(input)) != EOF; count++) bytes[count] = ch;
+        if (count == 0) break;
+        block = (long)bytes[0] << 16 | (count > 1 ? bytes[1] : 0) << 8 | (count > 2 ? bytes[2] : 0);
+        fputc(table[(block >> 18) & 63], output);
+        fputc(table[(block >> 12) & 63], output);
+        fputc(count > 1 ? table[(block >> 6) & 63] : '=', output);     // حشو
+        fputc(count > 2 ? table[block & 63] : '=', output);
+        written += 4;
+        if (count < 3) break;
+    }
+    fclose(input); fclose(output);
+    return written;
+}
+
+long decodeFile(const char *source, const char *target) {
+    FILE *input = fopen(source, "r"), *output = fopen(target, "wb");
+    int reverse[128], idx, symbols[4], count, pads;
+    long block, written = 0;
+    for (idx = 0; idx < 128; idx++) reverse[idx] = 0;
+    for (idx = 0; idx < 64; idx++) reverse[(int)table[idx]] = idx;     // جدول معكوس
+    while (1) {
+        for (count = 0, pads = 0; count < 4 && (symbols[count] = fgetc(input)) != EOF; count++)
+            if (symbols[count] == '=') pads++;
+        if (count < 4) break;
+        for (block = 0, idx = 0; idx < 4; idx++)
+            block = block << 6 | (symbols[idx] == '=' ? 0 : reverse[symbols[idx]]);
+        fputc((int)(block >> 16) & 255, output); written++;
+        if (pads < 2) { fputc((int)(block >> 8) & 255, output); written++; }
+        if (pads < 1) { fputc((int)block & 255, output); written++; }
+    }
+    fclose(input); fclose(output);
+    return written;
+}
+
+int main(void) {
+    FILE *file = fopen("thumb.bin", "wb"), *other;
+    int idx, chA, chB, same = 1;
+    for (idx = 0; idx < 50; idx++) fputc((idx * 37 + 11) % 256, file);    // بيانات ثنائية
+    fclose(file);
+    printf("encoded: %ld chars\n", encodeFile("thumb.bin", "thumb.b64"));
+    file = fopen("thumb.b64", "r");
+    printf("text: ");
+    for (idx = 0; idx < 32 && (chA = fgetc(file)) != EOF; idx++) putchar(chA);
+    printf("...\n");
+    fclose(file);
+    printf("decoded: %ld bytes\n", decodeFile("thumb.b64", "thumb.out"));
+    file = fopen("thumb.bin", "rb");
+    other = fopen("thumb.out", "rb");
+    do { chA = fgetc(file); chB = fgetc(other); if (chA != chB) same = 0; } while (chA != EOF && chB != EOF);
+    fclose(file); fclose(other);
+    printf("round trip identical: %s\n", same ? "yes" : "no");
+    return 0;
+}
+
+@@
+title: نموذج الانحدار من ملف وكتابة التنبؤات
+level: hard
+domain: ds
+@ statement
+ملف `history.csv` يحتوي على `week,price,units`. درّب نموذج انحدار خطي `units = a + b·price` بمرور أول على الملف (مجاميع)، ثم **مرور ثانٍ** بعد `rewind` لكتابة ملف `predictions.csv` يضيف لكل سطر التنبؤ والخطأ، واحسب **مرونة الطلب** عند متوسط السعر والسعر الذي يعظّم الإيراد.
+@ steps
+- المرور 1: `Σx, Σy, Σxy, Σx², n` ثم `b = (nΣxy - ΣxΣy) / (nΣx² - (Σx)²)` و `a = (Σy - bΣx)/n`.
+- `rewind(file)` يعيد القراءة من البداية دون إغلاق.
+- المرونة = `b × meanPrice / meanUnits`؛ الإيراد `p(a + bp)` أعظمي عند `p = -a / (2b)`.
+@ flow
+while: fscanf(file, week, price, units) == 3
+  do: تحديث المجاميع
+do: حساب a و b
+do: rewind(file)
+while: fscanf(file, week, price, units) == 3
+  do: fprintf(out, week, price, units, a + b*price, الخطأ)
+out: a, b, المرونة، أفضل سعر
+@ code
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("history.csv", "w"), *out;
+    double prices[8] = {3200, 3000, 3500, 2800, 3300, 3600, 2900, 3100};
+    double units[8] = {410, 455, 360, 500, 385, 345, 480, 430};
+    double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, slope, intercept, price, qty, sse = 0;
+    char header[40];
+    int week, count = 0, ch;
+    fprintf(file, "week,price,units\n");
+    for (week = 0; week < 8; week++) fprintf(file, "%d,%.0f,%.0f\n", week + 1, prices[week], units[week]);
+    fclose(file);
+    file = fopen("history.csv", "r");
+    fgets(header, 40, file);
+    while (fscanf(file, "%d,%lf,%lf", &week, &price, &qty) == 3) {        // المرور الأول
+        sumX += price; sumY += qty; sumXY += price * qty; sumX2 += price * price;
+        count++;
+    }
+    slope = (count * sumXY - sumX * sumY) / (count * sumX2 - sumX * sumX);
+    intercept = (sumY - slope * sumX) / count;
+    rewind(file);                                                        // من البداية
+    fgets(header, 40, file);
+    out = fopen("predictions.csv", "w");
+    fprintf(out, "week,price,units,predicted,error\n");
+    while (fscanf(file, "%d,%lf,%lf", &week, &price, &qty) == 3) {        // المرور الثاني
+        fprintf(out, "%d,%.0f,%.0f,%.1f,%+.1f\n", week, price, qty, intercept + slope * price,
+                qty - (intercept + slope * price));
+        sse += (qty - intercept - slope * price) * (qty - intercept - slope * price);
+    }
+    fclose(file); fclose(out);
+    out = fopen("predictions.csv", "r");
+    while ((ch = fgetc(out)) != EOF) putchar(ch);
+    fclose(out);
+    printf("units = %.2f %+.4f * price, MSE = %.1f\n", intercept, slope, sse / count);
+    printf("Elasticity at mean: %.2f\n", slope * (sumX / count) / (sumY / count));
+    printf("Revenue-maximizing price: %.0f DA\n", -intercept / (2 * slope));
+    return 0;
+}
+
+@@
+title: قاعدة بيانات المنتجات بالحذف المنطقي والضغط
+level: hard
+domain: ec
+@ statement
+ملف ثنائي `products.db` من سجلات ثابتة الحجم. **الحذف** لا يزيح الملف: نكتب علامة `deleted = 1` في السجل (حذف منطقي). اكتب دوال `insertProduct` (في النهاية)، `deleteProduct` (بحث ثم تعليم)، `updatePrice` (في المكان)، `listProducts`، و `compact` التي تنشئ ملفًا جديدًا دون السجلات المحذوفة وتستبدل به القديم.
+@ steps
+- البحث: قراءة تسلسلية حتى الرمز المطلوب مع `ftell` لتذكر موضع السجل.
+- التعديل في المكان: `fseek(file, position, SEEK_SET)` ثم `fwrite`.
+- الضغط: نسخ السجلات الحية إلى `products.tmp` ثم `remove` و `rename`.
+@ flow
+call: insertProduct × 5
+call: deleteProduct(102) ; deleteProduct(104)
+call: updatePrice(103, 29900)
+call: listProducts()
+call: compact()
+call: listProducts()
+@ code
+#include <stdio.h>
+
+typedef struct { int code; char name[12]; double price; int deleted; } Record;
+
+const char *DB = "products.db";
+
+void insertProduct(int code, const char *name, double price) {
+    FILE *file = fopen(DB, "ab");
+    Record record = {0, "", 0, 0};
+    int pos;
+    record.code = code;
+    for (pos = 0; pos < 11 && name[pos] != '\0'; pos++) record.name[pos] = name[pos];
+    record.price = price;
+    fwrite(&record, sizeof(Record), 1, file);
+    fclose(file);
+}
+
+long findRecord(FILE *file, int code, Record *record) {
+    long position;
+    rewind(file);
+    while (1) {
+        position = ftell(file);
+        if (fread(record, sizeof(Record), 1, file) != 1) return -1;
+        if (record->code == code && !record->deleted) return position;
+    }
+}
+
+void deleteProduct(int code) {
+    FILE *file = fopen(DB, "r+b");
+    Record record;
+    long position = findRecord(file, code, &record);
+    if (position >= 0) {
+        record.deleted = 1;                                   // حذف منطقي
+        fseek(file, position, SEEK_SET);
+        fwrite(&record, sizeof(Record), 1, file);
+    }
+    fclose(file);
+}
+
+void updatePrice(int code, double price) {
+    FILE *file = fopen(DB, "r+b");
+    Record record;
+    long position = findRecord(file, code, &record);
+    if (position >= 0) {
+        record.price = price;
+        fseek(file, position, SEEK_SET);                      // تعديل في المكان
+        fwrite(&record, sizeof(Record), 1, file);
+    }
+    fclose(file);
+}
+
+void listProducts(const char *label) {
+    FILE *file = fopen(DB, "rb");
+    Record record;
+    int total = 0, alive = 0;
+    printf("%s:", label);
+    while (fread(&record, sizeof(Record), 1, file) == 1) {
+        total++;
+        if (!record.deleted) { alive++; printf(" %d %s %.0f;", record.code, record.name, record.price); }
+    }
+    fseek(file, 0, SEEK_END);
+    printf("\n  %d live / %d records, file %ld bytes\n", alive, total, ftell(file));
+    fclose(file);
+}
+
+void compact(void) {
+    FILE *input = fopen(DB, "rb"), *output = fopen("products.tmp", "wb");
+    Record record;
+    while (fread(&record, sizeof(Record), 1, input) == 1)
+        if (!record.deleted) fwrite(&record, sizeof(Record), 1, output);
+    fclose(input);
+    fclose(output);
+    remove(DB);                                               // نستبدل القديم بالجديد
+    rename("products.tmp", DB);
+}
+
+int main(void) {
+    FILE *file = fopen(DB, "wb");
+    fclose(file);
+    insertProduct(101, "Mouse", 1500);
+    insertProduct(102, "Keyboard", 3200);
+    insertProduct(103, "Monitor", 32000);
+    insertProduct(104, "Cable", 450);
+    insertProduct(105, "Webcam", 4100);
+    deleteProduct(102);
+    deleteProduct(104);
+    updatePrice(103, 29900);
+    listProducts("before compact");
+    compact();
+    listProducts("after compact");
+    return 0;
+}
+
+@@
+title: فهرس معكوس للبحث في الكتالوج
+level: hard
+domain: ds
+@ statement
+محرك بحث المتجر: اقرأ ملف الأوصاف `catalog.txt` (`id: كلمات الوصف`) وابنِ **فهرسًا معكوسًا**: لكل كلمة قائمة مرتبة بمعرفات المنتجات التي تحتويها. احفظ الفهرس في `index.txt`، ثم أجب عن استعلامات **AND** متعددة الكلمات بتقاطع القوائم المرتبة (كما في الدمج).
+@ steps
+- لكل كلمة (بحروف صغيرة): نضيف المعرف إلى قائمتها إن لم يكن آخر عنصر فيها (الأسطر مرتبة حسب المعرف).
+- كتابة الفهرس: `word: id1 id2 ...`.
+- التقاطع: مؤشران على قائمتين مرتبتين، نتقدم بالأصغر، ونحتفظ بالمتساوي.
+@ flow
+while: fscanf(file, id) == 1
+  while: توجد كلمة أخرى في السطر
+    do: إضافة id إلى قائمة الكلمة
+do: كتابة index.txt
+for: query = 0 ; query < 3 ; query++
+  do: result = قائمة الكلمة الأولى
+  for: term = 1 ; term < nbTerms ; term++
+    do: result = intersect(result, قائمة الكلمة term)
+  out: result
+@ code
+#include <stdio.h>
+
+#define MAXW 60
+#define MAXP 12
+
+char words[MAXW][16];
+int lists[MAXW][MAXP], sizes[MAXW], nbWords = 0;
+
+int lookup(const char *word, int add) {
+    int idx, pos;
+    for (idx = 0; idx < nbWords; idx++) {
+        for (pos = 0; word[pos] != '\0' && word[pos] == words[idx][pos]; pos++) {}
+        if (word[pos] == words[idx][pos]) return idx;
+    }
+    if (!add) return -1;
+    for (pos = 0; (words[nbWords][pos] = word[pos]) != '\0'; pos++) {}
+    sizes[nbWords] = 0;
+    return nbWords++;
+}
+
+int intersect(const int *first, int sizeA, const int *second, int sizeB, int *out) {
+    int left = 0, right = 0, count = 0;
+    while (left < sizeA && right < sizeB) {
+        if (first[left] == second[right]) { out[count++] = first[left]; left++; right++; }
+        else if (first[left] < second[right]) left++;           // نتقدم بالأصغر
+        else right++;
+    }
+    return count;
+}
+
+int main(void) {
+    FILE *file = fopen("catalog.txt", "w");
+    const char *queries[3][3] = {{"wireless", "mouse", ""}, {"usb", "c", "fast"}, {"gaming", "", ""}};
+    char word[16];
+    int id, idx, ch, pos, query, term, result[MAXP], tmp[MAXP], count;
+    fprintf(file, "1: Wireless optical mouse\n2: Gaming mouse RGB wired\n3: USB C fast charger\n");
+    fprintf(file, "4: Wireless keyboard and mouse combo\n5: USB C hub fast ethernet\n6: Gaming keyboard wireless\n");
+    fclose(file);
+    file = fopen("catalog.txt", "r");
+    while (fscanf(file, "%d:", &id) == 1) {
+        while ((ch = fgetc(file)) != '\n' && ch != EOF) {
+            if (ch == ' ') continue;
+            pos = 0;
+            while (ch != ' ' && ch != '\n' && ch != EOF) {
+                if (pos < 15) word[pos++] = (char)(ch >= 'A' && ch <= 'Z' ? ch - 'A' + 'a' : ch);
+                ch = fgetc(file);
+            }
+            word[pos] = '\0';
+            idx = lookup(word, 1);
+            if (sizes[idx] == 0 || lists[idx][sizes[idx] - 1] != id) lists[idx][sizes[idx]++] = id;
+            if (ch == '\n' || ch == EOF) break;
+        }
+    }
+    fclose(file);
+    file = fopen("index.txt", "w");
+    for (idx = 0; idx < nbWords; idx++) {
+        fprintf(file, "%s:", words[idx]);
+        for (pos = 0; pos < sizes[idx]; pos++) fprintf(file, " %d", lists[idx][pos]);
+        fprintf(file, "\n");
+    }
+    fclose(file);
+    printf("index.txt: %d words\n", nbWords);
+    for (query = 0; query < 3; query++) {
+        idx = lookup(queries[query][0], 0);
+        count = idx >= 0 ? sizes[idx] : 0;
+        for (pos = 0; pos < count; pos++) result[pos] = lists[idx][pos];
+        for (term = 1; term < 3 && queries[query][term][0] != '\0'; term++) {
+            idx = lookup(queries[query][term], 0);
+            count = idx >= 0 ? intersect(result, count, lists[idx], sizes[idx], tmp) : 0;
+            for (pos = 0; pos < count; pos++) result[pos] = tmp[pos];
+        }
+        printf("\"%s", queries[query][0]);
+        for (term = 1; term < 3 && queries[query][term][0] != '\0'; term++) printf(" %s", queries[query][term]);
+        printf("\" ->");
+        for (pos = 0; pos < count; pos++) printf(" #%d", result[pos]);
+        printf("\n");
+    }
+    return 0;
+}

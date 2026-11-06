@@ -1,0 +1,47 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{القائمة المتصلة}: سلسلة من \textbf{العقد} المحجوزة ديناميكيًا؛ كل عقدة تحمل بياناتها ومؤشرًا \code{next} على العقدة التالية.
+    \item \textbf{الرأس} \code{head} يشير إلى أول عقدة، وآخر عقدة \code{next = NULL}.
+    \item \textbf{التعريف}: \code{typedef struct Node \{ int code; struct Node *next; \} Node;}
+    \item \textbf{القائمة المزدوجة}: مؤشران \code{prev} و\code{next}. \textbf{القائمة الدائرية}: آخر عقدة تشير إلى الأولى.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=9mm,
+    data/.style={draw=brandTeal, fill=brandTeal!10, very thick, minimum width=1.3cm,
+        minimum height=0.75cm, font=\small\bfseries},
+    ptr/.style={draw=brandTeal, fill=white, very thick, minimum width=0.6cm, minimum height=0.75cm}]
+    \node[font=\small\bfseries, lawn=brandOrange] (h) at (1.2,0) {\code{head}};
+    \foreach \v/\x in {101/0, 205/-2.6, 330/-5.2} {
+        \node[data] (d\v) at (\x,0) {\en{\v}};
+        \node[ptr, left=0pt of d\v] (p\v) {};
+    }
+    \draw[sahm, brandOrange] (h) -- (d101);
+    \draw[sahm] (p101.center) -- (d205.east);
+    \draw[sahm] (p205.center) -- (d330.east);
+    \node[font=\small\bfseries, lawn=brandMuted] (n) at (-7.4,0) {\code{NULL}};
+    \draw[sahm] (p330.center) -- (n);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{العملية} & \ras{التكلفة والفكرة} \\ \hline
+إدراج / حذف في الرأس & وقت ثابت: نغير مؤشرين فقط \\ \hline
+إدراج في النهاية & ثابت إذا احتفظنا بمؤشر \code{tail} \\ \hline
+بحث، وصول إلى العنصر رقم \code{k} & خطي: نمر من الرأس عقدة بعقدة \\ \hline
+حذف عقدة معلومة & ثابت في القائمة المزدوجة، يحتاج إلى السابقة في الأحادية \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad حيل مفيدة}
+\textbf{العقدة الحارسة} \code{dummy} تلغي حالة الرأس الخاصة، و\textbf{المؤشر على مؤشر} \code{Node **link}
+يوحد حذف الرأس وحذف عقدة في الوسط، و\textbf{المؤشران السريع والبطيء} يجدان المنتصف أو الحلقة في مرور واحد.
+احفظ دائمًا \code{next} قبل \code{free}.
+\end{obox}
+
+\chaprefs{weiss,sedgewick,knuth1}
+\insertstats{12}

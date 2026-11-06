@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int id; struct Node *next; } Node;
+
+int main(void) {
+    Node *head = NULL, *tail = NULL, *node, *prev, *out;
+    int count, step, idx, survivor = 0, size;
+    scanf("%d %d", &count, &step);
+    for (idx = 1; idx <= count; idx++) {
+        node = malloc(sizeof(Node));
+        node->id = idx;
+        node->next = NULL;
+        if (head == NULL) head = node; else tail->next = node;
+        tail = node;
+    }
+    tail->next = head;                              (*@\cmt{نغلق الدائرة}@*)
+    prev = tail;
+    printf("Eliminated:");
+    while (prev->next != prev) {
+        for (idx = 1; idx < step; idx++) prev = prev->next;
+        out = prev->next;                           (*@\cmt{المشارك رقم \cen{step}}@*)
+        prev->next = out->next;
+        printf(" %d", out->id);
+        free(out);
+    }
+    printf("\nWinner: participant %d\n", prev->id);
+    for (size = 2; size <= count; size++) survivor = (survivor + step) % size;   (*@\cmt{صيغة يوسيفوس}@*)
+    printf("Formula check: %d\n", survivor + 1);
+    free(prev);
+    return 0;
+}

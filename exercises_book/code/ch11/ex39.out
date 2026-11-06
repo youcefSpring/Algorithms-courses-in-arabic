@@ -1,0 +1,6 @@
+kept 3, rejected 4
+--- rejected.txt ---
+empty field        | 7782,Karim,,3200
+bad amount         | 7783,Lina,Setif,89x0
+wrong field count  | 7784,Omar,Annaba
+bad amount         | 7786,Nadir,Oran,1.2.3

@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { char *text; int length, capacity, grows; } Builder;
+
+void init(Builder *builder, int capacity) {
+    builder->text = malloc(capacity);
+    builder->text[0] = '\0';
+    builder->length = 0;
+    builder->capacity = capacity;
+    builder->grows = 0;
+}
+
+void ensure(Builder *builder, int extra) {
+    char *bigger;
+    int idx;
+    while (builder->length + extra + 1 > builder->capacity) {
+        bigger = malloc(2 * builder->capacity);
+        for (idx = 0; idx <= builder->length; idx++) bigger[idx] = builder->text[idx];
+        free(builder->text);
+        builder->text = bigger;
+        builder->capacity *= 2;
+        builder->grows++;
+    }
+}
+
+void appendChar(Builder *builder, char ch) {
+    ensure(builder, 1);
+    builder->text[builder->length++] = ch;
+    builder->text[builder->length] = '\0';
+}
+
+void appendText(Builder *builder, const char *text) {
+    while (*text != '\0') appendChar(builder, *text++);
+}
+
+void appendNumber(Builder *builder, long value) {
+    char digits[20];
+    int count = 0;
+    if (value == 0) digits[count++] = '0';
+    while (value > 0) { digits[count++] = (char)('0' + value % 10); value /= 10; }   // معكوس
+    while (count > 0) appendChar(builder, digits[--count]);
+}
+
+int main(void) {
+    const char *names[4] = {"Mouse      x2", "Keyboard   x1", "Monitor    x1", "USB cable  x5"};
+    long amounts[4] = {3000, 3200, 32000, 2250}, total = 0;
+    Builder invoice;
+    int idx;
+    init(&invoice, 8);
+    appendText(&invoice, "INVOICE #7781\n");
+    for (idx = 0; idx < 4; idx++) {
+        appendText(&invoice, names[idx]);
+        appendText(&invoice, "  ");
+        appendNumber(&invoice, amounts[idx]);
+        appendText(&invoice, " DA\n");
+        total += amounts[idx];
+    }
+    appendText(&invoice, "TOTAL ");
+    appendNumber(&invoice, total);
+    appendText(&invoice, " DA\n");
+    printf("%s", invoice.text);
+    printf("[%d chars, capacity %d, %d grows]\n", invoice.length, invoice.capacity, invoice.grows);
+    free(invoice.text);
+    return 0;
+}

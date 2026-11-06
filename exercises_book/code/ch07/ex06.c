@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+double average3(int first, int second, int third) {
+    return (first + second + third) / 3.0;   // 3.0 لتفادي القسمة الصحيحة
+}
+
+int main(void) {
+    printf("Headphones: %.2f\n", average3(4, 5, 3));
+    printf("Charger:    %.2f\n", average3(2, 3, 2));
+    printf("Keyboard:   %.2f\n", average3(5, 5, 4));
+    return 0;
+}

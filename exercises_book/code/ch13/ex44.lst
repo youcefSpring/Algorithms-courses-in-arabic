@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+typedef struct { Tree *items[32]; int top, forward; } Iterator;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void pushSide(Iterator *iter, Tree *node) {
+    while (node != NULL) {
+        iter->items[iter->top++] = node;
+        node = iter->forward ? node->left : node->right;     (*@\cmt{النزول إلى الطرف}@*)
+    }
+}
+
+void startIter(Iterator *iter, Tree *root, int forward) { iter->top = 0; iter->forward = forward; pushSide(iter, root); }
+
+int nextValue(Iterator *iter) {
+    Tree *node = iter->items[--iter->top];
+    pushSide(iter, iter->forward ? node->right : node->left);
+    return node->price;
+}
+
+int main(void) {
+    int prices[10] = {4500, 1200, 32000, 899, 3200, 12500, 89000, 2900, 6800, 450};
+    Tree *root = NULL;
+    Iterator ascending, descending;
+    int idx, nbQueries, target, low, high, steps, found;
+    for (idx = 0; idx < 10; idx++) root = insert(root, prices[idx]);
+    scanf("%d", &nbQueries);
+    for (idx = 0; idx < nbQueries; idx++) {
+        scanf("%d", &target);
+        startIter(&ascending, root, 1);
+        startIter(&descending, root, 0);
+        low = nextValue(&ascending);
+        high = nextValue(&descending);
+        found = 0;
+        steps = 0;
+        while (low < high && !found) {
+            steps++;
+            if (low + high == target) found = 1;
+            else if (low + high < target) low = nextValue(&ascending);   (*@\cmt{نحتاج أكثر}@*)
+            else high = nextValue(&descending);                          (*@\cmt{نحتاج أقل}@*)
+        }
+        if (found) printf("%6d DA = %d + %d (%d steps)\n", target, low, high, steps);
+        else printf("%6d DA: no pair\n", target);
+    }
+    while (root != NULL) {                                    (*@\cmt{تحرير تكراري بسيط}@*)
+        Tree *node = root;
+        if (node->left) { root = node->left; node->left = root->right; root->right = node; }
+        else { root = node->right; free(node); }
+    }
+    return 0;
+}

@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+#define MAXLEN 40
+
+int main(void) {
+    char first[] = "fast usb charger 20w";
+    char second[] = "usb-c fast charger";
+    int lcs[MAXLEN][MAXLEN];
+    char common[MAXLEN];
+    int lenA = 0, lenB = 0, row, col, size;
+    while (first[lenA] != '\0') lenA++;
+    while (second[lenB] != '\0') lenB++;
+    for (row = 0; row <= lenA; row++)
+        for (col = 0; col <= lenB; col++) {
+            if (row == 0 || col == 0)
+                lcs[row][col] = 0;                         (*@\cmt{نص فارغ}@*)
+            else if (first[row - 1] == second[col - 1])
+                lcs[row][col] = lcs[row - 1][col - 1] + 1;
+            else
+                lcs[row][col] = lcs[row - 1][col] > lcs[row][col - 1]
+                                ? lcs[row - 1][col] : lcs[row][col - 1];
+        }
+    size = lcs[lenA][lenB];
+    common[size] = '\0';
+    row = lenA; col = lenB;
+    while (row > 0 && col > 0) {                           (*@\cmt{إعادة البناء من النهاية}@*)
+        if (first[row - 1] == second[col - 1]) {
+            common[--size] = first[row - 1];
+            row--; col--;
+        } else if (lcs[row - 1][col] >= lcs[row][col - 1]) {
+            row--;
+        } else {
+            col--;
+        }
+    }
+    printf("LCS length: %d\n", lcs[lenA][lenB]);
+    printf("LCS: \"%s\"\n", common);
+    printf("Similarity: %.2f\n", 2.0 * lcs[lenA][lenB] / (lenA + lenB));
+    return 0;
+}

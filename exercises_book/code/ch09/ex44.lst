@@ -1,0 +1,45 @@
+#include <stdio.h>
+
+#define CAP 5
+
+typedef struct { int id, arrival; } Ticket;
+typedef struct { Ticket items[CAP]; int head, tail, count; } Queue;
+
+int enqueue(Queue queue[], Ticket ticket) {
+    if (queue[0].count == CAP) return 0;                 (*@\cmt{الطابور ممتلئ}@*)
+    queue[0].items[queue[0].tail] = ticket;
+    queue[0].tail = (queue[0].tail + 1) % CAP;           (*@\cmt{دوران}@*)
+    queue[0].count++;
+    return 1;
+}
+
+Ticket dequeue(Queue queue[]) {
+    Ticket ticket = queue[0].items[queue[0].head];
+    queue[0].head = (queue[0].head + 1) % CAP;
+    queue[0].count--;
+    return ticket;
+}
+
+int main(void) {
+    char events[] = "+++-++-+++++--+-----+-";
+    Queue queue[1] = {{{{0, 0}}, 0, 0, 0}};
+    Ticket ticket;
+    int minute, nextId = 1, served = 0, rejected = 0, totalWait = 0;
+    for (minute = 0; events[minute] != '\0'; minute++) {
+        if (events[minute] == '+') {
+            ticket.id = nextId++;
+            ticket.arrival = minute;
+            if (!enqueue(queue, ticket)) {
+                rejected++;
+                printf("t=%2d ticket %d rejected (queue full)\n", minute, ticket.id);
+            }
+        } else if (queue[0].count > 0) {
+            ticket = dequeue(queue);
+            totalWait += minute - ticket.arrival;
+            served++;
+        }
+    }
+    printf("Served %d, rejected %d, still waiting %d\n", served, rejected, queue[0].count);
+    printf("Average wait: %.2f minutes\n", (double)totalWait / served);
+    return 0;
+}

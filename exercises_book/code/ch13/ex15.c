@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+int counter, found, result;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void visit(const Tree *node, int rank) {
+    if (node == NULL || found) return;
+    visit(node->left, rank);
+    if (found) return;
+    if (++counter == rank) { result = node->price; found = 1; return; }   // توقف مبكر
+    visit(node->right, rank);
+}
+
+int kthSmallest(const Tree *root, int rank) {
+    counter = 0;
+    found = 0;
+    visit(root, rank);
+    return result;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[11] = {32000, 29500, 31000, 89000, 30500, 28900, 33000, 27500, 35000, 30000, 29900};
+    Tree *root = NULL;
+    int idx;
+    for (idx = 0; idx < 11; idx++) root = insert(root, prices[idx]);
+    printf("Q1 (3rd):     %d\n", kthSmallest(root, 3));
+    printf("Median (6th): %d\n", kthSmallest(root, 6));
+    printf("Q3 (9th):     %d\n", kthSmallest(root, 9));
+    freeTree(root);
+    return 0;
+}

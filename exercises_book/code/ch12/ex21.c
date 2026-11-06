@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Driver { char name[10]; int load; struct Driver *next; } Driver;
+
+void addDriver(Driver **tail, const char *name) {
+    Driver *node = malloc(sizeof(Driver));
+    int pos;
+    for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+    node->load = 0;
+    if (*tail == NULL) node->next = node;               // سائق وحيد: يشير إلى نفسه
+    else { node->next = (*tail)->next; (*tail)->next = node; }
+    *tail = node;
+}
+
+int main(void) {
+    const char *names[4] = {"Yacine", "Bilal", "Rania", "Hakim"};
+    Driver *tail = NULL, *turn, *walk, *next;
+    int idx, order;
+    for (idx = 0; idx < 4; idx++) addDriver(&tail, names[idx]);
+    turn = tail->next;                                  // الرأس
+    for (order = 0; order < 10; order++) {
+        printf("order #%d -> %s\n", 7781 + order, turn->name);
+        turn->load++;
+        turn = turn->next;                              // الدور التالي (دائري)
+    }
+    walk = tail->next;
+    do { printf("%s: %d  ", walk->name, walk->load); walk = walk->next; } while (walk != tail->next);
+    printf("\n");
+    walk = tail->next;
+    tail->next = NULL;                                  // نكسر الحلقة قبل التحرير
+    for (; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}

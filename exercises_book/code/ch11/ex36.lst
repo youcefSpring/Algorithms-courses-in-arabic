@@ -1,0 +1,47 @@
+#include <stdio.h>
+
+#define VERSION 2
+
+typedef struct { int version; int count; } Header;
+typedef struct { int code; int qty; double price; } Item;
+
+void saveCart(const char *path, const Item *items, int count) {
+    FILE *file = fopen(path, "wb");
+    Header header = {VERSION, count};
+    fwrite(&header, sizeof(Header), 1, file);          (*@\cmt{الرأس أولًا}@*)
+    fwrite(items, sizeof(Item), count, file);
+    fclose(file);
+}
+
+int loadCart(const char *path, Item *items, int capacity) {
+    FILE *file = fopen(path, "rb");
+    Header header;
+    int count;
+    if (file == NULL) return -1;
+    if (fread(&header, sizeof(Header), 1, file) != 1 || header.version != VERSION
+        || header.count < 0 || header.count > capacity) {
+        fclose(file);
+        return -1;                                     (*@\cmt{ملف غير متوافق}@*)
+    }
+    count = (int)fread(items, sizeof(Item), header.count, file);
+    fclose(file);
+    return count;
+}
+
+int main(void) {
+    Item cart[3] = {{101, 2, 1500}, {205, 1, 32000}, {330, 4, 450}}, restored[10];
+    Header oldHeader = {1, 3};
+    FILE *file;
+    int count, idx;
+    saveCart("cart.bin", cart, 3);
+    count = loadCart("cart.bin", restored, 10);
+    printf("Restored %d items:", count);
+    for (idx = 0; idx < count; idx++) printf(" %d x%d", restored[idx].code, restored[idx].qty);
+    printf("\n");
+    file = fopen("old.bin", "wb");
+    fwrite(&oldHeader, sizeof(Header), 1, file);
+    fwrite(cart, sizeof(Item), 3, file);
+    fclose(file);
+    printf("Old format file: %s\n", loadCart("old.bin", restored, 10) < 0 ? "rejected" : "loaded");
+    return 0;
+}

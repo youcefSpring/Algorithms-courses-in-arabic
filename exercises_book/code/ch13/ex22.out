@@ -1,0 +1,5 @@
+R1: IF loyal AND cart>10000 THEN 15% off
+R2: IF loyal AND NOT cart>10000 THEN 5% off
+R3: IF NOT loyal AND first_order THEN free shipping
+R4: IF NOT loyal AND NOT first_order AND cart>20000 THEN 5% off
+R5: IF NOT loyal AND NOT first_order AND NOT cart>20000 THEN no discount

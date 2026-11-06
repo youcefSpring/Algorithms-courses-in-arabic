@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price, height; struct Tree *left, *right; } Tree;
+
+int rotations = 0;
+
+int heightOf(const Tree *node) { return node ? node->height : 0; }
+void update(Tree *node) { int lh = heightOf(node->left), rh = heightOf(node->right); node->height = 1 + (lh > rh ? lh : rh); }
+
+Tree *rotateRight(Tree *node) {
+    Tree *pivot = node->left;
+    node->left = pivot->right;
+    pivot->right = node;
+    update(node); update(pivot);
+    rotations++;
+    return pivot;
+}
+
+Tree *rotateLeft(Tree *node) {
+    Tree *pivot = node->right;
+    node->right = pivot->left;
+    pivot->left = node;
+    update(node); update(pivot);
+    rotations++;
+    return pivot;
+}
+
+Tree *insert(Tree *node, int price) {
+    int balance;
+    if (node == NULL) {
+        node = malloc(sizeof(Tree));
+        node->price = price; node->height = 1; node->left = node->right = NULL;
+        return node;
+    }
+    if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    update(node);
+    balance = heightOf(node->left) - heightOf(node->right);
+    if (balance > 1) {                                         // ثقيلة يسارًا
+        if (price > node->left->price) node->left = rotateLeft(node->left);
+        return rotateRight(node);
+    }
+    if (balance < -1) {                                        // ثقيلة يمينًا
+        if (price < node->right->price) node->right = rotateRight(node->right);
+        return rotateLeft(node);
+    }
+    return node;
+}
+
+Tree *plainInsert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->height = 1; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = plainInsert(node->left, price);
+    else node->right = plainInsert(node->right, price);
+    return node;
+}
+
+int realHeight(const Tree *node) { int lh, rh; if (!node) return 0; lh = realHeight(node->left); rh = realHeight(node->right); return 1 + (lh > rh ? lh : rh); }
+void preorder(const Tree *node) { if (node) { printf("%d ", node->price); preorder(node->left); preorder(node->right); } }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *avl = NULL, *plain = NULL;
+    int idx;
+    for (idx = 1; idx <= 15; idx++) {
+        avl = insert(avl, idx * 1000);
+        plain = plainInsert(plain, idx * 1000);
+    }
+    printf("15 sorted prices inserted\n");
+    printf("plain BST height: %d\n", realHeight(plain));
+    printf("AVL height: %d after %d rotations, root %d\n", realHeight(avl), rotations, avl->price);
+    printf("AVL preorder: ");
+    preorder(avl);
+    printf("\n");
+    freeTree(avl);
+    freeTree(plain);
+    return 0;
+}

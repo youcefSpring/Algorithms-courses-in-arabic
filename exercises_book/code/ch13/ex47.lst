@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBW 10
+
+typedef struct KdNode { double point[2]; char name[6]; struct KdNode *left, *right; } KdNode;
+
+KdNode warehouses[NBW] = {{{2, 3}, "W1", 0, 0}, {{5, 4}, "W2", 0, 0}, {{9, 6}, "W3", 0, 0}, {{4, 7}, "W4", 0, 0},
+                          {{8, 1}, "W5", 0, 0}, {{7, 2}, "W6", 0, 0}, {{1, 9}, "W7", 0, 0}, {{6, 8}, "W8", 0, 0},
+                          {{3, 1}, "W9", 0, 0}, {{10, 10}, "W10", 0, 0}};
+KdNode *view[NBW];
+const KdNode *best;
+double bestDist;
+int visited;
+
+KdNode *build(int low, int high, int depth) {
+    int axis = depth % 2, idx, back, middle;
+    KdNode *key;
+    if (low > high) return NULL;
+    for (idx = low + 1; idx <= high; idx++) {                    (*@\cmt{ترتيب حسب المحور}@*)
+        key = view[idx];
+        for (back = idx - 1; back >= low && view[back]->point[axis] > key->point[axis]; back--) view[back + 1] = view[back];
+        view[back + 1] = key;
+    }
+    middle = (low + high) / 2;
+    view[middle]->left = build(low, middle - 1, depth + 1);
+    view[middle]->right = build(middle + 1, high, depth + 1);
+    return view[middle];
+}
+
+void nearest(const KdNode *node, const double *query, int depth) {
+    double dx, dy, dist, diff;
+    int axis = depth % 2;
+    if (node == NULL) return;
+    visited++;
+    dx = node->point[0] - query[0];
+    dy = node->point[1] - query[1];
+    dist = dx * dx + dy * dy;
+    if (dist < bestDist) { bestDist = dist; best = node; }
+    diff = query[axis] - node->point[axis];
+    nearest(diff <= 0 ? node->left : node->right, query, depth + 1);   (*@\cmt{الجانب القريب}@*)
+    if (diff * diff < bestDist)                                        (*@\cmt{التقليم}@*)
+        nearest(diff <= 0 ? node->right : node->left, query, depth + 1);
+}
+
+int main(void) {
+    double orders[3][2] = {{6, 3}, {2, 8}, {9, 9}};
+    KdNode *root;
+    int idx;
+    for (idx = 0; idx < NBW; idx++) view[idx] = &warehouses[idx];
+    root = build(0, NBW - 1, 0);
+    printf("root %s (%.0f,%.0f)\n", root->name, root->point[0], root->point[1]);
+    for (idx = 0; idx < 3; idx++) {
+        bestDist = 1e18;
+        visited = 0;
+        nearest(root, orders[idx], 0);
+        printf("order at (%.0f,%.0f) -> %s, dist^2 %.0f, visited %d/%d\n", orders[idx][0], orders[idx][1],
+               best->name, bestDist, visited, NBW);
+    }
+    return 0;
+}

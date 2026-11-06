@@ -1,0 +1,4 @@
+15 sorted prices inserted
+plain BST height: 15
+AVL height: 4 after 11 rotations, root 8000
+AVL preorder: 8000 4000 2000 1000 3000 6000 5000 7000 12000 10000 9000 11000 14000 13000 15000 

@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+char *duplicate(const char *text) {
+    int length = 0, pos;
+    char *copy;
+    while (text[length] != '\0') length++;
+    copy = malloc(length + 1);                 (*@\cmt{+\cen{1} لعلامة النهاية}@*)
+    if (copy == NULL) return NULL;
+    for (pos = 0; pos <= length; pos++) copy[pos] = text[pos];
+    return copy;
+}
+
+int main(void) {
+    char buffer[100];
+    char *names[3];
+    int idx, bytes = 0, len;
+    for (idx = 0; idx < 3; idx++) {
+        scanf("%99s", buffer);
+        names[idx] = duplicate(buffer);        (*@\cmt{نسخة بحجمها الحقيقي}@*)
+        for (len = 0; names[idx][len] != '\0'; len++) {}
+        bytes += len + 1;
+    }
+    for (idx = 0; idx < 3; idx++) printf("%s\n", names[idx]);
+    printf("Used %d bytes instead of %d\n", bytes, 3 * 100);
+    for (idx = 0; idx < 3; idx++) free(names[idx]);
+    return 0;
+}

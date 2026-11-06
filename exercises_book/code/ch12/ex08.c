@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; struct Node *next; } Node;
+
+int popFront(Node **head) {
+    Node *first = *head;
+    int number;
+    if (first == NULL) return -1;             // قائمة فارغة
+    number = first->number;
+    *head = first->next;                      // الرأس ينتقل إلى الثانية
+    free(first);
+    return number;
+}
+
+int main(void) {
+    Node *head = NULL, *node;
+    int idx;
+    for (idx = 3; idx >= 0; idx--) {
+        node = malloc(sizeof(Node));
+        node->number = 7781 + idx;
+        node->next = head;
+        head = node;
+    }
+    while (head != NULL) printf("Processing order #%d\n", popFront(&head));
+    printf("Pop on empty list: %d\n", popFront(&head));
+    return 0;
+}

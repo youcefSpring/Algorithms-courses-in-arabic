@@ -1,0 +1,11 @@
+get 5: MISS | 5
+get 2: MISS | 2 5
+get 5: HIT  | 5 2
+get 7: MISS | 7 5 2
+get 9: MISS evict 2 | 9 7 5
+get 2: MISS evict 5 | 2 9 7
+get 5: MISS evict 7 | 5 2 9
+get 9: HIT  | 9 5 2
+get 9: HIT  | 9 5 2
+get 1: MISS evict 2 | 1 9 5
+hits 3, misses 7, hit rate 30%

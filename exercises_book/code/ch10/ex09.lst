@@ -1,0 +1,19 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { int code; double price; int stock; } Product;
+
+int main(void) {
+    Product *item = malloc(sizeof(Product));
+    if (item == NULL) return 1;
+    item->code = 330;                 (*@\cmt{كتابة الحقول عبر المؤشر}@*)
+    item->price = 899;
+    item->stock = 25;
+    printf("Product %d: %.2f DA x %d = %.2f DA\n", item->code, item->price,
+           item->stock, item->price * item->stock);
+    printf("Block size: %d bytes\n", (int)sizeof(Product));
+    free(item);
+    item = NULL;                      (*@\cmt{لا نستعمل ذاكرة محررة}@*)
+    printf("Freed: %s\n", item == NULL ? "pointer reset" : "?");
+    return 0;
+}

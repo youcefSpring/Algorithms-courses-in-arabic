@@ -1,0 +1,1119 @@
+@@
+title: هيكل المنتج
+level: easy
+domain: ec
+@ statement
+عرّف هيكلًا `struct Product` يجمع رمز المنتج واسمه وسعره وكميته في المخزون، ثم أنشئ منتجًا مهيأً واعرض بطاقته وقيمة مخزونه.
+@ steps
+- الهيكل يجمع حقولًا من أنواع مختلفة تحت اسم واحد.
+- نصل إلى الحقل بالنقطة: `item.price`.
+@ flow
+do: item = {2045, "Smartphone X", 32000, 14}
+out: item.code, item.name, item.price, item.stock
+out: item.price * item.stock
+@ code
+#include <stdio.h>
+
+struct Product {
+    int code;
+    char name[30];
+    double price;
+    int stock;
+};
+
+int main(void) {
+    struct Product item = {2045, "Smartphone X", 32000, 14};   // تهيئة بالترتيب
+    printf("Code : %d\n", item.code);
+    printf("Name : %s\n", item.name);
+    printf("Price: %.2f DA\n", item.price);
+    printf("Stock: %d units\n", item.stock);
+    printf("Stock value: %.2f DA\n", item.price * item.stock);
+    return 0;
+}
+
+@@
+title: قراءة بيانات زبون
+level: easy
+domain: ec
+@ statement
+عرّف بـ `typedef` نوعًا `Customer` (المعرف، الاسم، المدينة، عدد الطلبيات)، ثم اقرأ زبونًا من لوحة المفاتيح واعرض بطاقته مع فئته: "وفي" إذا تجاوز 10 طلبيات.
+@ stdin
+507 Amina Oran 12
+@ steps
+- `typedef struct {...} Customer;` يسمح بكتابة `Customer` بدل `struct ...`.
+- `scanf` يحتاج إلى عنوان الحقل: `&client.id`، أما الجدول `client.name` فهو عنوان.
+@ flow
+in: client.id, client.name, client.city, client.orders
+if: client.orders > 10
+  out: `"loyal"`
+else:
+  out: `"regular"`
+@ code
+#include <stdio.h>
+
+typedef struct {
+    int id;
+    char name[30];
+    char city[20];
+    int orders;
+} Customer;
+
+int main(void) {
+    Customer client;
+    scanf("%d %29s %19s %d", &client.id, client.name, client.city, &client.orders);
+    printf("#%d %s (%s): %d orders -> %s\n", client.id, client.name, client.city,
+           client.orders, client.orders > 10 ? "loyal" : "regular");
+    return 0;
+}
+
+@@
+title: مقارنة تاريخي طلبيتين
+level: easy
+domain: ec
+@ statement
+عرّف هيكلًا `Date` (اليوم، الشهر، السنة) واكتب دالة `compareDates(first, second)` تعيد -1 أو 0 أو 1، ثم حدد أي الطلبيتين أقدم.
+@ steps
+- نقارن السنوات أولًا، ثم الأشهر، ثم الأيام.
+- الهيكل يُمرر إلى الدالة **بالقيمة** (نسخة).
+@ flow
+call: result = compareDates(orderA, orderB)
+if: result < 0
+  out: `"A is older"`
+else:
+  if: result > 0
+    out: `"B is older"`
+  else:
+    out: `"same day"`
+@ code
+#include <stdio.h>
+
+typedef struct {
+    int day, month, year;
+} Date;
+
+int compareDates(Date first, Date second) {
+    if (first.year != second.year) return first.year < second.year ? -1 : 1;
+    if (first.month != second.month) return first.month < second.month ? -1 : 1;
+    if (first.day != second.day) return first.day < second.day ? -1 : 1;
+    return 0;
+}
+
+int main(void) {
+    Date orderA = {28, 10, 2026}, orderB = {3, 11, 2026};
+    int result = compareDates(orderA, orderB);
+    printf("A: %02d/%02d/%d  B: %02d/%02d/%d\n", orderA.day, orderA.month, orderA.year,
+           orderB.day, orderB.month, orderB.year);
+    if (result < 0) printf("Order A is older\n");
+    else if (result > 0) printf("Order B is older\n");
+    else printf("Same day\n");
+    return 0;
+}
+
+@@
+title: المسافة بين المتجر والزبون
+level: easy
+domain: ec
+@ statement
+عرّف هيكلًا `Point` بإحداثيتين `posX` و `posY` (بالكم)، واكتب دالة `manhattan(first, second)` تحسب مسافة التنقل في شوارع متعامدة `|dx| + |dy|`، ثم احسب مسافة كل زبون عن المتجر.
+@ steps
+- القيمة المطلقة نكتبها بأنفسنا بالعامل الشرطي.
+- جدول من الهياكل: `Point clients[3]`.
+@ flow
+for: idx = 0 ; idx < 3 ; idx++
+  call: dist = manhattan(shop, clients[idx])
+  out: idx, dist
+@ code
+#include <stdio.h>
+
+typedef struct {
+    double posX, posY;
+} Point;
+
+double absValue(double value) { return value < 0 ? -value : value; }
+
+double manhattan(Point first, Point second) {
+    return absValue(first.posX - second.posX) + absValue(first.posY - second.posY);
+}
+
+int main(void) {
+    Point shop = {4, 3};
+    Point clients[3] = {{1, 7}, {9, 2}, {4, 10}};
+    int idx;
+    for (idx = 0; idx < 3; idx++)
+        printf("Client %d at (%.0f,%.0f): %.0f km\n", idx + 1,
+               clients[idx].posX, clients[idx].posY, manhattan(shop, clients[idx]));
+    return 0;
+}
+
+@@
+title: مبلغ الطلبية من سطورها
+level: easy
+domain: ec
+@ statement
+عرّف هيكلًا `OrderLine` (اسم المنتج، سعر الوحدة، الكمية) وجدولًا من 4 سطور، ثم احسب مبلغ كل سطر ومبلغ الطلبية الكلي.
+@ steps
+- `lines[idx].price * lines[idx].qty` لكل سطر.
+- نجمع في `total`.
+@ flow
+do: total = 0
+for: idx = 0 ; idx < 4 ; idx++
+  do: amount = lines[idx].price * lines[idx].qty
+  do: total = total + amount
+  out: lines[idx].name, amount
+out: total
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[20];
+    double price;
+    int qty;
+} OrderLine;
+
+int main(void) {
+    OrderLine lines[4] = {{"USB cable", 450, 3}, {"Charger", 2200, 1},
+                          {"Case", 900, 2}, {"Screen film", 350, 4}};
+    double total = 0, amount;
+    int idx;
+    for (idx = 0; idx < 4; idx++) {
+        amount = lines[idx].price * lines[idx].qty;
+        total += amount;
+        printf("%-12s %2d x %7.2f = %8.2f\n", lines[idx].name, lines[idx].qty,
+               lines[idx].price, amount);
+    }
+    printf("TOTAL %30.2f DA\n", total);
+    return 0;
+}
+
+@@
+title: قيمة المخزون الإجمالية
+level: easy
+domain: ec
+@ statement
+لدينا جدول من 5 منتجات (هيكل بالاسم والسعر والمخزون). احسب قيمة المخزون الإجمالية، وعدد المنتجات النافدة (مخزون 0).
+@ steps
+- حلقة واحدة على جدول الهياكل.
+- نجمع `price * stock` ونعد الحالات `stock == 0`.
+@ flow
+for: idx = 0 ; idx < 5 ; idx++
+  do: value = value + items[idx].price * items[idx].stock
+  if: items[idx].stock == 0
+    do: outOfStock++
+out: value, outOfStock
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[20];
+    double price;
+    int stock;
+} Product;
+
+int main(void) {
+    Product items[5] = {{"Laptop", 89000, 4}, {"Mouse", 1500, 0}, {"Monitor", 32000, 6},
+                        {"Keyboard", 3200, 15}, {"Webcam", 4100, 0}};
+    double value = 0;
+    int idx, outOfStock = 0;
+    for (idx = 0; idx < 5; idx++) {
+        value += items[idx].price * items[idx].stock;
+        if (items[idx].stock == 0) {
+            outOfStock++;
+            printf("Out of stock: %s\n", items[idx].name);
+        }
+    }
+    printf("Inventory value: %.2f DA\n", value);
+    printf("%d product(s) to reorder\n", outOfStock);
+    return 0;
+}
+
+@@
+title: دالة تعيد هيكلًا معدلًا
+level: easy
+domain: ec
+@ statement
+اكتب دالة `applyDiscount(item, percent)` تستقبل منتجًا (بالقيمة) وتعيد **نسخة** منه بسعر مخفض. اعرض المنتج الأصلي والنسخة للتأكد أن الأصل لم يتغير.
+@ steps
+- الهيكل يُمرر بالقيمة: التعديل داخل الدالة على نسخة.
+- الدالة تعيد هيكلًا كاملًا بـ `return`.
+@ flow
+call: promo = applyDiscount(item, 20)
+out: item.price, promo.price
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[20];
+    double price;
+} Product;
+
+Product applyDiscount(Product item, double percent) {
+    item.price = item.price * (100 - percent) / 100;   // نعدل النسخة فقط
+    return item;
+}
+
+int main(void) {
+    Product item = {"Headphones", 12500};
+    Product promo = applyDiscount(item, 20);
+    printf("Original: %s %.2f DA\n", item.name, item.price);
+    printf("Promo:    %s %.2f DA\n", promo.name, promo.price);
+    return 0;
+}
+
+@@
+title: متوسط تقييمات منتج
+level: easy
+domain: ds
+@ statement
+عرّف هيكلًا `Review` (اسم الزبون، النجوم من 1 إلى 5، هل الشراء موثق). احسب متوسط النجوم لكل التقييمات ومتوسط التقييمات الموثقة فقط.
+@ steps
+- حقل `verified` قيمته 0 أو 1.
+- مجموعان وعدادان.
+@ flow
+for: idx = 0 ; idx < 6 ; idx++
+  do: sumAll += reviews[idx].stars
+  if: reviews[idx].verified
+    do: sumVerified += reviews[idx].stars ; nbVerified++
+out: sumAll / 6, sumVerified / nbVerified
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char author[16];
+    int stars;
+    int verified;
+} Review;
+
+int main(void) {
+    Review reviews[6] = {{"Karim", 5, 1}, {"Lina", 1, 0}, {"Yacine", 4, 1},
+                         {"Sara", 1, 0}, {"Nadir", 4, 1}, {"Meriem", 5, 1}};
+    int idx, sumAll = 0, sumVerified = 0, nbVerified = 0;
+    for (idx = 0; idx < 6; idx++) {
+        sumAll += reviews[idx].stars;
+        if (reviews[idx].verified) {             // شراء موثق فقط
+            sumVerified += reviews[idx].stars;
+            nbVerified++;
+        }
+    }
+    printf("All reviews:      %.2f\n", sumAll / 6.0);
+    printf("Verified reviews: %.2f (%d reviews)\n", (double)sumVerified / nbVerified, nbVerified);
+    return 0;
+}
+
+@@
+title: جمع مدتين بهيكل الوقت
+level: easy
+domain: ds
+@ statement
+عرّف هيكلًا `Duration` (ساعات، دقائق، ثوان) ودالة `addDurations(first, second)` تعيد مجموعهما مع ترحيل الثواني والدقائق الزائدة، ثم احسب مدة تصفح زبون خلال ثلاث جلسات.
+@ steps
+- نجمع كل حقل، ثم: إذا تجاوزت الثواني 59 نرحّل `seconds / 60` إلى الدقائق، ونفس الشيء للدقائق.
+@ flow
+do: total = {0, 0, 0}
+for: idx = 0 ; idx < 3 ; idx++
+  call: total = addDurations(total, sessions[idx])
+out: total
+@ code
+#include <stdio.h>
+
+typedef struct {
+    int hours, minutes, seconds;
+} Duration;
+
+Duration addDurations(Duration first, Duration second) {
+    Duration sum;
+    sum.seconds = first.seconds + second.seconds;
+    sum.minutes = first.minutes + second.minutes + sum.seconds / 60;   // ترحيل
+    sum.seconds %= 60;
+    sum.hours = first.hours + second.hours + sum.minutes / 60;
+    sum.minutes %= 60;
+    return sum;
+}
+
+int main(void) {
+    Duration sessions[3] = {{0, 42, 35}, {1, 18, 50}, {0, 55, 47}};
+    Duration total = {0, 0, 0};
+    int idx;
+    for (idx = 0; idx < 3; idx++)
+        total = addDurations(total, sessions[idx]);
+    printf("Total browsing time: %dh %02dm %02ds\n", total.hours, total.minutes, total.seconds);
+    return 0;
+}
+
+@@
+title: نسخ الهياكل بالإسناد
+level: easy
+domain: ec
+@ statement
+وضّح أن الإسناد `backup = cart;` ينسخ **كل** حقول الهيكل، بما فيها الجداول الداخلية، على عكس الجداول العادية. عدّل السلة بعد النسخ وقارن.
+@ steps
+- الإسناد بين هيكلين من نفس النوع ينسخ الذاكرة كلها.
+- تعديل `cart` لا يؤثر على `backup`.
+@ flow
+do: backup = cart
+do: cart.qty[0] = 9 ; cart.items = 3
+out: cart, backup
+@ code
+#include <stdio.h>
+
+typedef struct {
+    int items;
+    int qty[5];
+} Cart;
+
+void show(char label[], Cart basket) {
+    int idx;
+    printf("%s %d items:", label, basket.items);
+    for (idx = 0; idx < basket.items; idx++) printf(" %d", basket.qty[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    Cart cart = {2, {1, 4}};
+    Cart backup = cart;                  // نسخة كاملة (بما فيها الجدول)
+    cart.qty[0] = 9;
+    cart.qty[2] = 2;
+    cart.items = 3;
+    show("cart:  ", cart);
+    show("backup:", backup);
+    return 0;
+}
+
+@@
+title: أرخص منتج في كل فئة
+level: medium
+domain: ec
+@ statement
+لدينا 8 منتجات، لكل منتج اسم وفئة (`'P'` هواتف، `'L'` حواسيب، `'A'` ملحقات) وسعر. اكتب دالة `cheapestOf(items, size, category)` تعيد **فهرس** أرخص منتج في الفئة المعطاة، واعرض النتيجة لكل فئة.
+@ steps
+- `best = -1` في البداية؛ أول منتج من الفئة يصبح المرشح.
+- نقارن السعر فقط مع منتجات نفس الفئة.
+@ flow
+for: cat = 0 ; cat < 3 ; cat++
+  call: best = cheapestOf(items, 8, categories[cat])
+  out: items[best].name, items[best].price
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[20];
+    char category;
+    double price;
+} Product;
+
+int cheapestOf(Product items[], int size, char category) {
+    int idx, best = -1;
+    for (idx = 0; idx < size; idx++)
+        if (items[idx].category == category &&
+            (best < 0 || items[idx].price < items[best].price))
+            best = idx;
+    return best;
+}
+
+int main(void) {
+    Product items[8] = {{"Galaxy A", 'P', 38000}, {"ThinkPad", 'L', 95000},
+                        {"Charger", 'A', 2200}, {"Redmi 13", 'P', 27500},
+                        {"IdeaPad", 'L', 72000}, {"Cable", 'A', 450},
+                        {"iPhone", 'P', 165000}, {"Hub", 'A', 3100}};
+    char categories[3] = {'P', 'L', 'A'};
+    int cat, best;
+    for (cat = 0; cat < 3; cat++) {
+        best = cheapestOf(items, 8, categories[cat]);
+        printf("Category %c: %-9s %9.2f DA\n", categories[cat], items[best].name, items[best].price);
+    }
+    return 0;
+}
+
+@@
+title: ترتيب المنتجات حسب السعر
+level: medium
+domain: ec
+@ statement
+رتّب جدولًا من الهياكل `Product` تصاعديًا حسب السعر بالترتيب بالاختيار، مع تبديل **الهياكل كاملة** (لا الأسعار فقط)، ثم اعرض الكتالوج.
+@ steps
+- نبحث عن فهرس أصغر سعر في الجزء غير المرتب.
+- نبدل الهيكلين بمتغير مؤقت `Product tmp` (إسناد هياكل).
+@ flow
+for: pos = 0 ; pos < NB - 1 ; pos++
+  do: minIdx = فهرس أصغر سعر من pos إلى النهاية
+  do: tmp = items[pos] ; items[pos] = items[minIdx] ; items[minIdx] = tmp
+out: items
+@ code
+#include <stdio.h>
+
+#define NB 6
+
+typedef struct {
+    int code;
+    char name[20];
+    double price;
+} Product;
+
+int main(void) {
+    Product items[NB] = {{101, "Monitor", 32000}, {102, "Mouse", 1500}, {103, "Laptop", 89000},
+                         {104, "Keyboard", 3200}, {105, "Webcam", 4100}, {106, "Cable", 450}};
+    Product tmp;
+    int pos, idx, minIdx;
+    for (pos = 0; pos < NB - 1; pos++) {
+        minIdx = pos;
+        for (idx = pos + 1; idx < NB; idx++)
+            if (items[idx].price < items[minIdx].price) minIdx = idx;
+        tmp = items[pos];                 // تبديل الهيكلين كاملين
+        items[pos] = items[minIdx];
+        items[minIdx] = tmp;
+    }
+    for (idx = 0; idx < NB; idx++)
+        printf("%d %-9s %9.2f\n", items[idx].code, items[idx].name, items[idx].price);
+    return 0;
+}
+
+@@
+title: ترتيب الزبائن أبجديًا
+level: medium
+domain: ec
+@ statement
+رتّب قائمة زبائن (الاسم، المدينة، المشتريات) **أبجديًا حسب الاسم** بالترتيب بالإدراج، مع دالة مقارنة يدوية `compareNames`، وفي حالة تساوي الاسمين حسب المدينة.
+@ steps
+- `compareNames` تقارن الحروف حتى أول اختلاف.
+- مفتاح المقارنة المركب: الاسم ثم المدينة.
+@ flow
+for: idx = 1 ; idx < NB ; idx++
+  do: key = clients[idx] ; back = idx - 1
+  while: back >= 0 && before(key, clients[back])
+    do: clients[back + 1] = clients[back] ; back--
+  do: clients[back + 1] = key
+@ code
+#include <stdio.h>
+
+#define NB 6
+
+typedef struct {
+    char name[16];
+    char city[16];
+    double spent;
+} Customer;
+
+int compareNames(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos]) pos++;
+    return first[pos] - second[pos];
+}
+
+int before(Customer first, Customer second) {
+    int byName = compareNames(first.name, second.name);
+    if (byName != 0) return byName < 0;
+    return compareNames(first.city, second.city) < 0;    // نفس الاسم: المدينة
+}
+
+int main(void) {
+    Customer clients[NB] = {{"Yacine", "Oran", 15000}, {"Amina", "Setif", 8200},
+                            {"Karim", "Annaba", 23000}, {"Amina", "Blida", 4100},
+                            {"Lina", "Algiers", 9900}, {"Bilal", "Oran", 12000}};
+    Customer key;
+    int idx, back;
+    for (idx = 1; idx < NB; idx++) {
+        key = clients[idx];
+        back = idx - 1;
+        while (back >= 0 && before(key, clients[back])) {
+            clients[back + 1] = clients[back];
+            back--;
+        }
+        clients[back + 1] = key;
+    }
+    for (idx = 0; idx < NB; idx++)
+        printf("%-7s %-8s %8.0f\n", clients[idx].name, clients[idx].city, clients[idx].spent);
+    return 0;
+}
+
+@@
+title: البحث عن منتج برمزه النصي
+level: medium
+domain: ec
+@ statement
+لكل منتج رمز نصي `SKU` مثل `"KB-204"`. اكتب دالة `findBySku(items, size, sku)` تعيد فهرس المنتج أو -1، واستعملها لمعالجة طلبات أسعار تُقرأ من لوحة المفاتيح.
+@ stdin
+3
+MS-110
+KB-204
+TV-999
+@ steps
+- دالة `sameText` تقارن سلسلتين حرفًا بحرف.
+- بحث تسلسلي على حقل `sku` في جدول الهياكل.
+@ flow
+in: nbQueries
+for: query = 0 ; query < nbQueries ; query++
+  in: sku
+  call: idx = findBySku(items, 5, sku)
+  if: idx >= 0
+    out: items[idx].name, items[idx].price
+  else:
+    out: `"unknown SKU"`
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char sku[10];
+    char name[20];
+    double price;
+} Product;
+
+int sameText(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos]) pos++;
+    return first[pos] == second[pos];          // انتهتا معًا
+}
+
+int findBySku(Product items[], int size, char sku[]) {
+    int idx;
+    for (idx = 0; idx < size; idx++)
+        if (sameText(items[idx].sku, sku)) return idx;
+    return -1;
+}
+
+int main(void) {
+    Product items[5] = {{"KB-204", "Keyboard", 3200}, {"MS-110", "Mouse", 1500},
+                        {"MN-270", "Monitor", 32000}, {"HD-500", "Headset", 5400},
+                        {"CB-001", "Cable", 450}};
+    char sku[10];
+    int nbQueries, query, idx;
+    scanf("%d", &nbQueries);
+    for (query = 0; query < nbQueries; query++) {
+        scanf("%9s", sku);
+        idx = findBySku(items, 5, sku);
+        if (idx >= 0) printf("%s: %s, %.2f DA\n", sku, items[idx].name, items[idx].price);
+        else printf("%s: unknown SKU\n", sku);
+    }
+    return 0;
+}
+
+@@
+title: الطلبية بهياكل متداخلة
+level: medium
+domain: ec
+@ statement
+عرّف هيكل `Order` يحتوي على هيكل `Customer` وهيكل `Date` وجدول من المنتجات المطلوبة. اكتب دالة `printOrder(order)` تعرض ملخص الطلبية: الزبون، التاريخ، عدد القطع، والمبلغ.
+@ steps
+- الوصول إلى حقل متداخل: `order.client.name` و `order.date.day`.
+- جدول داخل هيكل: `order.prices[idx]`.
+@ flow
+call: printOrder(order)
+@ code
+#include <stdio.h>
+
+typedef struct { int day, month, year; } Date;
+typedef struct { char name[20]; char city[16]; } Customer;
+typedef struct {
+    int number;
+    Customer client;               // هيكل داخل هيكل
+    Date date;
+    int nbLines;
+    double prices[5];
+    int qty[5];
+} Order;
+
+void printOrder(Order order) {
+    double total = 0;
+    int idx, pieces = 0;
+    for (idx = 0; idx < order.nbLines; idx++) {
+        total += order.prices[idx] * order.qty[idx];
+        pieces += order.qty[idx];
+    }
+    printf("Order #%d for %s (%s)\n", order.number, order.client.name, order.client.city);
+    printf("Date: %02d/%02d/%d\n", order.date.day, order.date.month, order.date.year);
+    printf("%d lines, %d pieces, total %.2f DA\n", order.nbLines, pieces, total);
+}
+
+int main(void) {
+    Order order = {7781, {"Nadir", "Tlemcen"}, {5, 11, 2026}, 3,
+                   {1500, 3200, 450}, {2, 1, 4}};
+    printOrder(order);
+    return 0;
+}
+
+@@
+title: تقرير إعادة التموين
+level: medium
+domain: ec
+@ statement
+لكل منتج: الاسم، المخزون الحالي، متوسط المبيعات اليومية، ومدة التوريد بالأيام. نعيد الطلب إذا كان المخزون لا يكفي لمدة التوريد + 3 أيام أمان. اكتب دالة `needsRestock(item)` و `orderQuantity(item)` (كمية تكفي 30 يومًا) واعرض التقرير.
+@ steps
+- نقطة إعادة الطلب = `dailySales * (leadDays + 3)`.
+- الكمية المطلوبة = `dailySales * 30 - stock` (تقريب إلى عدد صحيح).
+@ flow
+for: idx = 0 ; idx < 5 ; idx++
+  if: needsRestock(items[idx])
+    call: qty = orderQuantity(items[idx])
+    out: items[idx].name, qty
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[16];
+    int stock;
+    double dailySales;
+    int leadDays;
+} Item;
+
+int needsRestock(Item item) {
+    return item.stock < item.dailySales * (item.leadDays + 3);   // نقطة إعادة الطلب
+}
+
+int orderQuantity(Item item) {
+    return (int)(item.dailySales * 30 - item.stock + 0.5);
+}
+
+int main(void) {
+    Item items[5] = {{"Phone case", 40, 6.5, 4}, {"Charger", 120, 5.0, 7},
+                     {"Earbuds", 15, 2.2, 10}, {"Cable", 300, 12.0, 3},
+                     {"Power bank", 9, 1.5, 5}};
+    int idx, count = 0;
+    for (idx = 0; idx < 5; idx++)
+        if (needsRestock(items[idx])) {
+            printf("Reorder %-11s stock %3d -> order %3d units\n", items[idx].name,
+                   items[idx].stock, orderQuantity(items[idx]));
+            count++;
+        }
+    printf("%d product(s) to reorder\n", count);
+    return 0;
+}
+
+@@
+title: حساب الكسور لتقسيم الحصص
+level: medium
+domain: ds
+@ statement
+عرّف هيكل `Fraction` (بسط ومقام) ودوال `simplify` و `add` و `multiply`، واستعملها لحساب حصة كل شريك من أرباح متجر: الأول يملك 1/3، والثاني 1/4، والثالث ثلث الباقي.
+@ steps
+- `add`: `a/b + c/d = (ad + cb) / bd` ثم التبسيط بالقاسم المشترك الأكبر.
+- `multiply`: `(a·c) / (b·d)`.
+- الباقي = `1 - (1/3 + 1/4)`.
+@ flow
+call: taken = add(first, second)
+do: rest = 1 - taken
+call: third = multiply(rest, 1/3)
+out: first, second, third
+@ code
+#include <stdio.h>
+
+typedef struct {
+    long num, den;
+} Fraction;
+
+long gcd(long first, long second) {
+    while (second != 0) { long rest = first % second; first = second; second = rest; }
+    return first < 0 ? -first : first;
+}
+
+Fraction simplify(Fraction value) {
+    long divisor = gcd(value.num, value.den);
+    value.num /= divisor;
+    value.den /= divisor;
+    return value;
+}
+
+Fraction add(Fraction first, Fraction second) {
+    Fraction sum = {first.num * second.den + second.num * first.den, first.den * second.den};
+    return simplify(sum);
+}
+
+Fraction multiply(Fraction first, Fraction second) {
+    Fraction product = {first.num * second.num, first.den * second.den};
+    return simplify(product);
+}
+
+int main(void) {
+    Fraction first = {1, 3}, second = {1, 4}, oneThird = {1, 3};
+    Fraction taken = add(first, second);
+    Fraction rest = {taken.den - taken.num, taken.den};     // 1 - taken
+    Fraction third = multiply(rest, oneThird);
+    Fraction left = add(taken, third);
+    printf("Partner 1: %ld/%ld\nPartner 2: %ld/%ld\nPartner 3: %ld/%ld\n",
+           first.num, first.den, second.num, second.den, third.num, third.den);
+    printf("Reinvested: %ld/%ld of profit\n", left.den - left.num, left.den);
+    return 0;
+}
+
+@@
+title: المبالغ بالدينار والسنتيم دون أخطاء تقريب
+level: medium
+domain: ec
+@ statement
+الأعداد العشرية `double` قد تعطي أخطاء تقريب في المحاسبة. عرّف هيكل `Money` بحقلين صحيحين `dinars` و `centimes` (0..99) ودوال `addMoney` و `multiplyMoney(amount, qty)` و `printMoney`، ثم احسب فاتورة.
+@ steps
+- نحول إلى سنتيمات (`long`) للحساب، ثم نعيد التقسيم: `total / 100` و `total % 100`.
+- الضرب في الكمية يتم على السنتيمات.
+@ flow
+do: total = {0, 0}
+for: idx = 0 ; idx < 3 ; idx++
+  call: line = multiplyMoney(prices[idx], qty[idx])
+  call: total = addMoney(total, line)
+call: printMoney(total)
+@ code
+#include <stdio.h>
+
+typedef struct {
+    long dinars;
+    int centimes;
+} Money;
+
+long toCentimes(Money amount) { return amount.dinars * 100 + amount.centimes; }
+
+Money fromCentimes(long value) {
+    Money amount;
+    amount.dinars = value / 100;
+    amount.centimes = (int)(value % 100);
+    return amount;
+}
+
+Money addMoney(Money first, Money second) {
+    return fromCentimes(toCentimes(first) + toCentimes(second));
+}
+
+Money multiplyMoney(Money amount, int qty) {
+    return fromCentimes(toCentimes(amount) * qty);     // حساب بالأعداد الصحيحة
+}
+
+void printMoney(Money amount) {
+    printf("%ld.%02d DA", amount.dinars, amount.centimes);
+}
+
+int main(void) {
+    Money prices[3] = {{199, 99}, {1450, 50}, {89, 95}}, total = {0, 0}, line;
+    int qty[3] = {7, 3, 11}, idx;
+    double check = 0;
+    for (idx = 0; idx < 3; idx++) {
+        line = multiplyMoney(prices[idx], qty[idx]);
+        total = addMoney(total, line);
+        printf("%2d x ", qty[idx]); printMoney(prices[idx]);
+        printf(" = "); printMoney(line); printf("\n");
+        check += (prices[idx].dinars + prices[idx].centimes / 100.0) * qty[idx];
+    }
+    printf("Total: "); printMoney(total); printf("\n");
+    printf("Same total with double: %.17f\n", check);
+    return 0;
+}
+
+@@
+title: هل يدخل الصندوق في صندوق الشحن
+level: medium
+domain: ec
+@ statement
+عرّف هيكل `Box` (طول، عرض، ارتفاع بالسم). اكتب دالة `fitsIn(item, carton)` تتحقق إن كان المنتج يدخل في صندوق الشحن **مع إمكانية تدويره** (نرتب الأبعاد الثلاثة لكل صندوق ثم نقارنها)، ودالة `volume`، ثم اختر أصغر صندوق مناسب لكل منتج.
+@ steps
+- دالة `sortDims` ترتب أبعاد الصندوق تصاعديًا (3 مقارنات وتبديلات).
+- يدخل إذا كان كل بعد مرتب للمنتج ≤ البعد المرتب الموافق للصندوق.
+- أصغر صندوق مناسب = أصغر حجم بين الصناديق المناسبة.
+@ flow
+for: item = 0 ; item < 3 ; item++
+  do: best = -1
+  for: carton = 0 ; carton < 4 ; carton++
+    if: fitsIn(items[item], cartons[carton]) && حجمه أصغر
+      do: best = carton
+  out: item, best
+@ code
+#include <stdio.h>
+
+typedef struct {
+    double length, width, height;
+} Box;
+
+Box sortDims(Box box) {
+    double tmp;
+    if (box.length > box.width)  { tmp = box.length; box.length = box.width; box.width = tmp; }
+    if (box.width > box.height)  { tmp = box.width; box.width = box.height; box.height = tmp; }
+    if (box.length > box.width)  { tmp = box.length; box.length = box.width; box.width = tmp; }
+    return box;                    // length <= width <= height
+}
+
+double volume(Box box) { return box.length * box.width * box.height; }
+
+int fitsIn(Box item, Box carton) {
+    item = sortDims(item);
+    carton = sortDims(carton);
+    return item.length <= carton.length && item.width <= carton.width && item.height <= carton.height;
+}
+
+int main(void) {
+    Box cartons[4] = {{30, 20, 10}, {40, 30, 20}, {15, 60, 15}, {50, 40, 40}};
+    Box items[3] = {{12, 55, 9}, {35, 18, 25}, {28, 8, 19}};
+    int item, carton, best;
+    for (item = 0; item < 3; item++) {
+        best = -1;
+        for (carton = 0; carton < 4; carton++)
+            if (fitsIn(items[item], cartons[carton]) &&
+                (best < 0 || volume(cartons[carton]) < volume(cartons[best])))
+                best = carton;
+        printf("Item %d (%.0fx%.0fx%.0f): carton %d (%.0f cm3)\n", item + 1, items[item].length,
+               items[item].width, items[item].height, best + 1, volume(cartons[best]));
+    }
+    return 0;
+}
+
+@@
+title: دالة تعيد ملخصًا إحصائيًا
+level: medium
+domain: ds
+@ statement
+الدالة في C تعيد قيمة واحدة، لكن يمكنها أن تعيد **هيكلًا** يحتوي على عدة نتائج. اكتب دالة `describe(values, size)` تعيد هيكل `Summary` (العدد، الأصغر، الأكبر، المتوسط، الانحراف المعياري) لمبيعات فرعين.
+@ steps
+- مرور أول: الأصغر والأكبر والمجموع؛ مرور ثانٍ: مجموع مربعات الانحرافات.
+- الجذر بطريقة نيوتن.
+- `main` تعرض الهيكلين بدالة `printSummary`.
+@ flow
+call: printSummary("North:", describe(salesNorth, 7))
+call: printSummary("South:", describe(salesSouth, 7))
+@ code
+#include <stdio.h>
+
+typedef struct {
+    int count;
+    double low, high, mean, std;
+} Summary;
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    for (iter = 0; iter < 50; iter++) guess = (guess + value / guess) / 2;
+    return guess;
+}
+
+Summary describe(double values[], int size) {
+    Summary result;
+    double sum = 0, squares = 0;
+    int idx;
+    result.count = size;
+    result.low = result.high = values[0];
+    for (idx = 0; idx < size; idx++) {
+        sum += values[idx];
+        if (values[idx] < result.low) result.low = values[idx];
+        if (values[idx] > result.high) result.high = values[idx];
+    }
+    result.mean = sum / size;
+    for (idx = 0; idx < size; idx++)
+        squares += (values[idx] - result.mean) * (values[idx] - result.mean);
+    result.std = mySqrt(squares / size);
+    return result;                        // عدة نتائج في هيكل واحد
+}
+
+void printSummary(char label[], Summary info) {
+    printf("%s n=%d min=%.0f max=%.0f mean=%.2f std=%.2f\n", label, info.count,
+           info.low, info.high, info.mean, info.std);
+}
+
+int main(void) {
+    double salesNorth[7] = {120, 135, 128, 150, 142, 160, 131};
+    double salesSouth[7] = {90, 210, 60, 180, 75, 200, 95};
+    printSummary("North:", describe(salesNorth, 7));
+    printSummary("South:", describe(salesSouth, 7));
+    return 0;
+}
+
+@@
+title: المبيعات حسب الفئة
+level: medium
+domain: ds
+@ statement
+لدينا 10 عمليات بيع (اسم الفئة، المبلغ). اكتب برنامجًا يجمعها حسب الفئة في جدول من الهياكل `CategoryTotal` (الاسم، المجموع، العدد) يُبنى تدريجيًا، ثم يعرض لكل فئة مجموعها ومتوسطها وحصتها من رقم الأعمال.
+@ steps
+- لكل عملية: نبحث عن فئتها في جدول الإجماليات؛ إن لم توجد نضيف خانة جديدة.
+- الحصة = `مجموع الفئة / المجموع الكلي * 100`.
+@ flow
+for: sale = 0 ; sale < 10 ; sale++
+  do: pos = البحث عن الفئة في totals
+  if: pos < 0
+    do: pos = nbCats ; nbCats++ ; تهيئة الخانة
+  do: totals[pos].sum += amount ; totals[pos].count++
+for: cat = 0 ; cat < nbCats ; cat++
+  out: totals[cat]
+@ code
+#include <stdio.h>
+
+typedef struct { char category[12]; double amount; } Sale;
+typedef struct { char category[12]; double sum; int count; } CategoryTotal;
+
+int sameText(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos]) pos++;
+    return first[pos] == second[pos];
+}
+
+int main(void) {
+    Sale sales[10] = {{"Phones", 38000}, {"Audio", 5400}, {"Phones", 27500}, {"Laptops", 95000},
+                      {"Audio", 12500}, {"Cables", 450}, {"Laptops", 72000}, {"Phones", 41000},
+                      {"Cables", 900}, {"Audio", 3100}};
+    CategoryTotal totals[10];
+    int sale, cat, pos, nbCats = 0, letter;
+    double grand = 0;
+    for (sale = 0; sale < 10; sale++) {
+        pos = -1;
+        for (cat = 0; cat < nbCats; cat++)
+            if (sameText(totals[cat].category, sales[sale].category)) pos = cat;
+        if (pos < 0) {                                   // فئة جديدة
+            pos = nbCats++;
+            for (letter = 0; letter < 12; letter++) totals[pos].category[letter] = sales[sale].category[letter];
+            totals[pos].sum = 0;
+            totals[pos].count = 0;
+        }
+        totals[pos].sum += sales[sale].amount;
+        totals[pos].count++;
+        grand += sales[sale].amount;
+    }
+    for (cat = 0; cat < nbCats; cat++)
+        printf("%-8s %d sales, total %9.0f, mean %8.0f, share %5.1f%%\n", totals[cat].category,
+               totals[cat].count, totals[cat].sum, totals[cat].sum / totals[cat].count,
+               totals[cat].sum / grand * 100);
+    return 0;
+}
+
+@@
+title: صلاحية قسيمة التخفيض
+level: medium
+domain: ec
+@ statement
+عرّف هيكل `Coupon` (الرمز، النسبة، تاريخ البداية، تاريخ النهاية، الحد الأدنى للسلة). اكتب دالة `isValid(coupon, today, basket)` تتحقق من أن التاريخ داخل فترة الصلاحية وأن السلة تتجاوز الحد الأدنى، ثم طبّق أفضل قسيمة صالحة.
+@ steps
+- نحول التاريخ إلى عدد `year*10000 + month*100 + day` لتسهيل المقارنة.
+- من بين القسائم الصالحة نختار ذات أكبر نسبة.
+@ flow
+do: best = -1
+for: idx = 0 ; idx < 4 ; idx++
+  if: isValid(coupons[idx], today, basket) && نسبته أكبر
+    do: best = idx
+if: best >= 0
+  out: basket * (100 - coupons[best].percent) / 100
+else:
+  out: basket
+@ code
+#include <stdio.h>
+
+typedef struct { int day, month, year; } Date;
+typedef struct {
+    char code[12];
+    int percent;
+    Date start, end;
+    double minBasket;
+} Coupon;
+
+long dateKey(Date date) { return date.year * 10000L + date.month * 100 + date.day; }
+
+int isValid(Coupon coupon, Date today, double basket) {
+    long key = dateKey(today);
+    return key >= dateKey(coupon.start) && key <= dateKey(coupon.end) && basket >= coupon.minBasket;
+}
+
+int main(void) {
+    Coupon coupons[4] = {{"WELCOME10", 10, {1, 1, 2026}, {31, 12, 2026}, 0},
+                         {"AUTUMN20", 20, {1, 9, 2026}, {31, 10, 2026}, 5000},
+                         {"BIG15", 15, {1, 11, 2026}, {30, 11, 2026}, 20000},
+                         {"BLACK30", 30, {27, 11, 2026}, {30, 11, 2026}, 10000}};
+    Date today = {6, 11, 2026};
+    double basket = 24500;
+    int idx, best = -1;
+    for (idx = 0; idx < 4; idx++) {
+        printf("%-10s %s\n", coupons[idx].code, isValid(coupons[idx], today, basket) ? "valid" : "-");
+        if (isValid(coupons[idx], today, basket) &&
+            (best < 0 || coupons[idx].percent > coupons[best].percent))
+            best = idx;
+    }
+    if (best >= 0)
+        printf("Apply %s: %.2f -> %.2f DA\n", coupons[best].code, basket,
+               basket * (100 - coupons[best].percent) / 100);
+    return 0;
+}
+
+@@
+title: عمولات فريق المبيعات
+level: medium
+domain: ec
+@ statement
+لكل بائع: الاسم، المبيعات الشهرية، والهدف. العمولة 3% من المبيعات، وتصبح 5% على الجزء الذي يتجاوز الهدف، مع مكافأة 10000 دج لمن تجاوز الهدف بأكثر من 20%. اكتب دالة `commission(seller)` واعرض الترتيب حسب العمولة.
+@ steps
+- الجزء العادي `min(sales, target) * 0.03`، والجزء الإضافي `(sales - target) * 0.05`.
+- نخزن العمولة في حقل من الهيكل ثم نرتب.
+@ flow
+for: idx = 0 ; idx < 5 ; idx++
+  call: team[idx].bonus = commission(team[idx])
+do: ترتيب team تنازليًا حسب bonus
+out: team
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[12];
+    double sales, target, bonus;
+} Seller;
+
+double commission(Seller seller) {
+    double amount;
+    if (seller.sales <= seller.target) return seller.sales * 0.03;
+    amount = seller.target * 0.03 + (seller.sales - seller.target) * 0.05;
+    if (seller.sales > seller.target * 1.2) amount += 10000;    // مكافأة
+    return amount;
+}
+
+int main(void) {
+    Seller team[5] = {{"Rania", 820000, 700000, 0}, {"Hakim", 640000, 700000, 0},
+                      {"Selma", 910000, 750000, 0}, {"Omar", 505000, 500000, 0},
+                      {"Imane", 300000, 450000, 0}};
+    Seller tmp;
+    int idx, pass;
+    for (idx = 0; idx < 5; idx++) team[idx].bonus = commission(team[idx]);
+    for (pass = 0; pass < 4; pass++)
+        for (idx = 0; idx < 4 - pass; idx++)
+            if (team[idx].bonus < team[idx + 1].bonus) {
+                tmp = team[idx]; team[idx] = team[idx + 1]; team[idx + 1] = tmp;
+            }
+    for (idx = 0; idx < 5; idx++)
+        printf("%d. %-6s sales %7.0f / %7.0f -> %8.2f DA\n", idx + 1, team[idx].name,
+               team[idx].sales, team[idx].target, team[idx].bonus);
+    return 0;
+}
+
+@@
+title: أفضل ثلاثة زبائن
+level: medium
+domain: ds
+@ statement
+من سجل 12 طلبية (رقم الزبون، المبلغ)، اجمع إنفاق كل زبون في جدول هياكل `Spending`، ثم اعرض **أفضل ثلاثة زبائن** دون ترتيب الجدول كله (ثلاث عمليات اختيار للأكبر).
+@ steps
+- تجميع: بحث عن الزبون في الجدول، أو إضافته.
+- لكل رتبة من 1 إلى 3: نبحث عن الأكبر بين غير المختارين، ونعلّمه مختارًا.
+@ flow
+do: تجميع الطلبيات حسب الزبون
+for: rank = 0 ; rank < 3 ; rank++
+  do: best = أكبر total بين غير المختارين
+  do: picked[best] = 1
+  out: rank + 1, list[best]
+@ code
+#include <stdio.h>
+
+typedef struct { int client; double amount; } Order;
+typedef struct { int client; double total; int orders; int picked; } Spending;
+
+int main(void) {
+    Order orders[12] = {{7, 4500}, {3, 12000}, {7, 8200}, {9, 1500}, {3, 3300}, {5, 22000},
+                        {9, 6400}, {7, 2100}, {1, 9800}, {5, 1200}, {3, 7600}, {1, 400}};
+    Spending list[12];
+    int nb = 0, idx, pos, rank, best;
+    for (idx = 0; idx < 12; idx++) {
+        for (pos = 0; pos < nb && list[pos].client != orders[idx].client; pos++) {}
+        if (pos == nb) {                              // زبون جديد
+            list[nb].client = orders[idx].client;
+            list[nb].total = 0;
+            list[nb].orders = 0;
+            list[nb].picked = 0;
+            nb++;
+        }
+        list[pos].total += orders[idx].amount;
+        list[pos].orders++;
+    }
+    printf("%d distinct customers\n", nb);
+    for (rank = 0; rank < 3; rank++) {
+        best = -1;
+        for (pos = 0; pos < nb; pos++)
+            if (!list[pos].picked && (best < 0 || list[pos].total > list[best].total)) best = pos;
+        list[best].picked = 1;
+        printf("#%d customer %d: %.0f DA in %d orders\n", rank + 1, list[best].client,
+               list[best].total, list[best].orders);
+    }
+    return 0;
+}

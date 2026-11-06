@@ -1,0 +1,5 @@
+sales = 10.535 * ads + 108.263
+R^2 = 0.9948
+Budget    5 -> predicted sales 160.9
+Budget   22 -> predicted sales 340.0
+Budget   40 -> predicted sales 529.7

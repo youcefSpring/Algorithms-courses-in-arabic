@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+typedef struct { char name[8]; int stock; } Product;
+
+void swapBytes(void *first, void *second, int size) {
+    unsigned char *left = first, *right = second, tmp;
+    int pos;
+    for (pos = 0; pos < size; pos++) {               // بايتًا ببايت
+        tmp = left[pos];
+        left[pos] = right[pos];
+        right[pos] = tmp;
+    }
+}
+
+void reverseAny(void *base, int count, int size) {
+    unsigned char *bytes = base;
+    int low = 0, high = count - 1;
+    while (low < high) {
+        swapBytes(bytes + low * size, bytes + high * size, size);
+        low++;
+        high--;
+    }
+}
+
+int main(void) {
+    int codes[5] = {101, 205, 330, 412, 500}, idx;
+    double prices[4] = {1.5, 32.0, 4.1, 89.9};
+    Product items[3] = {{"Mouse", 12}, {"Hub", 4}, {"Cable", 40}};
+    reverseAny(codes, 5, sizeof(int));
+    reverseAny(prices, 4, sizeof(double));
+    reverseAny(items, 3, sizeof(Product));
+    for (idx = 0; idx < 5; idx++) printf("%d ", codes[idx]);
+    printf("\n");
+    for (idx = 0; idx < 4; idx++) printf("%.1f ", prices[idx]);
+    printf("\n");
+    for (idx = 0; idx < 3; idx++) printf("%s(%d) ", items[idx].name, items[idx].stock);
+    printf("\n");
+    return 0;
+}

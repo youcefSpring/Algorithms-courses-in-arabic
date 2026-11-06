@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char word[16]; int count; struct Tree *left, *right; } Tree;
+
+int distinct = 0;
+
+int compareText(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first - *second;
+}
+
+Tree *insertWord(Tree *node, const char *word) {
+    int cmp, pos;
+    if (node == NULL) {
+        node = malloc(sizeof(Tree));
+        for (pos = 0; (node->word[pos] = word[pos]) != '\0'; pos++) {}
+        node->count = 1;
+        node->left = node->right = NULL;
+        distinct++;
+        return node;
+    }
+    cmp = compareText(word, node->word);
+    if (cmp == 0) node->count++;                        // كلمة موجودة
+    else if (cmp < 0) node->left = insertWord(node->left, word);
+    else node->right = insertWord(node->right, word);
+    return node;
+}
+
+void inorder(const Tree *node) {
+    if (node == NULL) return;
+    inorder(node->left);
+    printf("%s(%d) ", node->word, node->count);
+    inorder(node->right);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    const char *text = "Good price good quality. Fast delivery, good packaging; delivery was fast. Price fair.";
+    Tree *root = NULL;
+    char word[16], ch;
+    int pos = 0, len = 0;
+    do {
+        ch = text[pos++];
+        if (ch >= 'A' && ch <= 'Z') ch = ch - 'A' + 'a';
+        if (ch >= 'a' && ch <= 'z') { if (len < 15) word[len++] = ch; }
+        else if (len > 0) { word[len] = '\0'; root = insertWord(root, word); len = 0; }
+    } while (ch != '\0');
+    inorder(root);
+    printf("\n%d distinct words\n", distinct);
+    freeTree(root);
+    return 0;
+}

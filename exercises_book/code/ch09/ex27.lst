@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+enum Status { PENDING, PAID, SHIPPED, DELIVERED, CANCELLED };
+
+typedef struct {
+    int number;
+    enum Status status;
+} Order;
+
+char names[5][10] = {"PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"};
+
+int advance(Order order[], char event) {
+    enum Status now = order[0].status;
+    if (event == 'p' && now == PENDING) order[0].status = PAID;
+    else if (event == 's' && now == PAID) order[0].status = SHIPPED;
+    else if (event == 'd' && now == SHIPPED) order[0].status = DELIVERED;
+    else if (event == 'c' && (now == PENDING || now == PAID)) order[0].status = CANCELLED;
+    else return 0;                                   (*@\cmt{انتقال مرفوض}@*)
+    return 1;
+}
+
+int main(void) {
+    Order order[1] = {{7781, PENDING}};
+    char events[20];
+    int idx, ok;
+    scanf("%19s", events);
+    for (idx = 0; events[idx] != '\0'; idx++) {
+        ok = advance(order, events[idx]);
+        printf("event '%c': %-9s %s\n", events[idx], names[order[0].status], ok ? "" : "(rejected)");
+    }
+    return 0;
+}

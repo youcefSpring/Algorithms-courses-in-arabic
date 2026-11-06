@@ -1,0 +1,836 @@
+@@
+title: دمج نوافذ التوصيل المتداخلة
+level: medium
+domain: ec
+@ statement
+اختار الزبائن نوافذ توصيل (ساعة البداية، ساعة النهاية) قد تتداخل. عرّف هيكل `Window` ورتب النوافذ حسب البداية، ثم **ادمج** المتداخلة منها لتحديد الفترات التي يجب أن يعمل فيها السائق.
+@ steps
+- ترتيب بالإدراج حسب `start`.
+- نمر على النوافذ: إذا بدأت النافذة قبل نهاية الفترة الحالية (أو عندها) نمدد النهاية، وإلا نبدأ فترة جديدة.
+@ flow
+do: ترتيب windows حسب start
+do: current = windows[0]
+for: idx = 1 ; idx < NB ; idx++
+  if: windows[idx].start <= current.end
+    do: current.end = max(current.end, windows[idx].end)
+  else:
+    out: current
+    do: current = windows[idx]
+out: current
+@ code
+#include <stdio.h>
+
+#define NB 8
+
+typedef struct { int start, end; } Window;
+
+int main(void) {
+    Window windows[NB] = {{14, 16}, {9, 11}, {10, 12}, {18, 20}, {15, 17}, {8, 9}, {19, 21}, {13, 14}};
+    Window key, current;
+    int idx, back, busy = 0;
+    for (idx = 1; idx < NB; idx++) {                 // ترتيب حسب البداية
+        key = windows[idx];
+        for (back = idx - 1; back >= 0 && windows[back].start > key.start; back--)
+            windows[back + 1] = windows[back];
+        windows[back + 1] = key;
+    }
+    current = windows[0];
+    for (idx = 1; idx < NB; idx++) {
+        if (windows[idx].start <= current.end) {     // تداخل أو تلامس
+            if (windows[idx].end > current.end) current.end = windows[idx].end;
+        } else {
+            printf("Shift %02dh-%02dh\n", current.start, current.end);
+            busy += current.end - current.start;
+            current = windows[idx];
+        }
+    }
+    printf("Shift %02dh-%02dh\n", current.start, current.end);
+    busy += current.end - current.start;
+    printf("Driver works %d hours\n", busy);
+    return 0;
+}
+
+@@
+title: موقع المستودع المركزي
+level: medium
+domain: ds
+@ statement
+لكل مدينة إحداثيات (هيكل `City`) وعدد طلبيات شهرية. أفضل موقع تقريبي لمستودع مركزي هو **المركز المرجح** `Σ(w·x)/Σw` و `Σ(w·y)/Σw`. احسبه، ثم احسب متوسط المسافة المرجحة عنه.
+@ steps
+- الوزن `w` هو عدد الطلبيات.
+- المسافة الإقليدية بالجذر (نيوتن).
+@ flow
+for: idx = 0 ; idx < 6 ; idx++
+  do: sumW += orders ; sumX += orders * posX ; sumY += orders * posY
+do: center = (sumX / sumW, sumY / sumW)
+for: idx = 0 ; idx < 6 ; idx++
+  do: avgDist += orders * distance(center, city)
+out: center, avgDist / sumW
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[12];
+    double posX, posY;
+    int orders;
+} City;
+
+typedef struct { double posX, posY; } Point;
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    for (iter = 0; iter < 50; iter++) guess = (guess + value / guess) / 2;
+    return guess;
+}
+
+int main(void) {
+    City cities[6] = {{"Algiers", 0, 0, 520}, {"Blida", -10, -45, 180}, {"Tizi", 95, -20, 140},
+                      {"Bouira", 110, -90, 60}, {"Medea", -20, -80, 90}, {"Boumerdes", 45, -5, 110}};
+    Point center;
+    double sumW = 0, sumX = 0, sumY = 0, avgDist = 0, dx, dy;
+    int idx;
+    for (idx = 0; idx < 6; idx++) {
+        sumW += cities[idx].orders;
+        sumX += cities[idx].orders * cities[idx].posX;
+        sumY += cities[idx].orders * cities[idx].posY;
+    }
+    center.posX = sumX / sumW;
+    center.posY = sumY / sumW;
+    for (idx = 0; idx < 6; idx++) {
+        dx = cities[idx].posX - center.posX;
+        dy = cities[idx].posY - center.posY;
+        avgDist += cities[idx].orders * mySqrt(dx * dx + dy * dy);   // مسافة مرجحة
+    }
+    printf("Warehouse at (%.1f, %.1f)\n", center.posX, center.posY);
+    printf("Average distance per order: %.1f km\n", avgDist / sumW);
+    return 0;
+}
+
+@@
+title: حالات الطلبية بالتعداد
+level: medium
+domain: ec
+@ statement
+عرّف تعدادًا `enum Status { PENDING, PAID, SHIPPED, DELIVERED, CANCELLED }` وهيكل `Order`. اكتب دالة `advance(order, event)` تطبق انتقالًا بين الحالات حسب الحدث (`'p'` دفع، `'s'` شحن، `'d'` تسليم، `'c'` إلغاء) وترفض الانتقالات غير المسموحة.
+@ stdin
+pscdd
+@ steps
+- الإلغاء مسموح فقط قبل الشحن.
+- كل حدث مسموح فقط من حالة واحدة (الدفع من `PENDING`، الشحن من `PAID`، ...).
+- جدول أسماء الحالات لعرضها نصيًا.
+@ flow
+in: events
+for: idx = 0 ; events[idx] != '\0' ; idx++
+  call: ok = advance(order, events[idx])
+  out: events[idx], حالة الطلبية, ok
+@ code
+#include <stdio.h>
+
+enum Status { PENDING, PAID, SHIPPED, DELIVERED, CANCELLED };
+
+typedef struct {
+    int number;
+    enum Status status;
+} Order;
+
+char names[5][10] = {"PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"};
+
+int advance(Order order[], char event) {
+    enum Status now = order[0].status;
+    if (event == 'p' && now == PENDING) order[0].status = PAID;
+    else if (event == 's' && now == PAID) order[0].status = SHIPPED;
+    else if (event == 'd' && now == SHIPPED) order[0].status = DELIVERED;
+    else if (event == 'c' && (now == PENDING || now == PAID)) order[0].status = CANCELLED;
+    else return 0;                                   // انتقال مرفوض
+    return 1;
+}
+
+int main(void) {
+    Order order[1] = {{7781, PENDING}};
+    char events[20];
+    int idx, ok;
+    scanf("%19s", events);
+    for (idx = 0; events[idx] != '\0'; idx++) {
+        ok = advance(order, events[idx]);
+        printf("event '%c': %-9s %s\n", events[idx], names[order[0].status], ok ? "" : "(rejected)");
+    }
+    return 0;
+}
+
+@@
+title: تاريخ الاستحقاق بإضافة أيام
+level: medium
+domain: ec
+@ statement
+اكتب دالة `addDays(date, count)` تعيد هيكل `Date` جديدًا بعد إضافة عدد من الأيام (مع تغيير الشهر والسنة والسنوات الكبيسة)، واستعملها لحساب تواريخ استحقاق أقساط شهرية كل 30 يومًا.
+@ steps
+- نضيف الأيام واحدًا واحدًا: إذا تجاوز اليوم عدد أيام الشهر ننتقل إلى الشهر التالي، وإذا تجاوز الشهر 12 ننتقل إلى السنة التالية.
+- دالة `daysIn(month, year)` مع الكبيسة.
+@ flow
+do: due = purchase
+for: idx = 1 ; idx <= 4 ; idx++
+  call: due = addDays(due, 30)
+  out: idx, due
+@ code
+#include <stdio.h>
+
+typedef struct { int day, month, year; } Date;
+
+int daysIn(int month, int year) {
+    int days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (month == 2 && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)) return 29;
+    return days[month - 1];
+}
+
+Date addDays(Date date, int count) {
+    while (count-- > 0) {
+        date.day++;
+        if (date.day > daysIn(date.month, date.year)) {   // شهر جديد
+            date.day = 1;
+            date.month++;
+            if (date.month > 12) { date.month = 1; date.year++; }
+        }
+    }
+    return date;
+}
+
+int main(void) {
+    Date purchase = {15, 11, 2027}, due = purchase;
+    int idx;
+    printf("Purchase: %02d/%02d/%d\n", purchase.day, purchase.month, purchase.year);
+    for (idx = 1; idx <= 4; idx++) {
+        due = addDays(due, 30);
+        printf("Installment %d due %02d/%02d/%d\n", idx, due.day, due.month, due.year);
+    }
+    return 0;
+}
+
+@@
+title: إدارة سلة المشتريات
+level: medium
+domain: ec
+@ statement
+عرّف هيكل `Cart` يحتوي على جدول من `CartItem` (الرمز، السعر، الكمية) وعدد العناصر. اكتب دوال `addItem` (تزيد الكمية إذا كان المنتج موجودًا) و `removeItem` (تحذف السطر وتزيح الباقي) و `cartTotal`، ثم طبّق سلسلة عمليات.
+@ steps
+- نمرر السلة كجدول من خانة واحدة `Cart cart[]` لكي تعدلها الدوال.
+- الحذف: نزيح العناصر التي بعده بخانة إلى اليسار وننقص العدد.
+@ flow
+call: addItem(cart, 101, 1500, 2)
+call: addItem(cart, 205, 3200, 1)
+call: addItem(cart, 101, 1500, 1)
+call: removeItem(cart, 205)
+call: total = cartTotal(cart)
+out: total
+@ code
+#include <stdio.h>
+
+typedef struct { int code; double price; int qty; } CartItem;
+typedef struct { CartItem items[10]; int count; } Cart;
+
+void addItem(Cart cart[], int code, double price, int qty) {
+    int idx;
+    for (idx = 0; idx < cart[0].count; idx++)
+        if (cart[0].items[idx].code == code) { cart[0].items[idx].qty += qty; return; }
+    cart[0].items[cart[0].count].code = code;           // سطر جديد
+    cart[0].items[cart[0].count].price = price;
+    cart[0].items[cart[0].count].qty = qty;
+    cart[0].count++;
+}
+
+void removeItem(Cart cart[], int code) {
+    int idx, found = -1;
+    for (idx = 0; idx < cart[0].count; idx++)
+        if (cart[0].items[idx].code == code) found = idx;
+    if (found < 0) return;
+    for (idx = found; idx < cart[0].count - 1; idx++)
+        cart[0].items[idx] = cart[0].items[idx + 1];      // إزاحة
+    cart[0].count--;
+}
+
+double cartTotal(Cart cart[]) {
+    double total = 0;
+    int idx;
+    for (idx = 0; idx < cart[0].count; idx++)
+        total += cart[0].items[idx].price * cart[0].items[idx].qty;
+    return total;
+}
+
+void show(Cart cart[]) {
+    int idx;
+    for (idx = 0; idx < cart[0].count; idx++)
+        printf("[%d x%d] ", cart[0].items[idx].code, cart[0].items[idx].qty);
+    printf("= %.2f DA\n", cartTotal(cart));
+}
+
+int main(void) {
+    Cart cart[1];
+    cart[0].count = 0;
+    addItem(cart, 101, 1500, 2); show(cart);
+    addItem(cart, 205, 3200, 1); show(cart);
+    addItem(cart, 330, 899, 3);  show(cart);
+    addItem(cart, 101, 1500, 1); show(cart);
+    removeItem(cart, 205);       show(cart);
+    return 0;
+}
+
+@@
+title: توزيع قيم السلات على فئات
+level: medium
+domain: ds
+@ statement
+عرّف هيكل `Bucket` (الحد الأدنى، الحد الأعلى، العدد). وزّع 20 قيمة سلة على 5 فئات متساوية العرض بين أصغر وأكبر قيمة، ثم اعرض **المدرج التكراري** بالنجوم.
+@ steps
+- العرض `width = (max - min) / 5`.
+- فهرس الفئة `(value - min) / width`، والقيمة العظمى تُوضع في الفئة الأخيرة.
+@ flow
+do: width = (max - min) / NBB
+for: idx = 0 ; idx < NB ; idx++
+  do: bin = (values[idx] - min) / width
+  if: bin == NBB
+    do: bin = NBB - 1
+  do: buckets[bin].count++
+out: buckets
+@ code
+#include <stdio.h>
+
+#define NB 20
+#define NBB 5
+
+typedef struct { double low, high; int count; } Bucket;
+
+int main(void) {
+    double values[NB] = {1200, 4500, 3100, 890, 7600, 2300, 5400, 1500, 9800, 3300,
+                         2700, 450, 6100, 3900, 2100, 1800, 4200, 3600, 2900, 5100};
+    Bucket buckets[NBB];
+    double low = values[0], high = values[0], width;
+    int idx, bin, star;
+    for (idx = 1; idx < NB; idx++) {
+        if (values[idx] < low) low = values[idx];
+        if (values[idx] > high) high = values[idx];
+    }
+    width = (high - low) / NBB;
+    for (bin = 0; bin < NBB; bin++) {
+        buckets[bin].low = low + bin * width;
+        buckets[bin].high = low + (bin + 1) * width;
+        buckets[bin].count = 0;
+    }
+    for (idx = 0; idx < NB; idx++) {
+        bin = (int)((values[idx] - low) / width);
+        if (bin == NBB) bin = NBB - 1;               // القيمة العظمى
+        buckets[bin].count++;
+    }
+    for (bin = 0; bin < NBB; bin++) {
+        printf("%6.0f-%6.0f | ", buckets[bin].low, buckets[bin].high);
+        for (star = 0; star < buckets[bin].count; star++) putchar('*');
+        printf(" %d\n", buckets[bin].count);
+    }
+    return 0;
+}
+
+@@
+title: معدل الارتداد ومدة الجلسات
+level: medium
+domain: ds
+@ statement
+كل جلسة تصفح هيكل `Session` (المصدر: `'S'` بحث، `'A'` إعلان، `'D'` مباشر؛ عدد الصفحات؛ المدة بالثواني؛ هل اشترى). الجلسة **مرتدة** إذا زار صفحة واحدة. احسب لكل مصدر: عدد الجلسات، معدل الارتداد، متوسط المدة، ومعدل التحويل.
+@ steps
+- هيكل `SourceStats` لكل مصدر يجمع العدادات.
+- فهرس المصدر من جدول الرموز `"SAD"`.
+@ flow
+for: idx = 0 ; idx < NB ; idx++
+  do: src = فهرس مصدر الجلسة
+  do: stats[src].sessions++ ; stats[src].duration += ...
+  if: sessions[idx].pages == 1
+    do: stats[src].bounces++
+  if: sessions[idx].bought
+    do: stats[src].sales++
+out: stats
+@ code
+#include <stdio.h>
+
+#define NB 12
+
+typedef struct { char source; int pages, seconds, bought; } Session;
+typedef struct { int sessions, bounces, seconds, sales; } SourceStats;
+
+int main(void) {
+    Session log[NB] = {{'S', 5, 340, 1}, {'A', 1, 12, 0}, {'D', 8, 610, 1}, {'A', 1, 9, 0},
+                       {'S', 3, 150, 0}, {'A', 2, 45, 0}, {'D', 1, 20, 0}, {'S', 7, 420, 1},
+                       {'A', 1, 15, 0}, {'S', 1, 30, 0}, {'D', 4, 260, 1}, {'A', 6, 380, 1}};
+    char codes[4] = "SAD";
+    char labels[3][8] = {"Search", "Ads", "Direct"};
+    SourceStats stats[3] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
+    int idx, src;
+    for (idx = 0; idx < NB; idx++) {
+        for (src = 0; codes[src] != log[idx].source; src++) {}   // فهرس المصدر
+        stats[src].sessions++;
+        stats[src].seconds += log[idx].seconds;
+        if (log[idx].pages == 1) stats[src].bounces++;
+        if (log[idx].bought) stats[src].sales++;
+    }
+    for (src = 0; src < 3; src++)
+        printf("%-6s %d sessions, bounce %5.1f%%, avg %5.1fs, conversion %5.1f%%\n", labels[src],
+               stats[src].sessions, 100.0 * stats[src].bounces / stats[src].sessions,
+               (double)stats[src].seconds / stats[src].sessions,
+               100.0 * stats[src].sales / stats[src].sessions);
+    return 0;
+}
+
+@@
+title: تكلفة الشحن حسب المنطقة والوزن
+level: medium
+domain: ec
+@ statement
+عرّف هيكل `Zone` (الاسم، السعر الأساسي حتى 1 كغ، سعر كل كغ إضافي) وهيكل `Parcel` (رقم الطرد، المنطقة، الوزن الحقيقي، الأبعاد). الوزن المعتمد هو الأكبر بين الوزن الحقيقي و**الوزن الحجمي** `طول×عرض×ارتفاع/5000`. احسب تكلفة كل طرد.
+@ steps
+- الوزن المعتمد يُقرب إلى أعلى كيلوغرام (دون `ceil`).
+- التكلفة = `base + (kg - 1) * perKg`.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  do: volumetric = L * W * H / 5000
+  do: billed = max(weight, volumetric) مقربًا للأعلى
+  do: cost = zone.base + (billed - 1) * zone.perKg
+  out: parcel, billed, cost
+@ code
+#include <stdio.h>
+
+typedef struct { char name[10]; double base, perKg; } Zone;
+typedef struct { int id, zone; double weight, length, width, height; } Parcel;
+
+int roundUp(double value) {
+    int whole = (int)value;
+    return value > whole ? whole + 1 : whole;      // تقريب إلى الأعلى
+}
+
+int main(void) {
+    Zone zones[3] = {{"Local", 400, 80}, {"North", 650, 120}, {"South", 900, 180}};
+    Parcel parcels[4] = {{1, 0, 2.3, 30, 20, 15}, {2, 2, 0.8, 60, 40, 40},
+                         {3, 1, 7.6, 40, 30, 20}, {4, 2, 12.0, 50, 40, 30}};
+    double volumetric, weight;
+    int idx, billed;
+    for (idx = 0; idx < 4; idx++) {
+        volumetric = parcels[idx].length * parcels[idx].width * parcels[idx].height / 5000;
+        weight = parcels[idx].weight > volumetric ? parcels[idx].weight : volumetric;
+        billed = roundUp(weight);
+        printf("Parcel %d (%s): real %.1f kg, volumetric %.1f kg -> %d kg, %.0f DA\n",
+               parcels[idx].id, zones[parcels[idx].zone].name, parcels[idx].weight, volumetric,
+               billed, zones[parcels[idx].zone].base + (billed - 1) * zones[parcels[idx].zone].perKg);
+    }
+    return 0;
+}
+
+@@
+title: تقييم الزبائن بطريقة RFM
+level: medium
+domain: ds
+@ statement
+تقسيم **RFM** يمنح كل زبون ثلاث علامات من 1 إلى 3: **الحداثة** (أيام منذ آخر شراء: أقل = أفضل)، **التكرار** (عدد الطلبيات)، **القيمة** (المبلغ الكلي). عرّف هيكل `Client` بهذه الحقول وبعلاماتها، واحسب العلامات بعتبات ثابتة ثم صنّف الزبائن.
+@ steps
+- `R`: ≤ 30 يومًا → 3، ≤ 90 → 2، وإلا 1. `F`: ≥ 10 → 3، ≥ 4 → 2. `M`: ≥ 50000 → 3، ≥ 15000 → 2.
+- المجموع 8-9: "Champion"، 6-7: "Loyal"، 4-5: "At risk"، وإلا "Lost".
+@ flow
+for: idx = 0 ; idx < 6 ; idx++
+  do: clients[idx].scoreR = ... ; scoreF = ... ; scoreM = ...
+  do: total = scoreR + scoreF + scoreM
+  out: clients[idx], segment(total)
+@ code
+#include <stdio.h>
+
+typedef struct {
+    char name[10];
+    int recency, frequency;
+    double monetary;
+    int scoreR, scoreF, scoreM;
+} Client;
+
+int grade(double value, double good, double medium, int higherIsBetter) {
+    if (higherIsBetter) return value >= good ? 3 : value >= medium ? 2 : 1;
+    return value <= good ? 3 : value <= medium ? 2 : 1;
+}
+
+int main(void) {
+    Client clients[6] = {{"Amina", 12, 15, 82000, 0, 0, 0}, {"Bilal", 200, 2, 6000, 0, 0, 0},
+                         {"Karim", 45, 6, 21000, 0, 0, 0}, {"Lina", 20, 3, 9000, 0, 0, 0},
+                         {"Omar", 120, 11, 64000, 0, 0, 0}, {"Sara", 75, 4, 16000, 0, 0, 0}};
+    char segments[4][10] = {"Lost", "At risk", "Loyal", "Champion"};
+    int idx, total;
+    for (idx = 0; idx < 6; idx++) {
+        clients[idx].scoreR = grade(clients[idx].recency, 30, 90, 0);    // الأقل أفضل
+        clients[idx].scoreF = grade(clients[idx].frequency, 10, 4, 1);
+        clients[idx].scoreM = grade(clients[idx].monetary, 50000, 15000, 1);
+        total = clients[idx].scoreR + clients[idx].scoreF + clients[idx].scoreM;
+        printf("%-6s R%d F%d M%d = %d -> %s\n", clients[idx].name, clients[idx].scoreR,
+               clients[idx].scoreF, clients[idx].scoreM, total,
+               segments[total >= 8 ? 3 : total >= 6 ? 2 : total >= 4 ? 1 : 0]);
+    }
+    return 0;
+}
+
+@@
+title: منطقة تغطية التوصيلات
+level: medium
+domain: ec
+@ statement
+عرّف هيكل `Rect` (الزاوية الدنيا والعليا) ودالة `boundingBox(points, size)` تعيد أصغر مستطيل يحتوي كل نقاط التسليم لسائق، ودالة `overlap(first, second)` تحسب مساحة تقاطع منطقتي سائقين (لتفادي التداخل).
+@ steps
+- المستطيل المحيط: أصغر وأكبر `posX` و `posY`.
+- التقاطع: `width = min(highs) - max(lows)` في كل محور؛ إذا كان سالبًا فلا تقاطع.
+@ flow
+call: zoneA = boundingBox(driverA, 5)
+call: zoneB = boundingBox(driverB, 4)
+call: shared = overlap(zoneA, zoneB)
+out: zoneA, zoneB, shared
+@ code
+#include <stdio.h>
+
+typedef struct { double posX, posY; } Point;
+typedef struct { Point low, high; } Rect;
+
+Rect boundingBox(Point points[], int size) {
+    Rect box;
+    int idx;
+    box.low = box.high = points[0];
+    for (idx = 1; idx < size; idx++) {
+        if (points[idx].posX < box.low.posX) box.low.posX = points[idx].posX;
+        if (points[idx].posY < box.low.posY) box.low.posY = points[idx].posY;
+        if (points[idx].posX > box.high.posX) box.high.posX = points[idx].posX;
+        if (points[idx].posY > box.high.posY) box.high.posY = points[idx].posY;
+    }
+    return box;
+}
+
+double overlap(Rect first, Rect second) {
+    double left = first.low.posX > second.low.posX ? first.low.posX : second.low.posX;
+    double right = first.high.posX < second.high.posX ? first.high.posX : second.high.posX;
+    double bottom = first.low.posY > second.low.posY ? first.low.posY : second.low.posY;
+    double top = first.high.posY < second.high.posY ? first.high.posY : second.high.posY;
+    if (right <= left || top <= bottom) return 0;           // لا تقاطع
+    return (right - left) * (top - bottom);
+}
+
+void show(char label[], Rect box) {
+    printf("%s (%.0f,%.0f)-(%.0f,%.0f), area %.0f km2\n", label, box.low.posX, box.low.posY,
+           box.high.posX, box.high.posY,
+           (box.high.posX - box.low.posX) * (box.high.posY - box.low.posY));
+}
+
+int main(void) {
+    Point driverA[5] = {{2, 3}, {8, 1}, {5, 9}, {3, 6}, {7, 7}};
+    Point driverB[4] = {{6, 5}, {12, 4}, {10, 11}, {7, 8}};
+    Rect zoneA = boundingBox(driverA, 5), zoneB = boundingBox(driverB, 4);
+    show("Driver A:", zoneA);
+    show("Driver B:", zoneB);
+    printf("Shared area: %.0f km2\n", overlap(zoneA, zoneB));
+    return 0;
+}
+
+@@
+title: تصفية الكتالوج بعدة معايير
+level: medium
+domain: ec
+@ statement
+عرّف هيكل `Filter` (الفئة أو `'*'` للكل، السعر الأدنى والأعلى، التقييم الأدنى، المتوفر فقط) ودالة `matches(item, filter)`، ثم طبّق ثلاثة مرشحات مختلفة على كتالوج من 8 منتجات.
+@ steps
+- المنتج يُقبل إذا حقق **كل** شروط المرشح.
+- الشرط `inStockOnly` يُطبق فقط إذا كانت قيمته 1.
+@ flow
+for: filt = 0 ; filt < 3 ; filt++
+  for: idx = 0 ; idx < 8 ; idx++
+    if: matches(items[idx], filters[filt])
+      out: items[idx].name
+@ code
+#include <stdio.h>
+
+typedef struct { char name[14]; char category; double price, rating; int stock; } Product;
+typedef struct { char category; double minPrice, maxPrice, minRating; int inStockOnly; } Filter;
+
+int matches(Product item, Filter filter) {
+    if (filter.category != '*' && item.category != filter.category) return 0;
+    if (item.price < filter.minPrice || item.price > filter.maxPrice) return 0;
+    if (item.rating < filter.minRating) return 0;
+    if (filter.inStockOnly && item.stock == 0) return 0;
+    return 1;                                        // كل الشروط محققة
+}
+
+int main(void) {
+    Product items[8] = {{"Galaxy A", 'P', 38000, 4.3, 5}, {"Redmi 13", 'P', 27500, 4.1, 0},
+                        {"iPhone", 'P', 165000, 4.7, 2}, {"ThinkPad", 'L', 95000, 4.5, 3},
+                        {"IdeaPad", 'L', 72000, 3.9, 6}, {"Earbuds", 'A', 5400, 4.6, 20},
+                        {"Charger", 'A', 2200, 3.5, 0}, {"Hub", 'A', 3100, 4.2, 8}};
+    Filter filters[3] = {{'P', 0, 50000, 4.0, 0}, {'*', 3000, 100000, 4.2, 1}, {'A', 0, 10000, 0, 1}};
+    int filt, idx;
+    for (filt = 0; filt < 3; filt++) {
+        printf("Filter %d:", filt + 1);
+        for (idx = 0; idx < 8; idx++)
+            if (matches(items[idx], filters[filt])) printf(" %s;", items[idx].name);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: سجل معاملات المحفظة الإلكترونية
+level: medium
+domain: ec
+@ statement
+كل معاملة في المحفظة هيكل `Transaction` (اليوم، النوع `'D'` إيداع أو `'P'` دفع أو `'R'` استرجاع، المبلغ). عالج السجل بالترتيب: ارفض أي دفع يتجاوز الرصيد، واعرض الرصيد بعد كل معاملة، وأدنى رصيد بلغته المحفظة.
+@ steps
+- الإيداع والاسترجاع يزيدان الرصيد؛ الدفع ينقصه إذا كان الرصيد كافيًا.
+- نحتفظ بحقل `accepted` في كل معاملة.
+@ flow
+for: idx = 0 ; idx < NB ; idx++
+  if: النوع 'P' و amount > balance
+    do: log[idx].accepted = 0
+  else:
+    do: تحديث balance ; log[idx].accepted = 1
+  out: log[idx], balance
+out: lowest
+@ code
+#include <stdio.h>
+
+#define NB 8
+
+typedef struct { int day; char kind; double amount; int accepted; } Transaction;
+
+int main(void) {
+    Transaction log[NB] = {{1, 'D', 10000, 0}, {3, 'P', 4500, 0}, {4, 'P', 7000, 0},
+                           {6, 'R', 1200, 0}, {9, 'P', 6200, 0}, {12, 'D', 5000, 0},
+                           {15, 'P', 3300, 0}, {20, 'P', 1800, 0}};
+    double balance = 0, lowest = 0;
+    int idx;
+    for (idx = 0; idx < NB; idx++) {
+        if (log[idx].kind == 'P' && log[idx].amount > balance) {
+            log[idx].accepted = 0;                       // رصيد غير كافٍ
+        } else {
+            balance += log[idx].kind == 'P' ? -log[idx].amount : log[idx].amount;
+            log[idx].accepted = 1;
+            if (balance < lowest || idx == 0) lowest = balance;
+        }
+        printf("Day %2d %c %7.2f %-8s balance %8.2f\n", log[idx].day, log[idx].kind,
+               log[idx].amount, log[idx].accepted ? "ok" : "REFUSED", balance);
+    }
+    printf("Lowest balance: %.2f DA\n", lowest);
+    return 0;
+}
+
+@@
+title: اختيار المورد بالعلامة المرجحة
+level: medium
+domain: ds
+@ statement
+لكل مورد هيكل يحتوي على: السعر، مدة التسليم بالأيام، نسبة العيوب، والتقييم. نطبّع كل معيار إلى `[0, 1]` (الأفضل = 1)، ثم نحسب علامة مرجحة: السعر 40%، التسليم 25%، العيوب 20%، التقييم 15%. اعرض الترتيب.
+@ steps
+- للمعايير التي "الأقل أفضل" (السعر، التسليم، العيوب): `(max - value) / (max - min)`.
+- للتقييم: `(value - min) / (max - min)`.
+- العلامة = مجموع الأوزان × العلامات المطبّعة.
+@ flow
+for: crit = 0 ; crit < 4 ; crit++
+  do: إيجاد min و max للمعيار
+for: idx = 0 ; idx < 4 ; idx++
+  do: score = Σ weight[crit] * normalized(idx, crit)
+out: الموردون مرتبون حسب score
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+typedef struct { char name[10]; double values[4]; double score; } Supplier;
+
+int main(void) {
+    Supplier list[NB] = {{"AlphaTec", {1200, 5, 2.0, 4.1}, 0}, {"BetaCom", {1050, 9, 3.5, 3.8}, 0},
+                         {"Gamma", {1350, 3, 0.8, 4.6}, 0}, {"Delta", {1100, 6, 1.5, 4.0}, 0}};
+    double weights[4] = {0.40, 0.25, 0.20, 0.15};
+    int lowerBetter[4] = {1, 1, 1, 0};
+    double low, high, norm;
+    Supplier tmp;
+    int crit, idx, pass;
+    for (crit = 0; crit < 4; crit++) {
+        low = high = list[0].values[crit];
+        for (idx = 1; idx < NB; idx++) {
+            if (list[idx].values[crit] < low) low = list[idx].values[crit];
+            if (list[idx].values[crit] > high) high = list[idx].values[crit];
+        }
+        for (idx = 0; idx < NB; idx++) {
+            norm = lowerBetter[crit] ? (high - list[idx].values[crit]) / (high - low)
+                                     : (list[idx].values[crit] - low) / (high - low);
+            list[idx].score += weights[crit] * norm;          // مساهمة المعيار
+        }
+    }
+    for (pass = 0; pass < NB - 1; pass++)
+        for (idx = 0; idx < NB - 1 - pass; idx++)
+            if (list[idx].score < list[idx + 1].score) {
+                tmp = list[idx]; list[idx] = list[idx + 1]; list[idx + 1] = tmp;
+            }
+    for (idx = 0; idx < NB; idx++)
+        printf("%d. %-9s score %.3f\n", idx + 1, list[idx].name, list[idx].score);
+    return 0;
+}
+
+@@
+title: أكبر انخفاض في تاريخ السعر
+level: medium
+domain: ds
+@ statement
+لكل منتج هيكل يحتوي على اسمه وجدول أسعاره خلال 10 أسابيع. اكتب دالة `largestDrop(item, from, to)` تجد **أكبر انخفاض** بين أسبوع وأسبوع لاحق (ليس بالضرورة متتاليين) في مرور واحد، وتكتب الأسبوعين في جدول.
+@ steps
+- نحتفظ بأعلى سعر سابق `peak` وأسبوعه.
+- لكل أسبوع: الانخفاض = `peak - price`؛ إذا كان أكبر من الأفضل نحفظه.
+- مرور واحد: تعقيد خطي بدل مقارنة كل الأزواج.
+@ flow
+do: peak = prices[0] ; best = 0
+for: week = 1 ; week < 10 ; week++
+  if: peak - prices[week] > best
+    do: best = peak - prices[week] ; from = peakWeek ; to = week
+  if: prices[week] > peak
+    do: peak = prices[week] ; peakWeek = week
+out: best, from, to
+@ code
+#include <stdio.h>
+
+typedef struct { char name[12]; double prices[10]; } History;
+
+double largestDrop(History item, int weeks[]) {
+    double peak = item.prices[0], best = 0;
+    int week, peakWeek = 0;
+    weeks[0] = weeks[1] = 0;
+    for (week = 1; week < 10; week++) {
+        if (peak - item.prices[week] > best) {
+            best = peak - item.prices[week];
+            weeks[0] = peakWeek;
+            weeks[1] = week;
+        }
+        if (item.prices[week] > peak) { peak = item.prices[week]; peakWeek = week; }   // قمة جديدة
+    }
+    return best;
+}
+
+int main(void) {
+    History items[3] = {{"Phone", {32000, 33500, 31000, 34500, 30000, 29000, 31500, 28000, 29500, 30500}},
+                        {"Laptop", {89000, 87000, 91000, 90500, 88000, 92000, 95000, 94000, 93000, 96000}},
+                        {"Earbuds", {5400, 5200, 5000, 4800, 4600, 4500, 4400, 4300, 4200, 4100}}};
+    int idx, weeks[2];
+    double drop;
+    for (idx = 0; idx < 3; idx++) {
+        drop = largestDrop(items[idx], weeks);
+        printf("%-8s largest drop %6.0f DA (week %d -> week %d, -%.1f%%)\n", items[idx].name,
+               drop, weeks[0] + 1, weeks[1] + 1, 100 * drop / items[idx].prices[weeks[0]]);
+    }
+    return 0;
+}
+
+@@
+title: مقارنة إصدارات تطبيق المتجر
+level: medium
+domain: ec
+@ statement
+إصدار التطبيق يُكتب `major.minor.patch` مثل `2.10.3`. اقرأ الإصدارات كنصوص، وحوّلها يدويًا إلى هيكل `Version`، واكتب دالة `compareVersions`، ثم حدد لكل جهاز هل يحتاج إلى تحديث نحو الإصدار الأخير `2.10.3`، مع التنبيه إذا كان التحديث **رئيسيًا**.
+@ stdin
+4
+2.9.12
+2.10.3
+1.15.0
+2.10.1
+@ steps
+- التحويل: نقرأ الأرقام حرفًا بحرف ونمر إلى الحقل التالي عند كل نقطة.
+- المقارنة: `major` ثم `minor` ثم `patch` (المقارنة النصية خاطئة: `"2.9" > "2.10"` نصيًا).
+@ flow
+in: nb
+for: idx = 0 ; idx < nb ; idx++
+  in: text
+  call: device = parseVersion(text)
+  if: compareVersions(device, latest) < 0
+    out: `"update"`, رئيسي إذا اختلف major
+  else:
+    out: `"up to date"`
+@ code
+#include <stdio.h>
+
+typedef struct { int major, minor, patch; } Version;
+
+Version parseVersion(char text[]) {
+    int parts[3] = {0, 0, 0}, field = 0, pos;
+    Version result;
+    for (pos = 0; text[pos] != '\0' && field < 3; pos++) {
+        if (text[pos] == '.') field++;                       // الحقل التالي
+        else parts[field] = parts[field] * 10 + (text[pos] - '0');
+    }
+    result.major = parts[0];
+    result.minor = parts[1];
+    result.patch = parts[2];
+    return result;
+}
+
+int compareVersions(Version first, Version second) {
+    if (first.major != second.major) return first.major - second.major;
+    if (first.minor != second.minor) return first.minor - second.minor;
+    return first.patch - second.patch;
+}
+
+int main(void) {
+    Version latest = {2, 10, 3}, device;
+    char text[20];
+    int nb, idx;
+    scanf("%d", &nb);
+    for (idx = 0; idx < nb; idx++) {
+        scanf("%19s", text);
+        device = parseVersion(text);
+        if (compareVersions(device, latest) < 0)
+            printf("%-8s -> update to 2.10.3%s\n", text, device.major < latest.major ? " (MAJOR)" : "");
+        else
+            printf("%-8s -> up to date\n", text);
+    }
+    return 0;
+}
+
+@@
+title: نتائج اختبار A/B لصفحة المنتج
+level: medium
+domain: ds
+@ statement
+اختبر المتجر نسختين من صفحة المنتج. لكل نسخة هيكل `Variant` (الاسم، عدد الزوار، عدد المشترين). احسب معدل التحويل لكل نسخة، و**الارتفاع النسبي** (lift)، وإحصائية `z` لاختبار الفرق بين نسبتين، وقرر إن كان الفرق معنويًا (`|z| > 1.96`).
+@ steps
+- `rate = buyers / visitors`؛ `lift = (rateB - rateA) / rateA`.
+- النسبة المجمعة `pooled = (buyersA + buyersB) / (visitorsA + visitorsB)`.
+- `z = (rateB - rateA) / sqrt(pooled (1 - pooled) (1/nA + 1/nB))`.
+@ flow
+do: rateA = buyersA / visitorsA ; rateB = buyersB / visitorsB
+do: pooled = (buyersA + buyersB) / (visitorsA + visitorsB)
+do: z = (rateB - rateA) / sqrt(pooled (1 - pooled) (1/nA + 1/nB))
+if: |z| > 1.96
+  out: `"significant"`
+else:
+  out: `"not significant"`
+@ code
+#include <stdio.h>
+
+typedef struct { char name[16]; int visitors, buyers; } Variant;
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    for (iter = 0; iter < 60; iter++) guess = (guess + value / guess) / 2;
+    return guess;
+}
+
+double rate(Variant variant) { return (double)variant.buyers / variant.visitors; }
+
+int main(void) {
+    Variant tests[2][2] = {{{"A: old page", 4800, 192}, {"B: new photos", 4750, 238}},
+                           {{"A: green btn", 1200, 54}, {"B: red btn", 1180, 59}}};
+    double rateA, rateB, pooled, zValue;
+    int test;
+    for (test = 0; test < 2; test++) {
+        rateA = rate(tests[test][0]);
+        rateB = rate(tests[test][1]);
+        pooled = (double)(tests[test][0].buyers + tests[test][1].buyers)
+               / (tests[test][0].visitors + tests[test][1].visitors);
+        zValue = (rateB - rateA) / mySqrt(pooled * (1 - pooled) *
+                 (1.0 / tests[test][0].visitors + 1.0 / tests[test][1].visitors));
+        printf("%s %.2f%% vs %s %.2f%%\n", tests[test][0].name, 100 * rateA,
+               tests[test][1].name, 100 * rateB);
+        printf("  lift %+.1f%%, z = %.2f -> %s\n", 100 * (rateB - rateA) / rateA, zValue,
+               (zValue > 1.96 || zValue < -1.96) ? "significant" : "not significant");
+    }
+    return 0;
+}

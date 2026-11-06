@@ -1,0 +1,5 @@
+7782 UNPAID    3200.00
+7784 UNKNOWN   payment 650.00
+7785 MISMATCH  expected 45000.00 got 44000.00
+7790 UNKNOWN   payment 300.00
+4 matched, 4 issues, 4200.00 DA not received

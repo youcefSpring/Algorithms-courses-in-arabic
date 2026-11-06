@@ -1,0 +1,13 @@
+add 101 at slot 0   (free slots 7)
+add 205 at slot 1   (free slots 6)
+add 330 at slot 2   (free slots 5)
+remove 330, slot 2 freed   (free slots 6)
+add 412 at slot 2   (free slots 5)
+remove 412, slot 2 freed   (free slots 6)
+remove 205, slot 1 freed   (free slots 7)
+add 500 at slot 1   (free slots 6)
+add 618 at slot 2   (free slots 5)
+add 701 at slot 3   (free slots 4)
+remove 701, slot 3 freed   (free slots 5)
+add 802 at slot 3   (free slots 4)
+malloc calls: 1 for 12 operations

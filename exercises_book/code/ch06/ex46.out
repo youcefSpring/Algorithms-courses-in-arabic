@@ -1,0 +1,7 @@
+Pattern TV-*-202?
+  TV-SAM-2024      MATCH
+  TV-LG-OLED-2025  MATCH
+  PC-HP-2024       -
+  TV--2023         MATCH
+  TV-SONY-2019     -
+  TV-TCL-20245     -

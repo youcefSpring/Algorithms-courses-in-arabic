@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+typedef struct {
+    int count;
+    double low, high, mean, std;
+} Summary;
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    for (iter = 0; iter < 50; iter++) guess = (guess + value / guess) / 2;
+    return guess;
+}
+
+Summary describe(double values[], int size) {
+    Summary result;
+    double sum = 0, squares = 0;
+    int idx;
+    result.count = size;
+    result.low = result.high = values[0];
+    for (idx = 0; idx < size; idx++) {
+        sum += values[idx];
+        if (values[idx] < result.low) result.low = values[idx];
+        if (values[idx] > result.high) result.high = values[idx];
+    }
+    result.mean = sum / size;
+    for (idx = 0; idx < size; idx++)
+        squares += (values[idx] - result.mean) * (values[idx] - result.mean);
+    result.std = mySqrt(squares / size);
+    return result;                        // عدة نتائج في هيكل واحد
+}
+
+void printSummary(char label[], Summary info) {
+    printf("%s n=%d min=%.0f max=%.0f mean=%.2f std=%.2f\n", label, info.count,
+           info.low, info.high, info.mean, info.std);
+}
+
+int main(void) {
+    double salesNorth[7] = {120, 135, 128, 150, 142, 160, 131};
+    double salesSouth[7] = {90, 210, 60, 180, 75, 200, 95};
+    printSummary("North:", describe(salesNorth, 7));
+    printSummary("South:", describe(salesSouth, 7));
+    return 0;
+}

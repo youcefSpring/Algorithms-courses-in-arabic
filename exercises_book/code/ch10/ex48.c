@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NB 10
+
+int main(void) {
+    long orders[NB] = {482019, 102345, 993201, 482001, 100045, 777310, 102344, 560120, 999999, 100000};
+    long *source = orders, *target = malloc(NB * sizeof(long)), *tmp;
+    long place;
+    int count[10], idx, digit, pass = 0;
+    for (place = 1; place <= 100000; place *= 10) {
+        for (digit = 0; digit < 10; digit++) count[digit] = 0;
+        for (idx = 0; idx < NB; idx++) count[(source[idx] / place) % 10]++;
+        for (digit = 1; digit < 10; digit++) count[digit] += count[digit - 1];   // مواضع تراكمية
+        for (idx = NB - 1; idx >= 0; idx--)                                      // من النهاية: مستقر
+            target[--count[(source[idx] / place) % 10]] = source[idx];
+        tmp = source; source = target; target = tmp;                             // تبديل المؤشرين
+        pass++;
+    }
+    printf("%d passes, 0 comparisons\n", pass);
+    for (idx = 0; idx < NB; idx++) printf("%ld ", source[idx]);
+    printf("\n");
+    free(source == orders ? target : source);       // نحرر الكتلة المحجوزة فقط
+    return 0;
+}

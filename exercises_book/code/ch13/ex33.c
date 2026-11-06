@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int day; double sales; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int day, double sales) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->day = day; node->sales = sales; node->left = node->right = NULL; }
+    else if (day < node->day) node->left = insert(node->left, day, sales);
+    else node->right = insert(node->right, day, sales);
+    return node;
+}
+
+double rangeSum(const Tree *node, int from, int to) {
+    if (node == NULL) return 0;
+    if (node->day < from) return rangeSum(node->right, from, to);
+    if (node->day > to) return rangeSum(node->left, from, to);
+    return node->sales + rangeSum(node->left, from, to) + rangeSum(node->right, from, to);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = NULL;
+    int day, order[14] = {7, 3, 11, 1, 5, 9, 13, 2, 4, 6, 8, 10, 12, 14}, idx;
+    for (idx = 0; idx < 14; idx++) {
+        day = order[idx];                                 // ترتيب إدراج متوازن
+        root = insert(root, day, 1000 + (day * 173) % 600);
+    }
+    printf("Week 1 (days 1-7):  %.0f DA\n", rangeSum(root, 1, 7));
+    printf("Week 2 (days 8-14): %.0f DA\n", rangeSum(root, 8, 14));
+    printf("Weekend 6-7:        %.0f DA\n", rangeSum(root, 6, 7));
+    freeTree(root);
+    return 0;
+}

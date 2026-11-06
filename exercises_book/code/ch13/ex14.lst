@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+int visited = 0;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+int countRange(const Tree *node, int low, int high) {
+    if (node == NULL) return 0;
+    visited++;
+    if (node->price < low) return countRange(node->right, low, high);    (*@\cmt{تقليم اليسار}@*)
+    if (node->price > high) return countRange(node->left, low, high);    (*@\cmt{تقليم اليمين}@*)
+    return 1 + countRange(node->left, low, high) + countRange(node->right, low, high);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[15] = {8000, 3000, 20000, 1200, 5000, 12000, 45000, 450, 2000, 4100, 6500,
+                      9900, 15000, 32000, 89000};
+    Tree *root = NULL;
+    int idx, low, high, count;
+    for (idx = 0; idx < 15; idx++) root = insert(root, prices[idx]);
+    scanf("%d %d", &low, &high);
+    count = countRange(root, low, high);
+    printf("%d products between %d and %d DA (visited %d of 15 nodes)\n", count, low, high, visited);
+    freeTree(root);
+    return 0;
+}

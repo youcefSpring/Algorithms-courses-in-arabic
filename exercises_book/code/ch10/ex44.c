@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SIZE 13
+
+typedef struct Node { char word[16]; int count; struct Node *next; } Node;
+
+unsigned long hashWord(const char *word) {
+    unsigned long hash = 5381;
+    while (*word != '\0') hash = hash * 33 + (unsigned char)*word++;
+    return hash;
+}
+
+int sameWord(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first == *second;
+}
+
+int main(void) {
+    char text[] = "fast delivery good price fast service good quality fast refund "
+                  "bad packaging good support price ok";
+    Node *table[SIZE] = {NULL}, *node, *next;
+    char word[16];
+    int pos = 0, len, slot, chain, longest = 0, distinct = 0;
+    while (text[pos] != '\0') {
+        while (text[pos] == ' ') pos++;
+        for (len = 0; text[pos] != ' ' && text[pos] != '\0' && len < 15; pos++) word[len++] = text[pos];
+        word[len] = '\0';
+        if (len == 0) continue;
+        slot = (int)(hashWord(word) % SIZE);
+        for (node = table[slot]; node != NULL && !sameWord(node->word, word); node = node->next) {}
+        if (node != NULL) {
+            node->count++;
+        } else {
+            node = malloc(sizeof(Node));                     // عقدة جديدة في رأس السلسلة
+            for (len = 0; (node->word[len] = word[len]) != '\0'; len++) {}
+            node->count = 1;
+            node->next = table[slot];
+            table[slot] = node;
+            distinct++;
+        }
+    }
+    printf("%d distinct words. Repeated:", distinct);
+    for (slot = 0; slot < SIZE; slot++) {
+        chain = 0;
+        for (node = table[slot]; node != NULL; node = node->next) {
+            chain++;
+            if (node->count > 1) printf(" %s(%d)", node->word, node->count);
+        }
+        if (chain > longest) longest = chain;
+    }
+    printf("\nLongest chain: %d\n", longest);
+    for (slot = 0; slot < SIZE; slot++)
+        for (node = table[slot]; node != NULL; node = next) {
+            next = node->next;                               // نحفظ التالي قبل التحرير
+            free(node);
+        }
+    return 0;
+}

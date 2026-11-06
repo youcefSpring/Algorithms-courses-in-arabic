@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+typedef struct {
+    char name[12];
+    double posX, posY;
+    int orders;
+} City;
+
+typedef struct { double posX, posY; } Point;
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    for (iter = 0; iter < 50; iter++) guess = (guess + value / guess) / 2;
+    return guess;
+}
+
+int main(void) {
+    City cities[6] = {{"Algiers", 0, 0, 520}, {"Blida", -10, -45, 180}, {"Tizi", 95, -20, 140},
+                      {"Bouira", 110, -90, 60}, {"Medea", -20, -80, 90}, {"Boumerdes", 45, -5, 110}};
+    Point center;
+    double sumW = 0, sumX = 0, sumY = 0, avgDist = 0, dx, dy;
+    int idx;
+    for (idx = 0; idx < 6; idx++) {
+        sumW += cities[idx].orders;
+        sumX += cities[idx].orders * cities[idx].posX;
+        sumY += cities[idx].orders * cities[idx].posY;
+    }
+    center.posX = sumX / sumW;
+    center.posY = sumY / sumW;
+    for (idx = 0; idx < 6; idx++) {
+        dx = cities[idx].posX - center.posX;
+        dy = cities[idx].posY - center.posY;
+        avgDist += cities[idx].orders * mySqrt(dx * dx + dy * dy);   // مسافة مرجحة
+    }
+    printf("Warehouse at (%.1f, %.1f)\n", center.posX, center.posY);
+    printf("Average distance per order: %.1f km\n", avgDist / sumW);
+    return 0;
+}

@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+typedef struct { char name[16]; double price; } Product;
+
+void applyDiscount(Product *item, double percent) {
+    item->price = item->price * (100 - percent) / 100;   // يعدل الأصل
+}
+
+int main(void) {
+    Product items[3] = {{"Monitor", 32000}, {"Keyboard", 3200}, {"Webcam", 4100}};
+    int idx;
+    for (idx = 0; idx < 3; idx++) {
+        applyDiscount(&items[idx], 15);
+        printf("%-9s %9.2f DA\n", items[idx].name, items[idx].price);
+    }
+    return 0;
+}

@@ -1,0 +1,59 @@
+#include <stdio.h>
+
+#define SIZE 17
+
+typedef struct { int used; char sku[10]; double price; } Slot;
+
+Slot table[SIZE];
+int collisions = 0;
+
+unsigned long hashCode(char sku[]) {
+    unsigned long hash = 5381;
+    int pos;
+    for (pos = 0; sku[pos] != '\0'; pos++) hash = hash * 33 + (unsigned char)sku[pos];
+    return hash;
+}
+
+int sameText(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos]) pos++;
+    return first[pos] == second[pos];
+}
+
+void insert(char sku[], double price) {
+    int slot = (int)(hashCode(sku) % SIZE), pos;
+    while (table[slot].used) {                         (*@\cmt{تصادم: سبر خطي}@*)
+        collisions++;
+        slot = (slot + 1) % SIZE;
+    }
+    table[slot].used = 1;
+    for (pos = 0; pos < 10; pos++) table[slot].sku[pos] = sku[pos];
+    table[slot].price = price;
+}
+
+int lookup(char sku[], int probes[]) {
+    int slot = (int)(hashCode(sku) % SIZE);
+    probes[0] = 1;
+    while (table[slot].used) {
+        if (sameText(table[slot].sku, sku)) return slot;
+        slot = (slot + 1) % SIZE;
+        probes[0]++;
+    }
+    return -1;                                         (*@\cmt{خانة فارغة: غير موجود}@*)
+}
+
+int main(void) {
+    char skus[10][10] = {"KB-204", "MS-110", "MN-270", "HD-500", "CB-001",
+                         "PH-330", "LP-900", "WC-410", "HB-220", "SP-150"};
+    double prices[10] = {3200, 1500, 32000, 5400, 450, 38000, 89000, 4100, 3100, 6800};
+    char queries[3][10] = {"LP-900", "CB-001", "TV-999"};
+    int idx, slot, probes[1];
+    for (idx = 0; idx < 10; idx++) insert(skus[idx], prices[idx]);
+    printf("10 items in %d slots, %d collisions\n", SIZE, collisions);
+    for (idx = 0; idx < 3; idx++) {
+        slot = lookup(queries[idx], probes);
+        if (slot >= 0) printf("%s -> slot %2d, %.0f DA (%d probes)\n", queries[idx], slot, table[slot].price, probes[0]);
+        else printf("%s -> not found (%d probes)\n", queries[idx], probes[0]);
+    }
+    return 0;
+}

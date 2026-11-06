@@ -1,0 +1,45 @@
+#include <stdio.h>
+
+#define NB 7
+
+int dist[NB][NB] = {{0, 29, 20, 21, 16, 31, 100},
+                    {29, 0, 15, 29, 28, 40, 72},
+                    {20, 15, 0, 15, 14, 25, 81},
+                    {21, 29, 15, 0, 4, 12, 92},
+                    {16, 28, 14, 4, 0, 16, 94},
+                    {31, 40, 25, 12, 16, 0, 95},
+                    {100, 72, 81, 92, 94, 95, 0}};
+int visited[NB], path[NB], bestPath[NB], best = 1000000;
+long nodes = 0;
+
+void explore(int city, int visitedCount, int length) {
+    int next, idx;
+    nodes++;
+    if (length >= best) return;                        // تحديد: لا فائدة من المواصلة
+    if (visitedCount == NB) {
+        if (length + dist[city][0] < best) {
+            best = length + dist[city][0];
+            for (idx = 0; idx < NB; idx++) bestPath[idx] = path[idx];
+        }
+        return;
+    }
+    for (next = 1; next < NB; next++)
+        if (!visited[next]) {
+            visited[next] = 1;
+            path[visitedCount] = next;
+            explore(next, visitedCount + 1, length + dist[city][next]);
+            visited[next] = 0;                         // تراجع
+        }
+}
+
+int main(void) {
+    int idx;
+    path[0] = 0;
+    visited[0] = 1;
+    explore(0, 1, 0);
+    printf("Best tour:");
+    for (idx = 0; idx < NB; idx++) printf(" %d ->", bestPath[idx]);
+    printf(" 0\nLength: %d km\n", best);
+    printf("Nodes explored: %ld (full tree: 1957)\n", nodes);
+    return 0;
+}

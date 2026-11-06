@@ -1,0 +1,10 @@
+Degrees of separation from customer 0:
+  customer 1: 1
+  customer 2: 1
+  customer 3: 2
+  customer 4: 3
+  customer 5: 2
+  customer 6: unreachable
+  customer 7: unreachable
+  customer 8: unreachable
+Connected groups: 3

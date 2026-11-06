@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+void countdown(int hours) {
+    if (hours == 0) {
+        printf("Sale over!\n");
+        return;
+    }
+    printf("%d ", hours);              // نطبع قبل الاستدعاء
+    countdown(hours - 1);
+}
+
+void countUp(int hours) {
+    if (hours == 0) return;
+    countUp(hours - 1);                // نستدعي قبل الطباعة
+    printf("%d ", hours);
+}
+
+int main(void) {
+    int hours;
+    scanf("%d", &hours);
+    countdown(hours);
+    countUp(hours);
+    printf("\n");
+    return 0;
+}

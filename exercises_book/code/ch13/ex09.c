@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = left; node->right = right;
+    return node;
+}
+
+int countLeaves(const Tree *node) {
+    if (node == NULL) return 0;
+    if (node->left == NULL && node->right == NULL) return 1;     // ورقة
+    return countLeaves(node->left) + countLeaves(node->right);
+}
+
+int countInternal(const Tree *node) {
+    if (node == NULL || (node->left == NULL && node->right == NULL)) return 0;
+    return 1 + countInternal(node->left) + countInternal(node->right);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(1, newTree(2, newTree(4, NULL, NULL), newTree(5, NULL, NULL)),
+                            newTree(3, newTree(6, newTree(8, NULL, NULL), NULL), newTree(7, NULL, NULL)));
+    int leaves = countLeaves(root), internal = countInternal(root);
+    printf("Leaf categories: %d, internal: %d, total: %d\n", leaves, internal, leaves + internal);
+    freeTree(root);
+    return 0;
+}

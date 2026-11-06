@@ -1,0 +1,29 @@
+#include <stdio.h>
+
+void reverse(int *start, int *end) {
+    int tmp;
+    while (start < end) {
+        tmp = *start;
+        *start++ = *end;              (*@\cmt{نكتب ثم نتقدم}@*)
+        *end-- = tmp;
+    }
+}
+
+void show(char label[], int *values, int size) {
+    int *ptr;
+    printf("%s", label);
+    for (ptr = values; ptr < values + size; ptr++) printf(" %d", *ptr);
+    printf("\n");
+}
+
+int main(void) {
+    int sales[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    reverse(sales, sales + 9);
+    show("reversed:", sales, 10);
+    reverse(sales, sales + 9);                 (*@\cmt{نعيده كما كان}@*)
+    reverse(sales, sales + 2);                 (*@\cmt{تدوير يسارًا بـ \cen{3}}@*)
+    reverse(sales + 3, sales + 9);
+    reverse(sales, sales + 9);
+    show("rotated: ", sales, 10);
+    return 0;
+}

@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CAP 4
+
+typedef struct Node { int code; struct Node *next; } Node;
+
+int main(void) {
+    Node *head = NULL, *prev, *walk, *node, *next;
+    int code, count = 0;
+    while (scanf("%d", &code) == 1) {
+        for (prev = NULL, walk = head; walk != NULL && walk->code != code; prev = walk, walk = walk->next) {}
+        if (walk != NULL) {
+            if (prev != NULL) {                         (*@\cmt{نقل إلى الرأس}@*)
+                prev->next = walk->next;
+                walk->next = head;
+                head = walk;
+            }
+        } else {
+            node = malloc(sizeof(Node));
+            node->code = code;
+            node->next = head;
+            head = node;
+            if (++count > CAP) {                        (*@\cmt{حذف الأقدم (الأخير)}@*)
+                for (walk = head; walk->next->next != NULL; walk = walk->next) {}
+                free(walk->next);
+                walk->next = NULL;
+                count--;
+            }
+        }
+        printf("view %d ->", code);
+        for (walk = head; walk != NULL; walk = walk->next) printf(" %d", walk->code);
+        printf("\n");
+    }
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}

@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int main(void) {
+    char text[] = "GATTACATCGCTAGCGATCCA";
+    int length = 0, center, left, right, bestLen = 0, bestStart = 0, pos;
+    while (text[length] != '\0') length++;
+    for (center = 0; center < 2 * length - 1; center++) {
+        left = center / 2;                 (*@\cmt{مركز زوجي: حرف، فردي: بين حرفين}@*)
+        right = left + center % 2;
+        while (left >= 0 && right < length && text[left] == text[right]) {
+            left--;                        (*@\cmt{نتوسع ما دام التناظر قائمًا}@*)
+            right++;
+        }
+        if (right - left - 1 > bestLen) {
+            bestLen = right - left - 1;
+            bestStart = left + 1;
+        }
+    }
+    printf("Text: %s\n", text);
+    printf("Longest palindrome (%d chars) at %d: ", bestLen, bestStart);
+    for (pos = bestStart; pos < bestStart + bestLen; pos++)
+        putchar(text[pos]);
+    putchar('\n');
+    return 0;
+}

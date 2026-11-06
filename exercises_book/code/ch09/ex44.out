@@ -1,0 +1,5 @@
+t= 9 ticket 8 rejected (queue full)
+t=10 ticket 9 rejected (queue full)
+t=11 ticket 10 rejected (queue full)
+Served 9, rejected 3, still waiting 0
+Average wait: 6.67 minutes

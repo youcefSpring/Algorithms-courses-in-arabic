@@ -1,0 +1,8 @@
+user 7: 0 -> 400 (400 s, 3 pages)
+user 7: 2600 -> 2700 (100 s, 2 pages)
+user 9: 200 -> 2900 (2700 s, 4 pages)
+user 9: 5100 -> 5100 (0 s, 1 pages)
+user 7: 5000 -> 5200 (200 s, 2 pages)
+user 9: 7300 -> 7400 (100 s, 2 pages)
+user 7: 3 sessions, avg 233.3 s, avg 2.3 pages
+user 9: 3 sessions, avg 933.3 s, avg 2.3 pages

@@ -1,0 +1,49 @@
+#include <stdio.h>
+
+#define NB 10
+#define NBK 3
+
+double distance2(double visitsA, double basketA, double visitsB, double basketB) {
+    return (visitsA - visitsB) * (visitsA - visitsB) + (basketA - basketB) * (basketA - basketB);
+}
+
+void findNearest(double visits[], double basket[], double qVisits, double qBasket, int nearest[]) {
+    int used[NB] = {0}, rank, idx, best;
+    double dist, bestDist;
+    for (rank = 0; rank < NBK; rank++) {
+        best = -1;
+        bestDist = 0;
+        for (idx = 0; idx < NB; idx++) {
+            if (used[idx]) continue;
+            dist = distance2(visits[idx], basket[idx], qVisits, qBasket);
+            if (best < 0 || dist < bestDist) { best = idx; bestDist = dist; }
+        }
+        used[best] = 1;                      (*@\cmt{لا نختار نفس الجار مرتين}@*)
+        nearest[rank] = best;
+    }
+}
+
+int classify(double visits[], double basket[], int labels[], double qVisits, double qBasket) {
+    int nearest[NBK], rank, votes = 0;
+    findNearest(visits, basket, qVisits, qBasket, nearest);
+    printf("  neighbours:");
+    for (rank = 0; rank < NBK; rank++) {
+        printf(" #%d", nearest[rank]);
+        votes += labels[nearest[rank]];
+    }
+    return votes * 2 > NBK;                    (*@\cmt{أغلبية الأصوات}@*)
+}
+
+int main(void) {
+    double visits[NB] = {1, 2, 8, 9, 3, 10, 2, 7, 6, 1};
+    double basket[NB] = {2.0, 1.5, 6.0, 7.5, 2.5, 5.0, 3.0, 8.0, 4.5, 1.0};
+    int labels[NB] = {0, 0, 1, 1, 0, 1, 0, 1, 1, 0};
+    double newVisits[3] = {7, 2, 5}, newBasket[3] = {5.5, 2.0, 3.5};
+    int query, result;
+    for (query = 0; query < 3; query++) {
+        printf("Customer (%.0f visits, %.1fk):", newVisits[query], newBasket[query]);
+        result = classify(visits, basket, labels, newVisits[query], newBasket[query]);
+        printf(" -> %s\n", result ? "buyer" : "not buyer");
+    }
+    return 0;
+}

@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { double price; struct Node *next; } Node;
+
+void push(Node **top, double price) {
+    Node *node = malloc(sizeof(Node));
+    node->price = price;
+    node->next = *top;
+    *top = node;
+}
+
+double pop(Node **top) {
+    Node *old = *top;
+    double price = old->price;
+    *top = old->next;
+    free(old);
+    return price;
+}
+
+double peek(const Node *top) { return top->price; }
+
+int main(void) {
+    Node *top = NULL;
+    char command[16];
+    double value;
+    int pos;
+    push(&top, 3500);                                   (*@\cmt{السعر الأصلي}@*)
+    while (scanf("%15s", command) == 1) {
+        if (command[0] == 'e') {
+            for (value = 0, pos = 1; command[pos] != '\0'; pos++) value = value * 10 + (command[pos] - '0');
+            push(&top, value);
+        } else if (top->next != NULL) {
+            pop(&top);                                  (*@\cmt{تراجع}@*)
+        } else {
+            printf("%-6s nothing to undo\n", command);
+            continue;
+        }
+        printf("%-6s price = %.0f\n", command, peek(top));
+    }
+    while (top != NULL) pop(&top);
+    return 0;
+}

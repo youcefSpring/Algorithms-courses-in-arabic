@@ -1,0 +1,720 @@
+@@
+title: قاعدة بيانات مصغرة بالربط بين الجداول
+level: hard
+domain: ec
+@ statement
+لدينا ثلاثة جداول من الهياكل كما في قاعدة بيانات: `customers` و `products` و `orders` (كل طلبية تشير إلى زبون ومنتج بمعرّفيهما). اكتب دوال البحث بالمعرّف، ثم أنتج تقريرًا يشبه الاستعلام `SELECT city, SUM(qty*price) ... GROUP BY city ORDER BY total DESC`.
+@ steps
+- `findCustomer(id)` و `findProduct(id)` تعيدان الفهرس (الربط **join**).
+- لكل طلبية: مدينة الزبون + مبلغ السطر، ثم التجميع حسب المدينة في جدول هياكل `CityTotal`.
+- ترتيب النتيجة تنازليًا.
+@ flow
+for: idx = 0 ; idx < NBO ; idx++
+  call: client = findCustomer(orders[idx].customerId)
+  call: item = findProduct(orders[idx].productId)
+  do: amount = orders[idx].qty * products[item].price
+  do: إضافة amount إلى مدينة customers[client]
+do: ترتيب المدن تنازليًا
+out: المدن ومجاميعها
+@ code
+#include <stdio.h>
+
+#define NBC 5
+#define NBP 4
+#define NBO 10
+
+typedef struct { int id; char name[10]; char city[10]; } Customer;
+typedef struct { int id; char name[10]; double price; } Product;
+typedef struct { int customerId, productId, qty; } Order;
+typedef struct { char city[10]; double total; int orders; } CityTotal;
+
+Customer customers[NBC] = {{1, "Amina", "Oran"}, {2, "Karim", "Algiers"}, {3, "Lina", "Oran"},
+                           {4, "Omar", "Setif"}, {5, "Sara", "Algiers"}};
+Product products[NBP] = {{10, "Phone", 32000}, {11, "Case", 900}, {12, "Earbuds", 5400}, {13, "Laptop", 89000}};
+Order orders[NBO] = {{1, 10, 1}, {2, 11, 3}, {3, 12, 2}, {4, 13, 1}, {5, 10, 2},
+                     {1, 12, 1}, {2, 13, 1}, {3, 11, 5}, {4, 11, 2}, {5, 12, 1}};
+
+int findCustomer(int id) {
+    int idx;
+    for (idx = 0; idx < NBC; idx++) if (customers[idx].id == id) return idx;
+    return -1;
+}
+
+int findProduct(int id) {
+    int idx;
+    for (idx = 0; idx < NBP; idx++) if (products[idx].id == id) return idx;
+    return -1;
+}
+
+int sameText(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos]) pos++;
+    return first[pos] == second[pos];
+}
+
+int main(void) {
+    CityTotal report[NBC], tmp;
+    int nbCities = 0, idx, client, item, pos, letter, pass;
+    for (idx = 0; idx < NBO; idx++) {
+        client = findCustomer(orders[idx].customerId);       // ربط مع الزبائن
+        item = findProduct(orders[idx].productId);           // ربط مع المنتجات
+        for (pos = 0; pos < nbCities && !sameText(report[pos].city, customers[client].city); pos++) {}
+        if (pos == nbCities) {                               // GROUP BY city
+            for (letter = 0; letter < 10; letter++) report[pos].city[letter] = customers[client].city[letter];
+            report[pos].total = 0;
+            report[pos].orders = 0;
+            nbCities++;
+        }
+        report[pos].total += orders[idx].qty * products[item].price;
+        report[pos].orders++;
+    }
+    for (pass = 0; pass < nbCities - 1; pass++)              // ORDER BY total DESC
+        for (idx = 0; idx < nbCities - 1 - pass; idx++)
+            if (report[idx].total < report[idx + 1].total) {
+                tmp = report[idx]; report[idx] = report[idx + 1]; report[idx + 1] = tmp;
+            }
+    printf("city      orders      total\n");
+    for (idx = 0; idx < nbCities; idx++)
+        printf("%-9s %6d %10.0f\n", report[idx].city, report[idx].orders, report[idx].total);
+    return 0;
+}
+
+@@
+title: طابور الأولوية للطلبيات بكومة ثنائية
+level: hard
+domain: ec
+@ statement
+تُعالج الطلبيات حسب **الأولوية** (التوصيل السريع أولًا، ثم الأقدم). اكتب هيكل `Heap` (جدول من `Order` + الحجم) ودوال `push` (إدراج مع **الصعود**) و `pop` (سحب الجذر مع **النزول**) لكومة عظمى، ثم عالج الطلبيات بالترتيب الصحيح.
+@ steps
+- الأب في الكومة `(idx - 1) / 2` والأبناء `2*idx + 1` و `2*idx + 2`.
+- `higher(first, second)`: أولوية أكبر، وعند التساوي رقم أصغر (أقدم).
+- `push`: نضع العنصر في الأخير ثم نبدله مع أبيه ما دام أعلى منه.
+- `pop`: نأخذ الجذر، نضع الأخير مكانه، ثم ننزله نحو الابن الأعلى.
+@ flow
+for: idx = 0 ; idx < 8 ; idx++
+  call: push(heap, incoming[idx])
+while: heap.size > 0
+  call: order = pop(heap)
+  out: order
+@ code
+#include <stdio.h>
+
+#define CAP 20
+
+typedef struct { int number; int priority; char client[10]; } Order;
+typedef struct { Order items[CAP]; int size; } Heap;
+
+int higher(Order first, Order second) {
+    if (first.priority != second.priority) return first.priority > second.priority;
+    return first.number < second.number;            // الأقدم أولًا
+}
+
+void swapOrders(Heap heap[], int first, int second) {
+    Order tmp = heap[0].items[first];
+    heap[0].items[first] = heap[0].items[second];
+    heap[0].items[second] = tmp;
+}
+
+void push(Heap heap[], Order order) {
+    int idx = heap[0].size++;
+    heap[0].items[idx] = order;
+    while (idx > 0 && higher(heap[0].items[idx], heap[0].items[(idx - 1) / 2])) {
+        swapOrders(heap, idx, (idx - 1) / 2);       // صعود
+        idx = (idx - 1) / 2;
+    }
+}
+
+Order pop(Heap heap[]) {
+    Order top = heap[0].items[0];
+    int idx = 0, child;
+    heap[0].items[0] = heap[0].items[--heap[0].size];
+    while (2 * idx + 1 < heap[0].size) {            // نزول
+        child = 2 * idx + 1;
+        if (child + 1 < heap[0].size && higher(heap[0].items[child + 1], heap[0].items[child]))
+            child++;
+        if (!higher(heap[0].items[child], heap[0].items[idx])) break;
+        swapOrders(heap, idx, child);
+        idx = child;
+    }
+    return top;
+}
+
+int main(void) {
+    Order incoming[8] = {{101, 1, "Amina"}, {102, 3, "Karim"}, {103, 2, "Lina"}, {104, 3, "Omar"},
+                         {105, 1, "Sara"}, {106, 2, "Nadir"}, {107, 3, "Rania"}, {108, 1, "Yacine"}};
+    Heap heap[1];
+    Order order;
+    int idx;
+    heap[0].size = 0;
+    for (idx = 0; idx < 8; idx++) push(heap, incoming[idx]);
+    printf("Root after inserts: #%d\n", heap[0].items[0].number);
+    while (heap[0].size > 0) {
+        order = pop(heap);
+        printf("Process #%d (priority %d, %s)\n", order.number, order.priority, order.client);
+    }
+    return 0;
+}
+
+@@
+title: التراجع في السلة بمكدس
+level: hard
+domain: ec
+@ statement
+يتيح الموقع زر **تراجع** (Undo) و**إعادة** (Redo) لعمليات السلة. اكتب هيكل `Stack` لعمليات `Action` (نوع الإضافة/الحذف، المنتج، الكمية)، ودوال `pushAction` و `popAction`، ثم نفّذ سلسلة أوامر: كل عملية جديدة تُكدس في مكدس التراجع وتفرغ مكدس الإعادة.
+@ stdin
+a1 a2 a1 r2 u u u y y a3 u
+@ steps
+- `aN`: إضافة المنتج N، `rN`: حذفه، `u`: تراجع، `y`: إعادة.
+- التراجع: نسحب من `undo`، نطبّق **العملية المعاكسة**، ونكدسها في `redo`.
+- الإعادة: نسحب من `redo`، نطبّقها، ونكدسها في `undo`.
+@ flow
+for: idx = 0 ; idx < nbCommands ; idx++
+  in: command
+  if: إضافة أو حذف
+    do: apply(action) ; pushAction(undo, action) ; redo.top = 0
+  else:
+    if: u و undo غير فارغ
+      do: action = popAction(undo) ; apply(المعاكسة) ; pushAction(redo, action)
+    else:
+      do: action = popAction(redo) ; apply(action) ; pushAction(undo, action)
+  out: cart
+@ code
+#include <stdio.h>
+
+#define CAP 20
+
+typedef struct { char kind; int product; } Action;
+typedef struct { Action items[CAP]; int top; } Stack;
+
+int cart[5];
+
+void pushAction(Stack stack[], Action action) { stack[0].items[stack[0].top++] = action; }
+Action popAction(Stack stack[]) { return stack[0].items[--stack[0].top]; }
+
+void apply(Action action, int reverse) {
+    int add = (action.kind == 'a') != reverse;       // المعاكسة تقلب العملية
+    cart[action.product] += add ? 1 : -1;
+}
+
+void show(char command[]) {
+    int idx;
+    printf("%-3s cart:", command);
+    for (idx = 1; idx < 5; idx++) if (cart[idx] > 0) printf(" P%d x%d", idx, cart[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    Stack undo[1], redo[1];
+    Action action;
+    char command[4];
+    undo[0].top = redo[0].top = 0;
+    while (scanf("%3s", command) == 1) {
+        if (command[0] == 'a' || command[0] == 'r') {
+            action.kind = command[0];
+            action.product = command[1] - '0';
+            apply(action, 0);
+            pushAction(undo, action);
+            redo[0].top = 0;                         // عملية جديدة تلغي الإعادة
+        } else if (command[0] == 'u' && undo[0].top > 0) {
+            action = popAction(undo);
+            apply(action, 1);
+            pushAction(redo, action);
+        } else if (command[0] == 'y' && redo[0].top > 0) {
+            action = popAction(redo);
+            apply(action, 0);
+            pushAction(undo, action);
+        }
+        show(command);
+    }
+    return 0;
+}
+
+@@
+title: طابور تذاكر الدعم الدائري
+level: hard
+domain: ec
+@ statement
+يستقبل فريق الدعم التذاكر في **طابور دائري** بسعة 5. اكتب هيكل `Queue` (جدول، رأس، ذيل، عدد) ودوال `enqueue` (ترفض إذا امتلأ الطابور) و `dequeue`. حاكِ يومًا من العمل: في كل دقيقة تصل تذاكر و/أو يعالج الموظف تذكرة، واحسب متوسط وقت الانتظار.
+@ steps
+- الذيل يدور: `tail = (tail + 1) % CAP`، وكذلك الرأس.
+- كل تذكرة تحفظ دقيقة وصولها؛ الانتظار = دقيقة المعالجة - دقيقة الوصول.
+- الحدث `+` وصول تذكرة، `-` معالجة تذكرة.
+@ flow
+for: minute = 0 ; events[minute] != '\0' ; minute++
+  if: events[minute] == '+'
+    call: ok = enqueue(queue, ticket)
+    if: !ok
+      do: rejected++
+  else:
+    call: ticket = dequeue(queue)
+    do: totalWait += minute - ticket.arrival ; served++
+out: served, rejected, totalWait / served
+@ code
+#include <stdio.h>
+
+#define CAP 5
+
+typedef struct { int id, arrival; } Ticket;
+typedef struct { Ticket items[CAP]; int head, tail, count; } Queue;
+
+int enqueue(Queue queue[], Ticket ticket) {
+    if (queue[0].count == CAP) return 0;                 // الطابور ممتلئ
+    queue[0].items[queue[0].tail] = ticket;
+    queue[0].tail = (queue[0].tail + 1) % CAP;           // دوران
+    queue[0].count++;
+    return 1;
+}
+
+Ticket dequeue(Queue queue[]) {
+    Ticket ticket = queue[0].items[queue[0].head];
+    queue[0].head = (queue[0].head + 1) % CAP;
+    queue[0].count--;
+    return ticket;
+}
+
+int main(void) {
+    char events[] = "+++-++-+++++--+-----+-";
+    Queue queue[1] = {{{{0, 0}}, 0, 0, 0}};
+    Ticket ticket;
+    int minute, nextId = 1, served = 0, rejected = 0, totalWait = 0;
+    for (minute = 0; events[minute] != '\0'; minute++) {
+        if (events[minute] == '+') {
+            ticket.id = nextId++;
+            ticket.arrival = minute;
+            if (!enqueue(queue, ticket)) {
+                rejected++;
+                printf("t=%2d ticket %d rejected (queue full)\n", minute, ticket.id);
+            }
+        } else if (queue[0].count > 0) {
+            ticket = dequeue(queue);
+            totalWait += minute - ticket.arrival;
+            served++;
+        }
+    }
+    printf("Served %d, rejected %d, still waiting %d\n", served, rejected, queue[0].count);
+    printf("Average wait: %.2f minutes\n", (double)totalWait / served);
+    return 0;
+}
+
+@@
+title: أقصر طريق توصيل بخوارزمية ديكسترا
+level: hard
+domain: ec
+@ statement
+شبكة الطرق بين 7 نقاط (المستودع 0) ممثلة بجدول هياكل `Road` (من، إلى، المسافة) في الاتجاهين. اكتب خوارزمية **ديكسترا** لحساب أقصر مسافة من المستودع إلى كل نقطة، مع إعادة بناء المسار عبر جدول `previous`.
+@ steps
+- `dist[node] = ∞` ما عدا المستودع 0؛ `done[node] = 0`.
+- نكرر: نختار أقرب عقدة غير منتهية `current`، ونعلمها منتهية، ثم **نرخي** كل طريق يخرج منها: إذا `dist[current] + length < dist[other]` نحدث المسافة و `previous`.
+- المسار يُبنى بالرجوع من الهدف عبر `previous` حتى 0.
+@ flow
+do: dist = ∞ ; dist[0] = 0
+for: step = 0 ; step < NBN ; step++
+  do: current = أقرب عقدة غير منتهية ; done[current] = 1
+  for: road = 0 ; road < NBR ; road++
+    if: الطريق يخرج من current و dist[current] + length < dist[other]
+      do: dist[other] = dist[current] + length ; previous[other] = current
+out: dist, المسارات
+@ code
+#include <stdio.h>
+
+#define NBN 7
+#define NBR 11
+#define INF 1000000
+
+typedef struct { int from, to, length; } Road;
+
+int main(void) {
+    Road roads[NBR] = {{0, 1, 7}, {0, 2, 9}, {0, 5, 14}, {1, 2, 10}, {1, 3, 15}, {2, 3, 11},
+                       {2, 5, 2}, {3, 4, 6}, {4, 5, 9}, {4, 6, 5}, {3, 6, 12}};
+    int dist[NBN], previous[NBN], done[NBN], path[NBN];
+    int node, step, current, road, other, len, idx;
+    for (node = 0; node < NBN; node++) { dist[node] = INF; done[node] = 0; previous[node] = -1; }
+    dist[0] = 0;
+    for (step = 0; step < NBN; step++) {
+        current = -1;
+        for (node = 0; node < NBN; node++)               // أقرب عقدة غير منتهية
+            if (!done[node] && (current < 0 || dist[node] < dist[current])) current = node;
+        done[current] = 1;
+        for (road = 0; road < NBR; road++) {
+            if (roads[road].from == current) other = roads[road].to;
+            else if (roads[road].to == current) other = roads[road].from;
+            else continue;
+            if (dist[current] + roads[road].length < dist[other]) {   // إرخاء
+                dist[other] = dist[current] + roads[road].length;
+                previous[other] = current;
+            }
+        }
+    }
+    for (node = 1; node < NBN; node++) {
+        len = 0;
+        for (other = node; other != -1; other = previous[other]) path[len++] = other;
+        printf("to %d: %2d km via", node, dist[node]);
+        for (idx = len - 1; idx >= 0; idx--) printf(" %d", path[idx]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: جذع شجرة قرار بمؤشر جيني
+level: hard
+domain: ds
+@ statement
+نريد قاعدة بسيطة تتنبأ إن كان الزائر سيشتري: "إذا كانت الخاصية `feature` ≥ عتبة فهو مشترٍ". لكل زائر هيكل `Visitor` (مدة الزيارة، عدد الصفحات، عدد النقرات على الصور، اشترى أم لا). جرّب كل خاصية وكل عتبة ممكنة، واختر الأفضل بأقل **مؤشر جيني** مرجّح، ثم احسب دقة القاعدة.
+@ steps
+- جيني لمجموعة: `1 - p² - (1-p)²` حيث `p` نسبة المشترين فيها.
+- لكل (خاصية، عتبة): نقسم الزوار إلى يسار (< عتبة) ويمين (≥ عتبة)، والجيني المرجح `(nL·gL + nR·gR) / n`.
+- العتبات المرشحة: قيم الخاصية نفسها.
+@ flow
+for: feat = 0 ; feat < 3 ; feat++
+  for: cand = 0 ; cand < NB ; cand++
+    do: threshold = visitors[cand].values[feat]
+    do: تقسيم الزوار وحساب الجيني المرجح
+    if: gini < bestGini
+      do: حفظ feat و threshold
+out: القاعدة ودقتها
+@ code
+#include <stdio.h>
+
+#define NB 12
+
+typedef struct { double values[3]; int bought; } Visitor;
+
+double gini(int buyers, int total) {
+    double ratio;
+    if (total == 0) return 0;
+    ratio = (double)buyers / total;
+    return 1 - ratio * ratio - (1 - ratio) * (1 - ratio);
+}
+
+int main(void) {
+    Visitor visitors[NB] = {{{30, 2, 0}, 0}, {{240, 8, 5}, 1}, {{95, 4, 1}, 0}, {{310, 6, 7}, 1},
+                            {{60, 3, 2}, 0}, {{180, 9, 4}, 1}, {{150, 5, 0}, 0}, {{20, 1, 0}, 0},
+                            {{200, 4, 6}, 1}, {{130, 7, 3}, 1}, {{110, 6, 4}, 0}, {{270, 3, 4}, 1}};
+    char names[3][10] = {"duration", "pages", "photos"};
+    int feat, cand, idx, nLeft, nRight, buyLeft, buyRight, bestFeat = 0, correct = 0;
+    double threshold, score, bestGini = 2, bestThreshold = 0;
+    for (feat = 0; feat < 3; feat++)
+        for (cand = 0; cand < NB; cand++) {
+            threshold = visitors[cand].values[feat];
+            nLeft = nRight = buyLeft = buyRight = 0;
+            for (idx = 0; idx < NB; idx++) {
+                if (visitors[idx].values[feat] < threshold) { nLeft++; buyLeft += visitors[idx].bought; }
+                else { nRight++; buyRight += visitors[idx].bought; }
+            }
+            score = (nLeft * gini(buyLeft, nLeft) + nRight * gini(buyRight, nRight)) / NB;
+            if (score < bestGini) {                      // أنقى تقسيم
+                bestGini = score;
+                bestFeat = feat;
+                bestThreshold = threshold;
+            }
+        }
+    for (idx = 0; idx < NB; idx++)
+        correct += (visitors[idx].values[bestFeat] >= bestThreshold) == visitors[idx].bought;
+    printf("Rule: buyer if %s >= %.0f\n", names[bestFeat], bestThreshold);
+    printf("Weighted Gini: %.4f\n", bestGini);
+    printf("Training accuracy: %d/%d\n", correct, NB);
+    return 0;
+}
+
+@@
+title: جدول تجزئة لرموز المنتجات
+level: hard
+domain: ec
+@ statement
+البحث التسلسلي في كتالوج كبير بطيء. اكتب **جدول تجزئة** بالعنونة المفتوحة: هيكل `Slot` (مستعمل أم لا، الرمز، السعر)، ودالة تجزئة `hashCode(sku)` (طريقة djb2: `hash = hash * 33 + ch`)، ودالتي `insert` و `lookup` مع **السبر الخطي** عند التصادم. اعرض عدد التصادمات وعدد عمليات السبر لكل بحث.
+@ steps
+- الخانة الأولية `hashCode(sku) % SIZE`؛ إذا كانت مشغولة نجرب التالية `(slot + 1) % SIZE`.
+- `lookup` يتوقف عند العثور على الرمز أو عند خانة فارغة (غير موجود).
+- معامل الامتلاء `count / SIZE` يجب أن يبقى صغيرًا.
+@ flow
+for: idx = 0 ; idx < 10 ; idx++
+  call: insert(table, skus[idx], prices[idx])
+for: query = 0 ; query < 3 ; query++
+  call: slot = lookup(table, queries[query], probes)
+  out: queries[query], prices, probes
+@ code
+#include <stdio.h>
+
+#define SIZE 17
+
+typedef struct { int used; char sku[10]; double price; } Slot;
+
+Slot table[SIZE];
+int collisions = 0;
+
+unsigned long hashCode(char sku[]) {
+    unsigned long hash = 5381;
+    int pos;
+    for (pos = 0; sku[pos] != '\0'; pos++) hash = hash * 33 + (unsigned char)sku[pos];
+    return hash;
+}
+
+int sameText(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos]) pos++;
+    return first[pos] == second[pos];
+}
+
+void insert(char sku[], double price) {
+    int slot = (int)(hashCode(sku) % SIZE), pos;
+    while (table[slot].used) {                         // تصادم: سبر خطي
+        collisions++;
+        slot = (slot + 1) % SIZE;
+    }
+    table[slot].used = 1;
+    for (pos = 0; pos < 10; pos++) table[slot].sku[pos] = sku[pos];
+    table[slot].price = price;
+}
+
+int lookup(char sku[], int probes[]) {
+    int slot = (int)(hashCode(sku) % SIZE);
+    probes[0] = 1;
+    while (table[slot].used) {
+        if (sameText(table[slot].sku, sku)) return slot;
+        slot = (slot + 1) % SIZE;
+        probes[0]++;
+    }
+    return -1;                                         // خانة فارغة: غير موجود
+}
+
+int main(void) {
+    char skus[10][10] = {"KB-204", "MS-110", "MN-270", "HD-500", "CB-001",
+                         "PH-330", "LP-900", "WC-410", "HB-220", "SP-150"};
+    double prices[10] = {3200, 1500, 32000, 5400, 450, 38000, 89000, 4100, 3100, 6800};
+    char queries[3][10] = {"LP-900", "CB-001", "TV-999"};
+    int idx, slot, probes[1];
+    for (idx = 0; idx < 10; idx++) insert(skus[idx], prices[idx]);
+    printf("10 items in %d slots, %d collisions\n", SIZE, collisions);
+    for (idx = 0; idx < 3; idx++) {
+        slot = lookup(queries[idx], probes);
+        if (slot >= 0) printf("%s -> slot %2d, %.0f DA (%d probes)\n", queries[idx], slot, table[slot].price, probes[0]);
+        else printf("%s -> not found (%d probes)\n", queries[idx], probes[0]);
+    }
+    return 0;
+}
+
+@@
+title: جدولة أكبر عدد من العروض الترويجية
+level: hard
+domain: ec
+@ statement
+تريد الصفحة الرئيسية عرض لافتات ترويجية، ولا تُعرض لافتتان في نفس الوقت. لكل عرض هيكل `Promo` (الاسم، ساعة البداية، ساعة النهاية، الربح المتوقع). (1) اختر **أكبر عدد** من العروض بالطريقة الجشعة (الأبكر انتهاءً أولًا). (2) اختر مجموعة ذات **أكبر ربح** بالبرمجة الديناميكية وقارن.
+@ steps
+- نرتب العروض حسب ساعة النهاية.
+- الجشعة: نأخذ العرض إذا بدأ بعد نهاية آخر عرض مأخوذ.
+- الديناميكية: `best[idx] = max(best[idx-1], gain[idx] + best[last])` حيث `last` آخر عرض متوافق ينتهي قبل بداية `idx`.
+@ flow
+do: ترتيب promos حسب end
+do: lastEnd = 0
+for: idx = 0 ; idx < NB ; idx++
+  if: promos[idx].start >= lastEnd
+    out: promos[idx] ; lastEnd = promos[idx].end
+for: idx = 1 ; idx <= NB ; idx++
+  do: best[idx] = max(best[idx - 1], gain + best[compatible])
+out: best[NB]
+@ code
+#include <stdio.h>
+
+#define NB 8
+
+typedef struct { char name[10]; int start, end, gain; } Promo;
+
+int main(void) {
+    Promo promos[NB] = {{"Flash", 8, 11, 50}, {"Phones", 9, 12, 70}, {"Audio", 11, 14, 40},
+                        {"Laptops", 10, 16, 120}, {"Cables", 13, 15, 20}, {"Gaming", 14, 18, 65},
+                        {"Night", 18, 22, 55}, {"Bundle", 16, 20, 110}};
+    Promo key;
+    int best[NB + 1], take[NB + 1], idx, back, lastEnd = 0, count = 0, compat, withIt;
+    for (idx = 1; idx < NB; idx++) {                    // ترتيب حسب النهاية
+        key = promos[idx];
+        for (back = idx - 1; back >= 0 && promos[back].end > key.end; back--) promos[back + 1] = promos[back];
+        promos[back + 1] = key;
+    }
+    printf("Greedy (max count):");
+    for (idx = 0; idx < NB; idx++)
+        if (promos[idx].start >= lastEnd) {
+            printf(" %s", promos[idx].name);
+            lastEnd = promos[idx].end;
+            count++;
+        }
+    printf(" -> %d promos\n", count);
+    best[0] = 0;
+    for (idx = 1; idx <= NB; idx++) {
+        for (compat = idx - 1; compat >= 1 && promos[compat - 1].end > promos[idx - 1].start; compat--) {}
+        withIt = promos[idx - 1].gain + best[compat];   // compat = عدد العروض المتوافقة قبله
+        take[idx] = withIt > best[idx - 1];
+        best[idx] = take[idx] ? withIt : best[idx - 1];
+    }
+    printf("DP (max gain):");
+    for (idx = NB; idx >= 1; ) {                        // إعادة البناء
+        if (take[idx]) {
+            printf(" %s", promos[idx - 1].name);
+            for (compat = idx - 1; compat >= 1 && promos[compat - 1].end > promos[idx - 1].start; compat--) {}
+            idx = compat;
+        } else {
+            idx--;
+        }
+    }
+    printf(" -> gain %d\n", best[NB]);
+    return 0;
+}
+
+@@
+title: الأعداد الكبيرة لرقم الأعمال التراكمي
+level: hard
+domain: ds
+@ statement
+النوع `long` محدود بحوالي `9.2 × 10^18`. لحساب أعداد ضخمة (مثل `2^100` أو `30!` لعدد ترتيبات المنتجات)، عرّف هيكل `BigNum` يخزن الأرقام في جدول (الرقم الأقل وزنًا أولًا) ودوال `addBig` و `multiplySmall` و `printBig`.
+@ steps
+- الجمع: رقمًا برقم مع **حمل** `carry`.
+- الضرب في عدد صغير: كل رقم × العدد + الحمل، نحتفظ بـ `% 10` ونحمل `/ 10`.
+- `30! = 1 × 2 × ... × 30` و `2^100` بضرب متكرر في 2.
+@ flow
+do: fact = 1
+for: factor = 2 ; factor <= 30 ; factor++
+  call: multiplySmall(fact, factor)
+call: printBig(fact)
+do: power = 1
+for: step = 0 ; step < 100 ; step++
+  call: multiplySmall(power, 2)
+call: printBig(power)
+@ code
+#include <stdio.h>
+
+#define MAXD 80
+
+typedef struct { int digits[MAXD]; int length; } BigNum;
+
+BigNum fromInt(long value) {
+    BigNum number;
+    number.length = 0;
+    do {
+        number.digits[number.length++] = (int)(value % 10);
+        value /= 10;
+    } while (value > 0);
+    return number;
+}
+
+BigNum multiplySmall(BigNum number, int factor) {
+    int pos, carry = 0, product;
+    for (pos = 0; pos < number.length; pos++) {
+        product = number.digits[pos] * factor + carry;
+        number.digits[pos] = product % 10;
+        carry = product / 10;                          // الحمل
+    }
+    while (carry > 0) {
+        number.digits[number.length++] = carry % 10;
+        carry /= 10;
+    }
+    return number;
+}
+
+BigNum addBig(BigNum first, BigNum second) {
+    BigNum sum;
+    int pos, carry = 0, digit;
+    sum.length = first.length > second.length ? first.length : second.length;
+    for (pos = 0; pos < sum.length; pos++) {
+        digit = carry + (pos < first.length ? first.digits[pos] : 0)
+                      + (pos < second.length ? second.digits[pos] : 0);
+        sum.digits[pos] = digit % 10;
+        carry = digit / 10;
+    }
+    if (carry) sum.digits[sum.length++] = carry;
+    return sum;
+}
+
+void printBig(char label[], BigNum number) {
+    int pos;
+    printf("%s", label);
+    for (pos = number.length - 1; pos >= 0; pos--) putchar('0' + number.digits[pos]);
+    printf(" (%d digits)\n", number.length);
+}
+
+int main(void) {
+    BigNum fact = fromInt(1), power = fromInt(1);
+    int factor, step;
+    for (factor = 2; factor <= 30; factor++) fact = multiplySmall(fact, factor);
+    for (step = 0; step < 100; step++) power = multiplySmall(power, 2);
+    printBig("30!   = ", fact);
+    printBig("2^100 = ", power);
+    printBig("sum   = ", addBig(fact, power));
+    printBig("long max = ", fromInt(9223372036854775807L));
+    return 0;
+}
+
+@@
+title: انحدار متعدد بحل المعادلات الطبيعية
+level: hard
+domain: ds
+@ statement
+نتنبأ بالمبيعات الأسبوعية بدلالة ميزانية الإعلان والتخفيض: `sales = b0 + b1·ads + b2·discount`. عرّف هيكل `Matrix3` (3×4 موسعة) واكتب دوال `buildNormal` (تبني المعادلات الطبيعية `XᵀX b = Xᵀy`) و `solve` (غاوس) و `predict`، ثم احسب المعاملات والتنبؤ.
+@ steps
+- `XᵀX[row][col] = Σ feature[row] · feature[col]` حيث `feature = (1, ads, discount)`.
+- `Xᵀy[row] = Σ feature[row] · sales`.
+- حل جملة 3×3 بالحذف ثم التعويض التراجعي.
+@ flow
+call: system = buildNormal(weeks, 8)
+call: coeffs = solve(system)
+out: coeffs
+for: idx = 0 ; idx < 2 ; idx++
+  call: predict(coeffs, scenarios[idx])
+@ code
+#include <stdio.h>
+
+typedef struct { double ads, discount, sales; } Week;
+typedef struct { double cell[3][4]; } Matrix3;
+typedef struct { double coef[3]; } Model;
+
+Matrix3 buildNormal(Week weeks[], int size) {
+    Matrix3 system;
+    double feature[3];
+    int idx, row, col;
+    for (row = 0; row < 3; row++) for (col = 0; col < 4; col++) system.cell[row][col] = 0;
+    for (idx = 0; idx < size; idx++) {
+        feature[0] = 1; feature[1] = weeks[idx].ads; feature[2] = weeks[idx].discount;
+        for (row = 0; row < 3; row++) {
+            for (col = 0; col < 3; col++) system.cell[row][col] += feature[row] * feature[col];
+            system.cell[row][3] += feature[row] * weeks[idx].sales;   // X^T y
+        }
+    }
+    return system;
+}
+
+Model solve(Matrix3 system) {
+    Model model;
+    double factor, sum;
+    int pivot, row, col;
+    for (pivot = 0; pivot < 3; pivot++)                 // حذف غاوس
+        for (row = pivot + 1; row < 3; row++) {
+            factor = system.cell[row][pivot] / system.cell[pivot][pivot];
+            for (col = pivot; col < 4; col++) system.cell[row][col] -= factor * system.cell[pivot][col];
+        }
+    for (row = 2; row >= 0; row--) {                    // تعويض تراجعي
+        sum = system.cell[row][3];
+        for (col = row + 1; col < 3; col++) sum -= system.cell[row][col] * model.coef[col];
+        model.coef[row] = sum / system.cell[row][row];
+    }
+    return model;
+}
+
+double predict(Model model, double ads, double discount) {
+    return model.coef[0] + model.coef[1] * ads + model.coef[2] * discount;
+}
+
+int main(void) {
+    Week weeks[8] = {{10, 0, 205}, {15, 5, 290}, {8, 10, 230}, {20, 0, 320},
+                     {25, 10, 430}, {12, 15, 300}, {30, 5, 455}, {18, 20, 400}};
+    Model model = solve(buildNormal(weeks, 8));
+    double error = 0, diff;
+    int idx;
+    printf("sales = %.2f + %.2f * ads + %.2f * discount\n", model.coef[0], model.coef[1], model.coef[2]);
+    for (idx = 0; idx < 8; idx++) {
+        diff = weeks[idx].sales - predict(model, weeks[idx].ads, weeks[idx].discount);
+        error += diff * diff;
+    }
+    printf("Mean squared error: %.2f\n", error / 8);
+    printf("Forecast (ads 22, discount 10%%): %.1f\n", predict(model, 22, 10));
+    printf("Forecast (ads 35, discount 0%%):  %.1f\n", predict(model, 35, 0));
+    return 0;
+}

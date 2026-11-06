@@ -1,0 +1,1417 @@
+@@
+title: أول شجرة ثنائية للأقسام
+level: easy
+domain: ec
+@ statement
+عرّف عقدة شجرة ثنائية `Tree` (الاسم، ابن أيسر، ابن أيمن). ابنِ يدويًا شجرة أقسام صغيرة بـ `malloc`، ثم اعرضها **بالترتيب القبلي** (العقدة ثم اليسار ثم اليمين) مع إزاحة حسب العمق.
+@ steps
+- `newTree(name)` تحجز عقدة بابنين `NULL`.
+- `printPre(node, depth)`: نطبع ثم نستدعي على اليسار واليمين بعمق +1.
+@ flow
+do: بناء الشجرة يدويًا
+call: printPre(root, 0)
+do: تحرير العقد
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char name[14]; struct Tree *left, *right; } Tree;
+
+Tree *newTree(const char *name) {
+    Tree *node = malloc(sizeof(Tree));
+    int pos;
+    for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+    node->left = node->right = NULL;
+    return node;
+}
+
+void printPre(const Tree *node, int depth) {
+    if (node == NULL) return;
+    printf("%*s%s\n", 2 * depth, "", node->name);    // العقدة أولًا
+    printPre(node->left, depth + 1);
+    printPre(node->right, depth + 1);
+}
+
+void freeTree(Tree *node) {
+    if (node == NULL) return;
+    freeTree(node->left);
+    freeTree(node->right);
+    free(node);
+}
+
+int main(void) {
+    Tree *root = newTree("Store");
+    root->left = newTree("Electronics");
+    root->right = newTree("Home");
+    root->left->left = newTree("Phones");
+    root->left->right = newTree("Laptops");
+    root->right->left = newTree("Kitchen");
+    printPre(root, 0);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: طرق المرور الثلاث
+level: easy
+domain: ds
+@ statement
+لنفس الشجرة، اكتب المرور **القبلي** (عقدة، يسار، يمين)، و**الوسطي** (يسار، عقدة، يمين)، و**البعدي** (يسار، يمين، عقدة)، واعرض النتائج الثلاث لتلاحظ الفرق.
+@ steps
+- الدوال الثلاث متطابقة ما عدا موضع `printf` بالنسبة إلى الاستدعاءين العوديين.
+@ flow
+call: preorder(root)
+call: inorder(root)
+call: postorder(root)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = left; node->right = right;
+    return node;
+}
+
+void preorder(const Tree *node)  { if (node) { printf("%d ", node->code); preorder(node->left); preorder(node->right); } }
+void inorder(const Tree *node)   { if (node) { inorder(node->left); printf("%d ", node->code); inorder(node->right); } }
+void postorder(const Tree *node) { if (node) { postorder(node->left); postorder(node->right); printf("%d ", node->code); } }
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(50, newTree(30, newTree(20, NULL, NULL), newTree(40, NULL, NULL)),
+                             newTree(70, newTree(60, NULL, NULL), newTree(80, NULL, NULL)));
+    printf("preorder : "); preorder(root);  printf("\n");
+    printf("inorder  : "); inorder(root);   printf("\n");
+    printf("postorder: "); postorder(root); printf("\n");
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: عدد عقد الشجرة
+level: easy
+domain: ds
+@ statement
+اكتب دالة عودية `countNodes(node)` تعطي عدد عقد الشجرة: 0 للشجرة الفارغة، وإلا 1 + عقد اليسار + عقد اليمين. طبّقها على شجرة الأقسام وعلى كل فرع.
+@ steps
+- الحالة الأساسية `node == NULL`.
+- كل عقدة تُعد مرة واحدة.
+@ flow
+call: total = countNodes(root)
+call: leftCount = countNodes(root->left)
+call: rightCount = countNodes(root->right)
+out: total, leftCount, rightCount
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = left; node->right = right;
+    return node;
+}
+
+int countNodes(const Tree *node) {
+    if (node == NULL) return 0;
+    return 1 + countNodes(node->left) + countNodes(node->right);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(1, newTree(2, newTree(4, NULL, NULL), newTree(5, newTree(8, NULL, NULL), NULL)),
+                            newTree(3, NULL, newTree(6, NULL, newTree(7, NULL, NULL))));
+    printf("Total categories: %d\n", countNodes(root));
+    printf("Left branch: %d, right branch: %d\n", countNodes(root->left), countNodes(root->right));
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: ارتفاع شجرة الأقسام
+level: easy
+domain: ds
+@ statement
+**ارتفاع** الشجرة هو عدد العقد في أطول مسار من الجذر إلى ورقة (عدد مستويات القائمة المنسدلة). اكتب `height(node)` العودية = 1 + الأكبر بين ارتفاعي الفرعين.
+@ steps
+- الشجرة الفارغة ارتفاعها 0.
+- نحسب الارتفاعين ثم نأخذ الأكبر.
+@ flow
+if: node == NULL
+  out: 0
+else:
+  call: leftH = height(node->left)
+  call: rightH = height(node->right)
+  out: 1 + max(leftH, rightH)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = left; node->right = right;
+    return node;
+}
+
+int height(const Tree *node) {
+    int leftH, rightH;
+    if (node == NULL) return 0;
+    leftH = height(node->left);
+    rightH = height(node->right);
+    return 1 + (leftH > rightH ? leftH : rightH);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(1, newTree(2, newTree(4, NULL, NULL), newTree(5, newTree(8, newTree(9, NULL, NULL), NULL), NULL)),
+                            newTree(3, NULL, newTree(6, NULL, NULL)));
+    printf("Menu depth (height): %d levels\n", height(root));
+    printf("Left: %d, right: %d\n", height(root->left), height(root->right));
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: مجموع الأسعار في الشجرة
+level: easy
+domain: ec
+@ statement
+كل عقدة في شجرة الكتالوج تحمل سعر منتج. اكتب `sumPrices(node)` تعطي مجموع أسعار كل العقد، و`maxPrice(node)` تعطي أكبر سعر (شجرة عادية، ليست شجرة بحث).
+@ steps
+- المجموع: سعر العقدة + مجموع اليسار + مجموع اليمين.
+- الأكبر: نقارن سعر العقدة بأكبر سعر في كل فرع.
+@ flow
+call: total = sumPrices(root)
+call: best = maxPrice(root)
+out: total, best
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { double price; struct Tree *left, *right; } Tree;
+
+Tree *newTree(double price, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->price = price; node->left = left; node->right = right;
+    return node;
+}
+
+double sumPrices(const Tree *node) {
+    if (node == NULL) return 0;
+    return node->price + sumPrices(node->left) + sumPrices(node->right);
+}
+
+double maxPrice(const Tree *node) {
+    double best, side;
+    if (node == NULL) return 0;
+    best = node->price;
+    side = maxPrice(node->left);  if (side > best) best = side;
+    side = maxPrice(node->right); if (side > best) best = side;
+    return best;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(4500, newTree(1200, newTree(899, NULL, NULL), NULL),
+                               newTree(32000, newTree(450, NULL, NULL), newTree(89000, NULL, NULL)));
+    printf("Total: %.0f DA, most expensive: %.0f DA\n", sumPrices(root), maxPrice(root));
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: إدراج الأسعار في شجرة بحث ثنائية
+level: easy
+domain: ec
+@ statement
+في **شجرة البحث الثنائية** (BST): كل قيم الفرع الأيسر أصغر من العقدة، وكل قيم الأيمن أكبر. اكتب `insert(node, price)` العودية، أدرج أسعارًا غير مرتبة، ثم اعرضها **بالمرور الوسطي** لتظهر مرتبة.
+@ steps
+- شجرة فارغة: ننشئ العقدة ونعيدها.
+- السعر أصغر: ندرج في اليسار، وإلا في اليمين.
+- المرور الوسطي لشجرة بحث يعطي القيم مرتبة تصاعديًا.
+@ flow
+do: root = NULL
+for: idx = 0 ; idx < 8 ; idx++
+  call: root = insert(root, prices[idx])
+call: inorder(root)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { double price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, double price) {
+    if (node == NULL) {
+        node = malloc(sizeof(Tree));
+        node->price = price;
+        node->left = node->right = NULL;
+    } else if (price < node->price) {
+        node->left = insert(node->left, price);       // الأصغر يسارًا
+    } else {
+        node->right = insert(node->right, price);
+    }
+    return node;
+}
+
+void inorder(const Tree *node) {
+    if (node == NULL) return;
+    inorder(node->left);
+    printf("%.0f ", node->price);
+    inorder(node->right);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    double prices[8] = {4500, 1200, 32000, 899, 3200, 12500, 450, 89000};
+    Tree *root = NULL;
+    int idx;
+    for (idx = 0; idx < 8; idx++) root = insert(root, prices[idx]);
+    printf("Sorted by BST: ");
+    inorder(root);
+    printf("\nRoot: %.0f\n", root->price);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: البحث عن رمز في شجرة البحث
+level: easy
+domain: ec
+@ statement
+اكتب `search(node, code, &steps)` **تكرارية** (دون عودية) تبحث عن رمز منتج في شجرة بحث: في كل عقدة نذهب يسارًا أو يمينًا فقط. اعرض عدد العقد المزارة لكل بحث.
+@ stdin
+3310 7000
+@ steps
+- ما دام `node != NULL`: إذا ساوى الرمز نعيد العقدة، وإلا نختار الفرع.
+- عدد الخطوات لا يتجاوز ارتفاع الشجرة.
+@ flow
+in: code
+do: node = root ; steps = 0
+while: node != NULL && node->code != code
+  do: steps++
+  if: code < node->code
+    do: node = node->left
+  else:
+    do: node = node->right
+out: node != NULL, steps
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int code) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->code = code; node->left = node->right = NULL; }
+    else if (code < node->code) node->left = insert(node->left, code);
+    else node->right = insert(node->right, code);
+    return node;
+}
+
+Tree *search(Tree *node, int code, int *steps) {
+    *steps = 0;
+    while (node != NULL) {
+        (*steps)++;
+        if (code == node->code) return node;
+        node = code < node->code ? node->left : node->right;   // فرع واحد فقط
+    }
+    return NULL;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int codes[9] = {5120, 2045, 7781, 1001, 3310, 6400, 9002, 1500, 4400}, idx, code, steps;
+    Tree *root = NULL;
+    for (idx = 0; idx < 9; idx++) root = insert(root, codes[idx]);
+    for (idx = 0; idx < 2; idx++) {
+        scanf("%d", &code);
+        printf("Code %d: %s after %d node(s)\n", code,
+               search(root, code, &steps) != NULL ? "found" : "not found", steps);
+    }
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: أرخص وأغلى منتج في شجرة البحث
+level: easy
+domain: ec
+@ statement
+في شجرة البحث، **أصغر** قيمة هي أقصى عقدة على اليسار، و**أكبر** قيمة هي أقصى عقدة على اليمين. اكتب `minNode` و `maxNode` بحلقة بسيطة دون عودية.
+@ steps
+- `while (node->left != NULL) node = node->left;`.
+- لا حاجة لزيارة باقي الشجرة.
+@ flow
+do: low = root
+while: low->left != NULL
+  do: low = low->left
+do: high = root
+while: high->right != NULL
+  do: high = high->right
+out: low->price, high->price
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { double price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, double price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+Tree *minNode(Tree *node) { while (node->left != NULL) node = node->left; return node; }
+Tree *maxNode(Tree *node) { while (node->right != NULL) node = node->right; return node; }
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    double prices[8] = {4500, 1200, 32000, 899, 3200, 12500, 450, 89000};
+    Tree *root = NULL;
+    int idx;
+    for (idx = 0; idx < 8; idx++) root = insert(root, prices[idx]);
+    printf("Cheapest: %.0f DA, most expensive: %.0f DA\n", minNode(root)->price, maxNode(root)->price);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: عدد الأوراق في شجرة الأقسام
+level: easy
+domain: ds
+@ statement
+**الورقة** عقدة بلا أبناء (قسم نهائي يحتوي على منتجات). اكتب `countLeaves(node)` و `countInternal(node)` (العقد ذات ابن واحد على الأقل)، وتحقق أن مجموعهما يساوي عدد العقد.
+@ steps
+- ورقة: `left == NULL && right == NULL` → 1.
+- داخلية: 1 + داخليات الفرعين، والورقة تعطي 0.
+@ flow
+call: leaves = countLeaves(root)
+call: internal = countInternal(root)
+out: leaves, internal, leaves + internal
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = left; node->right = right;
+    return node;
+}
+
+int countLeaves(const Tree *node) {
+    if (node == NULL) return 0;
+    if (node->left == NULL && node->right == NULL) return 1;     // ورقة
+    return countLeaves(node->left) + countLeaves(node->right);
+}
+
+int countInternal(const Tree *node) {
+    if (node == NULL || (node->left == NULL && node->right == NULL)) return 0;
+    return 1 + countInternal(node->left) + countInternal(node->right);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(1, newTree(2, newTree(4, NULL, NULL), newTree(5, NULL, NULL)),
+                            newTree(3, newTree(6, newTree(8, NULL, NULL), NULL), newTree(7, NULL, NULL)));
+    int leaves = countLeaves(root), internal = countInternal(root);
+    printf("Leaf categories: %d, internal: %d, total: %d\n", leaves, internal, leaves + internal);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: تحرير الشجرة بالمرور البعدي
+level: easy
+domain: ec
+@ statement
+اكتب `freeTree(node)` التي تحرر كل العقد وتعد المحررة. لماذا يجب أن يكون المرور **بعديًا** (الأبناء قبل الأب)؟
+@ steps
+- إذا حررنا الأب أولًا لا يمكننا الوصول بعدها إلى `node->left` و `node->right`.
+- المرور البعدي يحرر الأبناء ثم الأب.
+@ flow
+if: node != NULL
+  call: freeTree(node->left)
+  call: freeTree(node->right)
+  do: free(node) ; freed++
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+int freed = 0;
+
+Tree *insert(Tree *node, int code) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->code = code; node->left = node->right = NULL; }
+    else if (code < node->code) node->left = insert(node->left, code);
+    else node->right = insert(node->right, code);
+    return node;
+}
+
+void freeTree(Tree *node) {
+    if (node == NULL) return;
+    freeTree(node->left);                 // الأبناء أولًا
+    freeTree(node->right);
+    printf("free %d\n", node->code);
+    free(node);                           // ثم الأب
+    freed++;
+}
+
+int main(void) {
+    int codes[6] = {50, 30, 70, 20, 40, 80}, idx;
+    Tree *root = NULL;
+    for (idx = 0; idx < 6; idx++) root = insert(root, codes[idx]);
+    freeTree(root);
+    root = NULL;
+    printf("%d nodes freed\n", freed);
+    return 0;
+}
+
+@@
+title: حذف منتج من شجرة البحث
+level: medium
+domain: ec
+@ statement
+اكتب `removeKey(node, price)` التي تحذف سعرًا من شجرة البحث مع المحافظة على خاصيتها. ثلاث حالات: (1) ورقة: نحذفها؛ (2) ابن واحد: نعوضها بابنها؛ (3) ابنان: ننسخ فيها **خلفها** (أصغر قيمة في الفرع الأيمن) ثم نحذف الخلف من الفرع الأيمن.
+@ steps
+- البحث العودي حتى العقدة، ثم معالجة الحالات الثلاث.
+- الدالة تعيد جذر الفرع بعد الحذف ليُربط بالأب.
+@ flow
+if: node == NULL
+  out: NULL
+else:
+  if: price != node->price
+    call: الحذف في الفرع المناسب
+  else:
+    if: node->left == NULL || node->right == NULL
+      do: child = الابن الموجود ; free(node) ; return child
+    else:
+      do: succ = أصغر عقدة في node->right
+      do: node->price = succ->price
+      call: node->right = removeKey(node->right, succ->price)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+Tree *removeKey(Tree *node, int price) {
+    Tree *child, *succ;
+    if (node == NULL) return NULL;
+    if (price < node->price) node->left = removeKey(node->left, price);
+    else if (price > node->price) node->right = removeKey(node->right, price);
+    else if (node->left == NULL || node->right == NULL) {      // 0 أو 1 ابن
+        child = node->left != NULL ? node->left : node->right;
+        free(node);
+        return child;
+    } else {                                                   // ابنان
+        for (succ = node->right; succ->left != NULL; succ = succ->left) {}
+        node->price = succ->price;                             // نسخ الخلف
+        node->right = removeKey(node->right, succ->price);
+    }
+    return node;
+}
+
+void inorder(const Tree *node) { if (node) { inorder(node->left); printf("%d ", node->price); inorder(node->right); } }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[9] = {4500, 1200, 32000, 899, 3200, 12500, 89000, 2000, 15000}, idx;
+    Tree *root = NULL;
+    for (idx = 0; idx < 9; idx++) root = insert(root, prices[idx]);
+    printf("start:          "); inorder(root); printf("\n");
+    root = removeKey(root, 899);   printf("remove leaf 899: "); inorder(root); printf("\n");
+    root = removeKey(root, 12500); printf("remove 1-child:  "); inorder(root); printf("\n");
+    root = removeKey(root, 4500);  printf("remove root:     "); inorder(root); printf("\n");
+    printf("new root: %d\n", root->price);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: المرور بالعرض مستوى بمستوى
+level: medium
+domain: ds
+@ statement
+اعرض شجرة الأقسام **مستوى بمستوى** (المرور بالعرض) باستعمال **طابور** من مؤشرات العقد، مع طباعة كل مستوى في سطر منفصل وعدد عقده.
+@ steps
+- نضع الجذر في الطابور.
+- لكل مستوى: نعرف عدد العقد الحالية في الطابور `levelSize`، ونخرجها كلها مع إدخال أبنائها.
+@ flow
+do: enqueue(root) ; level = 0
+while: الطابور غير فارغ
+  do: levelSize = rear - front
+  for: idx = 0 ; idx < levelSize ; idx++
+    do: node = dequeue
+    out: node->name
+    do: إدخال node->left و node->right إن وُجدا
+  do: level++
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char name[12]; struct Tree *left, *right; } Tree;
+
+Tree *newTree(const char *name, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    int pos;
+    for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+    node->left = left; node->right = right;
+    return node;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree("Store",
+        newTree("Tech", newTree("Phones", newTree("Android", NULL, NULL), NULL), newTree("Laptops", NULL, NULL)),
+        newTree("Home", newTree("Kitchen", NULL, NULL), newTree("Garden", NULL, newTree("Tools", NULL, NULL))));
+    Tree *queue[32], *node;
+    int front = 0, rear = 0, levelSize, idx, level = 0;
+    queue[rear++] = root;
+    while (front < rear) {
+        levelSize = rear - front;                    // عقد المستوى الحالي
+        printf("level %d (%d):", level, levelSize);
+        for (idx = 0; idx < levelSize; idx++) {
+            node = queue[front++];
+            printf(" %s", node->name);
+            if (node->left) queue[rear++] = node->left;
+            if (node->right) queue[rear++] = node->right;
+        }
+        printf("\n");
+        level++;
+    }
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: رسم الشجرة أفقيًا
+level: medium
+domain: ds
+@ statement
+اكتب `printSideways(node, depth)` تعرض شجرة البحث **مدورة 90 درجة**: الفرع الأيمن في الأعلى ثم العقدة ثم الأيسر، مع إزاحة 6 فراغات لكل مستوى. هكذا نرى بنية شجرة أسعار مبنية من مدخلات.
+@ stdin
+8
+50 30 70 20 40 60 80 35
+@ steps
+- مرور وسطي **معكوس** (يمين، عقدة، يسار).
+- الإزاحة `6 * depth` بـ `%*s`.
+@ flow
+if: node != NULL
+  call: printSideways(node->right, depth + 1)
+  out: إزاحة ثم node->price
+  call: printSideways(node->left, depth + 1)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void printSideways(const Tree *node, int depth) {
+    if (node == NULL) return;
+    printSideways(node->right, depth + 1);            // الأكبر في الأعلى
+    printf("%*s%d\n", 6 * depth, "", node->price);
+    printSideways(node->left, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = NULL;
+    int count, idx, price;
+    scanf("%d", &count);
+    for (idx = 0; idx < count; idx++) { scanf("%d", &price); root = insert(root, price); }
+    printSideways(root, 0);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: عدد المنتجات في مجال سعري
+level: medium
+domain: ec
+@ statement
+مرشح السعر في الموقع: كم منتجًا سعره بين `low` و `high`؟ اكتب `countRange(node, low, high)` تستغل خاصية شجرة البحث لـ **تقليم** الفروع: لا ننزل يسارًا إذا كان سعر العقدة أصغر من `low`، ولا يمينًا إذا كان أكبر من `high`. عدّ العقد المزارة.
+@ stdin
+1000 10000
+@ steps
+- إذا `node->price < low`: كل الفرع الأيسر أصغر أيضًا، نذهب يمينًا فقط.
+- إذا `node->price > high`: نذهب يسارًا فقط.
+- وإلا: العقدة داخل المجال، ونستكشف الفرعين.
+@ flow
+if: node == NULL
+  out: 0
+else:
+  if: node->price < low
+    call: countRange(node->right)
+  else:
+    if: node->price > high
+      call: countRange(node->left)
+    else:
+      call: 1 + countRange(node->left) + countRange(node->right)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+int visited = 0;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+int countRange(const Tree *node, int low, int high) {
+    if (node == NULL) return 0;
+    visited++;
+    if (node->price < low) return countRange(node->right, low, high);    // تقليم اليسار
+    if (node->price > high) return countRange(node->left, low, high);    // تقليم اليمين
+    return 1 + countRange(node->left, low, high) + countRange(node->right, low, high);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[15] = {8000, 3000, 20000, 1200, 5000, 12000, 45000, 450, 2000, 4100, 6500,
+                      9900, 15000, 32000, 89000};
+    Tree *root = NULL;
+    int idx, low, high, count;
+    for (idx = 0; idx < 15; idx++) root = insert(root, prices[idx]);
+    scanf("%d %d", &low, &high);
+    count = countRange(root, low, high);
+    printf("%d products between %d and %d DA (visited %d of 15 nodes)\n", count, low, high, visited);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: السعر رقم k في الترتيب
+level: medium
+domain: ds
+@ statement
+اكتب `kthSmallest(node, k)` تجد القيمة رقم `k` في الترتيب التصاعدي بالمرور الوسطي مع **عداد** يتوقف فور الوصول إلى `k` (دون زيارة باقي الشجرة). استعملها لإيجاد الوسيط والربيعين لأسعار السوق.
+@ steps
+- عداد عام يزداد عند زيارة كل عقدة في المرور الوسطي.
+- عندما يساوي `k` نحفظ القيمة ونوقف البحث (علم `found`).
+- الوسيط = العنصر رقم `(n + 1) / 2`.
+@ flow
+call: kthSmallest(node->left)
+do: counter++
+if: counter == k
+  do: result = node->price ; found = 1
+else:
+  call: kthSmallest(node->right)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+int counter, found, result;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void visit(const Tree *node, int rank) {
+    if (node == NULL || found) return;
+    visit(node->left, rank);
+    if (found) return;
+    if (++counter == rank) { result = node->price; found = 1; return; }   // توقف مبكر
+    visit(node->right, rank);
+}
+
+int kthSmallest(const Tree *root, int rank) {
+    counter = 0;
+    found = 0;
+    visit(root, rank);
+    return result;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[11] = {32000, 29500, 31000, 89000, 30500, 28900, 33000, 27500, 35000, 30000, 29900};
+    Tree *root = NULL;
+    int idx;
+    for (idx = 0; idx < 11; idx++) root = insert(root, prices[idx]);
+    printf("Q1 (3rd):     %d\n", kthSmallest(root, 3));
+    printf("Median (6th): %d\n", kthSmallest(root, 6));
+    printf("Q3 (9th):     %d\n", kthSmallest(root, 9));
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: أغلى منتج ضمن الميزانية
+level: medium
+domain: ec
+@ statement
+يعطي الزبون ميزانية، ونقترح **أغلى منتج لا يتجاوزها** (الأرضية) و**أرخص منتج يتجاوزها** (السقف). اكتب `floorPrice` و `ceilPrice` في شجرة البحث بحلقة واحدة لكل منهما.
+@ stdin
+3 5000 450 100000
+@ steps
+- الأرضية: إذا كان سعر العقدة ≤ الميزانية فهو مرشح ونذهب يمينًا (قد نجد أقرب)، وإلا يسارًا.
+- السقف: العكس.
+- -1 إذا لم يوجد.
+@ flow
+do: best = -1 ; node = root
+while: node != NULL
+  if: node->price <= budget
+    do: best = node->price ; node = node->right
+  else:
+    do: node = node->left
+out: best
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+int floorPrice(const Tree *node, int budget) {
+    int best = -1;
+    while (node != NULL) {
+        if (node->price <= budget) { best = node->price; node = node->right; }   // مرشح، نبحث عن أقرب
+        else node = node->left;
+    }
+    return best;
+}
+
+int ceilPrice(const Tree *node, int budget) {
+    int best = -1;
+    while (node != NULL) {
+        if (node->price >= budget) { best = node->price; node = node->left; }
+        else node = node->right;
+    }
+    return best;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[9] = {4500, 1200, 32000, 899, 3200, 12500, 450, 89000, 6800}, idx, count, budget;
+    Tree *root = NULL;
+    for (idx = 0; idx < 9; idx++) root = insert(root, prices[idx]);
+    scanf("%d", &count);
+    for (idx = 0; idx < count; idx++) {
+        scanf("%d", &budget);
+        printf("budget %6d: best under %6d, next above %6d\n", budget,
+               floorPrice(root, budget), ceilPrice(root, budget));
+    }
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: التحقق من صحة شجرة البحث
+level: medium
+domain: ds
+@ statement
+بعد تعديل يدوي على الفهرس، نتحقق أن الشجرة ما زالت **شجرة بحث صحيحة**. الاختبار المحلي (الأب أكبر من ابنه الأيسر فقط) غير كافٍ. اكتب `isValid(node, low, high)` التي تمرر **المجال المسموح** لكل فرع.
+@ steps
+- الجذر مسموح في `(-∞, +∞)`.
+- الفرع الأيسر لعقدة قيمتها `v` مسموح في `(low, v)`، والأيمن في `(v, high)`.
+- مثال: في الشجرة الثانية العقدة 35 أكبر من أبيها 20 (فينجح الاختبار المحلي)، لكنها في الفرع الأيسر لـ 30 فيجب أن تكون أصغر من 30.
+@ flow
+if: node == NULL
+  out: 1
+else:
+  if: node->price <= low || node->price >= high
+    out: 0
+  else:
+    call: isValid(node->left, low, node->price) && isValid(node->right, node->price, high)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int price, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->price = price; node->left = left; node->right = right;
+    return node;
+}
+
+int isValid(const Tree *node, long low, long high) {
+    if (node == NULL) return 1;
+    if (node->price <= low || node->price >= high) return 0;     // خارج المجال المسموح
+    return isValid(node->left, low, node->price) && isValid(node->right, node->price, high);
+}
+
+int localCheck(const Tree *node) {                                // اختبار ناقص
+    if (node == NULL) return 1;
+    if (node->left && node->left->price > node->price) return 0;
+    if (node->right && node->right->price < node->price) return 0;
+    return localCheck(node->left) && localCheck(node->right);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *good = newTree(30, newTree(20, newTree(10, NULL, NULL), newTree(25, NULL, NULL)), newTree(40, NULL, NULL));
+    Tree *bad = newTree(30, newTree(20, newTree(10, NULL, NULL), newTree(35, NULL, NULL)), newTree(40, NULL, NULL));
+    printf("tree 1: local %s, full %s\n", localCheck(good) ? "ok" : "bad", isValid(good, -1000000, 1000000) ? "VALID" : "INVALID");
+    printf("tree 2: local %s, full %s\n", localCheck(bad) ? "ok" : "bad", isValid(bad, -1000000, 1000000) ? "VALID" : "INVALID");
+    freeTree(good);
+    freeTree(bad);
+    return 0;
+}
+
+@@
+title: أقرب سلف مشترك لسعرين
+level: medium
+domain: ds
+@ statement
+في شجرة البحث، **أقرب سلف مشترك** (LCA) لقيمتين هو أول عقدة تقع قيمتها بينهما عند النزول من الجذر. اكتب `lowestCommon(root, first, second)` بحلقة، واستعملها لمعرفة "نقطة الانقسام" بين منتجين في فهرس الأسعار، مع المسافة بينهما (عدد الروابط).
+@ steps
+- إذا كانت القيمتان أصغر من العقدة: نذهب يسارًا؛ أكبر: يمينًا؛ وإلا فالعقدة هي الجواب.
+- المسافة = عمق الأولى + عمق الثانية - 2 × عمق السلف.
+@ flow
+do: node = root
+while: node != NULL
+  if: first < node->price && second < node->price
+    do: node = node->left
+  else:
+    if: first > node->price && second > node->price
+      do: node = node->right
+    else:
+      out: node
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+const Tree *lowestCommon(const Tree *node, int first, int second) {
+    while (node != NULL) {
+        if (first < node->price && second < node->price) node = node->left;
+        else if (first > node->price && second > node->price) node = node->right;
+        else return node;                             // تنفصل القيمتان هنا
+    }
+    return NULL;
+}
+
+int depthOf(const Tree *node, int price) {
+    int depth = 0;
+    while (node != NULL && node->price != price) { node = price < node->price ? node->left : node->right; depth++; }
+    return depth;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[11] = {8000, 3000, 20000, 1200, 5000, 12000, 45000, 450, 2000, 4100, 15000};
+    int pairs[3][2] = {{450, 2000}, {4100, 15000}, {12000, 15000}}, idx;
+    Tree *root = NULL;
+    const Tree *common;
+    for (idx = 0; idx < 11; idx++) root = insert(root, prices[idx]);
+    for (idx = 0; idx < 3; idx++) {
+        common = lowestCommon(root, pairs[idx][0], pairs[idx][1]);
+        printf("LCA(%d, %d) = %d, distance %d\n", pairs[idx][0], pairs[idx][1], common->price,
+               depthOf(root, pairs[idx][0]) + depthOf(root, pairs[idx][1]) - 2 * depthOf(root, common->price));
+    }
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: الشجرة المرآة
+level: medium
+domain: ds
+@ statement
+اكتب `mirror(node)` تقلب الشجرة **في مكانها** بتبديل الابنين في كل عقدة. طبّقها على شجرة بحث وبيّن أن المرور الوسطي يصبح **تنازليًا**، ثم أعدها كما كانت بنفس الدالة.
+@ steps
+- نبدل `left` و `right` ثم نستدعي على الفرعين.
+- المرآة مرتين تعيد الأصل.
+@ flow
+if: node != NULL
+  do: tmp = node->left ; node->left = node->right ; node->right = tmp
+  call: mirror(node->left)
+  call: mirror(node->right)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void mirror(Tree *node) {
+    Tree *tmp;
+    if (node == NULL) return;
+    tmp = node->left;                 // تبديل الابنين
+    node->left = node->right;
+    node->right = tmp;
+    mirror(node->left);
+    mirror(node->right);
+}
+
+void inorder(const Tree *node) { if (node) { inorder(node->left); printf("%d ", node->price); inorder(node->right); } }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[7] = {4500, 1200, 32000, 899, 3200, 12500, 89000}, idx;
+    Tree *root = NULL;
+    for (idx = 0; idx < 7; idx++) root = insert(root, prices[idx]);
+    printf("original: "); inorder(root); printf("\n");
+    mirror(root);
+    printf("mirror:   "); inorder(root); printf("\n");
+    mirror(root);
+    printf("back:     "); inorder(root); printf("\n");
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: هل الشجرة متوازنة
+level: medium
+domain: ds
+@ statement
+شجرة البحث المبنية من أسعار مدخلة **مرتبة** تصبح سلسلة طويلة وبطيئة. اكتب `checkBalance(node)` التي تعيد الارتفاع إذا كانت الشجرة **متوازنة** (فرق ارتفاعي الفرعين ≤ 1 في كل عقدة) و -1 وإلا، بمرور واحد. قارن شجرة من مدخلات مخلوطة وأخرى من مدخلات مرتبة.
+@ steps
+- نحسب ارتفاع الفرعين عوديًا؛ إذا كان أحدهما -1 ننشر -1.
+- إذا تجاوز الفرق 1 نعيد -1، وإلا `1 + max`.
+@ flow
+if: node == NULL
+  out: 0
+else:
+  call: leftH = checkBalance(node->left)
+  call: rightH = checkBalance(node->right)
+  if: leftH < 0 || rightH < 0 || |leftH - rightH| > 1
+    out: -1
+  else:
+    out: 1 + max(leftH, rightH)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+int checkBalance(const Tree *node) {
+    int leftH, rightH, diff;
+    if (node == NULL) return 0;
+    leftH = checkBalance(node->left);
+    rightH = checkBalance(node->right);
+    diff = leftH - rightH;
+    if (leftH < 0 || rightH < 0 || diff > 1 || diff < -1) return -1;   // غير متوازنة
+    return 1 + (leftH > rightH ? leftH : rightH);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int mixed[7] = {4000, 2000, 6000, 1000, 3000, 5000, 7000};
+    int sorted[7] = {1000, 2000, 3000, 4000, 5000, 6000, 7000};
+    Tree *first = NULL, *second = NULL;
+    int idx, result;
+    for (idx = 0; idx < 7; idx++) { first = insert(first, mixed[idx]); second = insert(second, sorted[idx]); }
+    result = checkBalance(first);
+    printf("mixed input:  %s (height %d)\n", result >= 0 ? "balanced" : "unbalanced", result);
+    result = checkBalance(second);
+    printf("sorted input: %s\n", result >= 0 ? "balanced" : "unbalanced (a chain of 7 nodes)");
+    freeTree(first);
+    freeTree(second);
+    return 0;
+}
+
+@@
+title: مسار حزمة بمجموع محدد
+level: medium
+domain: ec
+@ statement
+شجرة اقتراحات المنتجات: من كل منتج يمكن الانتقال إلى أحد اقتراحين. هل يوجد **مسار من الجذر إلى ورقة** مجموع أسعاره يساوي ميزانية الحزمة بالضبط؟ اكتب `hasPathSum(node, remaining, path, depth)` التي تعرض المسار إن وُجد.
+@ stdin
+9700
+@ steps
+- ننقص سعر العقدة من المتبقي ونحفظها في `path[depth]`.
+- في ورقة: نجاح إذا أصبح المتبقي 0.
+- نجرب اليسار ثم اليمين.
+@ flow
+in: budget
+if: node == NULL
+  out: 0
+else:
+  do: path[depth] = node->price ; remaining -= node->price
+  if: ورقة
+    out: remaining == 0
+  else:
+    call: hasPathSum(left) || hasPathSum(right)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int price, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->price = price; node->left = left; node->right = right;
+    return node;
+}
+
+int path[20];
+
+int hasPathSum(const Tree *node, int remaining, int depth) {
+    int idx;
+    if (node == NULL) return 0;
+    path[depth] = node->price;
+    remaining -= node->price;
+    if (node->left == NULL && node->right == NULL) {           // ورقة
+        if (remaining != 0) return 0;
+        printf("Bundle:");
+        for (idx = 0; idx <= depth; idx++) printf(" %d", path[idx]);
+        printf("\n");
+        return 1;
+    }
+    return hasPathSum(node->left, remaining, depth + 1) || hasPathSum(node->right, remaining, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(5000, newTree(3200, newTree(1500, NULL, NULL), newTree(450, NULL, NULL)),
+                               newTree(4100, newTree(600, NULL, NULL), newTree(2200, newTree(899, NULL, NULL), NULL)));
+    int budget;
+    scanf("%d", &budget);
+    if (!hasPathSum(root, budget, 0)) printf("No bundle for %d DA\n", budget);
+    if (!hasPathSum(root, 12000, 0)) printf("No bundle for 12000 DA\n");
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: كل قواعد شجرة القرار
+level: medium
+domain: ds
+@ statement
+شجرة قرار التخفيض: كل عقدة داخلية سؤال، وكل ورقة قرار. اكتب `printRules(node, path, depth)` التي تعرض **كل المسارات** من الجذر إلى الأوراق كقواعد "إذا ... و ... إذن ...". العقدة تحمل نصًا، والابن الأيسر = "نعم"، والأيمن = "لا".
+@ steps
+- نخزن في `path[depth]` نص السؤال مع الإجابة (نعم/لا) قبل النزول.
+- في الورقة نطبع كل الشروط ثم القرار.
+@ flow
+if: ورقة
+  out: كل شروط path ثم node->text
+else:
+  do: answers[depth] = 'Y'
+  call: printRules(node->left, depth + 1)
+  do: answers[depth] = 'N'
+  call: printRules(node->right, depth + 1)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { const char *text; struct Tree *left, *right; } Tree;
+
+Tree *newTree(const char *text, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->text = text; node->left = left; node->right = right;
+    return node;
+}
+
+const Tree *steps[10];
+char answers[10];
+int ruleCount = 0;
+
+void printRules(const Tree *node, int depth) {
+    int idx;
+    if (node->left == NULL && node->right == NULL) {          // ورقة: قرار
+        printf("R%d: IF", ++ruleCount);
+        for (idx = 0; idx < depth; idx++)
+            printf("%s %s%s", idx ? " AND" : "", answers[idx] == 'N' ? "NOT " : "", steps[idx]->text);
+        printf(" THEN %s\n", node->text);
+        return;
+    }
+    steps[depth] = node;
+    answers[depth] = 'Y';
+    printRules(node->left, depth + 1);
+    answers[depth] = 'N';
+    printRules(node->right, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree("loyal",
+        newTree("cart>10000", newTree("15% off", NULL, NULL), newTree("5% off", NULL, NULL)),
+        newTree("first_order", newTree("free shipping", NULL, NULL),
+                newTree("cart>20000", newTree("5% off", NULL, NULL), newTree("no discount", NULL, NULL))));
+    printRules(root, 0);
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: شجرة متوازنة من قائمة مرتبة
+level: medium
+domain: ec
+@ statement
+لدينا كتالوج **مرتب** حسب الرمز. الإدراج المتتالي يعطي سلسلة. اكتب `buildBalanced(codes, low, high)` التي تجعل العنصر الأوسط جذرًا، وتبني الفرعين عوديًا من النصفين، فتعطي شجرة **بأقل ارتفاع ممكن**. قارن الارتفاع بالبناء بالإدراج.
+@ steps
+- `middle = (low + high) / 2` يصبح الجذر.
+- اليسار من `[low, middle-1]` واليمين من `[middle+1, high]`.
+- الارتفاع ≈ `log2(n) + 1`.
+@ flow
+if: low > high
+  out: NULL
+else:
+  do: middle = (low + high) / 2 ; node = newTree(codes[middle])
+  call: node->left = buildBalanced(codes, low, middle - 1)
+  call: node->right = buildBalanced(codes, middle + 1, high)
+  out: node
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = node->right = NULL;
+    return node;
+}
+
+Tree *buildBalanced(const int *codes, int low, int high) {
+    Tree *node;
+    int middle;
+    if (low > high) return NULL;
+    middle = (low + high) / 2;
+    node = newTree(codes[middle]);                       // الأوسط جذرًا
+    node->left = buildBalanced(codes, low, middle - 1);
+    node->right = buildBalanced(codes, middle + 1, high);
+    return node;
+}
+
+Tree *insert(Tree *node, int code) {
+    if (node == NULL) return newTree(code);
+    if (code < node->code) node->left = insert(node->left, code);
+    else node->right = insert(node->right, code);
+    return node;
+}
+
+int height(const Tree *node) {
+    int leftH, rightH;
+    if (node == NULL) return 0;
+    leftH = height(node->left); rightH = height(node->right);
+    return 1 + (leftH > rightH ? leftH : rightH);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int codes[15], idx;
+    Tree *balanced, *chain = NULL;
+    for (idx = 0; idx < 15; idx++) codes[idx] = 1001 + idx * 7;
+    balanced = buildBalanced(codes, 0, 14);
+    for (idx = 0; idx < 15; idx++) chain = insert(chain, codes[idx]);
+    printf("15 sorted codes\nbalanced build: root %d, height %d\n", balanced->code, height(balanced));
+    printf("insert one by one: root %d, height %d\n", chain->code, height(chain));
+    freeTree(balanced);
+    freeTree(chain);
+    return 0;
+}
+
+@@
+title: شجرة العبارة لحساب السعر
+level: medium
+domain: ec
+@ statement
+صيغة السعر `(price - discount) * qty + shipping` تُمثل **بشجرة عبارة**: العقد الداخلية عمليات (`+ - * /`) والأوراق أعداد. اكتب `evaluate(node)` العودية، و `printInfix(node)` التي تعيد كتابة العبارة بالأقواس، ثم احسب السعر لعدة كميات بتغيير ورقة واحدة.
+@ steps
+- ورقة: نعيد قيمتها.
+- عقدة عملية: نحسب الفرعين ثم نطبق العملية.
+- `printInfix`: `(` يسار عملية يمين `)`.
+@ flow
+if: node->op == 0
+  out: node->value
+else:
+  call: left = evaluate(node->left)
+  call: right = evaluate(node->right)
+  out: left op right
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char op; double value; struct Tree *left, *right; } Tree;
+
+Tree *leaf(double value) {
+    Tree *node = malloc(sizeof(Tree));
+    node->op = 0; node->value = value; node->left = node->right = NULL;
+    return node;
+}
+
+Tree *operation(char op, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->op = op; node->value = 0; node->left = left; node->right = right;
+    return node;
+}
+
+double evaluate(const Tree *node) {
+    double left, right;
+    if (node->op == 0) return node->value;                 // ورقة
+    left = evaluate(node->left);
+    right = evaluate(node->right);
+    switch (node->op) {
+        case '+': return left + right;
+        case '-': return left - right;
+        case '*': return left * right;
+        default:  return left / right;
+    }
+}
+
+void printInfix(const Tree *node) {
+    if (node->op == 0) { printf("%g", node->value); return; }
+    printf("(");
+    printInfix(node->left);
+    printf(" %c ", node->op);
+    printInfix(node->right);
+    printf(")");
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *qty = leaf(1);
+    Tree *root = operation('+', operation('*', operation('-', leaf(4500), leaf(500)), qty), leaf(400));
+    int count;
+    printInfix(root);
+    printf("\n");
+    for (count = 1; count <= 4; count++) {
+        qty->value = count;                                    // نغير الورقة فقط
+        printf("qty %d -> %.0f DA\n", count, evaluate(root));
+    }
+    freeTree(root);
+    return 0;
+}
+
+@@
+title: شجرة بحث لأسماء المنتجات
+level: medium
+domain: ec
+@ statement
+ابنِ شجرة بحث **مفاتيحها نصوص** (أسماء المنتجات) بمقارنة أبجدية يدوية، مع السعر في كل عقدة. اعرض الكتالوج أبجديًا، وابحث عن أسماء، واعرض كل الأسماء التي تبدأ **ببادئة** معينة (مع تقليم الفروع غير المعنية).
+@ stdin
+Mo
+@ steps
+- `compareText` تحدد الاتجاه في الإدراج والبحث.
+- البادئة: نزور عقدة إذا كان مجال اسمها يمكن أن يحتوي على البادئة؛ المرور الوسطي يعطي النتائج مرتبة.
+@ flow
+for: idx = 0 ; idx < 8 ; idx++
+  call: root = insert(root, names[idx], prices[idx])
+call: inorder(root)
+in: prefix
+call: printPrefix(root, prefix)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char name[16]; double price; struct Tree *left, *right; } Tree;
+
+int compareText(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first - *second;
+}
+
+int startsWith(const char *text, const char *prefix) {
+    while (*prefix != '\0') if (*text++ != *prefix++) return 0;
+    return 1;
+}
+
+Tree *insert(Tree *node, const char *name, double price) {
+    int pos;
+    if (node == NULL) {
+        node = malloc(sizeof(Tree));
+        for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+        node->price = price;
+        node->left = node->right = NULL;
+    } else if (compareText(name, node->name) < 0) node->left = insert(node->left, name, price);
+    else node->right = insert(node->right, name, price);
+    return node;
+}
+
+void inorder(const Tree *node) { if (node) { inorder(node->left); printf("%s ", node->name); inorder(node->right); } }
+
+void printPrefix(const Tree *node, const char *prefix) {
+    if (node == NULL) return;
+    if (compareText(prefix, node->name) < 0) printPrefix(node->left, prefix);    // قد توجد يسارًا
+    if (startsWith(node->name, prefix)) printf("  %s %.0f\n", node->name, node->price);
+    if (startsWith(node->name, prefix) || compareText(node->name, prefix) < 0) printPrefix(node->right, prefix);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    const char *names[8] = {"Monitor", "Cable", "Mouse", "Laptop", "Webcam", "Modem", "Hub", "Keyboard"};
+    double prices[8] = {32000, 450, 1500, 89000, 4100, 6200, 3100, 3200};
+    Tree *root = NULL;
+    char prefix[16];
+    int idx;
+    for (idx = 0; idx < 8; idx++) root = insert(root, names[idx], prices[idx]);
+    printf("A-Z: "); inorder(root); printf("\n");
+    scanf("%15s", prefix);
+    printf("Starting with \"%s\":\n", prefix);
+    printPrefix(root, prefix);
+    freeTree(root);
+    return 0;
+}

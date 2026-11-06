@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int capacity = 2, count = 0, idx, copies = 0;
+    double *data = malloc(capacity * sizeof(double)), *bigger, value, total = 0;
+    if (data == NULL) return 1;
+    scanf("%lf", &value);
+    while (value != -1) {
+        if (count == capacity) {                       // الجدول ممتلئ
+            bigger = malloc(2 * capacity * sizeof(double));
+            if (bigger == NULL) { free(data); return 1; }
+            for (idx = 0; idx < count; idx++) bigger[idx] = data[idx];
+            copies += count;
+            free(data);                                // نحرر القديم
+            data = bigger;
+            capacity *= 2;
+            printf("grow -> capacity %d\n", capacity);
+        }
+        data[count++] = value;
+        scanf("%lf", &value);
+    }
+    for (idx = 0; idx < count; idx++) total += data[idx];
+    printf("%d sales, capacity %d, %d copies, total %.0f\n", count, capacity, copies, total);
+    free(data);
+    return 0;
+}

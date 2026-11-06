@@ -1,0 +1,35 @@
+#include <stdio.h>
+
+#define NB 4
+
+int coins[NB] = {25, 10, 7, 1};
+int memo[200];
+
+int minCoins(int amount) {
+    int idx, candidate, best = 100000;
+    if (amount == 0) return 0;
+    if (memo[amount] > 0) return memo[amount];
+    for (idx = 0; idx < NB; idx++)
+        if (coins[idx] <= amount) {
+            candidate = 1 + minCoins(amount - coins[idx]);   // نجرب كل قطعة
+            if (candidate < best) best = candidate;
+        }
+    memo[amount] = best;
+    return best;
+}
+
+int greedy(int amount) {
+    int idx, count = 0;
+    for (idx = 0; idx < NB; idx++)
+        while (amount >= coins[idx]) { amount -= coins[idx]; count++; }
+    return count;
+}
+
+int main(void) {
+    int amount, query;
+    for (query = 0; query < 3; query++) {
+        scanf("%d", &amount);
+        printf("%3d DA: optimal %d coins, greedy %d coins\n", amount, minCoins(amount), greedy(amount));
+    }
+    return 0;
+}

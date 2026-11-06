@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int textLength(const char *text) {
+    const char *walk = text;
+    while (*walk != '\0')
+        walk++;                       // نتقدم حتى النهاية
+    return (int)(walk - text);        // الفرق = عدد الحروف
+}
+
+int main(void) {
+    const char *names[3] = {"Wireless Mouse", "USB-C Hub", "4K Monitor 27 inch"};
+    int idx;
+    for (idx = 0; idx < 3; idx++)
+        printf("%-20s %d chars\n", names[idx], textLength(names[idx]));
+    return 0;
+}

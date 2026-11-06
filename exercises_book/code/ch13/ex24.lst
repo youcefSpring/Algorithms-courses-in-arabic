@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char op; double value; struct Tree *left, *right; } Tree;
+
+Tree *leaf(double value) {
+    Tree *node = malloc(sizeof(Tree));
+    node->op = 0; node->value = value; node->left = node->right = NULL;
+    return node;
+}
+
+Tree *operation(char op, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->op = op; node->value = 0; node->left = left; node->right = right;
+    return node;
+}
+
+double evaluate(const Tree *node) {
+    double left, right;
+    if (node->op == 0) return node->value;                 (*@\cmt{ورقة}@*)
+    left = evaluate(node->left);
+    right = evaluate(node->right);
+    switch (node->op) {
+        case '+': return left + right;
+        case '-': return left - right;
+        case '*': return left * right;
+        default:  return left / right;
+    }
+}
+
+void printInfix(const Tree *node) {
+    if (node->op == 0) { printf("%g", node->value); return; }
+    printf("(");
+    printInfix(node->left);
+    printf(" %c ", node->op);
+    printInfix(node->right);
+    printf(")");
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *qty = leaf(1);
+    Tree *root = operation('+', operation('*', operation('-', leaf(4500), leaf(500)), qty), leaf(400));
+    int count;
+    printInfix(root);
+    printf("\n");
+    for (count = 1; count <= 4; count++) {
+        qty->value = count;                                    (*@\cmt{نغير الورقة فقط}@*)
+        printf("qty %d -> %.0f DA\n", count, evaluate(root));
+    }
+    freeTree(root);
+    return 0;
+}

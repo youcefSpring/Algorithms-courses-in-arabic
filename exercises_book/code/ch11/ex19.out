@@ -1,0 +1,4 @@
+currency       = DZD
+vat            = 19
+free_shipping  = 10000
+theme          = (default) light

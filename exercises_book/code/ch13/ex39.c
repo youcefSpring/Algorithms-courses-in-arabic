@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[10] = {4500, 1200, 32000, 899, 3200, 12500, 89000, 450, 2000, 6800}, idx, top = 0, peak = 0;
+    Tree *root = NULL, *node, *stack[20];
+    for (idx = 0; idx < 10; idx++) root = insert(root, prices[idx]);
+    node = root;
+    while (node != NULL || top > 0) {
+        while (node != NULL) {                 // ننزل يسارًا
+            stack[top++] = node;
+            if (top > peak) peak = top;
+            node = node->left;
+        }
+        node = stack[--top];                   // أصغر عقدة لم تُزر
+        printf("%d ", node->price);
+        node = node->right;
+    }
+    printf("\nmax stack size: %d\n", peak);
+    freeTree(root);
+    return 0;
+}

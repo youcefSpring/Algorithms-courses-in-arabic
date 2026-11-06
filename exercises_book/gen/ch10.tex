@@ -1,0 +1,2556 @@
+\clearpage
+\levelsection{1}{التمارين السهلة}
+
+\exhead{10.1}{1}{عنوان السعر وقيمته}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+صرّح بمتغير \code{price} ومؤشر \code{ptr} يشير إليه. اعرض القيمة عبر المتغير وعبر المؤشر (\code{*ptr})، ثم عدّل السعر \textbf{عبر المؤشر} وتحقق أن المتغير تغيّر.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{ptr = \&price;} يخزن عنوان المتغير.
+\item \code{*ptr} يعني "القيمة الموجودة في العنوان": القراءة والكتابة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex01.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex01.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.70cm] (n2) at (0.00,-1.90) {\fc{price = 4500}\\\fc{ptr = \&price}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fio, text width=3.70cm] (n3) at (0.00,-3.41) {\textbf{اكتب}\ \fc{price, *ptr}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=3.70cm] (n4) at (0.00,-4.69) {\fc{*ptr = *ptr * 0.9}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=2.50cm] (n5) at (0.00,-5.97) {\textbf{اكتب}\ \fc{price}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-7.25) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.2}{1}{تبديل سعرين بالمؤشرات}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{swap(first, second)} تستقبل \textbf{مؤشرين} وتبدل القيمتين اللتين يشيران إليهما، واستعملها لترتيب سعرين تصاعديًا. لماذا لا تنجح الدالة إذا استقبلت القيم مباشرة؟
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item التمرير بالقيمة ينسخ المتغيرات: التبديل يحدث على النسخ فقط.
+\item بالمؤشرات: الدالة تصل إلى المتغيرات الأصلية \code{*first} و \code{*second}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex02.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex02.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex02.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{low, high}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fdec, text width=2.25cm] (d3) at (0.00,-3.43) {\fc{low > high}};
+\node[fcall, text width=3.70cm] (n5) at (0.00,-5.20) {\fc{swap(\&low, \&high)}};
+\coordinate (m4) at (0.00,-5.89);
+\draw[sahm] (d3.south) -- (n5.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d3.south) {نعم};
+\draw[fline] (n5.south) -- (m4);
+\draw[sahm] (d3.east) -- (2.50,-3.43) -- (2.50,-5.89) -- (m4);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d3.east) {لا};
+\draw[sahm] (n2.south) -- (d3.north);
+\node[fio, text width=3.30cm] (n6) at (0.00,-6.78) {\textbf{اكتب}\ \fc{low, high}};
+\draw[sahm] (m4) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.06) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.3}{1}{إنقاص المخزون عبر مؤشر}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{sell(stock, qty)} تستقبل \textbf{مؤشرًا} على المخزون وتنقصه بالكمية المباعة إذا كان كافيًا، وتعيد \en{1} أو \en{0}. طبّقها على سلسلة عمليات بيع.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{if (*stock < qty) return 0;} ثم \code{*stock -= qty;}.
+\item الاستدعاء بـ \code{sell(\&stock, 3)}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex03.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex03.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.65cm] (d6) at (0.00,-3.65) {\fc{idx < 4}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fcall, text width=6.30cm] (n7) at (0.00,-5.27) {\fc{ok = sell(\&stock, orders[idx])}};
+\node[fio, text width=5.90cm] (n8) at (0.00,-6.55) {\textbf{اكتب}\ \fc{orders[idx], ok, stock}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fproc, text width=1.30cm] (n9) at (0.00,-7.83) {\fc{idx++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-8.57) -- (-3.82,-8.57) -- (-3.82,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-9.02);
+\draw[fline] (d6.east) -- (3.82,-3.65) -- (3.82,-9.02) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fterm] (n10) at (0.00,-9.91) {نهاية};
+\draw[sahm] (e5) -- (n10.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.4}{1}{المرور على جدول بحساب المؤشرات}{\faTag\ علم البيانات}
+\begin{statement}
+احسب مجموع المبيعات اليومية بالمرور على الجدول \textbf{بمؤشر} يتقدم خانة بخانة (\code{ptr++}) بدل الفهرس، وتوقف عندما يصل المؤشر إلى نهاية الجدول \code{sales + 7}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item اسم الجدول \code{sales} هو عنوان أول عنصر.
+\item \code{ptr + 1} يشير إلى العنصر التالي (يتقدم بحجم \code{double}).
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex04.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex04.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=3.30cm] (n2) at (0.00,-1.90) {\fc{total = 0}\\\fc{end = sales + 7}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.50cm] (n3) at (0.00,-3.41) {\fc{ptr = sales}};
+\coordinate (t4) at (0.00,-4.30);
+\coordinate (j5) at (0.00,-4.50);
+\node[fdec, text width=2.05cm] (d7) at (0.00,-5.48) {\fc{ptr < end}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fproc, text width=4.30cm] (n8) at (0.00,-7.20) {\fc{total = total + *ptr}};
+\node[fproc, text width=1.30cm] (n9) at (0.00,-8.48) {\fc{ptr++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-9.22) -- (-2.75,-9.22) -- (-2.75,-4.50) -- (j5);
+\coordinate (e6) at (0.00,-9.67);
+\draw[fline] (d7.east) -- (2.75,-5.48) -- (2.75,-9.67) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.50cm] (n10) at (0.00,-10.56) {\textbf{اكتب}\ \fc{total}};
+\draw[sahm] (e6) -- (n10.north);
+\node[fterm] (n11) at (0.00,-11.84) {نهاية};
+\draw[sahm] (n10.south) -- (n11.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.5}{1}{دالة تعيد الأصغر والأكبر}{\faTag\ علم البيانات}
+\begin{statement}
+الدالة تعيد قيمة واحدة فقط، لكن يمكنها \textbf{كتابة} نتائج إضافية عبر مؤشرات. اكتب دالة \code{range(values, size, low, high)} تكتب أصغر وأكبر قيمة في \code{*low} و \code{*high}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item المعاملان \code{double *low, double *high} عنوانا متغيرين في \code{main}.
+\item \code{*low = values[0]} ثم نحدّث أثناء المرور.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex05.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex05.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=7.30cm] (n2) at (0.00,-1.67) {\fc{range(temps, 8, \&coldest, \&hottest)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fio, text width=4.70cm] (n3) at (0.00,-2.95) {\textbf{اكتب}\ \fc{coldest, hottest}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fterm] (n4) at (0.00,-4.23) {نهاية};
+\draw[sahm] (n3.south) -- (n4.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.6}{1}{جدول ديناميكي بحجم يحدده المستخدم}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اقرأ عدد الطلبيات \code{count}، ثم احجز جدولًا بالحجم المطلوب بـ \code{malloc}، واقرأ المبالغ، واحسب المتوسط، ثم حرر الذاكرة بـ \code{free}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{malloc(count * sizeof(double))} يعيد عنوان كتلة جديدة، أو \code{NULL} إذا فشل.
+\item نستعمل الكتلة كجدول عادي \code{amounts[idx]}.
+\item كل \code{malloc} يقابله \code{free}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex06.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex06.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex06.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{count}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=8.30cm] (n3) at (0.00,-2.95) {\fc{amounts = malloc(count * sizeof(double))}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=1.70cm] (n4) at (0.00,-4.23) {\fc{idx = 0}};
+\coordinate (t5) at (0.00,-5.12);
+\coordinate (j6) at (0.00,-5.32);
+\node[fdec, text width=2.45cm] (d8) at (0.00,-6.39) {\fc{idx < count}};
+\draw[sahm] (t5) -- (d8.north);
+\node[fio, text width=3.90cm] (n9) at (0.00,-8.20) {\textbf{اقرأ}\ \fc{amounts[idx]}};
+\node[fproc, text width=1.30cm] (n10) at (0.00,-9.48) {\fc{idx++}};
+\draw[sahm] (n9.south) -- (n10.north);
+\draw[sahm] (d8.south) -- (n9.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d8.south) {نعم};
+\draw[sahm] (n10.south) -- (0.00,-10.22) -- (-2.82,-10.22) -- (-2.82,-5.32) -- (j6);
+\coordinate (e7) at (0.00,-10.67);
+\draw[fline] (d8.east) -- (2.82,-6.39) -- (2.82,-10.67) -- (e7);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {لا};
+\draw[fline] (n4.south) -- (t5);
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.00cm] (n11) at (0.00,-11.79) {\textbf{اكتب}\ مجموع / \en{count}};
+\draw[sahm] (e7) -- (n11.north);
+\node[fproc, text width=2.90cm] (n12) at (0.00,-13.30) {\fc{free(amounts)}};
+\draw[sahm] (n11.south) -- (n12.north);
+\node[fterm] (n13) at (0.00,-14.58) {نهاية};
+\draw[sahm] (n12.south) -- (n13.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.7}{1}{مؤشر على هيكل والسهم}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{applyDiscount(item, percent)} تستقبل \textbf{مؤشرًا على هيكل} منتج وتعدل سعره مباشرة باستعمال العامل \code{->}، ثم طبّقها على عناصر جدول.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{item->price} يكافئ \code{(*item).price}.
+\item نمرر \code{\&items[idx]} لكي تعدل الدالة الأصل.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex07.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex07.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.65cm] (d6) at (0.00,-3.65) {\fc{idx < 3}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fcall, text width=6.30cm] (n7) at (0.00,-5.27) {\fc{applyDiscount(\&items[idx], 15)}};
+\node[fio, text width=8.10cm] (n8) at (0.00,-6.55) {\textbf{اكتب}\ \fc{items[idx].name, items[idx].price}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fproc, text width=1.30cm] (n9) at (0.00,-7.83) {\fc{idx++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-8.57) -- (-4.92,-8.57) -- (-4.92,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-9.02);
+\draw[fline] (d6.east) -- (4.92,-3.65) -- (4.92,-9.02) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fterm] (n10) at (0.00,-9.91) {نهاية};
+\draw[sahm] (e5) -- (n10.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.8}{1}{طول السلسلة بالمؤشرات}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{textLength(text)} تحسب طول سلسلة \textbf{بمؤشر} يتقدم حتى \code{'\textbackslash{}0'}، ثم تعيد الفرق بين المؤشر النهائي ومؤشر البداية.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{const char *walk = text;} ثم \code{while (*walk) walk++;}.
+\item طرح مؤشرين على نفس الجدول يعطي عدد الخانات بينهما.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex08.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex08.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.50cm] (n2) at (0.00,-1.67) {\fc{walk = text}};
+\draw[sahm] (n1.south) -- (n2.north);
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=2.85cm] (d6) at (0.00,-3.92) {\fc{*walk != '\textbackslash{}0'}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fproc, text width=1.50cm] (n7) at (0.00,-5.82) {\fc{walk++}};
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n7.south) -- (0.00,-6.56) -- (-2.67,-6.56) -- (-2.67,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-7.01);
+\draw[fline] (d6.east) -- (2.67,-3.92) -- (2.67,-7.01) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\node[fio, text width=3.70cm] (n8) at (0.00,-7.90) {\textbf{اكتب}\ \fc{walk - text}};
+\draw[sahm] (e5) -- (n8.north);
+\node[fterm] (n9) at (0.00,-9.18) {نهاية};
+\draw[sahm] (n8.south) -- (n9.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.9}{1}{حجز هيكل منتج ديناميكيًا}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+احجز هيكل منتج بـ \code{malloc(sizeof(Product))}، املأ حقوله عبر المؤشر، اعرضه، ثم حرره. وضّح أن المؤشر بعد \code{free} يجب ألا يُستعمل (نضعه \code{NULL}).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{Product *item = malloc(sizeof(Product));}
+\item الحقول عبر \code{item->...}.
+\item بعد \code{free(item)}: \code{item = NULL;}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex09.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex09.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=6.30cm] (n2) at (0.00,-1.67) {\fc{item = malloc(sizeof(Product))}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.70cm] (n3) at (0.00,-3.41) {\fc{item->code = 330}\\\fc{item->price = 899}\\\fc{item->stock = 25}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=8.90cm] (n4) at (0.00,-5.15) {\textbf{اكتب}\ \fc{item->code, item->price * item->stock}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=2.50cm] (n5) at (0.00,-6.66) {\fc{free(item)}\\\fc{item = NULL}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-8.17) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.10}{1}{عدد العناصر بين مؤشرين}{\faTag\ علم البيانات}
+\begin{statement}
+في جدول قراءات حرارة مرتب، ابحث بمؤشرين عن أول قراءة ≥ \en{4}°\en{C} وأول قراءة > \en{6}°\en{C}، ثم استنتج \textbf{عدد القراءات} في المجال \code{[4, 6]} بطرح المؤشرين.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{first} يتقدم حتى \code{*first >= 4}، و \code{last} يتقدم حتى \code{*last > 6}.
+\item العدد = \code{last - first}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex10.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex10.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.90cm] (n2) at (0.00,-1.67) {\fc{first = temps}};
+\draw[sahm] (n1.south) -- (n2.north);
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=5.25cm] (d6) at (0.00,-4.46) {\fc{first < end \&\& *first < 4}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fproc, text width=1.70cm] (n7) at (0.00,-6.91) {\fc{first++}};
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n7.south) -- (0.00,-7.65) -- (-3.87,-7.65) -- (-3.87,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-8.10);
+\draw[fline] (d6.east) -- (3.87,-4.46) -- (3.87,-8.10) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\node[fproc, text width=2.70cm] (n8) at (0.00,-8.99) {\fc{last = first}};
+\draw[sahm] (e5) -- (n8.north);
+\coordinate (t9) at (0.00,-9.88);
+\coordinate (j10) at (0.00,-10.08);
+\node[fdec, text width=5.05cm] (d12) at (0.00,-11.74) {\fc{last < end \&\& *last <= 6}};
+\draw[sahm] (t9) -- (d12.north);
+\node[fproc, text width=1.50cm] (n13) at (0.00,-14.14) {\fc{last++}};
+\draw[sahm] (d12.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d12.south) {نعم};
+\draw[sahm] (n13.south) -- (0.00,-14.88) -- (-3.77,-14.88) -- (-3.77,-10.08) -- (j10);
+\coordinate (e11) at (0.00,-15.33);
+\draw[fline] (d12.east) -- (3.77,-11.74) -- (3.77,-15.33) -- (e11);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d12.east) {لا};
+\draw[fline] (n8.south) -- (t9);
+\node[fio, text width=3.90cm] (n14) at (0.00,-16.22) {\textbf{اكتب}\ \fc{last - first}};
+\draw[sahm] (e11) -- (n14.north);
+\node[fterm] (n15) at (0.00,-17.50) {نهاية};
+\draw[sahm] (n14.south) -- (n15.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\clearpage
+\levelsection{2}{التمارين المتوسطة}
+
+\exhead{10.11}{2}{جدول يكبر تلقائيًا}{\faTag\ علم البيانات}
+\begin{statement}
+لا نعرف مسبقًا عدد المبيعات التي ستُقرأ (تنتهي القراءة بـ \code{-1}). اكتب برنامجًا يبدأ بجدول ديناميكي سعته \en{2}، وكلما امتلأ \textbf{يضاعف} سعته: يحجز كتلة جديدة، ينسخ العناصر، ويحرر القديمة (دون \code{realloc}).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{capacity} السعة، و \code{count} العدد المستعمل.
+\item عند \code{count == capacity}: \code{bigger = malloc(2 * capacity ...)}، نسخ، \code{free(old)}.
+\item المضاعفة تجعل التكلفة المتوسطة لكل إضافة ثابتة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex11.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex11.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex11.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=3.90cm] (n2) at (0.00,-1.90) {\fc{capacity = 2}\\\fc{data = malloc(...)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fio, text width=2.50cm] (n3) at (0.00,-3.41) {\textbf{اقرأ}\ \fc{value}};
+\draw[sahm] (n2.south) -- (n3.north);
+\coordinate (t4) at (0.00,-4.30);
+\coordinate (j5) at (0.00,-4.50);
+\node[fdec, text width=2.45cm] (d7) at (0.00,-5.57) {\fc{value != -1}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fdec, text width=3.65cm] (d8) at (0.00,-8.18) {\fc{count == capacity}};
+\node[fproc, text width=4.40cm] (n10) at (0.00,-10.72) {\en{bigger} = \en{malloc}(\en{2} * \en{capacity}) ; نسخ ; \en{free}(\en{data}) ; \en{data} = \en{bigger}};
+\node[fproc, text width=4.90cm] (n11) at (0.00,-12.46) {\fc{capacity = capacity * 2}};
+\draw[sahm] (n10.south) -- (n11.north);
+\coordinate (m9) at (0.00,-13.15);
+\draw[sahm] (d8.south) -- (n10.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d8.south) {نعم};
+\draw[fline] (n11.south) -- (m9);
+\draw[sahm] (d8.east) -- (3.12,-8.18) -- (3.12,-13.15) -- (m9);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {لا};
+\node[fproc, text width=4.50cm] (n12) at (0.00,-14.04) {\fc{data[count++] = value}};
+\draw[sahm] (m9) -- (n12.north);
+\node[fio, text width=2.50cm] (n13) at (0.00,-15.32) {\textbf{اقرأ}\ \fc{value}};
+\draw[sahm] (n12.south) -- (n13.north);
+\draw[sahm] (d7.south) -- (d8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n13.south) -- (0.00,-16.06) -- (-3.07,-16.06) -- (-3.07,-4.50) -- (j5);
+\coordinate (e6) at (0.00,-16.51);
+\draw[fline] (d7.east) -- (3.87,-5.57) -- (3.87,-16.51) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\node[fio, text width=4.50cm] (n14) at (0.00,-17.40) {\textbf{اكتب}\ \fc{count, capacity}};
+\draw[sahm] (e6) -- (n14.north);
+\node[fterm] (n15) at (0.00,-18.68) {نهاية};
+\draw[sahm] (n14.south) -- (n15.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.12}{2}{نسخة ديناميكية من اسم المنتج}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{duplicate(text)} تحجز \textbf{بالضبط} الذاكرة اللازمة لنسخة من السلسلة (الطول + \en{1})، وتنسخها، وتعيد المؤشر (بديل \code{strdup}). استعملها لتخزين أسماء منتجات بأطوال مختلفة دون إهدار ذاكرة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نحسب الطول، ثم \code{malloc(length + 1)}.
+\item ننسخ الحروف ثم \code{'\textbackslash{}0'}.
+\item المستدعي مسؤول عن \code{free}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex12.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex12.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex12.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.65cm] (d6) at (0.00,-3.65) {\fc{idx < 3}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fcall, text width=6.30cm] (n7) at (0.00,-5.27) {\fc{names[idx] = duplicate(buffer)}};
+\node[fproc, text width=1.30cm] (n8) at (0.00,-6.55) {\fc{idx++}};
+\draw[sahm] (n7.south) -- (n8.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n8.south) -- (0.00,-7.29) -- (-3.75,-7.29) -- (-3.75,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-7.74);
+\draw[fline] (d6.east) -- (3.75,-3.65) -- (3.75,-7.74) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fio, text width=2.50cm] (n9) at (0.00,-8.63) {\textbf{اكتب}\ \fc{names}};
+\draw[sahm] (e5) -- (n9.north);
+\node[fproc, text width=1.70cm] (n10) at (0.00,-9.91) {\fc{idx = 0}};
+\coordinate (t11) at (0.00,-10.80);
+\coordinate (j12) at (0.00,-11.00);
+\node[fdec, text width=1.65cm] (d14) at (0.00,-11.89) {\fc{idx < 3}};
+\draw[sahm] (t11) -- (d14.north);
+\node[fproc, text width=3.50cm] (n15) at (0.00,-13.52) {\fc{free(names[idx])}};
+\node[fproc, text width=1.30cm] (n16) at (0.00,-14.80) {\fc{idx++}};
+\draw[sahm] (n15.south) -- (n16.north);
+\draw[sahm] (d14.south) -- (n15.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d14.south) {نعم};
+\draw[sahm] (n16.south) -- (0.00,-15.54) -- (-2.35,-15.54) -- (-2.35,-11.00) -- (j12);
+\coordinate (e13) at (0.00,-15.99);
+\draw[fline] (d14.east) -- (2.35,-11.89) -- (2.35,-15.99) -- (e13);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d14.east) {لا};
+\draw[fline] (n10.south) -- (t11);
+\draw[sahm] (n9.south) -- (n10.north);
+\node[fterm] (n17) at (0.00,-16.88) {نهاية};
+\draw[sahm] (e13) -- (n17.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.13}{2}{الاسم الكامل في ذاكرة ديناميكية}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{fullName(first, last)} تحجز سلسلة جديدة تحتوي على \code{"LAST, First"} (اللقب بحروف كبيرة)، وتعيد مؤشرها. استعملها لطباعة ملصقات الطرود.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الحجم = طول اللقب + \en{2} (فاصلة وفراغ) + طول الاسم + \en{1}.
+\item ننسخ اللقب محولًا إلى حروف كبيرة، ثم \code{", "}، ثم الاسم مع أول حرف كبير.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex13.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex13.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex13.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.65cm] (d6) at (0.00,-3.65) {\fc{idx < 2}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fio, text width=3.70cm] (n7) at (0.00,-5.27) {\textbf{اقرأ}\ \fc{first, last}};
+\node[fcall, text width=6.10cm] (n8) at (0.00,-6.55) {\fc{label = fullName(first, last)}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fio, text width=2.50cm] (n9) at (0.00,-7.83) {\textbf{اكتب}\ \fc{label}};
+\draw[sahm] (n8.south) -- (n9.north);
+\node[fproc, text width=2.50cm] (n10) at (0.00,-9.11) {\fc{free(label)}};
+\draw[sahm] (n9.south) -- (n10.north);
+\node[fproc, text width=1.30cm] (n11) at (0.00,-10.39) {\fc{idx++}};
+\draw[sahm] (n10.south) -- (n11.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n11.south) -- (0.00,-11.13) -- (-3.65,-11.13) -- (-3.65,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-11.58);
+\draw[fline] (d6.east) -- (3.65,-3.65) -- (3.65,-11.58) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fterm] (n12) at (0.00,-12.47) {نهاية};
+\draw[sahm] (e5) -- (n12.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.14}{2}{قلب الجدول بمؤشرين متقابلين}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب دالة \code{reverse(start, end)} تقلب جزءًا من جدول \textbf{في مكانه} بمؤشرين: الأول من البداية والثاني من النهاية، يتبادلان ثم يتقاربان. استعملها لقلب الجدول كله، ثم لـ \textbf{تدوير} سجل المبيعات بـ \en{3} أيام (قلب ثلاث مرات).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item ما دام \code{start < end}: تبديل \code{*start} و \code{*end}، ثم \code{start++} و \code{end--}.
+\item التدوير يسارًا بـ \code{shift}: قلب \code{[0, shift)}، قلب \code{[shift, n)}، ثم قلب الكل.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex14.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex14.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=5.30cm] (n2) at (0.00,-1.67) {\fc{reverse(sales, sales + 9)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fcall, text width=5.30cm] (n3) at (0.00,-2.95) {\fc{reverse(sales, sales + 2)}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fcall, text width=6.10cm] (n4) at (0.00,-4.23) {\fc{reverse(sales + 3, sales + 9)}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fcall, text width=5.30cm] (n5) at (0.00,-5.51) {\fc{reverse(sales, sales + 9)}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=2.50cm] (n6) at (0.00,-6.79) {\textbf{اكتب}\ \fc{sales}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.07) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.15}{2}{حذف المكررات في مكانها}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+قائمة رموز المنتجات المطلوبة مرتبة وتحتوي على مكررات. اكتب دالة \code{unique(codes, size)} تحذف المكررات \textbf{في نفس الجدول} بمؤشري قراءة وكتابة، وتعيد الطول الجديد.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{write} يشير إلى آخر عنصر فريد، و \code{read} يمر على كل العناصر.
+\item إذا اختلف \code{*read} عن \code{*write}: نتقدم بـ \code{write} وننسخ.
+\item الطول الجديد \code{write - codes + 1}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex15.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex15.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.90cm] (n2) at (0.00,-1.67) {\fc{write = codes}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.50cm] (n3) at (0.00,-2.95) {\fc{read = codes + 1}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=4.05cm] (d7) at (0.00,-5.47) {\fc{read < codes + size}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fdec, text width=3.25cm] (d8) at (0.00,-8.35) {\fc{*read != *write}};
+\node[fproc, text width=3.10cm] (n10) at (0.00,-10.58) {\fc{write++}\\\fc{*write = *read}};
+\coordinate (m9) at (0.00,-11.50);
+\draw[sahm] (d8.south) -- (n10.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d8.south) {نعم};
+\draw[fline] (n10.south) -- (m9);
+\draw[sahm] (d8.east) -- (2.92,-8.35) -- (2.92,-11.50) -- (m9);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {لا};
+\node[fproc, text width=1.50cm] (n11) at (0.00,-12.39) {\fc{read++}};
+\draw[sahm] (m9) -- (n11.north);
+\draw[sahm] (d7.south) -- (d8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n11.south) -- (0.00,-13.13) -- (-3.27,-13.13) -- (-3.27,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-13.58);
+\draw[fline] (d7.east) -- (3.67,-5.47) -- (3.67,-13.58) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=4.90cm] (n12) at (0.00,-14.47) {\textbf{اكتب}\ \fc{write - codes + 1}};
+\draw[sahm] (e6) -- (n12.north);
+\node[fterm] (n13) at (0.00,-15.75) {نهاية};
+\draw[sahm] (n12.south) -- (n13.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.16}{2}{تقطيع الوصف إلى كلمات بالمؤشرات}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب دالة \code{splitWords(text, words, maxWords)} تقسم الجملة \textbf{في مكانها}: تستبدل الفراغات بـ \code{'\textbackslash{}0'} وتخزن في جدول مؤشرات \code{char *words[]} عنوان بداية كل كلمة، دون نسخ أي حرف. ثم اعرض الكلمات وأطولها.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نمر بمؤشر على النص؛ عند بداية كلمة نخزن العنوان.
+\item عند الفراغ بعد كلمة نكتب \code{'\textbackslash{}0'} لإنهائها.
+\item \code{words[idx]} سلسلة صالحة لأنها تنتهي بـ \code{'\textbackslash{}0'} داخل النص الأصلي.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex16.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex16.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.30cm] (n2) at (0.00,-1.90) {\fc{count = 0}\\\fc{inWord = 0}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.30cm] (n3) at (0.00,-3.41) {\fc{ptr = text}};
+\coordinate (t4) at (0.00,-4.30);
+\coordinate (j5) at (0.00,-4.50);
+\node[fdec, text width=2.65cm] (d7) at (0.00,-5.61) {\fc{*ptr != '\textbackslash{}0'}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fdec, text width=2.45cm] (d8) at (0.00,-8.00) {\fc{*ptr == ' '}};
+\node[fproc, text width=2.50cm] (n10) at (2.27,-9.84) {\fc{*ptr = '\textbackslash{}0'}\\\fc{inWord = 0}};
+\node[fdec, text width=1.65cm] (d11) at (-3.45,-9.95) {\fc{!inWord}};
+\node[fproc, text width=4.30cm] (n13) at (-3.45,-11.81) {\fc{words[count++] = ptr}\\\fc{inWord = 1}};
+\coordinate (m12) at (-3.45,-12.73);
+\draw[sahm] (d11.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d11.south) {نعم};
+\draw[fline] (n13.south) -- (m12);
+\draw[sahm] (d11.east) -- (-0.65,-9.95) -- (-0.65,-12.73) -- (m12);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d11.east) {لا};
+\coordinate (m9) at (0.00,-13.03);
+\draw[sahm] (d8.east) -| (n10.north);
+\draw[sahm] (n10.south) |- (m9);
+\draw[sahm] (d8.west) -| (d11.north);
+\draw[sahm] (m12) |- (m9);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {نعم};
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d8.west) {لا};
+\node[fproc, text width=1.30cm] (n14) at (0.00,-13.92) {\fc{ptr++}};
+\draw[sahm] (m9) -- (n14.north);
+\draw[sahm] (d7.south) -- (d8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n14.south) -- (0.00,-14.66) -- (-6.20,-14.66) -- (-6.20,-4.50) -- (j5);
+\coordinate (e6) at (0.00,-15.11);
+\draw[fline] (d7.east) -- (4.12,-5.61) -- (4.12,-15.11) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.50cm] (n15) at (0.00,-16.00) {\textbf{اكتب}\ \fc{words}};
+\draw[sahm] (e6) -- (n15.north);
+\node[fterm] (n16) at (0.00,-17.28) {نهاية};
+\draw[sahm] (n15.south) -- (n16.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.17}{2}{ترتيب مؤشرات المنتجات لا المنتجات}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+تبديل هياكل كبيرة مكلف. رتّب جدول \textbf{مؤشرات} \code{Product *view[]} يشير إلى المنتجات، حسب السعر مرة وحسب التقييم مرة أخرى، دون تحريك الهياكل الأصلية في الذاكرة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{view[idx] = \&items[idx]} في البداية.
+\item الترتيب يبدل المؤشرات فقط (\en{8} بايتات بدل الهيكل كله).
+\item الجدول الأصلي يبقى بترتيبه.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex17.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex17.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.85cm] (d6) at (0.00,-3.69) {\fc{idx < NB}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fproc, text width=4.90cm] (n7) at (0.00,-5.36) {\fc{view[idx] = \&items[idx]}};
+\node[fproc, text width=1.30cm] (n8) at (0.00,-6.64) {\fc{idx++}};
+\draw[sahm] (n7.south) -- (n8.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n8.south) -- (0.00,-7.38) -- (-3.05,-7.38) -- (-3.05,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-7.83);
+\draw[fline] (d6.east) -- (3.05,-3.69) -- (3.05,-7.83) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.40cm] (n9) at (0.00,-8.95) {ترتيب \en{view} حسب \en{view[idx]->price}};
+\draw[sahm] (e5) -- (n9.north);
+\node[fio, text width=2.30cm] (n10) at (0.00,-10.46) {\textbf{اكتب}\ \fc{view}};
+\draw[sahm] (n9.south) -- (n10.north);
+\node[fproc, text width=4.40cm] (n11) at (0.00,-11.97) {ترتيب \en{view} حسب \en{view[idx]->rating} تنازليًا};
+\draw[sahm] (n10.south) -- (n11.north);
+\node[fio, text width=2.30cm] (n12) at (0.00,-13.48) {\textbf{اكتب}\ \fc{view}};
+\draw[sahm] (n11.south) -- (n12.north);
+\node[fterm] (n13) at (0.00,-14.76) {نهاية};
+\draw[sahm] (n12.south) -- (n13.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.18}{2}{مصفوفة مبيعات ديناميكية}{\faTag\ علم البيانات}
+\begin{statement}
+اقرأ عدد الفروع وعدد الأيام، ثم احجز مصفوفة ديناميكية \code{double **sales}: جدول مؤشرات على الأسطر، وكل سطر جدول محجوز على حدة. املأها، احسب مجموع كل فرع ومجموع كل يوم، ثم حرر كل الأسطر ثم جدول المؤشرات.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{sales = malloc(rows * sizeof(double *))} ثم لكل سطر \code{malloc(cols * sizeof(double))}.
+\item \code{sales[row][col]} يعمل كمصفوفة عادية.
+\item التحرير بالترتيب المعاكس: الأسطر أولًا.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex18.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex18.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex18.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{rows, cols}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.40cm] (n3) at (0.00,-3.18) {\en{sales} = \en{malloc}(\en{rows} مؤشرات)};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=1.70cm] (n4) at (0.00,-4.69) {\fc{row = 0}};
+\coordinate (t5) at (0.00,-5.58);
+\coordinate (j6) at (0.00,-5.78);
+\node[fdec, text width=2.25cm] (d8) at (0.00,-6.80) {\fc{row < rows}};
+\draw[sahm] (t5) -- (d8.north);
+\node[fproc, text width=4.40cm] (n9) at (0.00,-8.80) {\en{sales[row]} = \en{malloc}(\en{cols} أعداد)};
+\node[fproc, text width=1.30cm] (n10) at (0.00,-10.31) {\fc{row++}};
+\draw[sahm] (n9.south) -- (n10.north);
+\draw[sahm] (d8.south) -- (n9.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d8.south) {نعم};
+\draw[sahm] (n10.south) -- (0.00,-11.05) -- (-2.80,-11.05) -- (-2.80,-5.78) -- (j6);
+\coordinate (e7) at (0.00,-11.50);
+\draw[fline] (d8.east) -- (2.80,-6.80) -- (2.80,-11.50) -- (e7);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {لا};
+\draw[fline] (n4.south) -- (t5);
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.30cm] (n11) at (0.00,-12.39) {قراءة وحساب المجاميع};
+\draw[sahm] (e7) -- (n11.north);
+\node[fproc, text width=1.70cm] (n12) at (0.00,-13.67) {\fc{row = 0}};
+\coordinate (t13) at (0.00,-14.56);
+\coordinate (j14) at (0.00,-14.76);
+\node[fdec, text width=2.25cm] (d16) at (0.00,-15.78) {\fc{row < rows}};
+\draw[sahm] (t13) -- (d16.north);
+\node[fproc, text width=3.50cm] (n17) at (0.00,-17.54) {\fc{free(sales[row])}};
+\node[fproc, text width=1.30cm] (n18) at (0.00,-18.82) {\fc{row++}};
+\draw[sahm] (n17.south) -- (n18.north);
+\draw[sahm] (d16.south) -- (n17.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d16.south) {نعم};
+\draw[sahm] (n18.south) -- (0.00,-19.56) -- (-2.37,-19.56) -- (-2.37,-14.76) -- (j14);
+\coordinate (e15) at (0.00,-20.01);
+\draw[fline] (d16.east) -- (2.37,-15.78) -- (2.37,-20.01) -- (e15);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d16.east) {لا};
+\draw[fline] (n12.south) -- (t13);
+\draw[sahm] (n11.south) -- (n12.north);
+\node[fproc, text width=2.50cm] (n19) at (0.00,-20.90) {\fc{free(sales)}};
+\draw[sahm] (e15) -- (n19.north);
+\node[fterm] (n20) at (0.00,-22.18) {نهاية};
+\draw[sahm] (n19.south) -- (n20.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.19}{2}{استراتيجية الخصم بمؤشر دالة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+لدى المتجر ثلاث سياسات خصم: بدون خصم، خصم ثابت \en{500} دج فوق \en{5000}، و \en{10\%} فوق \en{10000}. عرّف \textbf{مؤشر دالة} \code{double (*policy)(double)}، واختر السياسة حسب رمز الحملة، ثم طبّقها على عدة سلات.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item كل سياسة دالة بنفس التوقيع \code{double name(double amount)}.
+\item جدول مؤشرات دوال \code{policies[3]}، ونختار منه بالفهرس.
+\item الاستدعاء: \code{policy(amount)} كأي دالة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex19.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex19.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex19.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.10cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{campaign}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.40cm] (n3) at (0.00,-3.18) {\en{policy} = \en{policies[}فهرس الحملة]};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=1.70cm] (n4) at (0.00,-4.69) {\fc{idx = 0}};
+\coordinate (t5) at (0.00,-5.58);
+\coordinate (j6) at (0.00,-5.78);
+\node[fdec, text width=1.65cm] (d8) at (0.00,-6.67) {\fc{idx < 4}};
+\draw[sahm] (t5) -- (d8.north);
+\node[fcall, text width=5.90cm] (n9) at (0.00,-8.29) {\fc{total = policy(baskets[idx])}};
+\node[fio, text width=5.30cm] (n10) at (0.00,-9.57) {\textbf{اكتب}\ \fc{baskets[idx], total}};
+\draw[sahm] (n9.south) -- (n10.north);
+\node[fproc, text width=1.30cm] (n11) at (0.00,-10.85) {\fc{idx++}};
+\draw[sahm] (n10.south) -- (n11.north);
+\draw[sahm] (d8.south) -- (n9.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d8.south) {نعم};
+\draw[sahm] (n11.south) -- (0.00,-11.59) -- (-3.55,-11.59) -- (-3.55,-5.78) -- (j6);
+\coordinate (e7) at (0.00,-12.04);
+\draw[fline] (d8.east) -- (3.55,-6.67) -- (3.55,-12.04) -- (e7);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {لا};
+\draw[fline] (n4.south) -- (t5);
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fterm] (n12) at (0.00,-12.93) {نهاية};
+\draw[sahm] (e7) -- (n12.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.20}{2}{ترتيب عام بدالة مقارنة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة ترتيب عامة \code{sortProducts(items, size, compare)} تستقبل \textbf{مؤشر دالة مقارنة}، واكتب ثلاث دوال مقارنة (السعر تصاعديًا، التقييم تنازليًا، الاسم أبجديًا). هكذا نكتب الترتيب مرة واحدة ونغير المعيار فقط.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item توقيع المقارنة: \par{\centering\small\code{int compare(const Product *first, const Product *second)}\par} يعيد سالبًا إذا كان الأول قبل الثاني.
+\item الترتيب بالإدراج يستدعي \code{compare(\&key, \&items[back])}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex20.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex20.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=6.50cm] (n2) at (0.00,-1.67) {\fc{sortProducts(items, 5, byPrice)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fio, text width=2.50cm] (n3) at (0.00,-2.95) {\textbf{اكتب}\ \fc{items}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fcall, text width=6.70cm] (n4) at (0.00,-4.23) {\fc{sortProducts(items, 5, byRating)}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=2.50cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ \fc{items}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fcall, text width=6.30cm] (n6) at (0.00,-6.79) {\fc{sortProducts(items, 5, byName)}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fio, text width=2.50cm] (n7) at (0.00,-8.07) {\textbf{اكتب}\ \fc{items}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fterm] (n8) at (0.00,-9.35) {نهاية};
+\draw[sahm] (n7.south) -- (n8.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.21}{2}{دالة تحجز جدولًا للمستدعي}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب دالة \code{loadScores(result, count)} تقرأ عدد التقييمات ثم القيم، \textbf{تحجز} الجدول بنفسها، وتعيد عنوانه للمستدعي عبر \textbf{مؤشر على مؤشر} \code{double **result}، والعدد عبر \code{int *count}. احسب ثم المتوسط والوسيط.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item لكي تغير الدالة مؤشرًا في \code{main} يجب أن تستقبل \textbf{عنوانه}: \code{double **result}.
+\item \code{*result = malloc(...)} تكتب العنوان الجديد في متغير المستدعي.
+\item الوسيط بعد ترتيب الجدول.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex21.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex21.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex21.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=6.70cm] (n2) at (0.00,-1.67) {\fc{ok = loadScores(\&scores, \&count)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.70cm] (n3) at (0.00,-2.95) {ترتيب \en{scores}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=4.00cm] (n4) at (0.00,-4.46) {\textbf{اكتب}\ المتوسط، \en{scores[count} / \en{2]}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=2.70cm] (n5) at (0.00,-5.97) {\fc{free(scores)}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-7.25) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.22}{2}{تصفية المنتجات في جدول جديد}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \par{\centering\small\code{filterAbove(items, size, minRating, outCount)}\par} تعيد \textbf{جدولًا جديدًا محجوزًا} يحتوي فقط على المنتجات التي تقييمها ≥ الحد، وتكتب عددها في \code{*outCount}. الجدول الأصلي لا يتغير.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item مرور أول لعد العناصر المطابقة، ثم حجز بالحجم المضبوط.
+\item مرور ثانٍ للنسخ.
+\item إذا لم يوجد أي عنصر نعيد \code{NULL}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex22.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex22.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=8.50cm] (n2) at (0.00,-1.67) {\fc{best = filterAbove(items, 6, 4.3, \&count)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{idx = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=2.45cm] (d7) at (0.00,-5.11) {\fc{idx < count}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fio, text width=3.30cm] (n8) at (0.00,-6.92) {\textbf{اكتب}\ \fc{best[idx]}};
+\node[fproc, text width=1.30cm] (n9) at (0.00,-8.20) {\fc{idx++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-8.94) -- (-2.52,-8.94) -- (-2.52,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-9.39);
+\draw[fline] (d7.east) -- (2.52,-5.11) -- (2.52,-9.39) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=2.30cm] (n10) at (0.00,-10.28) {\fc{free(best)}};
+\draw[sahm] (e6) -- (n10.north);
+\node[fterm] (n11) at (0.00,-11.56) {نهاية};
+\draw[sahm] (n10.south) -- (n11.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.23}{2}{دمج قائمتين في ذاكرة جديدة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{mergeNew(first, sizeA, second, sizeB)} تحجز جدولًا جديدًا بحجم \code{sizeA + sizeB} وتدمج فيه قائمتي أسعار مرتبتين \textbf{بالمؤشرات} (لا فهارس)، ثم تعيد عنوانه.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item ثلاثة مؤشرات: \code{left} و \code{right} للقراءة و \code{out} للكتابة.
+\item ننسخ الأصغر بـ \code{*out++ = *left++}.
+\item بعد الحلقة ننسخ ما تبقى.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex23.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex23.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=6.30cm] (n2) at (0.00,-1.67) {\fc{merged = malloc(sizeA + sizeB)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=5.65cm] (d6) at (0.00,-4.56) {\fc{left < endA \&\& right < endB}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fdec, text width=3.25cm] (d7) at (0.00,-7.80) {\fc{*left <= *right}};
+\node[fproc, text width=3.50cm] (n9) at (2.67,-9.59) {\fc{*out++ = *left++}};
+\node[fproc, text width=3.70cm] (n10) at (-2.67,-9.59) {\fc{*out++ = *right++}};
+\coordinate (m8) at (0.00,-10.28);
+\draw[sahm] (d7.east) -| (n9.north);
+\draw[sahm] (n9.south) |- (m8);
+\draw[sahm] (d7.west) -| (n10.north);
+\draw[sahm] (n10.south) |- (m8);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {نعم};
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d7.west) {لا};
+\draw[sahm] (d6.south) -- (d7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (m8) -- (0.00,-10.63) -- (-5.12,-10.63) -- (-5.12,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-11.08);
+\draw[fline] (d6.east) -- (5.02,-4.56) -- (5.02,-11.08) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\node[fproc, text width=2.30cm] (n11) at (0.00,-11.97) {نسخ الباقي};
+\draw[sahm] (e5) -- (n11.north);
+\node[fio, text width=2.70cm] (n12) at (0.00,-13.25) {\textbf{اكتب}\ \fc{merged}};
+\draw[sahm] (n11.south) -- (n12.north);
+\node[fterm] (n13) at (0.00,-14.53) {نهاية};
+\draw[sahm] (n12.south) -- (n13.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.24}{2}{منقول مصفوفة التقييمات ديناميكيًا}{\faTag\ علم البيانات}
+\begin{statement}
+مصفوفة التقييمات \code{ratings[زبون][منتج]} (\en{4}×\en{3}). احجز \textbf{ديناميكيًا} مصفوفتها المنقولة \code{[منتج][زبون]} في كتلة \textbf{واحدة} متصلة (\code{malloc(rows * cols)}) مع حساب الموضع \code{row * cols + col}، ثم احسب متوسط كل منتج من المنقولة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item كتلة واحدة أسرع ويحررها \code{free} واحد.
+\item \par{\centering\small\code{transposed[col * nbClients + row] = ratings[row][col]}\par}.
+\item سطر المنتج في المنقولة متصل في الذاكرة: حساب متوسطه مرور بسيط.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex24.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex24.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=8.90cm] (n2) at (0.00,-1.67) {\fc{transposed = malloc(nbProducts * nbClients)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{row = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=3.25cm] (d7) at (0.00,-5.29) {\fc{row < nbClients}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fproc, text width=1.70cm] (n8) at (0.00,-7.28) {\fc{col = 0}};
+\coordinate (t9) at (0.00,-8.17);
+\coordinate (j10) at (0.00,-8.37);
+\node[fdec, text width=3.45cm] (d12) at (0.00,-9.67) {\fc{col < nbProducts}};
+\draw[sahm] (t9) -- (d12.north);
+\node[fproc, text width=10.90cm] (n13) at (0.00,-11.70) {\fc{transposed[col * nbClients + row] = ratings[row][col]}};
+\node[fproc, text width=1.30cm] (n14) at (0.00,-12.98) {\fc{col++}};
+\draw[sahm] (n13.south) -- (n14.north);
+\draw[sahm] (d12.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d12.south) {نعم};
+\draw[sahm] (n14.south) -- (0.00,-13.72) -- (-6.05,-13.72) -- (-6.05,-8.37) -- (j10);
+\coordinate (e11) at (0.00,-14.17);
+\draw[fline] (d12.east) -- (6.05,-9.67) -- (6.05,-14.17) -- (e11);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d12.east) {لا};
+\draw[fline] (n8.south) -- (t9);
+\node[fproc, text width=1.30cm] (n15) at (0.00,-15.06) {\fc{row++}};
+\draw[sahm] (e11) -- (n15.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-15.80) -- (-6.60,-15.80) -- (-6.60,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-16.25);
+\draw[fline] (d7.east) -- (6.80,-5.29) -- (6.80,-16.25) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=1.70cm] (n16) at (0.00,-17.14) {\fc{col = 0}};
+\coordinate (t17) at (0.00,-18.03);
+\coordinate (j18) at (0.00,-18.23);
+\node[fdec, text width=3.45cm] (d20) at (0.00,-19.53) {\fc{col < nbProducts}};
+\draw[sahm] (t17) -- (d20.north);
+\node[fio, text width=4.00cm] (n21) at (0.00,-21.79) {\textbf{اكتب}\ متوسط السطر \en{col} من \en{transposed}};
+\node[fproc, text width=1.30cm] (n22) at (0.00,-23.30) {\fc{col++}};
+\draw[sahm] (n21.south) -- (n22.north);
+\draw[sahm] (d20.south) -- (n21.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d20.south) {نعم};
+\draw[sahm] (n22.south) -- (0.00,-24.04) -- (-3.03,-24.04) -- (-3.03,-18.23) -- (j18);
+\coordinate (e19) at (0.00,-24.49);
+\draw[fline] (d20.east) -- (3.03,-19.53) -- (3.03,-24.49) -- (e19);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d20.east) {لا};
+\draw[fline] (n16.south) -- (t17);
+\draw[sahm] (e6) -- (n16.north);
+\node[fproc, text width=3.50cm] (n23) at (0.00,-25.38) {\fc{free(transposed)}};
+\draw[sahm] (e19) -- (n23.north);
+\node[fterm] (n24) at (0.00,-26.66) {نهاية};
+\draw[sahm] (n23.south) -- (n24.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.25}{2}{تفكيك سطر \en{CSV} في مكانه}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب دالة \code{splitCsv(line, fields, maxFields)} تقسم سطر \en{CSV} مفصولًا بـ \code{;} \textbf{في مكانه} (تستبدل \code{;} بـ \code{'\textbackslash{}0'}) وتخزن مؤشرات الحقول، مع قبول \textbf{الحقول الفارغة} (\code{;;}). عالج عدة أسطر من تصدير الطلبيات.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الحقل الأول يبدأ عند \code{line}.
+\item عند كل \code{;}: نكتبه \code{'\textbackslash{}0'} ونبدأ حقلًا جديدًا عند الحرف التالي.
+\item الحقل الفارغ مؤشر على \code{'\textbackslash{}0'} مباشرة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex25.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex25.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.65cm] (d6) at (0.00,-3.65) {\fc{idx < 3}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fcall, text width=8.10cm] (n7) at (0.00,-5.27) {\fc{count = splitCsv(lines[idx], fields, 6)}};
+\node[fproc, text width=2.10cm] (n8) at (0.00,-6.55) {\fc{field = 0}};
+\coordinate (t9) at (0.00,-7.44);
+\coordinate (j10) at (0.00,-7.64);
+\node[fdec, text width=2.85cm] (d12) at (0.00,-8.80) {\fc{field < count}};
+\draw[sahm] (t9) -- (d12.north);
+\node[fio, text width=4.00cm] (n13) at (0.00,-10.93) {\textbf{اكتب}\ \en{fields[field]} أو "(\en{empty})"};
+\node[fproc, text width=1.70cm] (n14) at (0.00,-12.44) {\fc{field++}};
+\draw[sahm] (n13.south) -- (n14.north);
+\draw[sahm] (d12.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d12.south) {نعم};
+\draw[sahm] (n14.south) -- (0.00,-13.18) -- (-3.03,-13.18) -- (-3.03,-7.64) -- (j10);
+\coordinate (e11) at (0.00,-13.63);
+\draw[fline] (d12.east) -- (3.03,-8.80) -- (3.03,-13.63) -- (e11);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d12.east) {لا};
+\draw[fline] (n8.south) -- (t9);
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fproc, text width=1.30cm] (n15) at (0.00,-14.52) {\fc{idx++}};
+\draw[sahm] (e11) -- (n15.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-15.26) -- (-4.65,-15.26) -- (-4.65,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-15.71);
+\draw[fline] (d6.east) -- (4.65,-3.65) -- (4.65,-15.71) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fterm] (n16) at (0.00,-16.60) {نهاية};
+\draw[sahm] (e5) -- (n16.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.26}{2}{إحصاءات متجددة عبر مؤشر على هيكل}{\faTag\ علم البيانات}
+\begin{statement}
+تصل أزمنة استجابة الخادم واحدًا واحدًا ولا نريد تخزينها كلها. اكتب هيكل \code{Running} (العدد، المتوسط، \code{m2}، الأصغر، الأكبر) ودالة \code{update(stats, value)} تحدّثه \textbf{عبر مؤشر} بخوارزمية \textbf{ويلفورد}، ثم اعرض المتوسط والتباين في كل لحظة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{count++}، \code{delta = value - mean}، \code{mean += delta / count}، \code{m2 += delta * (value - mean)}.
+\item التباين = \code{m2 / count}.
+\item خوارزمية بمرور واحد وذاكرة ثابتة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex26.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex26.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.50cm] (n2) at (0.00,-1.67) {\fc{stats = \{0\}}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{idx = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=1.65cm] (d7) at (0.00,-4.93) {\fc{idx < 8}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fcall, text width=5.50cm] (n8) at (0.00,-6.55) {\fc{update(\&stats, times[idx])}};
+\node[fio, text width=8.30cm] (n9) at (0.00,-7.83) {\textbf{اكتب}\ \fc{stats.mean, stats.m2 / stats.count}};
+\draw[sahm] (n8.south) -- (n9.north);
+\node[fproc, text width=1.30cm] (n10) at (0.00,-9.11) {\fc{idx++}};
+\draw[sahm] (n9.south) -- (n10.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n10.south) -- (0.00,-9.85) -- (-5.02,-9.85) -- (-5.02,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-10.30);
+\draw[fline] (d7.east) -- (5.02,-4.93) -- (5.02,-10.30) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fterm] (n11) at (0.00,-11.19) {نهاية};
+\draw[sahm] (e6) -- (n11.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.27}{2}{المخزن الدائري لآخر الأسعار}{\faTag\ علم البيانات}
+\begin{statement}
+نعرض على صفحة المنتج متوسط \textbf{آخر \en{4} أسعار}. اكتب هيكل \code{Ring} يحتوي على جدول بسعة \en{4} ومؤشرًا \code{next} على الخانة التالية للكتابة، ودالة \code{addPrice} تكتب ثم تُرجع المؤشر إلى البداية عند الوصول إلى النهاية.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{*ring->next = price;} ثم \code{ring->next++}؛ إذا وصل إلى \code{ring->data + CAP} نعيده إلى \code{ring->data}.
+\item \code{count} لا يتجاوز \code{CAP}.
+\item المتوسط على الخانات المملوءة فقط.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex27.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex27.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.65cm] (d6) at (0.00,-3.65) {\fc{idx < 7}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fcall, text width=5.90cm] (n7) at (0.00,-5.27) {\fc{addPrice(\&ring, prices[idx])}};
+\node[fio, text width=4.00cm] (n8) at (0.00,-6.78) {\textbf{اكتب}\ متوسط محتوى \en{ring}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fproc, text width=1.30cm] (n9) at (0.00,-8.29) {\fc{idx++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-9.03) -- (-3.55,-9.03) -- (-3.55,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-9.48);
+\draw[fline] (d6.east) -- (3.55,-3.65) -- (3.55,-9.48) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fterm] (n10) at (0.00,-10.37) {نهاية};
+\draw[sahm] (e5) -- (n10.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.28}{2}{طلبيات الزبائن بأسطر متفاوتة الطول}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+لكل زبون عدد مختلف من الطلبيات. بدل مصفوفة مستطيلة تهدر الذاكرة، احجز \textbf{جدولًا مسننًا}: جدول مؤشرات، وكل سطر محجوز بحجم طلبيات صاحبه بالضبط، مع جدول للأطوال.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \par{\centering\small\code{orders = malloc(nbClients * sizeof(double *))}\par} و \code{lengths = malloc(nbClients * sizeof(int))}.
+\item لكل زبون: نقرأ عدد طلبياته ثم \par{\centering\small\code{orders[client] = malloc(lengths[client] * sizeof(double))}\par}.
+\item نحسب المجموع لكل زبون، والذاكرة المستعملة مقارنة بمصفوفة مستطيلة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex28.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex28.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex28.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=3.30cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{nbClients}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.30cm] (n3) at (0.00,-2.95) {\fc{client = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=3.85cm] (d7) at (0.00,-5.43) {\fc{client < nbClients}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fio, text width=4.50cm] (n8) at (0.00,-7.55) {\textbf{اقرأ}\ \fc{lengths[client]}};
+\node[fproc, text width=8.30cm] (n9) at (0.00,-8.83) {\fc{orders[client] = malloc(lengths[client])}};
+\draw[sahm] (n8.south) -- (n9.north);
+\node[fio, text width=3.10cm] (n10) at (0.00,-10.11) {\textbf{اقرأ}\ الطلبيات};
+\draw[sahm] (n9.south) -- (n10.north);
+\node[fio, text width=4.00cm] (n11) at (0.00,-11.62) {\textbf{اكتب}\ \en{client}, مجموع طلبياته};
+\draw[sahm] (n10.south) -- (n11.north);
+\node[fproc, text width=1.90cm] (n12) at (0.00,-13.13) {\fc{client++}};
+\draw[sahm] (n11.south) -- (n12.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n12.south) -- (0.00,-13.87) -- (-4.75,-13.87) -- (-4.75,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-14.32);
+\draw[fline] (d7.east) -- (4.75,-5.43) -- (4.75,-14.32) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=4.40cm] (n13) at (0.00,-15.44) {تحرير كل الأسطر ثم الجداول};
+\draw[sahm] (e6) -- (n13.north);
+\node[fterm] (n14) at (0.00,-16.95) {نهاية};
+\draw[sahm] (n13.south) -- (n14.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.29}{2}{البحث عن كلمة يعيد مؤشرًا}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالة \code{findText(haystack, needle)} (بديل \code{strstr}) تعيد \textbf{مؤشرًا} على أول ظهور للكلمة داخل الوصف أو \code{NULL}. استعملها لعدّ كل الظهورات بمواصلة البحث بعد المؤشر المعاد.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item لكل موضع ممكن: نقارن الحروف بمؤشرين مؤقتين.
+\item إذا انتهت \code{needle} فالمطابقة تامة: نعيد الموضع.
+\item للعد: \code{pos = findText(pos + 1, needle)} حتى \code{NULL}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex29.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex29.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=5.50cm] (n2) at (0.00,-1.90) {\fc{count = 0}\\\fc{pos = findText(text, word)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\coordinate (t3) at (0.00,-3.02);
+\coordinate (j4) at (0.00,-3.22);
+\node[fdec, text width=2.45cm] (d6) at (0.00,-4.29) {\fc{pos != NULL}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fio, text width=3.50cm] (n7) at (0.00,-6.10) {\textbf{اكتب}\ \fc{pos - text}};
+\node[fproc, text width=6.10cm] (n8) at (0.00,-7.61) {\fc{count++}\\\fc{pos = findText(pos + 1, word)}};
+\draw[sahm] (n7.south) -- (n8.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n8.south) -- (0.00,-8.58) -- (-3.65,-8.58) -- (-3.65,-3.22) -- (j4);
+\coordinate (e5) at (0.00,-9.03);
+\draw[fline] (d6.east) -- (3.65,-4.29) -- (3.65,-9.03) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\node[fio, text width=2.50cm] (n9) at (0.00,-9.92) {\textbf{اكتب}\ \fc{count}};
+\draw[sahm] (e5) -- (n9.north);
+\node[fterm] (n10) at (0.00,-11.20) {نهاية};
+\draw[sahm] (n9.south) -- (n10.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.30}{2}{حذف الفراغات الطرفية بالمؤشرات}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+البيانات المدخلة في نماذج الموقع تحتوي على فراغات زائدة في البداية والنهاية. اكتب دالة \code{trim(text)} تعيد \textbf{مؤشرًا} على أول حرف غير فراغ، وتكتب \code{'\textbackslash{}0'} بعد آخر حرف غير فراغ، دون نسخ.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item مؤشر \code{start} يتقدم ما دام \code{*start == ' '}.
+\item مؤشر \code{end} على آخر حرف، يتراجع ما دام فراغًا وما دام \code{end >= start}.
+\item \code{*(end + 1) = '\textbackslash{}0'}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex30.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex30.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.70cm] (n2) at (0.00,-1.67) {\fc{start = text}};
+\draw[sahm] (n1.south) -- (n2.north);
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=2.85cm] (d6) at (0.00,-3.92) {\fc{*start == ' '}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fproc, text width=1.70cm] (n7) at (0.00,-5.82) {\fc{start++}};
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n7.south) -- (0.00,-6.56) -- (-2.67,-6.56) -- (-2.67,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-7.01);
+\draw[fline] (d6.east) -- (2.67,-3.92) -- (2.67,-7.01) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\node[fproc, text width=2.90cm] (n8) at (0.00,-7.90) {\en{end} = آخر حرف};
+\draw[sahm] (e5) -- (n8.north);
+\coordinate (t9) at (0.00,-8.79);
+\coordinate (j10) at (0.00,-8.99);
+\node[fdec, text width=5.45cm] (d12) at (0.00,-10.74) {\fc{end > start \&\& *end == ' '}};
+\draw[sahm] (t9) -- (d12.north);
+\node[fproc, text width=1.30cm] (n13) at (0.00,-13.23) {\fc{end--}};
+\draw[sahm] (d12.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d12.south) {نعم};
+\draw[sahm] (n13.south) -- (0.00,-13.97) -- (-3.97,-13.97) -- (-3.97,-8.99) -- (j10);
+\coordinate (e11) at (0.00,-14.42);
+\draw[fline] (d12.east) -- (3.97,-10.74) -- (3.97,-14.42) -- (e11);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d12.east) {لا};
+\draw[fline] (n8.south) -- (t9);
+\node[fproc, text width=3.70cm] (n14) at (0.00,-15.31) {\fc{*(end + 1) = '\textbackslash{}0'}};
+\draw[sahm] (e11) -- (n14.north);
+\node[fio, text width=2.50cm] (n15) at (0.00,-16.59) {\textbf{اكتب}\ \fc{start}};
+\draw[sahm] (n14.south) -- (n15.north);
+\node[fterm] (n16) at (0.00,-17.87) {نهاية};
+\draw[sahm] (n15.south) -- (n16.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.31}{2}{البحث الثنائي يعيد مؤشرًا}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب بحثًا ثنائيًا \code{findPrice(low, high, target)} يعمل بمؤشرين على بداية ونهاية جدول مرتب (لا فهارس)، ويعيد مؤشرًا على العنصر أو \code{NULL}. استعمل حساب \code{middle = low + (high - low) / 2}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item طرح مؤشرين يعطي عددًا، وإضافته لمؤشر تعطي مؤشرًا.
+\item لا يمكن جمع مؤشرين (\code{(low + high) / 2} خطأ).
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex31.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex31.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex31.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=2.70cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{target}};
+\draw[sahm] (n1.south) -- (n2.north);
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=2.45cm] (d6) at (0.00,-3.83) {\fc{low <= high}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fproc, text width=6.50cm] (n7) at (0.00,-5.64) {\fc{middle = low + (high - low) / 2}};
+\node[fdec, text width=3.65cm] (d8) at (0.00,-7.72) {\fc{*middle == target}};
+\node[fio, text width=2.70cm] (n10) at (2.87,-9.60) {\textbf{اكتب}\ \fc{middle}};
+\node[fdec, text width=3.45cm] (d11) at (-5.02,-10.36) {\fc{*middle < target}};
+\node[fproc, text width=3.50cm] (n13) at (-2.25,-12.19) {\fc{low = middle + 1}};
+\node[fproc, text width=3.70cm] (n14) at (-7.79,-12.19) {\fc{high = middle - 1}};
+\coordinate (m12) at (-5.02,-12.88);
+\draw[sahm] (d11.east) -| (n13.north);
+\draw[sahm] (n13.south) |- (m12);
+\draw[sahm] (d11.west) -| (n14.north);
+\draw[sahm] (n14.south) |- (m12);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d11.east) {نعم};
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d11.west) {لا};
+\coordinate (m9) at (0.00,-13.18);
+\draw[sahm] (d8.east) -| (n10.north);
+\draw[sahm] (n10.south) |- (m9);
+\draw[sahm] (d8.west) -| (d11.north);
+\draw[sahm] (m12) |- (m9);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {نعم};
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d8.west) {لا};
+\draw[sahm] (n7.south) -- (d8.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (m9) -- (0.00,-13.53) -- (-10.24,-13.53) -- (-10.24,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-13.98);
+\draw[fline] (d6.east) -- (5.09,-3.83) -- (5.09,-13.98) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\node[fio, text width=2.30cm] (n15) at (0.00,-14.87) {\textbf{اكتب}\ \fc{NULL}};
+\draw[sahm] (e5) -- (n15.north);
+\node[fterm] (n16) at (0.00,-16.15) {نهاية};
+\draw[sahm] (n15.south) -- (n16.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.32}{2}{نسخة عميقة من الكتالوج}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+كل منتج هيكل يحتوي على \textbf{مؤشر} \code{char *name} على اسم محجوز ديناميكيًا. النسخ البسيط \code{copy = item} ينسخ المؤشر فقط (نسخة \textbf{سطحية}): الاسمان يتشاركان نفس الذاكرة. اكتب \code{deepCopy} تحجز اسمًا جديدًا، ووضّح الفرق بتعديل النسخة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نسخة سطحية: تغيير \code{shallow.name[0]} يغير الأصل أيضًا.
+\item نسخة عميقة: \code{malloc} جديد ونسخ الحروف.
+\item كل اسم محجوز يُحرر مرة واحدة فقط.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex32.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex32.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=7.10cm] (n2) at (0.00,-1.67) {\fc{original.name = makeName("laptop")}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.90cm] (n3) at (0.00,-2.95) {\fc{shallow = original}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fcall, text width=5.30cm] (n4) at (0.00,-4.23) {\fc{deep = deepCopy(original)}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=4.50cm] (n5) at (0.00,-5.74) {\fc{shallow.name[0] = 'L'}\\\fc{deep.name[0] = 'X'}};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fio, text width=9.10cm] (n6) at (0.00,-7.25) {\textbf{اكتب}\ \fc{original.name, shallow.name, deep.name}};
+\draw[sahm] (n5.south) -- (n6.north);
+\node[fterm] (n7) at (0.00,-8.53) {نهاية};
+\draw[sahm] (n6.south) -- (n7.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.33}{2}{تطبيق دالة على كل عناصر الجدول}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب دالة عامة \code{mapArray(values, size, transform)} تطبق دالة (عبر مؤشر دالة) على كل عنصر في مكانه. استعملها لسلسلة معالجات على أسعار: إضافة الرسم، ثم التقريب، ثم التحويل إلى الأورو.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \par{\centering\small\code{void mapArray(double *values, int size, double (*transform)(double))}\par}.
+\item كل معالجة دالة صغيرة \code{double f(double)}.
+\item جدول من مؤشرات الدوال يمثل \textbf{خط معالجة}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\small]{code/ch10/ex33.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex33.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.90cm] (n2) at (0.00,-1.67) {\fc{step = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.85cm] (d6) at (0.00,-3.69) {\fc{step < 3}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fcall, text width=7.30cm] (n7) at (0.00,-5.36) {\fc{mapArray(prices, 5, pipeline[step])}};
+\node[fio, text width=2.70cm] (n8) at (0.00,-6.64) {\textbf{اكتب}\ \fc{prices}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fproc, text width=1.50cm] (n9) at (0.00,-7.92) {\fc{step++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-8.66) -- (-4.25,-8.66) -- (-4.25,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-9.11);
+\draw[fline] (d6.east) -- (4.25,-3.69) -- (4.25,-9.11) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fterm] (n10) at (0.00,-10.00) {نهاية};
+\draw[sahm] (e5) -- (n10.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.34}{2}{تبديل عام بمؤشر \en{void}}{\faTag\ علم البيانات}
+\begin{statement}
+اكتب دالة \code{swapBytes(first, second, size)} تبدل \textbf{أي نوع} من البيانات بايتًا ببايت عبر مؤشرات \code{void *} (محولة إلى \code{unsigned char *})، ثم دالة عامة \code{reverseAny(base, count, size)} تقلب جدولًا من أي نوع. اختبرها على \code{int} و \code{double} وجدول هياكل.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{void *} مؤشر عام لا يُفك مباشرة؛ نحوله إلى \code{unsigned char *} لنمر على البايتات.
+\item العنصر رقم \code{idx} يبدأ عند \code{(unsigned char *)base + idx * size}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex34.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex34.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=6.90cm] (n2) at (0.00,-1.67) {\fc{reverseAny(codes, 5, sizeof(int))}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fcall, text width=7.70cm] (n3) at (0.00,-2.95) {\fc{reverseAny(prices, 4, sizeof(double))}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fcall, text width=7.70cm] (n4) at (0.00,-4.23) {\fc{reverseAny(items, 3, sizeof(Product))}};
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=2.90cm] (n5) at (0.00,-5.51) {\textbf{اكتب}\ النتائج};
+\draw[sahm] (n4.south) -- (n5.north);
+\node[fterm] (n6) at (0.00,-6.79) {نهاية};
+\draw[sahm] (n5.south) -- (n6.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.35}{2}{مكدس ديناميكي يكبر عند الحاجة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب هيكل \code{Stack} (مؤشر على البيانات، السعة، القمة) ودوال \code{createStack} و \code{push} (تضاعف السعة عند الامتلاء) و \code{pop} و \code{destroyStack}. استعمله للتحقق من توازن الأقواس في قالب صفحة \en{HTML} مبسط.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{push}: إذا \code{top == capacity} نحجز ضعف الحجم، ننسخ، ونحرر القديم.
+\item لكل قوس فتح \code{( [ \{} نكدسه؛ لكل غلق نسحب ونتحقق من التطابق.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex35.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex35.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=4.70cm] (n2) at (0.00,-1.67) {\fc{stack = createStack(2)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{pos = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=3.65cm] (d7) at (0.00,-5.38) {\fc{text[pos] != '\textbackslash{}0'}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fdec, text width=1.65cm] (d8) at (0.00,-7.81) {قوس فتح};
+\node[fcall, text width=4.90cm] (n10) at (2.95,-9.24) {\fc{push(\&stack, text[pos])}};
+\node[fdec, text width=1.65cm] (d11) at (-3.25,-9.58) {قوس غلق};
+\node[fcall, text width=3.90cm] (n13) at (-3.25,-11.21) {\fc{open = pop(\&stack)}};
+\node[fproc, text width=3.70cm] (n14) at (-3.25,-12.49) {التحقق من التطابق};
+\draw[sahm] (n13.south) -- (n14.north);
+\coordinate (m12) at (-3.25,-13.18);
+\draw[sahm] (d11.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d11.south) {نعم};
+\draw[fline] (n14.south) -- (m12);
+\draw[sahm] (d11.east) -- (-0.65,-9.58) -- (-0.65,-13.18) -- (m12);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d11.east) {لا};
+\coordinate (m9) at (0.00,-13.48);
+\draw[sahm] (d8.east) -| (n10.north);
+\draw[sahm] (n10.south) |- (m9);
+\draw[sahm] (d8.west) -| (d11.north);
+\draw[sahm] (m12) |- (m9);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {نعم};
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d8.west) {لا};
+\node[fproc, text width=1.30cm] (n15) at (0.00,-14.37) {\fc{pos++}};
+\draw[sahm] (m9) -- (n15.north);
+\draw[sahm] (d7.south) -- (d8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-15.11) -- (-5.80,-15.11) -- (-5.80,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-15.56);
+\draw[fline] (d7.east) -- (6.00,-5.38) -- (6.00,-15.56) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=6.30cm] (n16) at (0.00,-16.45) {\textbf{اكتب}\ \fc{balanced, stack.capacity}};
+\draw[sahm] (e6) -- (n16.north);
+\node[fcall, text width=4.30cm] (n17) at (0.00,-17.73) {\fc{destroyStack(\&stack)}};
+\draw[sahm] (n16.south) -- (n17.north);
+\node[fterm] (n18) at (0.00,-19.01) {نهاية};
+\draw[sahm] (n17.south) -- (n18.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.36}{2}{جداء مصفوفتين ديناميكيتين}{\faTag\ علم البيانات}
+\begin{statement}
+مصفوفة الكميات \code{qty[فرع][منتج]} (\en{3}×\en{4}) ومصفوفة التكاليف \code{cost[منتج][بند]} (\en{4}×\en{2}: سعر الشراء وتكلفة النقل). احجز المصفوفات \textbf{ديناميكيًا} بدالة \code{newMatrix(rows, cols)} واحسب الجداء \code{qty × cost} لإيجاد التكاليف لكل فرع.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{newMatrix} تحجز جدول مؤشرات وأسطرًا وتعيد \code{double **}.
+\item \par{\centering\small\code{result[row][col] = Σ qty[row][mid] * cost[mid][col]}\par}.
+\item \code{freeMatrix} تحرر الأسطر ثم الجدول.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex36.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex36.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=5.10cm] (n2) at (0.00,-1.67) {\fc{result = newMatrix(3, 2)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{row = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=1.65cm] (d7) at (0.00,-4.93) {\fc{row < 3}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fproc, text width=1.70cm] (n8) at (0.00,-6.55) {\fc{col = 0}};
+\coordinate (t9) at (0.00,-7.44);
+\coordinate (j10) at (0.00,-7.64);
+\node[fdec, text width=1.65cm] (d12) at (0.00,-8.53) {\fc{col < 2}};
+\draw[sahm] (t9) -- (d12.north);
+\node[fproc, text width=10.50cm] (n13) at (0.00,-10.16) {\fc{result[row][col] = Σ qty[row][mid] * cost[mid][col]}};
+\node[fproc, text width=1.30cm] (n14) at (0.00,-11.44) {\fc{col++}};
+\draw[sahm] (n13.south) -- (n14.north);
+\draw[sahm] (d12.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d12.south) {نعم};
+\draw[sahm] (n14.south) -- (0.00,-12.18) -- (-5.85,-12.18) -- (-5.85,-7.64) -- (j10);
+\coordinate (e11) at (0.00,-12.63);
+\draw[fline] (d12.east) -- (5.85,-8.53) -- (5.85,-12.63) -- (e11);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d12.east) {لا};
+\draw[fline] (n8.south) -- (t9);
+\node[fproc, text width=1.30cm] (n15) at (0.00,-13.52) {\fc{row++}};
+\draw[sahm] (e11) -- (n15.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-14.26) -- (-6.40,-14.26) -- (-6.40,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-14.71);
+\draw[fline] (d7.east) -- (6.60,-4.93) -- (6.60,-14.71) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.70cm] (n16) at (0.00,-15.60) {\textbf{اكتب}\ \fc{result}};
+\draw[sahm] (e6) -- (n16.north);
+\node[fcall, text width=4.50cm] (n17) at (0.00,-16.88) {\fc{freeMatrix(result, 3)}};
+\draw[sahm] (n16.south) -- (n17.north);
+\node[fterm] (n18) at (0.00,-18.16) {نهاية};
+\draw[sahm] (n17.south) -- (n18.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.37}{2}{المجاميع التراكمية للاستعلامات السريعة}{\faTag\ علم البيانات}
+\begin{statement}
+نريد الإجابة بسرعة عن أسئلة مثل "كم بعنا بين اليوم \en{5} واليوم \en{20}؟". احجز جدول \textbf{مجاميع تراكمية} \code{prefix[day] = مجموع الأيام 0..day-1} بحجم \code{n + 1}، واملأه بمؤشرين (قراءة وكتابة)، ثم أجب عن كل استعلام بطرح واحد.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{prefix[0] = 0}، و \code{*(out + 1) = *out + *in}.
+\item مبيعات المجال \code{[from, to]} (من \en{1}) = \code{prefix[to] - prefix[from - 1]}.
+\item البناء خطي، وكل استعلام بعملية واحدة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex37.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex37.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex37.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=4.70cm] (n2) at (0.00,-1.90) {\fc{prefix = malloc(n + 1)}\\\fc{prefix[0] = 0}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-3.41) {\fc{day = 0}};
+\coordinate (t4) at (0.00,-4.30);
+\coordinate (j5) at (0.00,-4.50);
+\node[fdec, text width=1.65cm] (d7) at (0.00,-5.39) {\fc{day < n}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fproc, text width=8.70cm] (n8) at (0.00,-7.01) {\fc{prefix[day + 1] = prefix[day] + sales[day]}};
+\node[fproc, text width=1.30cm] (n9) at (0.00,-8.29) {\fc{day++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-9.03) -- (-4.95,-9.03) -- (-4.95,-4.50) -- (j5);
+\coordinate (e6) at (0.00,-9.48);
+\draw[fline] (d7.east) -- (4.95,-5.39) -- (4.95,-9.48) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=3.30cm] (n10) at (0.00,-10.37) {\textbf{اقرأ}\ \fc{nbQueries}};
+\draw[sahm] (e6) -- (n10.north);
+\node[fproc, text width=2.10cm] (n11) at (0.00,-11.65) {\fc{query = 0}};
+\coordinate (t12) at (0.00,-12.54);
+\coordinate (j13) at (0.00,-12.74);
+\node[fdec, text width=3.65cm] (d15) at (0.00,-14.08) {\fc{query < nbQueries}};
+\draw[sahm] (t12) -- (d15.north);
+\node[fio, text width=3.10cm] (n16) at (0.00,-16.17) {\textbf{اقرأ}\ \fc{from, to}};
+\node[fio, text width=7.30cm] (n17) at (0.00,-17.45) {\textbf{اكتب}\ \fc{prefix[to] - prefix[from - 1]}};
+\draw[sahm] (n16.south) -- (n17.north);
+\node[fproc, text width=1.70cm] (n18) at (0.00,-18.73) {\fc{query++}};
+\draw[sahm] (n17.south) -- (n18.north);
+\draw[sahm] (d15.south) -- (n16.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d15.south) {نعم};
+\draw[sahm] (n18.south) -- (0.00,-19.47) -- (-4.52,-19.47) -- (-4.52,-12.74) -- (j13);
+\coordinate (e14) at (0.00,-19.92);
+\draw[fline] (d15.east) -- (4.52,-14.08) -- (4.52,-19.92) -- (e14);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d15.east) {لا};
+\draw[fline] (n11.south) -- (t12);
+\draw[sahm] (n10.south) -- (n11.north);
+\node[fterm] (n19) at (0.00,-20.81) {نهاية};
+\draw[sahm] (e14) -- (n19.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.38}{2}{كشف تسرب الذاكرة بعدّاد}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب دالتين مغلفتين \code{trackedMalloc(size)} و \code{trackedFree(ptr)} تعدّان عدد الكتل المحجوزة والمحررة وعدد البايتات الحية. شغّل محاكاة سلة يُنسى فيها تحرير بعض الكتل، ثم اعرض تقرير \textbf{التسرب} في النهاية.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item عدادات عامة: \code{allocations}، \code{releases}، \code{liveBytes}.
+\item لمعرفة حجم الكتلة عند التحرير نحجز \code{size + sizeof(long)} ونخزن الحجم في بدايتها، ونعيد العنوان بعد الحجم.
+\item التسرب = \code{allocations - releases}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex38.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex38.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=1.70cm] (n2) at (0.00,-1.67) {\fc{idx = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=1.65cm] (d6) at (0.00,-3.65) {\fc{idx < 5}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fcall, text width=6.50cm] (n7) at (0.00,-5.27) {\fc{carts[idx] = trackedMalloc(...)}};
+\node[fproc, text width=1.30cm] (n8) at (0.00,-6.55) {\fc{idx++}};
+\draw[sahm] (n7.south) -- (n8.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n8.south) -- (0.00,-7.29) -- (-3.85,-7.29) -- (-3.85,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-7.74);
+\draw[fline] (d6.east) -- (3.85,-3.65) -- (3.85,-7.74) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n9) at (0.00,-8.63) {\fc{idx = 0}};
+\coordinate (t10) at (0.00,-9.52);
+\coordinate (j11) at (0.00,-9.72);
+\node[fdec, text width=1.65cm] (d13) at (0.00,-10.61) {\fc{idx < 5}};
+\draw[sahm] (t10) -- (d13.north);
+\node[fdec, text width=4.25cm] (d14) at (0.00,-13.18) {\fc{idx != 1 \&\& idx != 3}};
+\node[fcall, text width=4.90cm] (n16) at (0.00,-15.39) {\fc{trackedFree(carts[idx])}};
+\coordinate (m15) at (0.00,-16.08);
+\draw[sahm] (d14.south) -- (n16.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d14.south) {نعم};
+\draw[fline] (n16.south) -- (m15);
+\draw[sahm] (d14.east) -- (3.42,-13.18) -- (3.42,-16.08) -- (m15);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d14.east) {لا};
+\node[fproc, text width=1.30cm] (n17) at (0.00,-16.97) {\fc{idx++}};
+\draw[sahm] (m15) -- (n17.north);
+\draw[sahm] (d13.south) -- (d14.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d13.south) {نعم};
+\draw[sahm] (n17.south) -- (0.00,-17.71) -- (-3.37,-17.71) -- (-3.37,-9.72) -- (j11);
+\coordinate (e12) at (0.00,-18.16);
+\draw[fline] (d13.east) -- (4.17,-10.61) -- (4.17,-18.16) -- (e12);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d13.east) {لا};
+\draw[fline] (n9.south) -- (t10);
+\draw[sahm] (e5) -- (n9.north);
+\node[fio, text width=7.90cm] (n18) at (0.00,-19.05) {\textbf{اكتب}\ \fc{allocations, releases, liveBytes}};
+\draw[sahm] (e12) -- (n18.north);
+\node[fterm] (n19) at (0.00,-20.33) {نهاية};
+\draw[sahm] (n18.south) -- (n19.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.39}{2}{مدرج تكراري بعدد فئات متغير}{\faTag\ علم البيانات}
+\begin{statement}
+اقرأ عدد الفئات المطلوب، ثم احجز \textbf{ديناميكيًا} جدول العدادات وجدول الحدود، ووزّع أعمار الزبائن على الفئات بعرض متساوٍ، واعرض المدرج. جرّب \en{4} فئات ثم \en{7}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الحجز يعتمد على قيمة تُقرأ أثناء التنفيذ.
+\item \par{\centering\small\code{bin = (age - low) * bins / (high - low + 1)}\par}.
+\item نحرر الجدولين بعد كل مدرج.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex39.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex39.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex39.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=2.10cm] (n2) at (0.00,-1.67) {\fc{query = 0}};
+\coordinate (t3) at (0.00,-2.56);
+\coordinate (j4) at (0.00,-2.76);
+\node[fdec, text width=2.05cm] (d6) at (0.00,-3.74) {\fc{query < 2}};
+\draw[sahm] (t3) -- (d6.north);
+\node[fio, text width=2.30cm] (n7) at (0.00,-5.46) {\textbf{اقرأ}\ \fc{bins}};
+\node[fproc, text width=4.40cm] (n8) at (0.00,-6.97) {\en{counts} = \en{malloc}(\en{bins}) ; كلها \en{0}};
+\draw[sahm] (n7.south) -- (n8.north);
+\node[fproc, text width=1.70cm] (n9) at (0.00,-8.48) {\fc{idx = 0}};
+\coordinate (t10) at (0.00,-9.37);
+\coordinate (j11) at (0.00,-9.57);
+\node[fdec, text width=1.85cm] (d13) at (0.00,-10.50) {\fc{idx < NB}};
+\draw[sahm] (t10) -- (d13.north);
+\node[fproc, text width=4.40cm] (n14) at (0.00,-12.40) {\en{counts[}فئة \en{ages[idx]]++}};
+\node[fproc, text width=1.30cm] (n15) at (0.00,-13.91) {\fc{idx++}};
+\draw[sahm] (n14.south) -- (n15.north);
+\draw[sahm] (d13.south) -- (n14.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d13.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-14.65) -- (-2.80,-14.65) -- (-2.80,-9.57) -- (j11);
+\coordinate (e12) at (0.00,-15.10);
+\draw[fline] (d13.east) -- (2.80,-10.50) -- (2.80,-15.10) -- (e12);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d13.east) {لا};
+\draw[fline] (n9.south) -- (t10);
+\draw[sahm] (n8.south) -- (n9.north);
+\node[fio, text width=2.70cm] (n16) at (0.00,-15.99) {\textbf{اكتب}\ المدرج};
+\draw[sahm] (e12) -- (n16.north);
+\node[fproc, text width=2.70cm] (n17) at (0.00,-17.27) {\fc{free(counts)}};
+\draw[sahm] (n16.south) -- (n17.north);
+\node[fproc, text width=1.70cm] (n18) at (0.00,-18.55) {\fc{query++}};
+\draw[sahm] (n17.south) -- (n18.north);
+\draw[sahm] (d6.south) -- (n7.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d6.south) {نعم};
+\draw[sahm] (n18.south) -- (0.00,-19.29) -- (-3.35,-19.29) -- (-3.35,-2.76) -- (j4);
+\coordinate (e5) at (0.00,-19.74);
+\draw[fline] (d6.east) -- (3.55,-3.74) -- (3.55,-19.74) -- (e5);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {لا};
+\draw[fline] (n2.south) -- (t3);
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fterm] (n19) at (0.00,-20.63) {نهاية};
+\draw[sahm] (e5) -- (n19.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.40}{2}{إدراج اسم في قائمة مرتبة ديناميكية}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+قائمة أسماء العلامات التجارية جدول ديناميكي من المؤشرات \code{char **brands} مرتب أبجديًا. اكتب دالة \code{insertSorted(\&brands, \&count, name)} تحجز جدولًا أكبر بخانة، وتنسخ المؤشرات مع إدراج الاسم الجديد (نسخة محجوزة) في مكانه الصحيح.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الدالة تغير المؤشر \code{brands} في \code{main}، لذلك تستقبل \code{char ***list}.
+\item نجد موضع الإدراج بالمقارنة الأبجدية، ثم ننسخ المؤشرات قبله وبعده.
+\item نحرر الجدول القديم (المؤشرات فقط، لا الأسماء).
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\footnotesize]{code/ch10/ex40.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex40.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex40.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=1.90cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{nb}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{idx = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=1.85cm] (d7) at (0.00,-4.97) {\fc{idx < nb}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fio, text width=2.30cm] (n8) at (0.00,-6.64) {\textbf{اقرأ}\ \fc{name}};
+\node[fcall, text width=7.30cm] (n9) at (0.00,-7.92) {\fc{insertSorted(\&brands, \&count, name)}};
+\draw[sahm] (n8.south) -- (n9.north);
+\node[fproc, text width=1.30cm] (n10) at (0.00,-9.20) {\fc{idx++}};
+\draw[sahm] (n9.south) -- (n10.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n10.south) -- (0.00,-9.94) -- (-4.25,-9.94) -- (-4.25,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-10.39);
+\draw[fline] (d7.east) -- (4.25,-4.97) -- (4.25,-10.39) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.70cm] (n11) at (0.00,-11.28) {\textbf{اكتب}\ \fc{brands}};
+\draw[sahm] (e6) -- (n11.north);
+\node[fproc, text width=4.40cm] (n12) at (0.00,-12.79) {تحرير الأسماء ثم الجدول};
+\draw[sahm] (n11.south) -- (n12.north);
+\node[fterm] (n13) at (0.00,-14.30) {نهاية};
+\draw[sahm] (n12.south) -- (n13.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\clearpage
+\levelsection{3}{التمارين الصعبة}
+
+\exhead{10.41}{3}{الجدول الديناميكي الكامل}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+اكتب نوعًا \code{Vector} كامل الوظائف لسجل الطلبيات: \code{vecInit}، \code{vecPush} (إضافة في النهاية مع مضاعفة السعة)، \code{vecInsert(vec, pos, value)} (إدراج مع إزاحة)، \code{vecRemove(vec, pos)}، و \code{vecFree}. عدّ عدد العناصر المنسوخة الكلي لإظهار أن تكلفة الإضافة \textbf{مستهلكة ثابتة}.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{grow} تحجز ضعف السعة، تنسخ، وتحرر القديم.
+\item الإدراج: نتأكد من السعة، نزيح \code{[pos, size)} بخانة يمينًا من النهاية، ثم نكتب.
+\item الحذف: نزيح يسارًا وننقص الحجم.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex41.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex41.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=4.10cm] (n2) at (0.00,-1.67) {\fc{vecInit(\&orders, 1)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{idx = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=2.25cm] (d7) at (0.00,-5.06) {\fc{idx < 1000}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fcall, text width=4.50cm] (n8) at (0.00,-6.83) {\fc{vecPush(\&orders, idx)}};
+\node[fproc, text width=1.30cm] (n9) at (0.00,-8.11) {\fc{idx++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-8.85) -- (-2.85,-8.85) -- (-2.85,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-9.30);
+\draw[fline] (d7.east) -- (2.85,-5.06) -- (2.85,-9.30) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=10.10cm] (n10) at (0.00,-10.19) {\textbf{اكتب}\ \fc{orders.size, orders.capacity, copies / size}};
+\draw[sahm] (e6) -- (n10.north);
+\node[fcall, text width=5.30cm] (n11) at (0.00,-11.47) {\fc{vecInsert(\&orders, 0, -1)}};
+\draw[sahm] (n10.south) -- (n11.north);
+\node[fcall, text width=4.90cm] (n12) at (0.00,-12.75) {\fc{vecRemove(\&orders, 500)}};
+\draw[sahm] (n11.south) -- (n12.north);
+\node[fcall, text width=3.50cm] (n13) at (0.00,-14.03) {\fc{vecFree(\&orders)}};
+\draw[sahm] (n12.south) -- (n13.north);
+\node[fterm] (n14) at (0.00,-15.31) {نهاية};
+\draw[sahm] (n13.south) -- (n14.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.42}{3}{مصفوفة التقييمات المتناثرة \en{CSR}}{\faTag\ علم البيانات}
+\begin{statement}
+أغلب خانات مصفوفة (زبون × منتج) فارغة. صيغة \textbf{\en{CSR}} تخزن فقط القيم غير المعدومة في ثلاثة جداول ديناميكية: \code{values}، \code{columns}، و \code{rowStart} (بداية كل سطر). ابنِ \en{CSR} من قائمة تقييمات، ثم احسب لزبون جديد \textbf{التشابه} (جداء سلمي) مع كل زبون، واقترح منتجًا من أقربهم.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item نعد التقييمات لكل زبون، ثم \par{\centering\small\code{rowStart[row+1] = rowStart[row] + count[row]}\par}.
+\item نملأ \code{values} و \code{columns} في مواضعها.
+\item الجداء السلمي لسطر \code{row}: \code{Σ values[idx] * query[columns[idx]]} لـ \code{idx} من \code{rowStart[row]} إلى \code{rowStart[row+1]}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex42.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex42.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=4.40cm] (n2) at (0.00,-1.90) {حساب \en{rowStart} من عدد تقييمات كل زبون};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.30cm] (n3) at (0.00,-3.41) {ملء \en{values} و \en{columns}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=1.70cm] (n4) at (0.00,-4.69) {\fc{row = 0}};
+\coordinate (t5) at (0.00,-5.58);
+\coordinate (j6) at (0.00,-5.78);
+\node[fdec, text width=2.05cm] (d8) at (0.00,-6.76) {\fc{row < NBC}};
+\draw[sahm] (t5) -- (d8.north);
+\node[fproc, text width=6.90cm] (n9) at (0.00,-8.48) {\fc{score = Σ values * query[columns]}};
+\node[fproc, text width=1.30cm] (n10) at (0.00,-9.76) {\fc{row++}};
+\draw[sahm] (n9.south) -- (n10.north);
+\draw[sahm] (d8.south) -- (n9.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d8.south) {نعم};
+\draw[sahm] (n10.south) -- (0.00,-10.50) -- (-4.05,-10.50) -- (-4.05,-5.78) -- (j6);
+\coordinate (e7) at (0.00,-10.95);
+\draw[fline] (d8.east) -- (4.05,-6.76) -- (4.05,-10.95) -- (e7);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {لا};
+\draw[fline] (n4.south) -- (t5);
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fio, text width=4.00cm] (n11) at (0.00,-12.30) {\textbf{اكتب}\ أقرب زبون ومنتج مقترح لم يقيّمه الزبون الجديد};
+\draw[sahm] (e7) -- (n11.north);
+\node[fterm] (n12) at (0.00,-14.04) {نهاية};
+\draw[sahm] (n11.south) -- (n12.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.43}{3}{منشئ النصوص لتوليد الفاتورة}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+لتوليد نص الفاتورة سطرًا بسطر دون معرفة طوله مسبقًا، اكتب نوع \code{Builder} (مؤشر، طول، سعة) ودوال \code{appendText} و \code{appendNumber} (تحويل عدد صحيح إلى نص يدويًا) و \code{appendChar}، مع مضاعفة السعة عند الحاجة. ابنِ الفاتورة ثم اطبعها مرة واحدة.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item كل إضافة تتأكد أولًا من السعة: \code{ensure(builder, extra)}.
+\item \code{appendNumber}: نستخرج الأرقام في جدول مؤقت بالترتيب المعكوس ثم نضيفها.
+\item النص يبقى منتهيًا بـ \code{'\textbackslash{}0'} بعد كل إضافة.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex43.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex43.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fcall, text width=3.70cm] (n2) at (0.00,-1.67) {\fc{init(\&invoice, 8)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=1.70cm] (n3) at (0.00,-2.95) {\fc{idx = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=1.65cm] (d7) at (0.00,-4.93) {\fc{idx < 4}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fcall, text width=5.30cm] (n8) at (0.00,-7.24) {\fc{appendText(name)}\\\fc{appendChar(' ')}\\\fc{appendNumber(qty * price)}\\\fc{appendChar('\textbackslash{}n')}};
+\node[fproc, text width=1.30cm] (n9) at (0.00,-9.21) {\fc{idx++}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-9.95) -- (-3.25,-9.95) -- (-3.25,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-10.40);
+\draw[fline] (d7.east) -- (3.25,-4.93) -- (3.25,-10.40) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fcall, text width=4.30cm] (n10) at (0.00,-11.52) {\fc{appendText("TOTAL ")}\\\fc{appendNumber(total)}};
+\draw[sahm] (e6) -- (n10.north);
+\node[fio, text width=10.70cm] (n11) at (0.00,-13.03) {\textbf{اكتب}\ \fc{invoice.text, invoice.length, invoice.capacity}};
+\draw[sahm] (n10.south) -- (n11.north);
+\node[fterm] (n12) at (0.00,-14.31) {نهاية};
+\draw[sahm] (n11.south) -- (n12.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.44}{3}{جدول تجزئة بالسلاسل لعد الكلمات}{\faTag\ علم البيانات}
+\begin{statement}
+لعدّ تكرار الكلمات في التعليقات بسرعة، اكتب \textbf{جدول تجزئة بالسلاسل}: كل خانة رأس لقائمة عقد محجوزة بـ \code{malloc} (الكلمة، العداد، المؤشر على التالية). أدرج كل كلمة (أو زد عدادها)، ثم اعرض الكلمات التي ظهرت أكثر من مرة وطول أطول سلسلة، وحرر كل العقد.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{hashWord} (\en{djb2}) ثم \code{\% SIZE} لتحديد الخانة.
+\item البحث في القائمة؛ إذا لم توجد الكلمة نحجز عقدة جديدة ونضعها في رأس القائمة.
+\item التحرير: لكل خانة نمر على القائمة ونحرر العقدة بعد حفظ التالية.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex44.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex44.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\coordinate (t2) at (0.00,-1.28);
+\coordinate (j3) at (0.00,-1.48);
+\node[fdec, text width=3.00cm] (d5) at (0.00,-2.90) {توجد كلمة أخرى في النص};
+\draw[sahm] (t2) -- (d5.north);
+\node[fproc, text width=5.90cm] (n6) at (0.00,-5.07) {\fc{slot = hashWord(word) \% SIZE}};
+\node[fproc, text width=4.40cm] (n7) at (0.00,-6.58) {\en{node} = البحث في \en{table[slot]}};
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fdec, text width=2.65cm] (d8) at (0.00,-8.66) {\fc{node != NULL}};
+\node[fproc, text width=2.90cm] (n10) at (2.37,-10.32) {\fc{node->count++}};
+\node[fproc, text width=5.10cm] (n11) at (-3.05,-10.78) {\fc{node = malloc}\\\fc{node->next = table[slot]}\\\fc{table[slot] = node}};
+\coordinate (m9) at (0.00,-11.93);
+\draw[sahm] (d8.east) -| (n10.north);
+\draw[sahm] (n10.south) |- (m9);
+\draw[sahm] (d8.west) -| (n11.north);
+\draw[sahm] (n11.south) |- (m9);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {نعم};
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d8.west) {لا};
+\draw[sahm] (n7.south) -- (d8.north);
+\draw[sahm] (d5.south) -- (n6.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d5.south) {نعم};
+\draw[sahm] (m9) -- (0.00,-12.28) -- (-6.20,-12.28) -- (-6.20,-1.48) -- (j3);
+\coordinate (e4) at (0.00,-12.73);
+\draw[fline] (d5.east) -- (4.42,-2.90) -- (4.42,-12.73) -- (e4);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d5.east) {لا};
+\draw[fline] (n1.south) -- (t2);
+\node[fio, text width=4.00cm] (n12) at (0.00,-13.85) {\textbf{اكتب}\ الكلمات المتكررة};
+\draw[sahm] (e4) -- (n12.north);
+\node[fproc, text width=3.50cm] (n13) at (0.00,-15.36) {تحرير كل القوائم};
+\draw[sahm] (n12.south) -- (n13.north);
+\node[fterm] (n14) at (0.00,-16.64) {نهاية};
+\draw[sahm] (n13.south) -- (n14.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.45}{3}{الترتيب بالكومة لمؤشرات المنتجات}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+رتّب جدولًا \textbf{ديناميكيًا من المؤشرات} على هياكل منتجات حسب الإيراد (السعر × المبيعات) بخوارزمية \textbf{الترتيب بالكومة} (\en{heap sort}): نبني كومة عظمى في المكان، ثم ننقل الجذر إلى النهاية ونعيد ترميم الكومة. التعقيد \code{n log n} دون ذاكرة إضافية.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \code{siftDown(view, root, size)}: ننزل العنصر ما دام أحد أبنائه أكبر منه.
+\item البناء: \code{siftDown} لكل عقدة داخلية من \code{size/2 - 1} إلى \en{0}.
+\item الاستخراج: نبدل \code{view[0]} مع \code{view[end]}، ثم \code{siftDown(view, 0, end)}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex45.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex45.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=4.40cm] (n2) at (0.00,-2.13) {\en{view} = \en{malloc}(\en{NB} مؤشرات) ; \en{view[idx]} = \&\en{items[idx]}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=3.70cm] (n3) at (0.00,-3.87) {\fc{root = NB / 2 - 1}};
+\coordinate (t4) at (0.00,-4.76);
+\coordinate (j5) at (0.00,-4.96);
+\node[fdec, text width=2.05cm] (d7) at (0.00,-5.94) {\fc{root >= 0}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fcall, text width=5.10cm] (n8) at (0.00,-7.66) {\fc{siftDown(view, root, NB)}};
+\node[fproc, text width=1.50cm] (n9) at (0.00,-8.94) {\fc{root--}};
+\draw[sahm] (n8.south) -- (n9.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n9.south) -- (0.00,-9.68) -- (-3.15,-9.68) -- (-3.15,-4.96) -- (j5);
+\coordinate (e6) at (0.00,-10.13);
+\draw[fline] (d7.east) -- (3.15,-5.94) -- (3.15,-10.13) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=2.70cm] (n10) at (0.00,-11.02) {\fc{end = NB - 1}};
+\coordinate (t11) at (0.00,-11.91);
+\coordinate (j12) at (0.00,-12.11);
+\node[fdec, text width=1.65cm] (d14) at (0.00,-12.99) {\fc{end > 0}};
+\draw[sahm] (t11) -- (d14.north);
+\node[fproc, text width=4.40cm] (n15) at (0.00,-14.85) {تبديل \en{view[0]} و \en{view[end]}};
+\node[fcall, text width=4.70cm] (n16) at (0.00,-16.36) {\fc{siftDown(view, 0, end)}};
+\draw[sahm] (n15.south) -- (n16.north);
+\node[fproc, text width=1.30cm] (n17) at (0.00,-17.64) {\fc{end--}};
+\draw[sahm] (n16.south) -- (n17.north);
+\draw[sahm] (d14.south) -- (n15.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d14.south) {نعم};
+\draw[sahm] (n17.south) -- (0.00,-18.38) -- (-2.95,-18.38) -- (-2.95,-12.11) -- (j12);
+\coordinate (e13) at (0.00,-18.83);
+\draw[fline] (d14.east) -- (2.95,-12.99) -- (2.95,-18.83) -- (e13);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d14.east) {لا};
+\draw[fline] (n10.south) -- (t11);
+\draw[sahm] (e6) -- (n10.north);
+\node[fio, text width=2.30cm] (n18) at (0.00,-19.72) {\textbf{اكتب}\ \fc{view}};
+\draw[sahm] (e13) -- (n18.north);
+\node[fterm] (n19) at (0.00,-21.00) {نهاية};
+\draw[sahm] (n18.south) -- (n19.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.46}{3}{مصفوفة التشابه بين المنتجات}{\faTag\ علم البيانات}
+\begin{statement}
+لاقتراح "منتجات مشابهة"، احسب \textbf{تشابه جيب التمام} بين كل زوج من المنتجات من مصفوفة المشتريات (زبون × منتج، \en{0} أو عدد المرات). احجز مصفوفة التشابه \code{NBP × NBP} ديناميكيًا في كتلة واحدة، واستغل \textbf{التناظر} لحساب النصف فقط، ثم اعرض لكل منتج أقرب منتج إليه.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item \par{\centering\small\code{cos(a, b) = Σ buy[c][a]·buy[c][b] / (‖a‖·‖b‖)}\par}.
+\item نحسب الخانة \code{[a][b]} لـ \code{b > a} فقط ثم ننسخها في \code{[b][a]}.
+\item الجذر بطريقة نيوتن؛ القطر = \en{1}.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex46.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex46.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=4.90cm] (n2) at (0.00,-1.67) {\fc{sim = malloc(NBP * NBP)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.10cm] (n3) at (0.00,-2.95) {\fc{first = 0}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=2.45cm] (d7) at (0.00,-5.11) {\fc{first < NBP}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fproc, text width=3.90cm] (n8) at (0.00,-6.92) {\fc{second = first + 1}};
+\coordinate (t9) at (0.00,-7.81);
+\coordinate (j10) at (0.00,-8.01);
+\node[fdec, text width=2.65cm] (d12) at (0.00,-9.12) {\fc{second < NBP}};
+\draw[sahm] (t9) -- (d12.north);
+\node[fproc, text width=12.30cm] (n13) at (0.00,-10.98) {\fc{sim[first][second] = sim[second][first] = cos(first, second)}};
+\node[fproc, text width=1.90cm] (n14) at (0.00,-12.26) {\fc{second++}};
+\draw[sahm] (n13.south) -- (n14.north);
+\draw[sahm] (d12.south) -- (n13.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d12.south) {نعم};
+\draw[sahm] (n14.south) -- (0.00,-13.00) -- (-6.75,-13.00) -- (-6.75,-8.01) -- (j10);
+\coordinate (e11) at (0.00,-13.45);
+\draw[fline] (d12.east) -- (6.75,-9.12) -- (6.75,-13.45) -- (e11);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d12.east) {لا};
+\draw[fline] (n8.south) -- (t9);
+\node[fproc, text width=1.70cm] (n15) at (0.00,-14.34) {\fc{first++}};
+\draw[sahm] (e11) -- (n15.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-15.08) -- (-7.30,-15.08) -- (-7.30,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-15.53);
+\draw[fline] (d7.east) -- (7.50,-5.11) -- (7.50,-15.53) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=2.10cm] (n16) at (0.00,-16.42) {\fc{first = 0}};
+\coordinate (t17) at (0.00,-17.31);
+\coordinate (j18) at (0.00,-17.51);
+\node[fdec, text width=2.45cm] (d20) at (0.00,-18.57) {\fc{first < NBP}};
+\draw[sahm] (t17) -- (d20.north);
+\node[fio, text width=3.30cm] (n21) at (0.00,-20.38) {\textbf{اكتب}\ أقرب منتج};
+\node[fproc, text width=1.70cm] (n22) at (0.00,-21.66) {\fc{first++}};
+\draw[sahm] (n21.south) -- (n22.north);
+\draw[sahm] (d20.south) -- (n21.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d20.south) {نعم};
+\draw[sahm] (n22.south) -- (0.00,-22.40) -- (-2.52,-22.40) -- (-2.52,-17.51) -- (j18);
+\coordinate (e19) at (0.00,-22.85);
+\draw[fline] (d20.east) -- (2.52,-18.57) -- (2.52,-22.85) -- (e19);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d20.east) {لا};
+\draw[fline] (n16.south) -- (t17);
+\draw[sahm] (e6) -- (n16.north);
+\node[fproc, text width=2.10cm] (n23) at (0.00,-23.74) {\fc{free(sim)}};
+\draw[sahm] (e19) -- (n23.north);
+\node[fterm] (n24) at (0.00,-25.02) {نهاية};
+\draw[sahm] (n23.south) -- (n24.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.47}{3}{أطول تسلسل مشترك بين سجلي تصفح}{\faTag\ علم البيانات}
+\begin{statement}
+سجل تصفح زبون هو تسلسل من رموز الصفحات. لقياس تشابه سلوك زبونين، اقرأ التسلسلين بطولين يحددهما المدخل، واحجز جدول البرمجة الديناميكية \textbf{بالحجم المضبوط} \code{(lenA+1) × (lenB+1)} في كتلة واحدة، واحسب \textbf{\en{LCS}} ثم أعد بناء التسلسل المشترك.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item الخانة \code{(row, col)} في الموضع \code{row * (lenB + 1) + col}.
+\item نفس معادلة \en{LCS}: تطابق → قطري + \en{1}، وإلا الأكبر من الأعلى واليسار.
+\item نحرر الجداول الثلاثة في النهاية.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex47.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex47.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex47.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=6.50cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{lenA, first, lenB, second}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=8.10cm] (n3) at (0.00,-2.95) {\fc{table = malloc((lenA + 1) * (lenB + 1))}};
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fproc, text width=1.70cm] (n4) at (0.00,-4.23) {\fc{row = 1}};
+\coordinate (t5) at (0.00,-5.12);
+\coordinate (j6) at (0.00,-5.32);
+\node[fdec, text width=2.45cm] (d8) at (0.00,-6.39) {\fc{row <= lenA}};
+\draw[sahm] (t5) -- (d8.north);
+\node[fproc, text width=1.70cm] (n9) at (0.00,-8.20) {\fc{col = 1}};
+\coordinate (t10) at (0.00,-9.09);
+\coordinate (j11) at (0.00,-9.29);
+\node[fdec, text width=2.45cm] (d13) at (0.00,-10.36) {\fc{col <= lenB}};
+\draw[sahm] (t10) -- (d13.north);
+\node[fproc, text width=3.50cm] (n14) at (0.00,-12.16) {تطبيق معادلة \en{LCS}};
+\node[fproc, text width=1.30cm] (n15) at (0.00,-13.44) {\fc{col++}};
+\draw[sahm] (n14.south) -- (n15.north);
+\draw[sahm] (d13.south) -- (n14.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d13.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-14.18) -- (-2.47,-14.18) -- (-2.47,-9.29) -- (j11);
+\coordinate (e12) at (0.00,-14.63);
+\draw[fline] (d13.east) -- (2.47,-10.36) -- (2.47,-14.63) -- (e12);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d13.east) {لا};
+\draw[fline] (n9.south) -- (t10);
+\node[fproc, text width=1.30cm] (n16) at (0.00,-15.52) {\fc{row++}};
+\draw[sahm] (e12) -- (n16.north);
+\draw[sahm] (d8.south) -- (n9.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d8.south) {نعم};
+\draw[sahm] (n16.south) -- (0.00,-16.26) -- (-3.02,-16.26) -- (-3.02,-5.32) -- (j6);
+\coordinate (e7) at (0.00,-16.71);
+\draw[fline] (d8.east) -- (3.22,-6.39) -- (3.22,-16.71) -- (e7);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d8.east) {لا};
+\draw[fline] (n4.south) -- (t5);
+\draw[sahm] (n3.south) -- (n4.north);
+\node[fproc, text width=2.70cm] (n17) at (0.00,-17.60) {إعادة البناء};
+\draw[sahm] (e7) -- (n17.north);
+\node[fio, text width=2.10cm] (n18) at (0.00,-18.88) {\textbf{اكتب}\ \fc{LCS}};
+\draw[sahm] (n17.south) -- (n18.north);
+\node[fproc, text width=2.50cm] (n19) at (0.00,-20.16) {\fc{free(table)}};
+\draw[sahm] (n18.south) -- (n19.north);
+\node[fterm] (n20) at (0.00,-21.44) {نهاية};
+\draw[sahm] (n19.south) -- (n20.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.48}{3}{الترتيب بالأساس لأرقام الطلبيات}{\faTag\ تجارة إلكترونية}
+\begin{statement}
+أرقام الطلبيات أعداد صحيحة من \en{6} أرقام. \textbf{الترتيب بالأساس} (\en{radix sort}) يرتبها دون مقارنات: نرتب حسب رقم الآحاد، ثم العشرات، ثم المئات... بترتيب \textbf{مستقر} بالعد في كل مرحلة. احجز جدول الإخراج ديناميكيًا وبدّل المؤشرين بين المراحل.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item لكل رقم \code{digit = (value / place) \% 10}: نعد التكرارات \code{count[10]}.
+\item المواضع التراكمية تحدد مكان كل مجموعة؛ نكتب من النهاية للحفاظ على الاستقرار.
+\item نبدل \code{source} و \code{target} (مؤشران) بدل النسخ.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex48.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex48.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fproc, text width=4.10cm] (n2) at (0.00,-1.67) {\fc{target = malloc(NB)}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=2.10cm] (n3) at (0.00,-2.95) {\fc{place = 1}};
+\coordinate (t4) at (0.00,-3.84);
+\coordinate (j5) at (0.00,-4.04);
+\node[fdec, text width=3.25cm] (d7) at (0.00,-5.29) {\fc{place <= 100000}};
+\draw[sahm] (t4) -- (d7.north);
+\node[fproc, text width=4.40cm] (n8) at (0.00,-7.51) {عد الأرقام وحساب المواضع التراكمية};
+\node[fproc, text width=2.70cm] (n9) at (0.00,-9.02) {\fc{idx = NB - 1}};
+\coordinate (t10) at (0.00,-9.91);
+\coordinate (j11) at (0.00,-10.11);
+\node[fdec, text width=1.85cm] (d13) at (0.00,-11.04) {\fc{idx >= 0}};
+\draw[sahm] (t10) -- (d13.north);
+\node[fproc, text width=7.50cm] (n14) at (0.00,-12.72) {\fc{target[--count[digit]] = source[idx]}};
+\node[fproc, text width=1.30cm] (n15) at (0.00,-14.00) {\fc{idx--}};
+\draw[sahm] (n14.south) -- (n15.north);
+\draw[sahm] (d13.south) -- (n14.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d13.south) {نعم};
+\draw[sahm] (n15.south) -- (0.00,-14.74) -- (-4.35,-14.74) -- (-4.35,-10.11) -- (j11);
+\coordinate (e12) at (0.00,-15.19);
+\draw[fline] (d13.east) -- (4.35,-11.04) -- (4.35,-15.19) -- (e12);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d13.east) {لا};
+\draw[fline] (n9.south) -- (t10);
+\draw[sahm] (n8.south) -- (n9.north);
+\node[fproc, text width=4.40cm] (n16) at (0.00,-16.31) {تبديل \en{source} و \en{target}};
+\draw[sahm] (e12) -- (n16.north);
+\node[fproc, text width=3.90cm] (n17) at (0.00,-17.82) {\fc{place = place * 10}};
+\draw[sahm] (n16.south) -- (n17.north);
+\draw[sahm] (d7.south) -- (n8.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d7.south) {نعم};
+\draw[sahm] (n17.south) -- (0.00,-18.56) -- (-4.90,-18.56) -- (-4.90,-4.04) -- (j5);
+\coordinate (e6) at (0.00,-19.01);
+\draw[fline] (d7.east) -- (5.10,-5.29) -- (5.10,-19.01) -- (e6);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d7.east) {لا};
+\draw[fline] (n3.south) -- (t4);
+\draw[sahm] (n2.south) -- (n3.north);
+\node[fio, text width=2.70cm] (n18) at (0.00,-19.90) {\textbf{اكتب}\ \fc{source}};
+\draw[sahm] (e6) -- (n18.north);
+\node[fterm] (n19) at (0.00,-21.18) {نهاية};
+\draw[sahm] (n18.south) -- (n19.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.49}{3}{محاكاة مدير الذاكرة بالملاءمة الأولى}{\faTag\ علم البيانات}
+\begin{statement}
+كيف يعمل \code{malloc} من الداخل؟ حاكِ مديرًا بسيطًا على "ساحة" من \en{64} خانة: جدول كتل (البداية، الحجم، حرة أم لا). \code{allocate(size)} تختار \textbf{أول كتلة حرة كافية} وتقسمها، و \code{release(start)} تحرر الكتلة و\textbf{تدمجها} مع الكتل الحرة المجاورة. اعرض خريطة الذاكرة بعد كل عملية.
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item في البداية كتلة حرة واحدة \code{[0, 64)}.
+\item التقسيم: الكتلة الحرة \code{size} تصبح مستعملة، والباقي كتلة حرة جديدة (إزاحة جدول الكتل).
+\item الدمج: بعد التحرير نوحد كل كتلتين حرتين متتاليتين.
+\item التجزئة: قد يوجد مجموع حر كافٍ دون كتلة واحدة كافية.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex49.lst}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex49.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\coordinate (t2) at (0.00,-1.28);
+\coordinate (j3) at (0.00,-1.48);
+\node[fdec, text width=3.00cm] (d5) at (0.00,-2.90) {توجد عملية أخرى في السيناريو};
+\draw[sahm] (t2) -- (d5.north);
+\node[fdec, text width=0.85cm] (d6) at (0.00,-5.23) {حجز};
+\node[fcall, text width=4.70cm] (n8) at (2.85,-6.48) {\fc{start = allocate(size)}};
+\node[fcall, text width=3.10cm] (n9) at (-2.05,-6.48) {\fc{release(start)}};
+\coordinate (m7) at (0.00,-7.17);
+\draw[sahm] (d6.east) -| (n8.north);
+\draw[sahm] (n8.south) |- (m7);
+\draw[sahm] (d6.west) -| (n9.north);
+\draw[sahm] (n9.south) |- (m7);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d6.east) {نعم};
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d6.west) {لا};
+\node[fcall, text width=2.30cm] (n10) at (0.00,-8.06) {\fc{printMap()}};
+\draw[sahm] (m7) -- (n10.north);
+\draw[sahm] (d5.south) -- (d6.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d5.south) {نعم};
+\draw[sahm] (n10.south) -- (0.00,-8.80) -- (-4.20,-8.80) -- (-4.20,-1.48) -- (j3);
+\coordinate (e4) at (0.00,-9.25);
+\draw[fline] (d5.east) -- (5.80,-2.90) -- (5.80,-9.25) -- (e4);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d5.east) {لا};
+\draw[fline] (n1.south) -- (t2);
+\node[fterm] (n11) at (0.00,-10.14) {نهاية};
+\draw[sahm] (e4) -- (n11.north);
+\end{tikzpicture}}
+\end{flowbox}
+
+
+\exhead{10.50}{3}{تجميع نقاط التوصيل بخوارزمية \en{K-means}}{\faTag\ علم البيانات}
+\begin{statement}
+نريد تقسيم نقاط التوصيل (إحداثيات ثنائية البعد، عددها يُقرأ) إلى \code{groups} منطقة لسائقين. احجز ديناميكيًا جداول النقاط والمراكز والإسنادات، وطبّق \textbf{\en{K-means}}: إسناد كل نقطة إلى أقرب مركز ثم تحديث المراكز، حتى الاستقرار. اعرض المراكز وعدد النقاط ومجموع مربعات المسافات (\en{SSE}).
+\end{statement}
+\parthead{\faListOl}{خطوات الحل}
+\begin{stepsbox}\begin{enumerate}
+\item المراكز الابتدائية: أول \code{groups} نقاط مختلفة (للتبسيط).
+\item مسافة مربعة لتفادي الجذر.
+\item نتوقف عندما لا يتغير أي إسناد.
+\end{enumerate}\end{stepsbox}
+\parthead{\faCode}{البرنامج بلغة \en{C}}
+\ccode[\scriptsize]{code/ch10/ex50.lst}
+\parthead{\faKeyboard}{المدخلات}
+\cout{code/ch10/ex50.in}
+\parthead{\faTerminal}{نتيجة التنفيذ}
+\cout{code/ch10/ex50.out}
+\parthead{\faProjectDiagram}{المخطط الانسيابي \en{(Organigramme)}}
+\begin{flowbox}
+\adjustbox{max width=\linewidth, max totalheight=0.78\textheight}{%
+\begin{tikzpicture}
+\node[fterm] (n1) at (0.00,-0.39) {بداية};
+\node[fio, text width=4.70cm] (n2) at (0.00,-1.67) {\textbf{اقرأ}\ \fc{nbPoints, groups}};
+\draw[sahm] (n1.south) -- (n2.north);
+\node[fproc, text width=4.40cm] (n3) at (0.00,-3.18) {حجز \en{points} و \en{centers} و \en{assign} و \en{sums}};
+\draw[sahm] (n2.south) -- (n3.north);
+\coordinate (t4) at (0.00,-4.30);
+\coordinate (j5) at (0.00,-4.45);
+\node[fproc, text width=2.50cm] (n6) at (0.00,-4.99) {\fc{changed = 0}};
+\node[fproc, text width=1.70cm] (n7) at (0.00,-6.27) {\fc{idx = 0}};
+\coordinate (t8) at (0.00,-7.16);
+\coordinate (j9) at (0.00,-7.36);
+\node[fdec, text width=3.05cm] (d11) at (0.00,-8.56) {\fc{idx < nbPoints}};
+\draw[sahm] (t8) -- (d11.north);
+\node[fproc, text width=4.40cm] (n12) at (0.00,-10.74) {\en{best} = أقرب مركز ; إذا تغير: \en{changed++}};
+\node[fproc, text width=1.30cm] (n13) at (0.00,-12.25) {\fc{idx++}};
+\draw[sahm] (n12.south) -- (n13.north);
+\draw[sahm] (d11.south) -- (n12.north);
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d11.south) {نعم};
+\draw[sahm] (n13.south) -- (0.00,-12.99) -- (-2.80,-12.99) -- (-2.80,-7.36) -- (j9);
+\coordinate (e10) at (0.00,-13.44);
+\draw[fline] (d11.east) -- (2.80,-8.56) -- (2.80,-13.44) -- (e10);
+\node[flbl, anchor=south west] at ([xshift=2pt,yshift=1pt]d11.east) {لا};
+\draw[fline] (n7.south) -- (t8);
+\draw[sahm] (n6.south) -- (n7.north);
+\node[fproc, text width=4.40cm] (n14) at (0.00,-14.56) {\en{centers} = متوسط نقاط كل مجموعة};
+\draw[sahm] (e10) -- (n14.north);
+\draw[sahm] (t4) -- (n6.north);
+\node[fdec, text width=2.45cm] (d15) at (0.00,-16.60) {\fc{changed > 0}};
+\draw[sahm] (n14.south) -- (d15.north);
+\draw[sahm] (d15.west) -- (-3.35,-16.60) -- (-3.35,-4.45) -- (j5);
+\node[flbl, anchor=south east] at ([xshift=-2pt,yshift=1pt]d15.west) {نعم};
+\node[flbl, anchor=north west] at ([xshift=3pt,yshift=-1pt]d15.south) {لا};
+\draw[fline] (n3.south) -- (t4);
+\node[fio, text width=5.50cm] (n16) at (0.00,-18.41) {\textbf{اكتب}\ \fc{centers, counts, SSE}};
+\draw[sahm] (d15.south) -- (n16.north);
+\node[fproc, text width=2.90cm] (n17) at (0.00,-19.69) {تحرير الجداول};
+\draw[sahm] (n16.south) -- (n17.north);
+\node[fterm] (n18) at (0.00,-20.97) {نهاية};
+\draw[sahm] (n17.south) -- (n18.north);
+\end{tikzpicture}}
+\end{flowbox}
+

@@ -1,0 +1,37 @@
+#include <stdio.h>
+
+typedef struct { int code; char name[30]; double price; int inStock; } Product;
+
+void writeEscaped(FILE *file, const char *text) {
+    for (; *text != '\0'; text++) {
+        if (*text == '"' || *text == '\\') fputc('\\', file);   // تهريب
+        fputc(*text, file);
+    }
+}
+
+void exportJson(const char *path, const Product *items, int size) {
+    FILE *file = fopen(path, "w");
+    int idx;
+    fprintf(file, "[\n");
+    for (idx = 0; idx < size; idx++) {
+        fprintf(file, "  {\"code\": %d, \"name\": \"", items[idx].code);
+        writeEscaped(file, items[idx].name);
+        fprintf(file, "\", \"price\": %.2f, \"inStock\": %s}", items[idx].price,
+                items[idx].inStock ? "true" : "false");
+        if (idx < size - 1) fprintf(file, ",");                   // لا فاصلة بعد الأخير
+        fprintf(file, "\n");
+    }
+    fprintf(file, "]\n");
+    fclose(file);
+}
+
+int main(void) {
+    Product items[3] = {{101, "Mouse", 1500, 1}, {205, "Monitor 27\" 4K", 54000, 1}, {330, "Hub", 3100, 0}};
+    FILE *file;
+    int ch;
+    exportJson("catalog.json", items, 3);
+    file = fopen("catalog.json", "r");
+    while ((ch = fgetc(file)) != EOF) putchar(ch);
+    fclose(file);
+    return 0;
+}

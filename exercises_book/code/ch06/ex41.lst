@@ -1,0 +1,36 @@
+#include <stdio.h>
+
+#define NB 5
+#define MAXLEN 20
+
+int main(void) {
+    char query[] = "labtop";
+    char names[NB][MAXLEN] = {"laptop", "tablet", "desktop", "lamp", "backup"};
+    int dist[MAXLEN][MAXLEN];
+    int item, row, col, lenA = 0, lenB, best = 1000, bestItem = 0, smallest;
+    while (query[lenA] != '\0') lenA++;
+    for (item = 0; item < NB; item++) {
+        lenB = 0;
+        while (names[item][lenB] != '\0') lenB++;
+        for (row = 0; row <= lenA; row++) dist[row][0] = row;   (*@\cmt{حذف كل الحروف}@*)
+        for (col = 0; col <= lenB; col++) dist[0][col] = col;   (*@\cmt{إدراج كل الحروف}@*)
+        for (row = 1; row <= lenA; row++)
+            for (col = 1; col <= lenB; col++) {
+                if (query[row - 1] == names[item][col - 1]) {
+                    dist[row][col] = dist[row - 1][col - 1];   (*@\cmt{لا تكلفة}@*)
+                } else {
+                    smallest = dist[row - 1][col];               (*@\cmt{حذف}@*)
+                    if (dist[row][col - 1] < smallest) smallest = dist[row][col - 1];         (*@\cmt{إدراج}@*)
+                    if (dist[row - 1][col - 1] < smallest) smallest = dist[row - 1][col - 1]; (*@\cmt{تبديل}@*)
+                    dist[row][col] = 1 + smallest;
+                }
+            }
+        printf("%-8s -> distance %d\n", names[item], dist[lenA][lenB]);
+        if (dist[lenA][lenB] < best) {
+            best = dist[lenA][lenB];
+            bestItem = item;
+        }
+    }
+    printf("Did you mean \"%s\"?\n", names[bestItem]);
+    return 0;
+}

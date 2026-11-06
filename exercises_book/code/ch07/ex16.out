@@ -1,0 +1,3 @@
+Password length: 8
+compare("apple", "apply") = -20
+Access granted

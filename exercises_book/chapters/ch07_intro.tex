@@ -1,0 +1,37 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الدالة}: مجموعة تعليمات لها اسم، تستقبل \textbf{معاملات} وقد تعيد \textbf{قيمة} بـ \code{return}.
+    \item \textbf{التعريف}: \code{double priceWithTax(double price) \{ return price * 1.19; \}}
+    \item \textbf{الاستدعاء}: \code{total = priceWithTax(4500);} القيمة \en{4500} تُنسخ في المعامل \code{price}.
+    \item \textbf{الدالة} \code{void} لا تعيد شيئًا: تطبع أو تعدل جدولًا ممررًا.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[node distance=7mm,
+    blk/.style={draw=#1, fill=#1!10, very thick, rounded corners=4pt,
+        minimum height=1cm, text width=3.6cm, align=center, font=\small}]
+    \node[blk=brandTeal] (m) {\textbf{\code{main}}\\ \code{total = f(4500);}};
+    \node[blk=brandOrange, left=2.2cm of m] (f) {\textbf{\code{f(price)}}\\ \code{return price * 1.19;}};
+    \draw[sahm] ([yshift=2mm]m.west) -- node[above, font=\scriptsize] {نسخ القيمة \en{4500}} ([yshift=2mm]f.east);
+    \draw[sahm, brandOrange] ([yshift=-2mm]f.east) -- node[below, font=\scriptsize] {القيمة المعادة \en{5355}} ([yshift=-2mm]m.west);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{نوع المعامل} & \ras{ما يحدث عند الاستدعاء} \\ \hline
+عدد (\code{int}، \code{double}) & \textbf{تمرير بالقيمة}: الدالة تعمل على نسخة، والأصل لا يتغير \\ \hline
+جدول (\code{double values[]}) & يُمرر \textbf{عنوانه}: تعديلات الدالة تبقى بعد الخروج منها \\ \hline
+حجم الجدول & يُمرر دائمًا في معامل منفصل \code{int size} \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad دالة واحدة لمهمة واحدة}
+الدالة القصيرة ذات الاسم الواضح (\code{subtotal}، \code{tax}، \code{shipping}) أسهل للفهم والاختبار وإعادة الاستعمال.
+نعرّف الدالة \textbf{قبل} \code{main} لكي يعرفها المترجم عند الاستدعاء.
+\end{obox}
+
+\chaprefs{kr,king,deitel}
+\insertstats{07}

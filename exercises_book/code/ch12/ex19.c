@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; char type; struct Node *next; } Node;
+
+void splitByType(Node *head, Node **express, Node **standard) {
+    Node dummyE, dummyS, *tailE = &dummyE, *tailS = &dummyS;
+    while (head != NULL) {
+        if (head->type == 'E') { tailE->next = head; tailE = head; }
+        else { tailS->next = head; tailS = head; }
+        head = head->next;
+    }
+    tailE->next = NULL;                         // نغلق القائمتين
+    tailS->next = NULL;
+    *express = dummyE.next;
+    *standard = dummyS.next;
+}
+
+void printFree(const char *label, Node *head) {
+    Node *next;
+    printf("%s", label);
+    for (; head != NULL; head = next) { printf(" #%d", head->number); next = head->next; free(head); }
+    printf("\n");
+}
+
+int main(void) {
+    char types[8] = {'S', 'E', 'S', 'S', 'E', 'E', 'S', 'E'};
+    Node *head = NULL, *node, *express, *standard;
+    int idx;
+    for (idx = 7; idx >= 0; idx--) {
+        node = malloc(sizeof(Node)); node->number = 7781 + idx; node->type = types[idx];
+        node->next = head; head = node;
+    }
+    splitByType(head, &express, &standard);
+    printFree("Express: ", express);
+    printFree("Standard:", standard);
+    return 0;
+}

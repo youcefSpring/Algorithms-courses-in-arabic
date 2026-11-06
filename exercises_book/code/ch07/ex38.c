@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+void dayName(int day) {
+    char names[7][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    printf("%s", names[day]);
+}
+
+void addHours(int day, int hour, int extra) {
+    int total = day * 24 + hour + extra;      // ساعات منذ بداية الأسبوع
+    dayName(day);
+    printf(" %02dh + %2dh -> ", hour, extra);
+    dayName((total / 24) % 7);
+    printf(" %02dh\n", total % 24);
+}
+
+int main(void) {
+    int days[3] = {1, 4, 6}, hours[3] = {9, 16, 22}, delays[3] = {48, 30, 72};
+    int order;
+    for (order = 0; order < 3; order++)
+        addHours(days[order], hours[order], delays[order]);
+    return 0;
+}

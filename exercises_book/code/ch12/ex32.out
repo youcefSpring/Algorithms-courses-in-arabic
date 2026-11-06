@@ -1,0 +1,3 @@
+dot(A,B) = 46, cos(A,B) = 0.915
+dot(A,C) = 0, cos(A,C) = 0.000
+Stored 12 values instead of 3 x 10000

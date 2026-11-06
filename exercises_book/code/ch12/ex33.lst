@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { char name[10]; struct Node *next; } Node;
+
+Node *rotate(Node *head, int shift) {
+    Node *tail = head, *walk;
+    int length = 1, step;
+    if (head == NULL) return head;
+    while (tail->next != NULL) { tail = tail->next; length++; }
+    shift %= length;
+    if (shift == 0) return head;
+    tail->next = head;                                 (*@\cmt{حلقة مؤقتة}@*)
+    for (walk = head, step = 1; step < shift; step++) walk = walk->next;
+    head = walk->next;                                 (*@\cmt{الرأس الجديد}@*)
+    walk->next = NULL;                                 (*@\cmt{نقطع الحلقة}@*)
+    return head;
+}
+
+int main(void) {
+    const char *names[5] = {"Flash", "Phones", "Audio", "Gaming", "Bundle"};
+    Node *head = NULL, *node, *walk, *next;
+    int idx, pos, shift, query;
+    for (idx = 4; idx >= 0; idx--) {
+        node = malloc(sizeof(Node));
+        for (pos = 0; (node->name[pos] = names[idx][pos]) != '\0'; pos++) {}
+        node->next = head; head = node;
+    }
+    for (query = 0; query < 2; query++) {
+        scanf("%d", &shift);
+        head = rotate(head, shift);
+        printf("rotate %d:", shift);
+        for (walk = head; walk != NULL; walk = walk->next) printf(" %s", walk->name);
+        printf("\n");
+    }
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}

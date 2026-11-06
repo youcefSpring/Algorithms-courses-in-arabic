@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+#define LIMIT 10000
+
+void sieve(int limit, char isPrime[]) {
+    int number, multiple;
+    for (number = 0; number <= limit; number++) isPrime[number] = number >= 2;
+    for (number = 2; number * number <= limit; number++)
+        if (isPrime[number])
+            for (multiple = number * number; multiple <= limit; multiple += number)
+                isPrime[multiple] = 0;                // مضاعف = غير أولي
+}
+
+void factorize(int number, char isPrime[]) {
+    int prime, exponent, first = 1;
+    printf("%d =", number);
+    for (prime = 2; prime <= number; prime++) {
+        if (!isPrime[prime]) continue;
+        exponent = 0;
+        while (number % prime == 0) {
+            number /= prime;
+            exponent++;
+        }
+        if (exponent > 0) {
+            printf("%s %d", first ? "" : " x", prime);
+            if (exponent > 1) printf("^%d", exponent);
+            first = 0;
+        }
+    }
+    printf("\n");
+}
+
+int main(void) {
+    char isPrime[LIMIT + 1];
+    int number, query, count = 0;
+    sieve(LIMIT, isPrime);
+    for (number = 0; number <= LIMIT; number++) count += isPrime[number];
+    printf("%d primes up to %d\n", count, LIMIT);
+    for (query = 0; query < 4; query++) {
+        scanf("%d", &number);
+        factorize(number, isPrime);
+    }
+    return 0;
+}

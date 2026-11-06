@@ -1,0 +1,49 @@
+#include <stdio.h>
+
+#define CAP 20
+
+typedef struct { char kind; int product; } Action;
+typedef struct { Action items[CAP]; int top; } Stack;
+
+int cart[5];
+
+void pushAction(Stack stack[], Action action) { stack[0].items[stack[0].top++] = action; }
+Action popAction(Stack stack[]) { return stack[0].items[--stack[0].top]; }
+
+void apply(Action action, int reverse) {
+    int add = (action.kind == 'a') != reverse;       (*@\cmt{المعاكسة تقلب العملية}@*)
+    cart[action.product] += add ? 1 : -1;
+}
+
+void show(char command[]) {
+    int idx;
+    printf("%-3s cart:", command);
+    for (idx = 1; idx < 5; idx++) if (cart[idx] > 0) printf(" P%d x%d", idx, cart[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    Stack undo[1], redo[1];
+    Action action;
+    char command[4];
+    undo[0].top = redo[0].top = 0;
+    while (scanf("%3s", command) == 1) {
+        if (command[0] == 'a' || command[0] == 'r') {
+            action.kind = command[0];
+            action.product = command[1] - '0';
+            apply(action, 0);
+            pushAction(undo, action);
+            redo[0].top = 0;                         (*@\cmt{عملية جديدة تلغي الإعادة}@*)
+        } else if (command[0] == 'u' && undo[0].top > 0) {
+            action = popAction(undo);
+            apply(action, 1);
+            pushAction(redo, action);
+        } else if (command[0] == 'y' && redo[0].top > 0) {
+            action = popAction(redo);
+            apply(action, 0);
+            pushAction(undo, action);
+        }
+        show(command);
+    }
+    return 0;
+}

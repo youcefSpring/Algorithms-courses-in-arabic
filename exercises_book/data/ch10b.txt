@@ -1,0 +1,776 @@
+@@
+title: إحصاءات متجددة عبر مؤشر على هيكل
+level: medium
+domain: ds
+@ statement
+تصل أزمنة استجابة الخادم واحدًا واحدًا ولا نريد تخزينها كلها. اكتب هيكل `Running` (العدد، المتوسط، `m2`، الأصغر، الأكبر) ودالة `update(stats, value)` تحدّثه **عبر مؤشر** بخوارزمية **ويلفورد**، ثم اعرض المتوسط والتباين في كل لحظة.
+@ steps
+- `count++`، `delta = value - mean`، `mean += delta / count`، `m2 += delta * (value - mean)`.
+- التباين = `m2 / count`.
+- خوارزمية بمرور واحد وذاكرة ثابتة.
+@ flow
+do: stats = {0}
+for: idx = 0 ; idx < 8 ; idx++
+  call: update(&stats, times[idx])
+  out: stats.mean, stats.m2 / stats.count
+@ code
+#include <stdio.h>
+
+typedef struct { int count; double mean, m2, low, high; } Running;
+
+void update(Running *stats, double value) {
+    double delta = value - stats->mean;
+    stats->count++;
+    stats->mean += delta / stats->count;
+    stats->m2 += delta * (value - stats->mean);       // ويلفورد
+    if (stats->count == 1 || value < stats->low) stats->low = value;
+    if (stats->count == 1 || value > stats->high) stats->high = value;
+}
+
+int main(void) {
+    double times[8] = {120, 135, 98, 410, 125, 140, 101, 132};
+    Running stats = {0, 0, 0, 0, 0};
+    int idx;
+    for (idx = 0; idx < 8; idx++) {
+        update(&stats, times[idx]);
+        printf("n=%d value %3.0f ms -> mean %6.2f var %8.2f\n", stats.count, times[idx],
+               stats.mean, stats.m2 / stats.count);
+    }
+    printf("min %.0f, max %.0f\n", stats.low, stats.high);
+    return 0;
+}
+
+@@
+title: المخزن الدائري لآخر الأسعار
+level: medium
+domain: ds
+@ statement
+نعرض على صفحة المنتج متوسط **آخر 4 أسعار**. اكتب هيكل `Ring` يحتوي على جدول بسعة 4 ومؤشرًا `next` على الخانة التالية للكتابة، ودالة `addPrice` تكتب ثم تُرجع المؤشر إلى البداية عند الوصول إلى النهاية.
+@ steps
+- `*ring->next = price;` ثم `ring->next++`؛ إذا وصل إلى `ring->data + CAP` نعيده إلى `ring->data`.
+- `count` لا يتجاوز `CAP`.
+- المتوسط على الخانات المملوءة فقط.
+@ flow
+for: idx = 0 ; idx < 7 ; idx++
+  call: addPrice(&ring, prices[idx])
+  out: متوسط محتوى ring
+@ code
+#include <stdio.h>
+
+#define CAP 4
+
+typedef struct { double data[CAP]; double *next; int count; } Ring;
+
+void addPrice(Ring *ring, double price) {
+    *ring->next = price;
+    ring->next++;
+    if (ring->next == ring->data + CAP) ring->next = ring->data;   // دوران
+    if (ring->count < CAP) ring->count++;
+}
+
+double average(const Ring *ring) {
+    double sum = 0;
+    int idx;
+    for (idx = 0; idx < ring->count; idx++) sum += ring->data[idx];
+    return sum / ring->count;
+}
+
+int main(void) {
+    double prices[7] = {32000, 33500, 31000, 34500, 30000, 29000, 31500};
+    Ring ring;
+    int idx;
+    ring.next = ring.data;
+    ring.count = 0;
+    for (idx = 0; idx < 7; idx++) {
+        addPrice(&ring, prices[idx]);
+        printf("add %.0f -> last %d avg %.2f\n", prices[idx], ring.count, average(&ring));
+    }
+    return 0;
+}
+
+@@
+title: طلبيات الزبائن بأسطر متفاوتة الطول
+level: medium
+domain: ec
+@ statement
+لكل زبون عدد مختلف من الطلبيات. بدل مصفوفة مستطيلة تهدر الذاكرة، احجز **جدولًا مسننًا**: جدول مؤشرات، وكل سطر محجوز بحجم طلبيات صاحبه بالضبط، مع جدول للأطوال.
+@ stdin
+4
+3 1200 4500 890
+1 32000
+5 450 900 1500 300 2200
+2 7800 6400
+@ steps
+- `orders = malloc(nbClients * sizeof(double *))` و `lengths = malloc(nbClients * sizeof(int))`.
+- لكل زبون: نقرأ عدد طلبياته ثم `orders[client] = malloc(lengths[client] * sizeof(double))`.
+- نحسب المجموع لكل زبون، والذاكرة المستعملة مقارنة بمصفوفة مستطيلة.
+@ flow
+in: nbClients
+for: client = 0 ; client < nbClients ; client++
+  in: lengths[client]
+  do: orders[client] = malloc(lengths[client])
+  in: الطلبيات
+  out: client, مجموع طلبياته
+do: تحرير كل الأسطر ثم الجداول
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int nbClients, client, idx, cells = 0, longest = 0;
+    double **orders, sum;
+    int *lengths;
+    scanf("%d", &nbClients);
+    orders = malloc(nbClients * sizeof(double *));
+    lengths = malloc(nbClients * sizeof(int));
+    for (client = 0; client < nbClients; client++) {
+        scanf("%d", &lengths[client]);
+        orders[client] = malloc(lengths[client] * sizeof(double));   // سطر بطوله الحقيقي
+        for (sum = 0, idx = 0; idx < lengths[client]; idx++) {
+            scanf("%lf", &orders[client][idx]);
+            sum += orders[client][idx];
+        }
+        cells += lengths[client];
+        if (lengths[client] > longest) longest = lengths[client];
+        printf("Client %d: %d orders, total %.0f\n", client + 1, lengths[client], sum);
+    }
+    printf("Cells used %d vs rectangular %d\n", cells, nbClients * longest);
+    for (client = 0; client < nbClients; client++) free(orders[client]);
+    free(orders);
+    free(lengths);
+    return 0;
+}
+
+@@
+title: البحث عن كلمة يعيد مؤشرًا
+level: medium
+domain: ec
+@ statement
+اكتب دالة `findText(haystack, needle)` (بديل `strstr`) تعيد **مؤشرًا** على أول ظهور للكلمة داخل الوصف أو `NULL`. استعملها لعدّ كل الظهورات بمواصلة البحث بعد المؤشر المعاد.
+@ steps
+- لكل موضع ممكن: نقارن الحروف بمؤشرين مؤقتين.
+- إذا انتهت `needle` فالمطابقة تامة: نعيد الموضع.
+- للعد: `pos = findText(pos + 1, needle)` حتى `NULL`.
+@ flow
+do: count = 0 ; pos = findText(text, word)
+while: pos != NULL
+  out: pos - text
+  do: count++ ; pos = findText(pos + 1, word)
+out: count
+@ code
+#include <stdio.h>
+
+const char *findText(const char *haystack, const char *needle) {
+    const char *start, *left, *right;
+    for (start = haystack; *start != '\0'; start++) {
+        left = start;
+        right = needle;
+        while (*right != '\0' && *left == *right) { left++; right++; }
+        if (*right == '\0') return start;         // كل needle طابقت
+    }
+    return NULL;
+}
+
+int main(void) {
+    const char *text = "usb cable, usb charger and usb-c hub with usb 3.0 support";
+    const char *word = "usb";
+    const char *pos = findText(text, word);
+    int count = 0;
+    printf("Positions of \"%s\":", word);
+    while (pos != NULL) {
+        printf(" %d", (int)(pos - text));
+        count++;
+        pos = findText(pos + 1, word);            // نواصل بعد آخر ظهور
+    }
+    printf("\n%d occurrences\n", count);
+    printf("\"hdmi\" found: %s\n", findText(text, "hdmi") ? "yes" : "no");
+    return 0;
+}
+
+@@
+title: حذف الفراغات الطرفية بالمؤشرات
+level: medium
+domain: ec
+@ statement
+البيانات المدخلة في نماذج الموقع تحتوي على فراغات زائدة في البداية والنهاية. اكتب دالة `trim(text)` تعيد **مؤشرًا** على أول حرف غير فراغ، وتكتب `'\0'` بعد آخر حرف غير فراغ، دون نسخ.
+@ steps
+- مؤشر `start` يتقدم ما دام `*start == ' '`.
+- مؤشر `end` على آخر حرف، يتراجع ما دام فراغًا وما دام `end >= start`.
+- `*(end + 1) = '\0'`.
+@ flow
+do: start = text
+while: *start == ' '
+  do: start++
+do: end = آخر حرف
+while: end > start && *end == ' '
+  do: end--
+do: *(end + 1) = '\0'
+out: start
+@ code
+#include <stdio.h>
+
+char *trim(char *text) {
+    char *start = text, *end;
+    while (*start == ' ') start++;               // فراغات البداية
+    if (*start == '\0') return start;             // نص فارغ
+    end = start;
+    while (*(end + 1) != '\0') end++;             // آخر حرف
+    while (end > start && *end == ' ') end--;     // فراغات النهاية
+    *(end + 1) = '\0';
+    return start;
+}
+
+int main(void) {
+    char inputs[3][40] = {"   amina@mail.dz  ", "Oran   ", "      "};
+    int idx;
+    for (idx = 0; idx < 3; idx++)
+        printf("[%s]\n", trim(inputs[idx]));
+    return 0;
+}
+
+@@
+title: البحث الثنائي يعيد مؤشرًا
+level: medium
+domain: ec
+@ statement
+اكتب بحثًا ثنائيًا `findPrice(low, high, target)` يعمل بمؤشرين على بداية ونهاية جدول مرتب (لا فهارس)، ويعيد مؤشرًا على العنصر أو `NULL`. استعمل حساب `middle = low + (high - low) / 2`.
+@ stdin
+3200 4000
+@ steps
+- طرح مؤشرين يعطي عددًا، وإضافته لمؤشر تعطي مؤشرًا.
+- لا يمكن جمع مؤشرين (`(low + high) / 2` خطأ).
+@ flow
+in: target
+while: low <= high
+  do: middle = low + (high - low) / 2
+  if: *middle == target
+    out: middle
+  else:
+    if: *middle < target
+      do: low = middle + 1
+    else:
+      do: high = middle - 1
+out: NULL
+@ code
+#include <stdio.h>
+
+const double *findPrice(const double *low, const double *high, double target) {
+    const double *middle;
+    while (low <= high) {
+        middle = low + (high - low) / 2;          // لا نجمع مؤشرين
+        if (*middle == target) return middle;
+        if (*middle < target) low = middle + 1;
+        else high = middle - 1;
+    }
+    return NULL;
+}
+
+int main(void) {
+    double prices[10] = {99, 450, 650, 899, 1200, 1500, 2300, 3200, 4100, 7800};
+    const double *found;
+    double target;
+    int query;
+    for (query = 0; query < 2; query++) {
+        scanf("%lf", &target);
+        found = findPrice(prices, prices + 9, target);
+        if (found != NULL) printf("%.0f found at index %d\n", target, (int)(found - prices));
+        else printf("%.0f not found\n", target);
+    }
+    return 0;
+}
+
+@@
+title: نسخة عميقة من الكتالوج
+level: medium
+domain: ec
+@ statement
+كل منتج هيكل يحتوي على **مؤشر** `char *name` على اسم محجوز ديناميكيًا. النسخ البسيط `copy = item` ينسخ المؤشر فقط (نسخة **سطحية**): الاسمان يتشاركان نفس الذاكرة. اكتب `deepCopy` تحجز اسمًا جديدًا، ووضّح الفرق بتعديل النسخة.
+@ steps
+- نسخة سطحية: تغيير `shallow.name[0]` يغير الأصل أيضًا.
+- نسخة عميقة: `malloc` جديد ونسخ الحروف.
+- كل اسم محجوز يُحرر مرة واحدة فقط.
+@ flow
+do: original.name = makeName("laptop")
+do: shallow = original
+call: deep = deepCopy(original)
+do: shallow.name[0] = 'L' ; deep.name[0] = 'X'
+out: original.name, shallow.name, deep.name
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { char *name; double price; } Product;
+
+char *makeName(const char *text) {
+    int len = 0, pos;
+    char *copy;
+    while (text[len] != '\0') len++;
+    copy = malloc(len + 1);
+    for (pos = 0; pos <= len; pos++) copy[pos] = text[pos];
+    return copy;
+}
+
+Product deepCopy(Product item) {
+    Product copy = item;
+    copy.name = makeName(item.name);          // ذاكرة مستقلة للاسم
+    return copy;
+}
+
+int main(void) {
+    Product original, shallow, deep;
+    original.name = makeName("laptop");
+    original.price = 89000;
+    shallow = original;                       // نسخ المؤشر فقط
+    deep = deepCopy(original);
+    shallow.name[0] = 'L';
+    deep.name[0] = 'X';
+    printf("original: %s\nshallow:  %s\ndeep:     %s\n", original.name, shallow.name, deep.name);
+    printf("shared memory: %s\n", original.name == shallow.name ? "yes" : "no");
+    free(original.name);                      // shallow يشير لنفس الكتلة: لا نحررها مرتين
+    free(deep.name);
+    return 0;
+}
+
+@@
+title: تطبيق دالة على كل عناصر الجدول
+level: medium
+domain: ds
+@ statement
+اكتب دالة عامة `mapArray(values, size, transform)` تطبق دالة (عبر مؤشر دالة) على كل عنصر في مكانه. استعملها لسلسلة معالجات على أسعار: إضافة الرسم، ثم التقريب، ثم التحويل إلى الأورو.
+@ steps
+- `void mapArray(double *values, int size, double (*transform)(double))`.
+- كل معالجة دالة صغيرة `double f(double)`.
+- جدول من مؤشرات الدوال يمثل **خط معالجة**.
+@ flow
+for: step = 0 ; step < 3 ; step++
+  call: mapArray(prices, 5, pipeline[step])
+  out: prices
+@ code
+#include <stdio.h>
+
+double addTax(double value)   { return value * 1.19; }
+double roundTen(double value) { return (int)(value / 10 + 0.5) * 10.0; }
+double toEuro(double value)   { return value / 148.5; }
+
+void mapArray(double *values, int size, double (*transform)(double)) {
+    double *ptr;
+    for (ptr = values; ptr < values + size; ptr++)
+        *ptr = transform(*ptr);                // نفس الدالة لكل عنصر
+}
+
+int main(void) {
+    double prices[5] = {1500, 3200, 899, 4100, 32000};
+    double (*pipeline[3])(double) = {addTax, roundTen, toEuro};
+    char names[3][10] = {"tax", "round", "euro"};
+    int step, idx;
+    for (step = 0; step < 3; step++) {
+        mapArray(prices, 5, pipeline[step]);
+        printf("after %-5s:", names[step]);
+        for (idx = 0; idx < 5; idx++) printf(" %9.2f", prices[idx]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: تبديل عام بمؤشر void
+level: medium
+domain: ds
+@ statement
+اكتب دالة `swapBytes(first, second, size)` تبدل **أي نوع** من البيانات بايتًا ببايت عبر مؤشرات `void *` (محولة إلى `unsigned char *`)، ثم دالة عامة `reverseAny(base, count, size)` تقلب جدولًا من أي نوع. اختبرها على `int` و `double` وجدول هياكل.
+@ steps
+- `void *` مؤشر عام لا يُفك مباشرة؛ نحوله إلى `unsigned char *` لنمر على البايتات.
+- العنصر رقم `idx` يبدأ عند `(unsigned char *)base + idx * size`.
+@ flow
+call: reverseAny(codes, 5, sizeof(int))
+call: reverseAny(prices, 4, sizeof(double))
+call: reverseAny(items, 3, sizeof(Product))
+out: النتائج
+@ code
+#include <stdio.h>
+
+typedef struct { char name[8]; int stock; } Product;
+
+void swapBytes(void *first, void *second, int size) {
+    unsigned char *left = first, *right = second, tmp;
+    int pos;
+    for (pos = 0; pos < size; pos++) {               // بايتًا ببايت
+        tmp = left[pos];
+        left[pos] = right[pos];
+        right[pos] = tmp;
+    }
+}
+
+void reverseAny(void *base, int count, int size) {
+    unsigned char *bytes = base;
+    int low = 0, high = count - 1;
+    while (low < high) {
+        swapBytes(bytes + low * size, bytes + high * size, size);
+        low++;
+        high--;
+    }
+}
+
+int main(void) {
+    int codes[5] = {101, 205, 330, 412, 500}, idx;
+    double prices[4] = {1.5, 32.0, 4.1, 89.9};
+    Product items[3] = {{"Mouse", 12}, {"Hub", 4}, {"Cable", 40}};
+    reverseAny(codes, 5, sizeof(int));
+    reverseAny(prices, 4, sizeof(double));
+    reverseAny(items, 3, sizeof(Product));
+    for (idx = 0; idx < 5; idx++) printf("%d ", codes[idx]);
+    printf("\n");
+    for (idx = 0; idx < 4; idx++) printf("%.1f ", prices[idx]);
+    printf("\n");
+    for (idx = 0; idx < 3; idx++) printf("%s(%d) ", items[idx].name, items[idx].stock);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: مكدس ديناميكي يكبر عند الحاجة
+level: medium
+domain: ec
+@ statement
+اكتب هيكل `Stack` (مؤشر على البيانات، السعة، القمة) ودوال `createStack` و `push` (تضاعف السعة عند الامتلاء) و `pop` و `destroyStack`. استعمله للتحقق من توازن الأقواس في قالب صفحة HTML مبسط.
+@ steps
+- `push`: إذا `top == capacity` نحجز ضعف الحجم، ننسخ، ونحرر القديم.
+- لكل قوس فتح `( [ {` نكدسه؛ لكل غلق نسحب ونتحقق من التطابق.
+@ flow
+call: stack = createStack(2)
+for: pos = 0 ; text[pos] != '\0' ; pos++
+  if: قوس فتح
+    call: push(&stack, text[pos])
+  else:
+    if: قوس غلق
+      call: open = pop(&stack)
+      do: التحقق من التطابق
+out: balanced, stack.capacity
+call: destroyStack(&stack)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { char *data; int capacity, top; } Stack;
+
+Stack createStack(int capacity) {
+    Stack stack;
+    stack.data = malloc(capacity);
+    stack.capacity = capacity;
+    stack.top = 0;
+    return stack;
+}
+
+void push(Stack *stack, char value) {
+    char *bigger;
+    int idx;
+    if (stack->top == stack->capacity) {            // نضاعف السعة
+        bigger = malloc(2 * stack->capacity);
+        for (idx = 0; idx < stack->top; idx++) bigger[idx] = stack->data[idx];
+        free(stack->data);
+        stack->data = bigger;
+        stack->capacity *= 2;
+    }
+    stack->data[stack->top++] = value;
+}
+
+char pop(Stack *stack) { return stack->top > 0 ? stack->data[--stack->top] : '\0'; }
+void destroyStack(Stack *stack) { free(stack->data); stack->data = NULL; }
+
+int main(void) {
+    char text[] = "{div:[{p:(price*(1+tax))},{ul:[(a),(b),{c:[(d)]}]}]}";
+    Stack stack = createStack(2);
+    int pos, balanced = 1, deepest = 0;
+    char open, close;
+    for (pos = 0; text[pos] != '\0' && balanced; pos++) {
+        close = text[pos];
+        if (close == '(' || close == '[' || close == '{') {
+            push(&stack, close);
+            if (stack.top > deepest) deepest = stack.top;
+        } else if (close == ')' || close == ']' || close == '}') {
+            open = pop(&stack);
+            balanced = (open == '(' && close == ')') || (open == '[' && close == ']') ||
+                       (open == '{' && close == '}');
+        }
+    }
+    if (stack.top != 0) balanced = 0;
+    printf("%s, max depth %d, final capacity %d\n", balanced ? "balanced" : "unbalanced",
+           deepest, stack.capacity);
+    destroyStack(&stack);
+    return 0;
+}
+
+@@
+title: جداء مصفوفتين ديناميكيتين
+level: medium
+domain: ds
+@ statement
+مصفوفة الكميات `qty[فرع][منتج]` (3×4) ومصفوفة التكاليف `cost[منتج][بند]` (4×2: سعر الشراء وتكلفة النقل). احجز المصفوفات **ديناميكيًا** بدالة `newMatrix(rows, cols)` واحسب الجداء `qty × cost` لإيجاد التكاليف لكل فرع.
+@ steps
+- `newMatrix` تحجز جدول مؤشرات وأسطرًا وتعيد `double **`.
+- `result[row][col] = Σ qty[row][mid] * cost[mid][col]`.
+- `freeMatrix` تحرر الأسطر ثم الجدول.
+@ flow
+call: result = newMatrix(3, 2)
+for: row = 0 ; row < 3 ; row++
+  for: col = 0 ; col < 2 ; col++
+    do: result[row][col] = Σ qty[row][mid] * cost[mid][col]
+out: result
+call: freeMatrix(result, 3)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+double **newMatrix(int rows, int cols) {
+    double **matrix = malloc(rows * sizeof(double *));
+    int row, col;
+    for (row = 0; row < rows; row++) {
+        matrix[row] = malloc(cols * sizeof(double));
+        for (col = 0; col < cols; col++) matrix[row][col] = 0;
+    }
+    return matrix;
+}
+
+void freeMatrix(double **matrix, int rows) {
+    int row;
+    for (row = 0; row < rows; row++) free(matrix[row]);
+    free(matrix);
+}
+
+int main(void) {
+    double qtyData[3][4] = {{10, 5, 0, 8}, {4, 12, 6, 2}, {7, 0, 9, 5}};
+    double costData[4][2] = {{1200, 50}, {3200, 120}, {899, 30}, {4100, 150}};
+    double **qty = newMatrix(3, 4), **cost = newMatrix(4, 2), **result = newMatrix(3, 2);
+    int row, col, mid;
+    for (row = 0; row < 3; row++) for (col = 0; col < 4; col++) qty[row][col] = qtyData[row][col];
+    for (row = 0; row < 4; row++) for (col = 0; col < 2; col++) cost[row][col] = costData[row][col];
+    for (row = 0; row < 3; row++)
+        for (col = 0; col < 2; col++)
+            for (mid = 0; mid < 4; mid++)
+                result[row][col] += qty[row][mid] * cost[mid][col];   // سطر × عمود
+    for (row = 0; row < 3; row++)
+        printf("Branch %d: purchase %8.0f DA, transport %6.0f DA\n", row + 1, result[row][0], result[row][1]);
+    freeMatrix(qty, 3);
+    freeMatrix(cost, 4);
+    freeMatrix(result, 3);
+    return 0;
+}
+
+@@
+title: المجاميع التراكمية للاستعلامات السريعة
+level: medium
+domain: ds
+@ statement
+نريد الإجابة بسرعة عن أسئلة مثل "كم بعنا بين اليوم 5 واليوم 20؟". احجز جدول **مجاميع تراكمية** `prefix[day] = مجموع الأيام 0..day-1` بحجم `n + 1`، واملأه بمؤشرين (قراءة وكتابة)، ثم أجب عن كل استعلام بطرح واحد.
+@ stdin
+3
+5 20
+1 30
+14 14
+@ steps
+- `prefix[0] = 0`، و `*(out + 1) = *out + *in`.
+- مبيعات المجال `[from, to]` (من 1) = `prefix[to] - prefix[from - 1]`.
+- البناء خطي، وكل استعلام بعملية واحدة.
+@ flow
+do: prefix = malloc(n + 1) ; prefix[0] = 0
+for: day = 0 ; day < n ; day++
+  do: prefix[day + 1] = prefix[day] + sales[day]
+in: nbQueries
+for: query = 0 ; query < nbQueries ; query++
+  in: from, to
+  out: prefix[to] - prefix[from - 1]
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int days = 30, day, nbQueries, query, from, to;
+    long *sales = malloc(days * sizeof(long)), *prefix = malloc((days + 1) * sizeof(long));
+    long *in, *out;
+    for (day = 0; day < days; day++) sales[day] = 1000 + (day * 37) % 500;   // بيانات تجريبية
+    prefix[0] = 0;
+    for (in = sales, out = prefix; in < sales + days; in++, out++)
+        *(out + 1) = *out + *in;                     // المجموع التراكمي
+    scanf("%d", &nbQueries);
+    for (query = 0; query < nbQueries; query++) {
+        scanf("%d %d", &from, &to);
+        printf("Days %2d..%2d: %ld DA\n", from, to, prefix[to] - prefix[from - 1]);
+    }
+    free(sales);
+    free(prefix);
+    return 0;
+}
+
+@@
+title: كشف تسرب الذاكرة بعدّاد
+level: medium
+domain: ec
+@ statement
+اكتب دالتين مغلفتين `trackedMalloc(size)` و `trackedFree(ptr)` تعدّان عدد الكتل المحجوزة والمحررة وعدد البايتات الحية. شغّل محاكاة سلة يُنسى فيها تحرير بعض الكتل، ثم اعرض تقرير **التسرب** في النهاية.
+@ steps
+- عدادات عامة: `allocations`، `releases`، `liveBytes`.
+- لمعرفة حجم الكتلة عند التحرير نحجز `size + sizeof(long)` ونخزن الحجم في بدايتها، ونعيد العنوان بعد الحجم.
+- التسرب = `allocations - releases`.
+@ flow
+for: idx = 0 ; idx < 5 ; idx++
+  call: carts[idx] = trackedMalloc(...)
+for: idx = 0 ; idx < 5 ; idx++
+  if: idx != 1 && idx != 3
+    call: trackedFree(carts[idx])
+out: allocations, releases, liveBytes
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int allocations = 0, releases = 0;
+long liveBytes = 0;
+
+void *trackedMalloc(long size) {
+    long *block = malloc(size + sizeof(long));
+    if (block == NULL) return NULL;
+    *block = size;                         // نخزن الحجم قبل البيانات
+    allocations++;
+    liveBytes += size;
+    return block + 1;                      // المستخدم يرى ما بعد الحجم
+}
+
+void trackedFree(void *ptr) {
+    long *block = (long *)ptr - 1;         // نرجع إلى بداية الكتلة
+    liveBytes -= *block;
+    releases++;
+    free(block);
+}
+
+int main(void) {
+    double *carts[5];
+    int idx, items;
+    for (idx = 0; idx < 5; idx++) {
+        items = 3 + idx * 2;
+        carts[idx] = trackedMalloc(items * sizeof(double));
+        carts[idx][0] = 100.0 * items;
+    }
+    for (idx = 0; idx < 5; idx++)
+        if (idx != 1 && idx != 3)          // نسيان تحرير السلتين 1 و 3
+            trackedFree(carts[idx]);
+    printf("allocations %d, releases %d\n", allocations, releases);
+    printf("LEAK: %d blocks, %ld bytes still allocated\n", allocations - releases, liveBytes);
+    trackedFree(carts[1]);
+    trackedFree(carts[3]);
+    printf("after fix: %ld bytes\n", liveBytes);
+    return 0;
+}
+
+@@
+title: مدرج تكراري بعدد فئات متغير
+level: medium
+domain: ds
+@ statement
+اقرأ عدد الفئات المطلوب، ثم احجز **ديناميكيًا** جدول العدادات وجدول الحدود، ووزّع أعمار الزبائن على الفئات بعرض متساوٍ، واعرض المدرج. جرّب 4 فئات ثم 7.
+@ stdin
+4 7
+@ steps
+- الحجز يعتمد على قيمة تُقرأ أثناء التنفيذ.
+- `bin = (age - low) * bins / (high - low + 1)`.
+- نحرر الجدولين بعد كل مدرج.
+@ flow
+for: query = 0 ; query < 2 ; query++
+  in: bins
+  do: counts = malloc(bins) ; كلها 0
+  for: idx = 0 ; idx < NB ; idx++
+    do: counts[فئة ages[idx]]++
+  out: المدرج
+  do: free(counts)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NB 20
+
+int main(void) {
+    int ages[NB] = {19, 23, 31, 45, 52, 27, 34, 22, 61, 38, 29, 47, 25, 33, 56, 41, 21, 36, 30, 66};
+    int low = 18, high = 67, bins, query, idx, bin, star, *counts;
+    for (query = 0; query < 2; query++) {
+        scanf("%d", &bins);
+        counts = malloc(bins * sizeof(int));              // حجم يحدده المستخدم
+        for (bin = 0; bin < bins; bin++) counts[bin] = 0;
+        for (idx = 0; idx < NB; idx++) counts[(ages[idx] - low) * bins / (high - low + 1)]++;
+        printf("%d bins:\n", bins);
+        for (bin = 0; bin < bins; bin++) {
+            printf("  %2d-%2d |", low + bin * (high - low + 1) / bins,
+                   low + (bin + 1) * (high - low + 1) / bins - 1);
+            for (star = 0; star < counts[bin]; star++) putchar('#');
+            printf(" %d\n", counts[bin]);
+        }
+        free(counts);
+    }
+    return 0;
+}
+
+@@
+title: إدراج اسم في قائمة مرتبة ديناميكية
+level: medium
+domain: ec
+@ statement
+قائمة أسماء العلامات التجارية جدول ديناميكي من المؤشرات `char **brands` مرتب أبجديًا. اكتب دالة `insertSorted(&brands, &count, name)` تحجز جدولًا أكبر بخانة، وتنسخ المؤشرات مع إدراج الاسم الجديد (نسخة محجوزة) في مكانه الصحيح.
+@ stdin
+4
+Samsung
+Apple
+Xiaomi
+Lenovo
+@ steps
+- الدالة تغير المؤشر `brands` في `main`، لذلك تستقبل `char ***list`.
+- نجد موضع الإدراج بالمقارنة الأبجدية، ثم ننسخ المؤشرات قبله وبعده.
+- نحرر الجدول القديم (المؤشرات فقط، لا الأسماء).
+@ flow
+in: nb
+for: idx = 0 ; idx < nb ; idx++
+  in: name
+  call: insertSorted(&brands, &count, name)
+out: brands
+do: تحرير الأسماء ثم الجدول
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int compareText(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first - *second;
+}
+
+char *copyText(const char *text) {
+    int len = 0, pos;
+    char *copy;
+    while (text[len] != '\0') len++;
+    copy = malloc(len + 1);
+    for (pos = 0; pos <= len; pos++) copy[pos] = text[pos];
+    return copy;
+}
+
+void insertSorted(char ***list, int *count, const char *name) {
+    char **bigger = malloc((*count + 1) * sizeof(char *));
+    int pos = 0, idx;
+    while (pos < *count && compareText((*list)[pos], name) < 0) pos++;   // موضع الإدراج
+    for (idx = 0; idx < pos; idx++) bigger[idx] = (*list)[idx];
+    bigger[pos] = copyText(name);
+    for (idx = pos; idx < *count; idx++) bigger[idx + 1] = (*list)[idx];
+    free(*list);                          // الجدول القديم (المؤشرات فقط)
+    *list = bigger;
+    (*count)++;
+}
+
+int main(void) {
+    char **brands = NULL, name[30];
+    int count = 0, nb, idx;
+    scanf("%d", &nb);
+    for (idx = 0; idx < nb; idx++) {
+        scanf("%29s", name);
+        insertSorted(&brands, &count, name);
+        printf("after %-8s:", name);
+        for (int show = 0; show < count; show++) printf(" %s", brands[show]);
+        printf("\n");
+    }
+    for (idx = 0; idx < count; idx++) free(brands[idx]);
+    free(brands);
+    return 0;
+}

@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int page; struct Node *next; } Node;
+
+int cycleLength(Node *head) {
+    Node *slow = head, *fast = head, *walk;
+    int len;
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {                           // التقيا داخل الحلقة
+            for (len = 1, walk = slow->next; walk != slow; walk = walk->next) len++;
+            return len;
+        }
+    }
+    return 0;                                         // وصلنا إلى NULL
+}
+
+int main(void) {
+    Node nodes[7];
+    int idx;
+    for (idx = 0; idx < 7; idx++) { nodes[idx].page = 100 + idx; nodes[idx].next = idx < 6 ? &nodes[idx + 1] : NULL; }
+    printf("Redirect chain OK: cycle length %d\n", cycleLength(&nodes[0]));
+    nodes[6].next = &nodes[3];                        // خطأ: 106 -> 103
+    printf("After misconfiguration: cycle length %d\n", cycleLength(&nodes[0]));
+    return 0;
+}

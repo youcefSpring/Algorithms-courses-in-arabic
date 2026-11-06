@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+double safeTotal(const char *path) {
+    FILE *file = fopen(path, "r");
+    double price, total = 0;
+    if (file == NULL) {                       // فشل الفتح
+        printf("Cannot open '%s'\n", path);
+        return -1;
+    }
+    while (fscanf(file, "%lf", &price) == 1) total += price;
+    fclose(file);
+    return total;
+}
+
+int main(void) {
+    FILE *file = fopen("prices.txt", "w");
+    fprintf(file, "1500 3200 450 899\n");
+    fclose(file);
+    printf("prices.txt total: %.2f\n", safeTotal("prices.txt"));
+    printf("old_prices.txt total: %.2f\n", safeTotal("old_prices.txt"));
+    return 0;
+}

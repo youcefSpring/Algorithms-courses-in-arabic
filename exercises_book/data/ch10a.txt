@@ -1,0 +1,1048 @@
+@@
+title: عنوان السعر وقيمته
+level: easy
+domain: ec
+@ statement
+صرّح بمتغير `price` ومؤشر `ptr` يشير إليه. اعرض القيمة عبر المتغير وعبر المؤشر (`*ptr`)، ثم عدّل السعر **عبر المؤشر** وتحقق أن المتغير تغيّر.
+@ steps
+- `ptr = &price;` يخزن عنوان المتغير.
+- `*ptr` يعني "القيمة الموجودة في العنوان": القراءة والكتابة.
+@ flow
+do: price = 4500 ; ptr = &price
+out: price, *ptr
+do: *ptr = *ptr * 0.9
+out: price
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double price = 4500;
+    double *ptr = &price;                    // ptr يحمل عنوان price
+    printf("price = %.2f, *ptr = %.2f\n", price, *ptr);
+    printf("same address: %s\n", ptr == &price ? "yes" : "no");
+    *ptr = *ptr * 0.9;                       // نعدل price عبر المؤشر
+    printf("after -10%% via pointer: price = %.2f\n", price);
+    return 0;
+}
+
+@@
+title: تبديل سعرين بالمؤشرات
+level: easy
+domain: ec
+@ statement
+اكتب دالة `swap(first, second)` تستقبل **مؤشرين** وتبدل القيمتين اللتين يشيران إليهما، واستعملها لترتيب سعرين تصاعديًا. لماذا لا تنجح الدالة إذا استقبلت القيم مباشرة؟
+@ stdin
+5400 3200
+@ steps
+- التمرير بالقيمة ينسخ المتغيرات: التبديل يحدث على النسخ فقط.
+- بالمؤشرات: الدالة تصل إلى المتغيرات الأصلية `*first` و `*second`.
+@ flow
+in: low, high
+if: low > high
+  call: swap(&low, &high)
+out: low, high
+@ code
+#include <stdio.h>
+
+void swap(double *first, double *second) {
+    double tmp = *first;
+    *first = *second;                 // نعدل المتغيرات الأصلية
+    *second = tmp;
+}
+
+int main(void) {
+    double low, high;
+    scanf("%lf %lf", &low, &high);
+    if (low > high)
+        swap(&low, &high);            // نمرر العناوين
+    printf("Price range: %.2f - %.2f DA\n", low, high);
+    return 0;
+}
+
+@@
+title: إنقاص المخزون عبر مؤشر
+level: easy
+domain: ec
+@ statement
+اكتب دالة `sell(stock, qty)` تستقبل **مؤشرًا** على المخزون وتنقصه بالكمية المباعة إذا كان كافيًا، وتعيد 1 أو 0. طبّقها على سلسلة عمليات بيع.
+@ steps
+- `if (*stock < qty) return 0;` ثم `*stock -= qty;`.
+- الاستدعاء بـ `sell(&stock, 3)`.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  call: ok = sell(&stock, orders[idx])
+  out: orders[idx], ok, stock
+@ code
+#include <stdio.h>
+
+int sell(int *stock, int qty) {
+    if (*stock < qty)
+        return 0;                     // مخزون غير كافٍ
+    *stock -= qty;
+    return 1;
+}
+
+int main(void) {
+    int stock = 10, orders[4] = {3, 5, 4, 2}, idx, ok;
+    for (idx = 0; idx < 4; idx++) {
+        ok = sell(&stock, orders[idx]);
+        printf("Sell %d: %s, stock now %d\n", orders[idx], ok ? "OK" : "refused", stock);
+    }
+    return 0;
+}
+
+@@
+title: المرور على جدول بحساب المؤشرات
+level: easy
+domain: ds
+@ statement
+احسب مجموع المبيعات اليومية بالمرور على الجدول **بمؤشر** يتقدم خانة بخانة (`ptr++`) بدل الفهرس، وتوقف عندما يصل المؤشر إلى نهاية الجدول `sales + 7`.
+@ steps
+- اسم الجدول `sales` هو عنوان أول عنصر.
+- `ptr + 1` يشير إلى العنصر التالي (يتقدم بحجم `double`).
+@ flow
+do: total = 0 ; end = sales + 7
+for: ptr = sales ; ptr < end ; ptr++
+  do: total = total + *ptr
+out: total
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double sales[7] = {1200, 980, 1430, 1100, 1290, 1650, 1520};
+    double *ptr, *end = sales + 7, total = 0;
+    for (ptr = sales; ptr < end; ptr++)        // المؤشر يتقدم بخانة
+        total += *ptr;
+    printf("Week total: %.2f DA\n", total);
+    printf("Third day via pointer: %.2f (= sales[2])\n", *(sales + 2));
+    return 0;
+}
+
+@@
+title: دالة تعيد الأصغر والأكبر
+level: easy
+domain: ds
+@ statement
+الدالة تعيد قيمة واحدة فقط، لكن يمكنها **كتابة** نتائج إضافية عبر مؤشرات. اكتب دالة `range(values, size, low, high)` تكتب أصغر وأكبر قيمة في `*low` و `*high`.
+@ steps
+- المعاملان `double *low, double *high` عنوانا متغيرين في `main`.
+- `*low = values[0]` ثم نحدّث أثناء المرور.
+@ flow
+call: range(temps, 8, &coldest, &hottest)
+out: coldest, hottest
+@ code
+#include <stdio.h>
+
+void range(double values[], int size, double *low, double *high) {
+    int idx;
+    *low = *high = values[0];
+    for (idx = 1; idx < size; idx++) {
+        if (values[idx] < *low) *low = values[idx];
+        if (values[idx] > *high) *high = values[idx];
+    }
+}
+
+int main(void) {
+    double temps[8] = {4.2, 3.8, 5.1, 6.9, 4.4, 2.7, 3.3, 5.6};
+    double coldest, hottest;
+    range(temps, 8, &coldest, &hottest);     // نتيجتان عبر العناوين
+    printf("Cold room range: %.1f C to %.1f C\n", coldest, hottest);
+    return 0;
+}
+
+@@
+title: جدول ديناميكي بحجم يحدده المستخدم
+level: easy
+domain: ec
+@ statement
+اقرأ عدد الطلبيات `count`، ثم احجز جدولًا بالحجم المطلوب بـ `malloc`، واقرأ المبالغ، واحسب المتوسط، ثم حرر الذاكرة بـ `free`.
+@ stdin
+5
+1200 4500 890 3100 2600
+@ steps
+- `malloc(count * sizeof(double))` يعيد عنوان كتلة جديدة، أو `NULL` إذا فشل.
+- نستعمل الكتلة كجدول عادي `amounts[idx]`.
+- كل `malloc` يقابله `free`.
+@ flow
+in: count
+do: amounts = malloc(count * sizeof(double))
+for: idx = 0 ; idx < count ; idx++
+  in: amounts[idx]
+out: مجموع / count
+do: free(amounts)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int count, idx;
+    double *amounts, total = 0;
+    scanf("%d", &count);
+    amounts = malloc(count * sizeof(double));     // حجم يُعرف أثناء التنفيذ
+    if (amounts == NULL) {
+        printf("Not enough memory\n");
+        return 1;
+    }
+    for (idx = 0; idx < count; idx++) {
+        scanf("%lf", &amounts[idx]);
+        total += amounts[idx];
+    }
+    printf("%d orders, average %.2f DA\n", count, total / count);
+    free(amounts);                                // نعيد الذاكرة
+    return 0;
+}
+
+@@
+title: مؤشر على هيكل والسهم
+level: easy
+domain: ec
+@ statement
+اكتب دالة `applyDiscount(item, percent)` تستقبل **مؤشرًا على هيكل** منتج وتعدل سعره مباشرة باستعمال العامل `->`، ثم طبّقها على عناصر جدول.
+@ steps
+- `item->price` يكافئ `(*item).price`.
+- نمرر `&items[idx]` لكي تعدل الدالة الأصل.
+@ flow
+for: idx = 0 ; idx < 3 ; idx++
+  call: applyDiscount(&items[idx], 15)
+  out: items[idx].name, items[idx].price
+@ code
+#include <stdio.h>
+
+typedef struct { char name[16]; double price; } Product;
+
+void applyDiscount(Product *item, double percent) {
+    item->price = item->price * (100 - percent) / 100;   // يعدل الأصل
+}
+
+int main(void) {
+    Product items[3] = {{"Monitor", 32000}, {"Keyboard", 3200}, {"Webcam", 4100}};
+    int idx;
+    for (idx = 0; idx < 3; idx++) {
+        applyDiscount(&items[idx], 15);
+        printf("%-9s %9.2f DA\n", items[idx].name, items[idx].price);
+    }
+    return 0;
+}
+
+@@
+title: طول السلسلة بالمؤشرات
+level: easy
+domain: ec
+@ statement
+اكتب دالة `textLength(text)` تحسب طول سلسلة **بمؤشر** يتقدم حتى `'\0'`، ثم تعيد الفرق بين المؤشر النهائي ومؤشر البداية.
+@ steps
+- `const char *walk = text;` ثم `while (*walk) walk++;`.
+- طرح مؤشرين على نفس الجدول يعطي عدد الخانات بينهما.
+@ flow
+do: walk = text
+while: *walk != '\0'
+  do: walk++
+out: walk - text
+@ code
+#include <stdio.h>
+
+int textLength(const char *text) {
+    const char *walk = text;
+    while (*walk != '\0')
+        walk++;                       // نتقدم حتى النهاية
+    return (int)(walk - text);        // الفرق = عدد الحروف
+}
+
+int main(void) {
+    const char *names[3] = {"Wireless Mouse", "USB-C Hub", "4K Monitor 27 inch"};
+    int idx;
+    for (idx = 0; idx < 3; idx++)
+        printf("%-20s %d chars\n", names[idx], textLength(names[idx]));
+    return 0;
+}
+
+@@
+title: حجز هيكل منتج ديناميكيًا
+level: easy
+domain: ec
+@ statement
+احجز هيكل منتج بـ `malloc(sizeof(Product))`، املأ حقوله عبر المؤشر، اعرضه، ثم حرره. وضّح أن المؤشر بعد `free` يجب ألا يُستعمل (نضعه `NULL`).
+@ steps
+- `Product *item = malloc(sizeof(Product));`
+- الحقول عبر `item->...`.
+- بعد `free(item)`: `item = NULL;`.
+@ flow
+do: item = malloc(sizeof(Product))
+do: item->code = 330 ; item->price = 899 ; item->stock = 25
+out: item->code, item->price * item->stock
+do: free(item) ; item = NULL
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { int code; double price; int stock; } Product;
+
+int main(void) {
+    Product *item = malloc(sizeof(Product));
+    if (item == NULL) return 1;
+    item->code = 330;                 // كتابة الحقول عبر المؤشر
+    item->price = 899;
+    item->stock = 25;
+    printf("Product %d: %.2f DA x %d = %.2f DA\n", item->code, item->price,
+           item->stock, item->price * item->stock);
+    printf("Block size: %d bytes\n", (int)sizeof(Product));
+    free(item);
+    item = NULL;                      // لا نستعمل ذاكرة محررة
+    printf("Freed: %s\n", item == NULL ? "pointer reset" : "?");
+    return 0;
+}
+
+@@
+title: عدد العناصر بين مؤشرين
+level: easy
+domain: ds
+@ statement
+في جدول قراءات حرارة مرتب، ابحث بمؤشرين عن أول قراءة ≥ 4°C وأول قراءة > 6°C، ثم استنتج **عدد القراءات** في المجال `[4, 6]` بطرح المؤشرين.
+@ steps
+- `first` يتقدم حتى `*first >= 4`، و `last` يتقدم حتى `*last > 6`.
+- العدد = `last - first`.
+@ flow
+do: first = temps
+while: first < end && *first < 4
+  do: first++
+do: last = first
+while: last < end && *last <= 6
+  do: last++
+out: last - first
+@ code
+#include <stdio.h>
+
+int main(void) {
+    double temps[10] = {2.1, 3.0, 3.8, 4.0, 4.6, 5.2, 5.9, 6.0, 6.8, 7.5};
+    double *end = temps + 10, *first = temps, *last;
+    while (first < end && *first < 4) first++;
+    last = first;
+    while (last < end && *last <= 6) last++;
+    printf("First in range: %.1f (index %d)\n", *first, (int)(first - temps));
+    printf("Readings in [4, 6]: %d\n", (int)(last - first));   // طرح مؤشرين
+    return 0;
+}
+
+@@
+title: جدول يكبر تلقائيًا
+level: medium
+domain: ds
+@ statement
+لا نعرف مسبقًا عدد المبيعات التي ستُقرأ (تنتهي القراءة بـ `-1`). اكتب برنامجًا يبدأ بجدول ديناميكي سعته 2، وكلما امتلأ **يضاعف** سعته: يحجز كتلة جديدة، ينسخ العناصر، ويحرر القديمة (دون `realloc`).
+@ stdin
+120 340 90 560 210 480 75 330 -1
+@ steps
+- `capacity` السعة، و `count` العدد المستعمل.
+- عند `count == capacity`: `bigger = malloc(2 * capacity ...)`، نسخ، `free(old)`.
+- المضاعفة تجعل التكلفة المتوسطة لكل إضافة ثابتة.
+@ flow
+do: capacity = 2 ; data = malloc(...)
+in: value
+while: value != -1
+  if: count == capacity
+    do: bigger = malloc(2 * capacity) ; نسخ ; free(data) ; data = bigger
+    do: capacity = capacity * 2
+  do: data[count++] = value
+  in: value
+out: count, capacity
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int capacity = 2, count = 0, idx, copies = 0;
+    double *data = malloc(capacity * sizeof(double)), *bigger, value, total = 0;
+    if (data == NULL) return 1;
+    scanf("%lf", &value);
+    while (value != -1) {
+        if (count == capacity) {                       // الجدول ممتلئ
+            bigger = malloc(2 * capacity * sizeof(double));
+            if (bigger == NULL) { free(data); return 1; }
+            for (idx = 0; idx < count; idx++) bigger[idx] = data[idx];
+            copies += count;
+            free(data);                                // نحرر القديم
+            data = bigger;
+            capacity *= 2;
+            printf("grow -> capacity %d\n", capacity);
+        }
+        data[count++] = value;
+        scanf("%lf", &value);
+    }
+    for (idx = 0; idx < count; idx++) total += data[idx];
+    printf("%d sales, capacity %d, %d copies, total %.0f\n", count, capacity, copies, total);
+    free(data);
+    return 0;
+}
+
+@@
+title: نسخة ديناميكية من اسم المنتج
+level: medium
+domain: ec
+@ statement
+اكتب دالة `duplicate(text)` تحجز **بالضبط** الذاكرة اللازمة لنسخة من السلسلة (الطول + 1)، وتنسخها، وتعيد المؤشر (بديل `strdup`). استعملها لتخزين أسماء منتجات بأطوال مختلفة دون إهدار ذاكرة.
+@ steps
+- نحسب الطول، ثم `malloc(length + 1)`.
+- ننسخ الحروف ثم `'\0'`.
+- المستدعي مسؤول عن `free`.
+@ flow
+for: idx = 0 ; idx < 3 ; idx++
+  call: names[idx] = duplicate(buffer)
+out: names
+for: idx = 0 ; idx < 3 ; idx++
+  do: free(names[idx])
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+char *duplicate(const char *text) {
+    int length = 0, pos;
+    char *copy;
+    while (text[length] != '\0') length++;
+    copy = malloc(length + 1);                 // +1 لعلامة النهاية
+    if (copy == NULL) return NULL;
+    for (pos = 0; pos <= length; pos++) copy[pos] = text[pos];
+    return copy;
+}
+
+int main(void) {
+    char buffer[100];
+    char *names[3];
+    int idx, bytes = 0, len;
+    for (idx = 0; idx < 3; idx++) {
+        scanf("%99s", buffer);
+        names[idx] = duplicate(buffer);        // نسخة بحجمها الحقيقي
+        for (len = 0; names[idx][len] != '\0'; len++) {}
+        bytes += len + 1;
+    }
+    for (idx = 0; idx < 3; idx++) printf("%s\n", names[idx]);
+    printf("Used %d bytes instead of %d\n", bytes, 3 * 100);
+    for (idx = 0; idx < 3; idx++) free(names[idx]);
+    return 0;
+}
+@ stdin
+Mouse
+Ultra-Wide-Curved-Monitor-34
+Hub
+
+@@
+title: الاسم الكامل في ذاكرة ديناميكية
+level: medium
+domain: ec
+@ statement
+اكتب دالة `fullName(first, last)` تحجز سلسلة جديدة تحتوي على `"LAST, First"` (اللقب بحروف كبيرة)، وتعيد مؤشرها. استعملها لطباعة ملصقات الطرود.
+@ stdin
+amina benali
+karim zerrouki
+@ steps
+- الحجم = طول اللقب + 2 (فاصلة وفراغ) + طول الاسم + 1.
+- ننسخ اللقب محولًا إلى حروف كبيرة، ثم `", "`، ثم الاسم مع أول حرف كبير.
+@ flow
+for: idx = 0 ; idx < 2 ; idx++
+  in: first, last
+  call: label = fullName(first, last)
+  out: label
+  do: free(label)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int length(const char *text) {
+    int len = 0;
+    while (text[len] != '\0') len++;
+    return len;
+}
+
+char upper(char ch) { return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch; }
+
+char *fullName(const char *first, const char *last) {
+    int lenF = length(first), lenL = length(last), pos, out = 0;
+    char *label = malloc(lenL + 2 + lenF + 1);
+    if (label == NULL) return NULL;
+    for (pos = 0; pos < lenL; pos++) label[out++] = upper(last[pos]);   // اللقب كبير
+    label[out++] = ',';
+    label[out++] = ' ';
+    for (pos = 0; pos < lenF; pos++) label[out++] = pos == 0 ? upper(first[pos]) : first[pos];
+    label[out] = '\0';
+    return label;
+}
+
+int main(void) {
+    char first[30], last[30], *label;
+    int idx;
+    for (idx = 0; idx < 2; idx++) {
+        scanf("%29s %29s", first, last);
+        label = fullName(first, last);
+        printf("Ship to: %s\n", label);
+        free(label);
+    }
+    return 0;
+}
+
+@@
+title: قلب الجدول بمؤشرين متقابلين
+level: medium
+domain: ds
+@ statement
+اكتب دالة `reverse(start, end)` تقلب جزءًا من جدول **في مكانه** بمؤشرين: الأول من البداية والثاني من النهاية، يتبادلان ثم يتقاربان. استعملها لقلب الجدول كله، ثم لـ **تدوير** سجل المبيعات بـ 3 أيام (قلب ثلاث مرات).
+@ steps
+- ما دام `start < end`: تبديل `*start` و `*end`، ثم `start++` و `end--`.
+- التدوير يسارًا بـ `shift`: قلب `[0, shift)`، قلب `[shift, n)`، ثم قلب الكل.
+@ flow
+call: reverse(sales, sales + 9)
+call: reverse(sales, sales + 2)
+call: reverse(sales + 3, sales + 9)
+call: reverse(sales, sales + 9)
+out: sales
+@ code
+#include <stdio.h>
+
+void reverse(int *start, int *end) {
+    int tmp;
+    while (start < end) {
+        tmp = *start;
+        *start++ = *end;              // نكتب ثم نتقدم
+        *end-- = tmp;
+    }
+}
+
+void show(char label[], int *values, int size) {
+    int *ptr;
+    printf("%s", label);
+    for (ptr = values; ptr < values + size; ptr++) printf(" %d", *ptr);
+    printf("\n");
+}
+
+int main(void) {
+    int sales[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    reverse(sales, sales + 9);
+    show("reversed:", sales, 10);
+    reverse(sales, sales + 9);                 // نعيده كما كان
+    reverse(sales, sales + 2);                 // تدوير يسارًا بـ 3
+    reverse(sales + 3, sales + 9);
+    reverse(sales, sales + 9);
+    show("rotated: ", sales, 10);
+    return 0;
+}
+
+@@
+title: حذف المكررات في مكانها
+level: medium
+domain: ec
+@ statement
+قائمة رموز المنتجات المطلوبة مرتبة وتحتوي على مكررات. اكتب دالة `unique(codes, size)` تحذف المكررات **في نفس الجدول** بمؤشري قراءة وكتابة، وتعيد الطول الجديد.
+@ steps
+- `write` يشير إلى آخر عنصر فريد، و `read` يمر على كل العناصر.
+- إذا اختلف `*read` عن `*write`: نتقدم بـ `write` وننسخ.
+- الطول الجديد `write - codes + 1`.
+@ flow
+do: write = codes
+for: read = codes + 1 ; read < codes + size ; read++
+  if: *read != *write
+    do: write++ ; *write = *read
+out: write - codes + 1
+@ code
+#include <stdio.h>
+
+int unique(int *codes, int size) {
+    int *write = codes, *read;
+    if (size == 0) return 0;
+    for (read = codes + 1; read < codes + size; read++)
+        if (*read != *write)
+            *++write = *read;            // عنصر جديد: نتقدم ثم ننسخ
+    return (int)(write - codes) + 1;
+}
+
+int main(void) {
+    int codes[14] = {101, 101, 105, 110, 110, 110, 204, 204, 330, 412, 412, 412, 412, 500};
+    int size = unique(codes, 14), idx;
+    printf("%d distinct codes:", size);
+    for (idx = 0; idx < size; idx++) printf(" %d", codes[idx]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: تقطيع الوصف إلى كلمات بالمؤشرات
+level: medium
+domain: ds
+@ statement
+اكتب دالة `splitWords(text, words, maxWords)` تقسم الجملة **في مكانها**: تستبدل الفراغات بـ `'\0'` وتخزن في جدول مؤشرات `char *words[]` عنوان بداية كل كلمة، دون نسخ أي حرف. ثم اعرض الكلمات وأطولها.
+@ steps
+- نمر بمؤشر على النص؛ عند بداية كلمة نخزن العنوان.
+- عند الفراغ بعد كلمة نكتب `'\0'` لإنهائها.
+- `words[idx]` سلسلة صالحة لأنها تنتهي بـ `'\0'` داخل النص الأصلي.
+@ flow
+do: count = 0 ; inWord = 0
+for: ptr = text ; *ptr != '\0' ; ptr++
+  if: *ptr == ' '
+    do: *ptr = '\0' ; inWord = 0
+  else:
+    if: !inWord
+      do: words[count++] = ptr ; inWord = 1
+out: words
+@ code
+#include <stdio.h>
+
+int splitWords(char *text, char *words[], int maxWords) {
+    int count = 0, inWord = 0;
+    char *ptr;
+    for (ptr = text; *ptr != '\0'; ptr++) {
+        if (*ptr == ' ') {
+            *ptr = '\0';                       // نهاية الكلمة السابقة
+            inWord = 0;
+        } else if (!inWord && count < maxWords) {
+            words[count++] = ptr;              // عنوان بداية الكلمة
+            inWord = 1;
+        }
+    }
+    return count;
+}
+
+int main(void) {
+    char text[] = "  ergonomic  wireless keyboard with silent keys ";
+    char *words[20], *longest;
+    int count = splitWords(text, words, 20), idx, len, best = 0;
+    longest = words[0];
+    for (idx = 0; idx < count; idx++) {
+        for (len = 0; words[idx][len] != '\0'; len++) {}
+        printf("[%s] ", words[idx]);
+        if (len > best) { best = len; longest = words[idx]; }
+    }
+    printf("\n%d words, longest: %s (%d)\n", count, longest, best);
+    return 0;
+}
+
+@@
+title: ترتيب مؤشرات المنتجات لا المنتجات
+level: medium
+domain: ec
+@ statement
+تبديل هياكل كبيرة مكلف. رتّب جدول **مؤشرات** `Product *view[]` يشير إلى المنتجات، حسب السعر مرة وحسب التقييم مرة أخرى، دون تحريك الهياكل الأصلية في الذاكرة.
+@ steps
+- `view[idx] = &items[idx]` في البداية.
+- الترتيب يبدل المؤشرات فقط (8 بايتات بدل الهيكل كله).
+- الجدول الأصلي يبقى بترتيبه.
+@ flow
+for: idx = 0 ; idx < NB ; idx++
+  do: view[idx] = &items[idx]
+do: ترتيب view حسب view[idx]->price
+out: view
+do: ترتيب view حسب view[idx]->rating تنازليًا
+out: view
+@ code
+#include <stdio.h>
+
+#define NB 5
+
+typedef struct { char name[16]; double price, rating; char details[200]; } Product;
+
+void sortView(Product *view[], int byPrice) {
+    Product *tmp;
+    int pass, idx, swapIt;
+    for (pass = 0; pass < NB - 1; pass++)
+        for (idx = 0; idx < NB - 1 - pass; idx++) {
+            swapIt = byPrice ? view[idx]->price > view[idx + 1]->price
+                             : view[idx]->rating < view[idx + 1]->rating;
+            if (swapIt) { tmp = view[idx]; view[idx] = view[idx + 1]; view[idx + 1] = tmp; }
+        }
+}
+
+void show(char label[], Product *view[]) {
+    int idx;
+    printf("%s", label);
+    for (idx = 0; idx < NB; idx++) printf(" %s;", view[idx]->name);
+    printf("\n");
+}
+
+int main(void) {
+    Product items[NB] = {{"Monitor", 32000, 4.4, ""}, {"Mouse", 1500, 4.7, ""},
+                         {"Laptop", 89000, 4.2, ""}, {"Keyboard", 3200, 4.5, ""},
+                         {"Webcam", 4100, 3.9, ""}};
+    Product *view[NB];
+    int idx;
+    for (idx = 0; idx < NB; idx++) view[idx] = &items[idx];
+    sortView(view, 1);
+    show("By price: ", view);
+    sortView(view, 0);
+    show("By rating:", view);
+    printf("Original first item still: %s\n", items[0].name);
+    printf("Swapped %d bytes per move instead of %d\n", (int)sizeof(Product *), (int)sizeof(Product));
+    return 0;
+}
+
+@@
+title: مصفوفة مبيعات ديناميكية
+level: medium
+domain: ds
+@ statement
+اقرأ عدد الفروع وعدد الأيام، ثم احجز مصفوفة ديناميكية `double **sales`: جدول مؤشرات على الأسطر، وكل سطر جدول محجوز على حدة. املأها، احسب مجموع كل فرع ومجموع كل يوم، ثم حرر كل الأسطر ثم جدول المؤشرات.
+@ stdin
+3 4
+120 95 140 180
+80 60 75 90
+200 210 190 250
+@ steps
+- `sales = malloc(rows * sizeof(double *))` ثم لكل سطر `malloc(cols * sizeof(double))`.
+- `sales[row][col]` يعمل كمصفوفة عادية.
+- التحرير بالترتيب المعاكس: الأسطر أولًا.
+@ flow
+in: rows, cols
+do: sales = malloc(rows مؤشرات)
+for: row = 0 ; row < rows ; row++
+  do: sales[row] = malloc(cols أعداد)
+do: قراءة وحساب المجاميع
+for: row = 0 ; row < rows ; row++
+  do: free(sales[row])
+do: free(sales)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int rows, cols, row, col;
+    double **sales, sum;
+    scanf("%d %d", &rows, &cols);
+    sales = malloc(rows * sizeof(double *));          // جدول مؤشرات الأسطر
+    for (row = 0; row < rows; row++)
+        sales[row] = malloc(cols * sizeof(double));   // كل سطر على حدة
+    for (row = 0; row < rows; row++)
+        for (col = 0; col < cols; col++) scanf("%lf", &sales[row][col]);
+    for (row = 0; row < rows; row++) {
+        for (sum = 0, col = 0; col < cols; col++) sum += sales[row][col];
+        printf("Branch %d: %.0f\n", row + 1, sum);
+    }
+    printf("Per day:");
+    for (col = 0; col < cols; col++) {
+        for (sum = 0, row = 0; row < rows; row++) sum += sales[row][col];
+        printf(" %.0f", sum);
+    }
+    printf("\n");
+    for (row = 0; row < rows; row++) free(sales[row]);  // الأسطر أولًا
+    free(sales);
+    return 0;
+}
+
+@@
+title: استراتيجية الخصم بمؤشر دالة
+level: medium
+domain: ec
+@ statement
+لدى المتجر ثلاث سياسات خصم: بدون خصم، خصم ثابت 500 دج فوق 5000، و 10% فوق 10000. عرّف **مؤشر دالة** `double (*policy)(double)`، واختر السياسة حسب رمز الحملة، ثم طبّقها على عدة سلات.
+@ stdin
+F
+@ steps
+- كل سياسة دالة بنفس التوقيع `double name(double amount)`.
+- جدول مؤشرات دوال `policies[3]`، ونختار منه بالفهرس.
+- الاستدعاء: `policy(amount)` كأي دالة.
+@ flow
+in: campaign
+do: policy = policies[فهرس الحملة]
+for: idx = 0 ; idx < 4 ; idx++
+  call: total = policy(baskets[idx])
+  out: baskets[idx], total
+@ code
+#include <stdio.h>
+
+double noDiscount(double amount) { return amount; }
+double fixedOff(double amount)   { return amount > 5000 ? amount - 500 : amount; }
+double tenPercent(double amount) { return amount > 10000 ? amount * 0.9 : amount; }
+
+int main(void) {
+    double (*policies[3])(double) = {noDiscount, fixedOff, tenPercent};   // جدول دوال
+    char codes[3] = {'N', 'F', 'P'}, campaign;
+    double baskets[4] = {3000, 7500, 12000, 25000};
+    double (*policy)(double) = noDiscount;
+    int idx;
+    scanf(" %c", &campaign);
+    for (idx = 0; idx < 3; idx++)
+        if (codes[idx] == campaign) policy = policies[idx];
+    for (idx = 0; idx < 4; idx++)
+        printf("%8.2f -> %8.2f DA\n", baskets[idx], policy(baskets[idx]));   // استدعاء عبر المؤشر
+    printf("Best policy for 12000: %.2f\n",
+           tenPercent(12000) < fixedOff(12000) ? tenPercent(12000) : fixedOff(12000));
+    return 0;
+}
+
+@@
+title: ترتيب عام بدالة مقارنة
+level: medium
+domain: ec
+@ statement
+اكتب دالة ترتيب عامة `sortProducts(items, size, compare)` تستقبل **مؤشر دالة مقارنة**، واكتب ثلاث دوال مقارنة (السعر تصاعديًا، التقييم تنازليًا، الاسم أبجديًا). هكذا نكتب الترتيب مرة واحدة ونغير المعيار فقط.
+@ steps
+- توقيع المقارنة: `int compare(const Product *first, const Product *second)` يعيد سالبًا إذا كان الأول قبل الثاني.
+- الترتيب بالإدراج يستدعي `compare(&key, &items[back])`.
+@ flow
+call: sortProducts(items, 5, byPrice)
+out: items
+call: sortProducts(items, 5, byRating)
+out: items
+call: sortProducts(items, 5, byName)
+out: items
+@ code
+#include <stdio.h>
+
+typedef struct { char name[12]; double price, rating; } Product;
+
+int byPrice(const Product *first, const Product *second) {
+    return first->price < second->price ? -1 : first->price > second->price;
+}
+int byRating(const Product *first, const Product *second) {
+    return first->rating > second->rating ? -1 : first->rating < second->rating;
+}
+int byName(const Product *first, const Product *second) {
+    const char *left = first->name, *right = second->name;
+    while (*left != '\0' && *left == *right) { left++; right++; }
+    return *left - *right;
+}
+
+void sortProducts(Product items[], int size, int (*compare)(const Product *, const Product *)) {
+    Product key;
+    int idx, back;
+    for (idx = 1; idx < size; idx++) {
+        key = items[idx];
+        for (back = idx - 1; back >= 0 && compare(&key, &items[back]) < 0; back--)
+            items[back + 1] = items[back];
+        items[back + 1] = key;
+    }
+}
+
+void show(char label[], Product items[], int size) {
+    int idx;
+    printf("%-7s", label);
+    for (idx = 0; idx < size; idx++) printf(" %s", items[idx].name);
+    printf("\n");
+}
+
+int main(void) {
+    Product items[5] = {{"Monitor", 32000, 4.4}, {"Mouse", 1500, 4.7}, {"Laptop", 89000, 4.2},
+                        {"Keyboard", 3200, 4.5}, {"Webcam", 4100, 3.9}};
+    sortProducts(items, 5, byPrice);  show("price:", items, 5);
+    sortProducts(items, 5, byRating); show("rating:", items, 5);
+    sortProducts(items, 5, byName);   show("name:", items, 5);
+    return 0;
+}
+
+@@
+title: دالة تحجز جدولًا للمستدعي
+level: medium
+domain: ds
+@ statement
+اكتب دالة `loadScores(result, count)` تقرأ عدد التقييمات ثم القيم، **تحجز** الجدول بنفسها، وتعيد عنوانه للمستدعي عبر **مؤشر على مؤشر** `double **result`، والعدد عبر `int *count`. احسب ثم المتوسط والوسيط.
+@ stdin
+7
+4.5 3.0 5.0 4.0 2.5 4.5 3.5
+@ steps
+- لكي تغير الدالة مؤشرًا في `main` يجب أن تستقبل **عنوانه**: `double **result`.
+- `*result = malloc(...)` تكتب العنوان الجديد في متغير المستدعي.
+- الوسيط بعد ترتيب الجدول.
+@ flow
+call: ok = loadScores(&scores, &count)
+do: ترتيب scores
+out: المتوسط، scores[count / 2]
+do: free(scores)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int loadScores(double **result, int *count) {
+    int idx;
+    scanf("%d", count);
+    *result = malloc(*count * sizeof(double));   // نكتب العنوان في متغير المستدعي
+    if (*result == NULL) return 0;
+    for (idx = 0; idx < *count; idx++) scanf("%lf", &(*result)[idx]);
+    return 1;
+}
+
+int main(void) {
+    double *scores = NULL, total = 0, key;
+    int count = 0, idx, back;
+    if (!loadScores(&scores, &count)) return 1;
+    for (idx = 0; idx < count; idx++) total += scores[idx];
+    for (idx = 1; idx < count; idx++) {           // ترتيب بالإدراج
+        key = scores[idx];
+        for (back = idx - 1; back >= 0 && scores[back] > key; back--) scores[back + 1] = scores[back];
+        scores[back + 1] = key;
+    }
+    printf("%d scores, mean %.2f, median %.2f\n", count, total / count, scores[count / 2]);
+    free(scores);
+    return 0;
+}
+
+@@
+title: تصفية المنتجات في جدول جديد
+level: medium
+domain: ec
+@ statement
+اكتب دالة `filterAbove(items, size, minRating, outCount)` تعيد **جدولًا جديدًا محجوزًا** يحتوي فقط على المنتجات التي تقييمها ≥ الحد، وتكتب عددها في `*outCount`. الجدول الأصلي لا يتغير.
+@ steps
+- مرور أول لعد العناصر المطابقة، ثم حجز بالحجم المضبوط.
+- مرور ثانٍ للنسخ.
+- إذا لم يوجد أي عنصر نعيد `NULL`.
+@ flow
+call: best = filterAbove(items, 6, 4.3, &count)
+for: idx = 0 ; idx < count ; idx++
+  out: best[idx]
+do: free(best)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { char name[12]; double price, rating; } Product;
+
+Product *filterAbove(const Product *items, int size, double minRating, int *outCount) {
+    Product *result;
+    int idx, count = 0;
+    for (idx = 0; idx < size; idx++) if (items[idx].rating >= minRating) count++;
+    *outCount = count;
+    if (count == 0) return NULL;
+    result = malloc(count * sizeof(Product));      // الحجم المضبوط
+    if (result == NULL) { *outCount = 0; return NULL; }
+    count = 0;
+    for (idx = 0; idx < size; idx++)
+        if (items[idx].rating >= minRating) result[count++] = items[idx];
+    return result;
+}
+
+int main(void) {
+    Product items[6] = {{"Monitor", 32000, 4.4}, {"Mouse", 1500, 4.7}, {"Laptop", 89000, 4.2},
+                        {"Keyboard", 3200, 4.5}, {"Webcam", 4100, 3.9}, {"Hub", 3100, 4.3}};
+    int count, idx;
+    Product *best = filterAbove(items, 6, 4.3, &count);
+    printf("%d products rated >= 4.3:\n", count);
+    for (idx = 0; idx < count; idx++)
+        printf("  %-9s %.1f  %8.2f DA\n", best[idx].name, best[idx].rating, best[idx].price);
+    free(best);
+    return 0;
+}
+
+@@
+title: دمج قائمتين في ذاكرة جديدة
+level: medium
+domain: ec
+@ statement
+اكتب دالة `mergeNew(first, sizeA, second, sizeB)` تحجز جدولًا جديدًا بحجم `sizeA + sizeB` وتدمج فيه قائمتي أسعار مرتبتين **بالمؤشرات** (لا فهارس)، ثم تعيد عنوانه.
+@ steps
+- ثلاثة مؤشرات: `left` و `right` للقراءة و `out` للكتابة.
+- ننسخ الأصغر بـ `*out++ = *left++`.
+- بعد الحلقة ننسخ ما تبقى.
+@ flow
+do: merged = malloc(sizeA + sizeB)
+while: left < endA && right < endB
+  if: *left <= *right
+    do: *out++ = *left++
+  else:
+    do: *out++ = *right++
+do: نسخ الباقي
+out: merged
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int *mergeNew(const int *first, int sizeA, const int *second, int sizeB) {
+    int *merged = malloc((sizeA + sizeB) * sizeof(int)), *out = merged;
+    const int *left = first, *right = second, *endA = first + sizeA, *endB = second + sizeB;
+    if (merged == NULL) return NULL;
+    while (left < endA && right < endB)
+        *out++ = (*left <= *right) ? *left++ : *right++;   // الأصغر أولًا
+    while (left < endA) *out++ = *left++;
+    while (right < endB) *out++ = *right++;
+    return merged;
+}
+
+int main(void) {
+    int supplierA[5] = {450, 900, 1500, 3200, 7800};
+    int supplierB[4] = {300, 1200, 2500, 9900};
+    int *merged = mergeNew(supplierA, 5, supplierB, 4), *ptr;
+    for (ptr = merged; ptr < merged + 9; ptr++) printf("%d ", *ptr);
+    printf("\n");
+    free(merged);
+    return 0;
+}
+
+@@
+title: منقول مصفوفة التقييمات ديناميكيًا
+level: medium
+domain: ds
+@ statement
+مصفوفة التقييمات `ratings[زبون][منتج]` (4×3). احجز **ديناميكيًا** مصفوفتها المنقولة `[منتج][زبون]` في كتلة **واحدة** متصلة (`malloc(rows * cols)`) مع حساب الموضع `row * cols + col`، ثم احسب متوسط كل منتج من المنقولة.
+@ steps
+- كتلة واحدة أسرع ويحررها `free` واحد.
+- `transposed[col * nbClients + row] = ratings[row][col]`.
+- سطر المنتج في المنقولة متصل في الذاكرة: حساب متوسطه مرور بسيط.
+@ flow
+do: transposed = malloc(nbProducts * nbClients)
+for: row = 0 ; row < nbClients ; row++
+  for: col = 0 ; col < nbProducts ; col++
+    do: transposed[col * nbClients + row] = ratings[row][col]
+for: col = 0 ; col < nbProducts ; col++
+  out: متوسط السطر col من transposed
+do: free(transposed)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int ratings[4][3] = {{5, 3, 4}, {4, 2, 5}, {5, 4, 4}, {3, 1, 5}};
+    int nbClients = 4, nbProducts = 3, row, col;
+    int *transposed = malloc(nbProducts * nbClients * sizeof(int));   // كتلة واحدة
+    double sum;
+    if (transposed == NULL) return 1;
+    for (row = 0; row < nbClients; row++)
+        for (col = 0; col < nbProducts; col++)
+            transposed[col * nbClients + row] = ratings[row][col];    // فهرس مسطح
+    for (col = 0; col < nbProducts; col++) {
+        printf("Product %d:", col + 1);
+        for (sum = 0, row = 0; row < nbClients; row++) {
+            printf(" %d", transposed[col * nbClients + row]);
+            sum += transposed[col * nbClients + row];
+        }
+        printf("  mean %.2f\n", sum / nbClients);
+    }
+    free(transposed);
+    return 0;
+}
+
+@@
+title: تفكيك سطر CSV في مكانه
+level: medium
+domain: ds
+@ statement
+اكتب دالة `splitCsv(line, fields, maxFields)` تقسم سطر CSV مفصولًا بـ `;` **في مكانه** (تستبدل `;` بـ `'\0'`) وتخزن مؤشرات الحقول، مع قبول **الحقول الفارغة** (`;;`). عالج عدة أسطر من تصدير الطلبيات.
+@ steps
+- الحقل الأول يبدأ عند `line`.
+- عند كل `;`: نكتبه `'\0'` ونبدأ حقلًا جديدًا عند الحرف التالي.
+- الحقل الفارغ مؤشر على `'\0'` مباشرة.
+@ flow
+for: idx = 0 ; idx < 3 ; idx++
+  call: count = splitCsv(lines[idx], fields, 6)
+  for: field = 0 ; field < count ; field++
+    out: fields[field] أو "(empty)"
+@ code
+#include <stdio.h>
+
+int splitCsv(char *line, char *fields[], int maxFields) {
+    int count = 0;
+    char *ptr = line;
+    fields[count++] = ptr;                       // الحقل الأول
+    for (; *ptr != '\0'; ptr++)
+        if (*ptr == ';' && count < maxFields) {
+            *ptr = '\0';                         // نهاية الحقل الحالي
+            fields[count++] = ptr + 1;           // بداية التالي
+        }
+    return count;
+}
+
+int main(void) {
+    char lines[3][60] = {"7781;Amina;Oran;12500;paid", "7782;Karim;;3200;", "7783;Lina;Setif;;pending"};
+    char *fields[6];
+    int idx, count, field;
+    for (idx = 0; idx < 3; idx++) {
+        count = splitCsv(lines[idx], fields, 6);
+        printf("%d fields:", count);
+        for (field = 0; field < count; field++)
+            printf(" [%s]", *fields[field] != '\0' ? fields[field] : "-");
+        printf("\n");
+    }
+    return 0;
+}

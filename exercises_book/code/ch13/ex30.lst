@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int code, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->code = code; node->left = left; node->right = right;
+    return node;
+}
+
+void appendText(char *text, int *len, const char *piece) { while (*piece != '\0') text[(*len)++] = *piece++; text[*len] = '\0'; }
+
+void appendNumber(char *text, int *len, int value) {
+    char digits[12];
+    int count = 0;
+    do { digits[count++] = (char)('0' + value % 10); value /= 10; } while (value > 0);
+    while (count > 0) text[(*len)++] = digits[--count];
+    text[(*len)++] = ' ';
+    text[*len] = '\0';
+}
+
+void serialize(const Tree *node, char *text, int *len) {
+    if (node == NULL) { appendText(text, len, "# "); return; }
+    appendNumber(text, len, node->code);
+    serialize(node->left, text, len);
+    serialize(node->right, text, len);
+}
+
+Tree *deserialize(const char *text, int *pos) {
+    Tree *node;
+    int value = 0;
+    while (text[*pos] == ' ') (*pos)++;
+    if (text[*pos] == '#') { (*pos)++; return NULL; }       (*@\cmt{فرع فارغ}@*)
+    while (text[*pos] >= '0' && text[*pos] <= '9') value = value * 10 + (text[(*pos)++] - '0');
+    node = newTree(value, NULL, NULL);
+    node->left = deserialize(text, pos);                     (*@\cmt{نفس ترتيب التسلسل}@*)
+    node->right = deserialize(text, pos);
+    return node;
+}
+
+int sameText(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first == *second;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree(100, newTree(110, newTree(111, NULL, NULL), NULL),
+                              newTree(120, newTree(121, NULL, NULL), newTree(122, NULL, newTree(1221, NULL, NULL))));
+    Tree *copy;
+    char text[200], check[200];
+    int len = 0, pos = 0;
+    serialize(root, text, &len);
+    printf("saved:   %s\n", text);
+    copy = deserialize(text, &pos);
+    len = 0;
+    serialize(copy, check, &len);
+    printf("rebuilt: %s\n", check);
+    printf("identical: %s\n", sameText(text, check) ? "yes" : "no");
+    freeTree(root);
+    freeTree(copy);
+    return 0;
+}

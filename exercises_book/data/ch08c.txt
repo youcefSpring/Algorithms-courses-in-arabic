@@ -1,0 +1,659 @@
+@@
+title: الترتيب بالدمج وعدد الانقلابات
+level: hard
+domain: ds
+@ statement
+رتّب محرك التوصيات 10 منتجات، ورتّبها الزبون بطريقته. عدد **الانقلابات** (أزواج المنتجات المرتبة في اتجاهين مختلفين) يقيس الاختلاف بين الترتيبين. اكتب دالة `sortCount(values, low, high)` **عودية** ترتب بالدمج وتعد الانقلابات في نفس الوقت بتعقيد `n log n`.
+@ steps
+- نقسم إلى نصفين ونرتب كل نصف عوديًا (ونعد انقلاباته).
+- أثناء الدمج: إذا أخذنا عنصرًا من النصف الأيمن قبل عناصر باقية في الأيسر، فكل تلك العناصر الباقية (`middle - first + 1`) تشكل انقلابات معه.
+- المجموع = انقلابات اليسار + اليمين + الدمج.
+@ flow
+if: low >= high
+  out: 0
+else:
+  do: middle = (low + high) / 2
+  call: count = sortCount(low, middle) + sortCount(middle + 1, high)
+  do: دمج النصفين في buffer
+  do: عند أخذ عنصر من اليمين: count += middle - first + 1
+  out: count
+@ code
+#include <stdio.h>
+
+#define NB 10
+
+int buffer[NB];
+
+long sortCount(int values[], int low, int high) {
+    int middle, first, second, out, idx;
+    long count;
+    if (low >= high) return 0;
+    middle = (low + high) / 2;
+    count = sortCount(values, low, middle) + sortCount(values, middle + 1, high);
+    first = low; second = middle + 1; out = low;
+    while (first <= middle && second <= high) {
+        if (values[first] <= values[second]) {
+            buffer[out++] = values[first++];
+        } else {
+            buffer[out++] = values[second++];
+            count += middle - first + 1;          // كل الباقي في اليسار أكبر منه
+        }
+    }
+    while (first <= middle) buffer[out++] = values[first++];
+    while (second <= high) buffer[out++] = values[second++];
+    for (idx = low; idx <= high; idx++) values[idx] = buffer[idx];
+    return count;
+}
+
+int main(void) {
+    int customer[NB] = {3, 1, 2, 5, 4, 7, 10, 6, 9, 8};   // رتبة المحرك لكل منتج حسب ترتيب الزبون
+    int reversed[NB] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    long inv;
+    int idx;
+    inv = sortCount(customer, 0, NB - 1);
+    printf("Inversions: %ld of %d pairs\n", inv, NB * (NB - 1) / 2);
+    printf("Kendall tau = %.3f\n", 1 - 4.0 * inv / (NB * (NB - 1)));
+    printf("Sorted: ");
+    for (idx = 0; idx < NB; idx++) printf("%d ", customer[idx]);
+    printf("\nFully reversed list: %ld inversions\n", sortCount(reversed, 0, NB - 1));
+    return 0;
+}
+
+@@
+title: الترتيب السريع للأسعار
+level: hard
+domain: ec
+@ statement
+اكتب الترتيب السريع **العودي** `quickSort(prices, low, high)`: نختار محورًا (العنصر الأوسط)، ونقسم الجدول بحيث يكون كل ما قبل المحور أصغر منه وكل ما بعده أكبر، ثم نرتب الجزأين عوديًا. اعرض كل تقسيم وعدد المقارنات.
+@ steps
+- التقسيم (طريقة هور): مؤشران `left` و `right` يتقاربان؛ نتوقف عند عنصر في غير مكانه من كل جهة ونبدلهما.
+- بعد التقسيم: `quickSort(low, right)` و `quickSort(left, high)`.
+- الحالة الأساسية `low >= high`.
+@ flow
+if: low < high
+  do: pivot = prices[(low + high) / 2] ; left = low ; right = high
+  while: left <= right
+    do: تقدم left ما دام prices[left] < pivot
+    do: تراجع right ما دام prices[right] > pivot
+    if: left <= right
+      do: تبديل prices[left] و prices[right] ; left++ ; right--
+  call: quickSort(low, right)
+  call: quickSort(left, high)
+@ code
+#include <stdio.h>
+
+#define NB 12
+
+int comparisons = 0;
+
+void quickSort(int prices[], int low, int high) {
+    int pivot, left = low, right = high, tmp;
+    if (low >= high) return;
+    pivot = prices[(low + high) / 2];
+    while (left <= right) {
+        while (++comparisons && prices[left] < pivot) left++;
+        while (++comparisons && prices[right] > pivot) right--;
+        if (left <= right) {
+            tmp = prices[left]; prices[left] = prices[right]; prices[right] = tmp;
+            left++;
+            right--;
+        }
+    }
+    printf("pivot %5d on [%2d..%2d] -> [%2d..%2d] | [%2d..%2d]\n",
+           pivot, low, high, low, right, left, high);
+    quickSort(prices, low, right);             // الجزء الأصغر من المحور
+    quickSort(prices, left, high);             // الجزء الأكبر
+}
+
+int main(void) {
+    int prices[NB] = {4500, 1200, 899, 27000, 650, 3200, 12500, 99, 7800, 2300, 560, 4100};
+    int idx;
+    quickSort(prices, 0, NB - 1);
+    for (idx = 0; idx < NB; idx++) printf("%d ", prices[idx]);
+    printf("\n%d comparisons\n", comparisons);
+    return 0;
+}
+
+@@
+title: توزيع الأكشاك دون تهديد متبادل
+level: hard
+domain: ec
+@ statement
+في قاعة معرض على شكل شبكة 6×6 نريد وضع 6 أكشاك لعلامات متنافسة بحيث لا يتشارك كشكان نفس **السطر** أو **العمود** أو **القطر** (مسألة الملكات). اكتب دالة عودية بالتراجع `place(row)` تعد كل الحلول وتعرض الأول.
+@ steps
+- في كل سطر نضع كشكًا واحدًا؛ نجرب كل عمود.
+- الموضع آمن إذا لم يكن في سطر سابق كشك في نفس العمود أو على نفس القطر (`|col1 - col2| == |row1 - row2|`).
+- إذا وصلنا إلى `row == NB` فقد وجدنا حلًا.
+@ flow
+if: row == NB
+  do: solutions++ ; حفظ الحل الأول
+else:
+  for: col = 0 ; col < NB ; col++
+    if: safe(row, col)
+      do: cols[row] = col
+      call: place(row + 1)
+@ code
+#include <stdio.h>
+
+#define NB 6
+
+int cols[NB], first[NB], solutions = 0;
+
+int safe(int row, int col) {
+    int prev, diff;
+    for (prev = 0; prev < row; prev++) {
+        diff = cols[prev] > col ? cols[prev] - col : col - cols[prev];
+        if (cols[prev] == col || diff == row - prev)   // نفس العمود أو القطر
+            return 0;
+    }
+    return 1;
+}
+
+void place(int row) {
+    int col, idx;
+    if (row == NB) {
+        if (solutions == 0)
+            for (idx = 0; idx < NB; idx++) first[idx] = cols[idx];
+        solutions++;
+        return;
+    }
+    for (col = 0; col < NB; col++)
+        if (safe(row, col)) {
+            cols[row] = col;
+            place(row + 1);                            // التراجع تلقائي عند العودة
+        }
+}
+
+int main(void) {
+    int row, col;
+    place(0);
+    printf("%d solutions. First one:\n", solutions);
+    for (row = 0; row < NB; row++) {
+        for (col = 0; col < NB; col++) printf(" %c", first[row] == col ? 'K' : '.');
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: حل لغز السودوكو الترويجي
+level: hard
+domain: ec
+@ statement
+ينشر المتجر لغز سودوكو أسبوعيًا ومن يحله يربح قسيمة. اكتب دالة عودية بالتراجع `solve(cell)` تملأ الخانات الفارغة (0) بحيث يحتوي كل سطر وكل عمود وكل مربع 3×3 على الأرقام 1 إلى 9 مرة واحدة.
+@ steps
+- نمر على الخانات من 0 إلى 80؛ الخانة المملوءة نتخطاها.
+- نجرب الأرقام 1..9؛ الرقم مقبول إذا لم يظهر في السطر ولا العمود ولا المربع.
+- إذا فشلت كل الأرقام نعيد الخانة إلى 0 ونرجع `0` (تراجع).
+@ flow
+if: cell == 81
+  out: 1
+else:
+  if: grid[row][col] != 0
+    call: solve(cell + 1)
+  for: digit = 1 ; digit <= 9 ; digit++
+    if: allowed(row, col, digit)
+      do: grid[row][col] = digit
+      if: solve(cell + 1)
+        out: 1
+  do: grid[row][col] = 0
+  out: 0
+@ code
+#include <stdio.h>
+
+int grid[9][9] = {{5, 3, 0, 0, 7, 0, 0, 0, 0}, {6, 0, 0, 1, 9, 5, 0, 0, 0},
+                  {0, 9, 8, 0, 0, 0, 0, 6, 0}, {8, 0, 0, 0, 6, 0, 0, 0, 3},
+                  {4, 0, 0, 8, 0, 3, 0, 0, 1}, {7, 0, 0, 0, 2, 0, 0, 0, 6},
+                  {0, 6, 0, 0, 0, 0, 2, 8, 0}, {0, 0, 0, 4, 1, 9, 0, 0, 5},
+                  {0, 0, 0, 0, 8, 0, 0, 7, 9}};
+long tries = 0;
+
+int allowed(int row, int col, int digit) {
+    int idx, boxRow = row / 3 * 3, boxCol = col / 3 * 3;
+    for (idx = 0; idx < 9; idx++) {
+        if (grid[row][idx] == digit || grid[idx][col] == digit) return 0;
+        if (grid[boxRow + idx / 3][boxCol + idx % 3] == digit) return 0;   // المربع 3x3
+    }
+    return 1;
+}
+
+int solve(int cell) {
+    int row = cell / 9, col = cell % 9, digit;
+    if (cell == 81) return 1;                         // كل الخانات مملوءة
+    if (grid[row][col] != 0) return solve(cell + 1);
+    for (digit = 1; digit <= 9; digit++)
+        if (allowed(row, col, digit)) {
+            grid[row][col] = digit;
+            tries++;
+            if (solve(cell + 1)) return 1;
+        }
+    grid[row][col] = 0;                               // تراجع
+    return 0;
+}
+
+int main(void) {
+    int row, col;
+    if (solve(0)) {
+        for (row = 0; row < 9; row++) {
+            for (col = 0; col < 9; col++)
+                printf("%d%s", grid[row][col], col % 3 == 2 && col < 8 ? " | " : " ");
+            printf("\n");
+            if (row % 3 == 2 && row < 8) printf("------+-------+------\n");
+        }
+        printf("Solved with %ld placements\n", tries);
+    }
+    return 0;
+}
+
+@@
+title: محلل صيغ الأسعار بالأقواس
+level: hard
+domain: ec
+@ statement
+وسّع حاسبة صيغ الأسعار لتقبل **الأقواس** والأعداد العشرية: `(1200+800)*1.19-(2*150)/3`. اكتب **محللًا تنازليًا عوديًا** من ثلاث دوال متبادلة: `expression` (جمع وطرح)، `term` (ضرب وقسمة)، `factor` (عدد أو عبارة بين قوسين).
+@ stdin
+(1200+800)*1.19-(2*150)/3
+@ steps
+- `expression := term (('+'|'-') term)*`.
+- `term := factor (('*'|'/') factor)*`.
+- `factor := number | '(' expression ')'`: هنا تحدث العودية غير المباشرة.
+- موضع القراءة متغير عام `pos` تتقدم فيه كل الدوال.
+@ flow
+in: formula
+call: value = expression()
+out: value
+@ code
+#include <stdio.h>
+
+char formula[100];
+int pos = 0;
+
+double expression(void);
+
+double factor(void) {
+    double value = 0, scale = 1;
+    if (formula[pos] == '(') {
+        pos++;                                     // (
+        value = expression();                      // عودية غير مباشرة
+        pos++;                                     // )
+        return value;
+    }
+    while (formula[pos] >= '0' && formula[pos] <= '9')
+        value = value * 10 + (formula[pos++] - '0');
+    if (formula[pos] == '.') {
+        pos++;
+        while (formula[pos] >= '0' && formula[pos] <= '9') {
+            scale /= 10;
+            value += (formula[pos++] - '0') * scale;
+        }
+    }
+    return value;
+}
+
+double term(void) {
+    double value = factor();
+    while (formula[pos] == '*' || formula[pos] == '/') {
+        if (formula[pos++] == '*') value *= factor();
+        else value /= factor();
+    }
+    return value;
+}
+
+double expression(void) {
+    double value = term();
+    while (formula[pos] == '+' || formula[pos] == '-') {
+        if (formula[pos++] == '+') value += term();
+        else value -= term();
+    }
+    return value;
+}
+
+int main(void) {
+    scanf("%99s", formula);
+    printf("%s = %.2f DA\n", formula, expression());
+    return 0;
+}
+
+@@
+title: أطول اتجاه صاعد في الأسعار
+level: hard
+domain: ds
+@ statement
+لتحليل اتجاه سعر منتج، نبحث عن **أطول متتالية جزئية متزايدة تمامًا** (ليست بالضرورة متجاورة) في أسعاره الأسبوعية. اكتب دالة عودية بالتذكر `lisFrom(idx)` = طول أطول متتالية متزايدة تبدأ من `idx`، ثم أعد بناء المتتالية.
+@ steps
+- `lisFrom(idx) = 1 + max(lisFrom(next))` على كل `next > idx` حيث `prices[next] > prices[idx]`.
+- `memo[idx]` و `nextOf[idx]` (العنصر التالي في أفضل متتالية) لإعادة البناء.
+- الجواب = أكبر `lisFrom(idx)` على كل نقاط البداية.
+@ flow
+for: idx = 0 ; idx < NB ; idx++
+  call: len = lisFrom(idx)
+  if: len > best
+    do: best = len ; start = idx
+do: نتبع nextOf ابتداءً من start
+out: best, المتتالية
+@ code
+#include <stdio.h>
+
+#define NB 14
+
+int prices[NB] = {520, 480, 510, 530, 470, 545, 560, 500, 575, 590, 540, 600, 580, 620};
+int memo[NB], nextOf[NB];
+
+int lisFrom(int idx) {
+    int next, len, best = 1;
+    if (memo[idx] > 0) return memo[idx];
+    nextOf[idx] = -1;
+    for (next = idx + 1; next < NB; next++)
+        if (prices[next] > prices[idx]) {
+            len = 1 + lisFrom(next);
+            if (len > best) { best = len; nextOf[idx] = next; }
+        }
+    memo[idx] = best;
+    return best;
+}
+
+int main(void) {
+    int idx, best = 0, start = 0, len;
+    for (idx = 0; idx < NB; idx++) {
+        len = lisFrom(idx);
+        if (len > best) { best = len; start = idx; }
+    }
+    printf("Longest rising trend: %d weeks\n", best);
+    for (idx = start; idx != -1; idx = nextOf[idx])     // إعادة البناء
+        printf("w%d:%d ", idx + 1, prices[idx]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: الاختيار السريع لوسيط الأسعار
+level: hard
+domain: ds
+@ statement
+لإيجاد **العنصر رقم k** (مثل الوسيط) لا نحتاج إلى ترتيب الجدول كله. اكتب دالة عودية `quickSelect(values, low, high, rank)`: نقسم حول محور كما في الترتيب السريع، ثم نستدعي الدالة على **جهة واحدة فقط** حسب موضع المحور.
+@ steps
+- التقسيم (لوموتو): المحور آخر عنصر؛ نضع كل الأصغر منه على اليسار، ثم نضع المحور في موضعه النهائي `pivotPos`.
+- إذا `rank == pivotPos` وجدناه؛ إذا كان أصغر نبحث يسارًا، وإلا يمينًا.
+- التعقيد المتوسط خطي.
+@ flow
+call: pivotPos = partition(values, low, high)
+if: rank == pivotPos
+  out: values[pivotPos]
+else:
+  if: rank < pivotPos
+    call: quickSelect(values, low, pivotPos - 1, rank)
+  else:
+    call: quickSelect(values, pivotPos + 1, high, rank)
+@ code
+#include <stdio.h>
+
+#define NB 15
+
+int calls = 0;
+
+int partition(double values[], int low, int high) {
+    double pivot = values[high], tmp;
+    int store = low, idx;
+    for (idx = low; idx < high; idx++)
+        if (values[idx] < pivot) {
+            tmp = values[idx]; values[idx] = values[store]; values[store] = tmp;
+            store++;
+        }
+    tmp = values[store]; values[store] = values[high]; values[high] = tmp;
+    return store;                                  // الموضع النهائي للمحور
+}
+
+double quickSelect(double values[], int low, int high, int rank) {
+    int pivotPos;
+    calls++;
+    if (low == high) return values[low];
+    pivotPos = partition(values, low, high);
+    if (rank == pivotPos) return values[pivotPos];
+    if (rank < pivotPos) return quickSelect(values, low, pivotPos - 1, rank);
+    return quickSelect(values, pivotPos + 1, high, rank);   // جهة واحدة فقط
+}
+
+int main(void) {
+    double prices[NB] = {32000, 29500, 31000, 89000, 30500, 28900, 33000, 27500,
+                         35000, 30000, 29900, 31500, 120000, 30800, 28000};
+    double median, low, high;
+    median = quickSelect(prices, 0, NB - 1, NB / 2);
+    printf("Median price: %.0f DA (%d calls)\n", median, calls);
+    low = quickSelect(prices, 0, NB - 1, 3);
+    high = quickSelect(prices, 0, NB - 1, NB - 4);
+    printf("4th lowest: %.0f, 4th highest: %.0f\n", low, high);
+    return 0;
+}
+
+@@
+title: أقرب مستودعين بطريقة فرّق تسد
+level: hard
+domain: ec
+@ statement
+لشركة التوصيل 12 مستودعًا بإحداثيات (كم). اكتب دالة عودية `closest(low, high)` تجد **أقرب زوج من المستودعين** بطريقة فرّق تسد: نرتب حسب `x`، نقسم إلى نصفين، نحل كل نصف، ثم نفحص الشريط الضيق حول خط القسمة.
+@ steps
+- الحالة الأساسية: 3 نقاط أو أقل → نقارن كل الأزواج.
+- `best = min(closest(يسار), closest(يمين))`.
+- في الشريط `|x - xMiddle| < best` نقارن كل نقطة بالنقاط القريبة منها في `y`.
+- نقارن مربعات المسافات، ونأخذ الجذر في النهاية بطريقة نيوتن.
+@ flow
+if: high - low < 3
+  out: أصغر مسافة بين كل الأزواج
+else:
+  do: middle = (low + high) / 2
+  call: best = min(closest(low, middle), closest(middle + 1, high))
+  do: فحص الأزواج في الشريط حول xs[middle]
+  out: best
+@ code
+#include <stdio.h>
+
+#define NB 12
+
+double xs[NB] = {2, 15, 7, 31, 22, 9, 40, 18, 27, 4, 35, 12};
+double ys[NB] = {3, 8, 14, 5, 19, 2, 11, 25, 9, 20, 16, 13};
+int pairA, pairB;
+
+double dist2(int first, int second) {
+    return (xs[first] - xs[second]) * (xs[first] - xs[second])
+         + (ys[first] - ys[second]) * (ys[first] - ys[second]);
+}
+
+double check(int first, int second, double best) {
+    double value = dist2(first, second);
+    if (value < best) { pairA = first; pairB = second; return value; }
+    return best;
+}
+
+double closest(int low, int high) {
+    double best = 1e18, right, gap;
+    int first, second, middle;
+    if (high - low < 3) {                                   // حالة أساسية صغيرة
+        for (first = low; first <= high; first++)
+            for (second = first + 1; second <= high; second++)
+                best = check(first, second, best);
+        return best;
+    }
+    middle = (low + high) / 2;
+    best = closest(low, middle);
+    right = closest(middle + 1, high);
+    if (right < best) best = right;
+    for (first = low; first <= high; first++) {             // الشريط حول خط القسمة
+        gap = xs[first] - xs[middle];
+        if (gap * gap >= best) continue;
+        for (second = first + 1; second <= high; second++) {
+            gap = xs[second] - xs[middle];
+            if (gap * gap < best) best = check(first, second, best);
+        }
+    }
+    return best;
+}
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    for (iter = 0; iter < 50; iter++) guess = (guess + value / guess) / 2;
+    return guess;
+}
+
+int main(void) {
+    int idx, back;
+    double keyX, keyY, best;
+    for (idx = 1; idx < NB; idx++) {                        // ترتيب حسب x
+        keyX = xs[idx]; keyY = ys[idx]; back = idx - 1;
+        while (back >= 0 && xs[back] > keyX) {
+            xs[back + 1] = xs[back]; ys[back + 1] = ys[back]; back--;
+        }
+        xs[back + 1] = keyX; ys[back + 1] = keyY;
+    }
+    best = closest(0, NB - 1);
+    printf("Closest warehouses: (%.0f,%.0f) and (%.0f,%.0f)\n",
+           xs[pairA], ys[pairA], xs[pairB], ys[pairB]);
+    printf("Distance: %.3f km\n", mySqrt(best));
+    return 0;
+}
+
+@@
+title: جولة التوصيل المثلى بالتفرع والتحديد
+level: hard
+domain: ec
+@ statement
+يزور السائق 6 مدن انطلاقًا من المستودع (المدينة 0) ثم يعود. تجربة كل الترتيبات (720) مكلفة. اكتب دالة عودية `explore(city, visitedCount, length)` بطريقة **التفرع والتحديد**: نتوقف عن توسيع أي جولة جزئية طولها الحالي ≥ أفضل جولة وجدناها.
+@ steps
+- `visited[]` يعلّم المدن المزارة، و `path[]` يحفظ الترتيب الحالي.
+- عند زيارة كل المدن: نضيف طريق العودة ونقارن بالأفضل.
+- **التحديد**: `if (length >= best) return;` يقطع فروعًا كاملة.
+- نعد العقد المزارة لقياس فائدة التقليم.
+@ flow
+if: length >= best
+  out: تقليم
+else:
+  if: visitedCount == NB
+    do: تحديث best بـ length + dist[city][0]
+  else:
+    for: next = 1 ; next < NB ; next++
+      if: !visited[next]
+        do: visited[next] = 1 ; path[visitedCount] = next
+        call: explore(next, visitedCount + 1, length + dist[city][next])
+        do: visited[next] = 0
+@ code
+#include <stdio.h>
+
+#define NB 7
+
+int dist[NB][NB] = {{0, 29, 20, 21, 16, 31, 100},
+                    {29, 0, 15, 29, 28, 40, 72},
+                    {20, 15, 0, 15, 14, 25, 81},
+                    {21, 29, 15, 0, 4, 12, 92},
+                    {16, 28, 14, 4, 0, 16, 94},
+                    {31, 40, 25, 12, 16, 0, 95},
+                    {100, 72, 81, 92, 94, 95, 0}};
+int visited[NB], path[NB], bestPath[NB], best = 1000000;
+long nodes = 0;
+
+void explore(int city, int visitedCount, int length) {
+    int next, idx;
+    nodes++;
+    if (length >= best) return;                        // تحديد: لا فائدة من المواصلة
+    if (visitedCount == NB) {
+        if (length + dist[city][0] < best) {
+            best = length + dist[city][0];
+            for (idx = 0; idx < NB; idx++) bestPath[idx] = path[idx];
+        }
+        return;
+    }
+    for (next = 1; next < NB; next++)
+        if (!visited[next]) {
+            visited[next] = 1;
+            path[visitedCount] = next;
+            explore(next, visitedCount + 1, length + dist[city][next]);
+            visited[next] = 0;                         // تراجع
+        }
+}
+
+int main(void) {
+    int idx;
+    path[0] = 0;
+    visited[0] = 1;
+    explore(0, 1, 0);
+    printf("Best tour:");
+    for (idx = 0; idx < NB; idx++) printf(" %d ->", bestPath[idx]);
+    printf(" 0\nLength: %d km\n", best);
+    printf("Nodes explored: %ld (full tree: 1957)\n", nodes);
+    return 0;
+}
+
+@@
+title: تقطيع الوسم إلى كلمات من القاموس
+level: hard
+domain: ds
+@ statement
+وسوم الحملات تُكتب دون فراغات مثل `#freeshippingforsummersale`. اكتب دالة عودية بالتذكر `canSplit(start)` تحدد إن كان الوسم يمكن تقطيعه إلى كلمات من قاموس، وتعيد بناء التقطيع، وتعد عدد التقطيعات الممكنة.
+@ stdin
+freeshippingforsummersale
+@ steps
+- `canSplit(start)`: نجرب كل كلمة من القاموس تطابق النص ابتداءً من `start`، ثم نستدعي `canSplit(start + طول الكلمة)`.
+- الحالة الأساسية: `start == length` → نجاح.
+- `ways[start]` يحفظ عدد التقطيعات من `start` (-1 = غير محسوب)، و `choice[start]` أول كلمة صالحة.
+@ flow
+in: tag
+call: total = countWays(0)
+if: total > 0
+  do: start = 0
+  while: start < length
+    out: dict[choice[start]]
+    do: start = start + طول الكلمة
+else:
+  out: `"cannot split"`
+@ code
+#include <stdio.h>
+
+#define NBW 12
+
+char dict[NBW][10] = {"free", "shipping", "ship", "ping", "for", "summer", "sale",
+                      "sum", "mer", "fors", "um", "s"};
+char tag[60];
+int length, choice[60];
+long ways[60];
+
+int matchAt(int start, int word) {
+    int pos = 0;
+    while (dict[word][pos] != '\0') {
+        if (tag[start + pos] != dict[word][pos]) return 0;
+        pos++;
+    }
+    return pos;                                      // طول الكلمة المطابقة
+}
+
+long countWays(int start) {
+    int word, len;
+    long total = 0, sub;
+    if (start == length) return 1;
+    if (ways[start] >= 0) return ways[start];
+    choice[start] = -1;
+    for (word = 0; word < NBW; word++) {
+        len = matchAt(start, word);
+        if (len > 0) {
+            sub = countWays(start + len);
+            if (sub > 0 && choice[start] < 0) choice[start] = word;
+            total += sub;
+        }
+    }
+    ways[start] = total;
+    return total;
+}
+
+int main(void) {
+    int start;
+    long total;
+    scanf("%59s", tag);
+    for (length = 0; tag[length] != '\0'; length++) ways[length] = -1;
+    total = countWays(0);
+    printf("#%s: %ld possible splits\n", tag, total);
+    if (total > 0) {
+        printf("First split:");
+        for (start = 0; start < length; start += matchAt(start, choice[start]))
+            printf(" %s", dict[choice[start]]);
+        printf("\n");
+    }
+    return 0;
+}

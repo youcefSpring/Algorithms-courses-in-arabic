@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int code; double price; struct Node *next; } Node;
+
+Node *newNode(int code, double price) {
+    Node *node = malloc(sizeof(Node));
+    node->code = code;
+    node->price = price;
+    node->next = NULL;
+    return node;
+}
+
+int main(void) {
+    Node *head = newNode(101, 1500);
+    Node *walk;
+    head->next = newNode(205, 32000);            // الربط يدويًا
+    head->next->next = newNode(330, 450);
+    for (walk = head; walk != NULL; walk = walk->next)
+        printf("[%d %.0f] -> ", walk->code, walk->price);
+    printf("NULL\n");
+    free(head->next->next);
+    free(head->next);
+    free(head);
+    return 0;
+}

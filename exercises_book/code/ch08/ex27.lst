@@ -1,0 +1,34 @@
+#include <stdio.h>
+
+int comparisons = 0;
+
+void minMax(double prices[], int low, int high, double result[]) {
+    double left[2], right[2];
+    int middle;
+    if (low == high) {
+        result[0] = result[1] = prices[low];
+        return;
+    }
+    if (high == low + 1) {
+        comparisons++;
+        if (prices[low] < prices[high]) { result[0] = prices[low]; result[1] = prices[high]; }
+        else { result[0] = prices[high]; result[1] = prices[low]; }
+        return;
+    }
+    middle = (low + high) / 2;
+    minMax(prices, low, middle, left);          (*@\cmt{النصف الأيسر}@*)
+    minMax(prices, middle + 1, high, right);    (*@\cmt{النصف الأيمن}@*)
+    comparisons += 2;
+    result[0] = left[0] < right[0] ? left[0] : right[0];
+    result[1] = left[1] > right[1] ? left[1] : right[1];
+}
+
+int main(void) {
+    double prices[16] = {4500, 1200, 899, 27000, 650, 3200, 12500, 99,
+                         7800, 2300, 560, 4100, 1500, 18900, 740, 3100};
+    double result[2];
+    minMax(prices, 0, 15, result);
+    printf("Min %.0f, max %.0f\n", result[0], result[1]);
+    printf("Comparisons: %d (simple method: %d)\n", comparisons, 2 * (16 - 1));
+    return 0;
+}

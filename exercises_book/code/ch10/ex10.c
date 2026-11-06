@@ -1,0 +1,12 @@
+#include <stdio.h>
+
+int main(void) {
+    double temps[10] = {2.1, 3.0, 3.8, 4.0, 4.6, 5.2, 5.9, 6.0, 6.8, 7.5};
+    double *end = temps + 10, *first = temps, *last;
+    while (first < end && *first < 4) first++;
+    last = first;
+    while (last < end && *last <= 6) last++;
+    printf("First in range: %.1f (index %d)\n", *first, (int)(first - temps));
+    printf("Readings in [4, 6]: %d\n", (int)(last - first));   // طرح مؤشرين
+    return 0;
+}

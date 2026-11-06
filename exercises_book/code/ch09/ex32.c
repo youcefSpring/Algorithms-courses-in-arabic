@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+typedef struct { char name[10]; double base, perKg; } Zone;
+typedef struct { int id, zone; double weight, length, width, height; } Parcel;
+
+int roundUp(double value) {
+    int whole = (int)value;
+    return value > whole ? whole + 1 : whole;      // تقريب إلى الأعلى
+}
+
+int main(void) {
+    Zone zones[3] = {{"Local", 400, 80}, {"North", 650, 120}, {"South", 900, 180}};
+    Parcel parcels[4] = {{1, 0, 2.3, 30, 20, 15}, {2, 2, 0.8, 60, 40, 40},
+                         {3, 1, 7.6, 40, 30, 20}, {4, 2, 12.0, 50, 40, 30}};
+    double volumetric, weight;
+    int idx, billed;
+    for (idx = 0; idx < 4; idx++) {
+        volumetric = parcels[idx].length * parcels[idx].width * parcels[idx].height / 5000;
+        weight = parcels[idx].weight > volumetric ? parcels[idx].weight : volumetric;
+        billed = roundUp(weight);
+        printf("Parcel %d (%s): real %.1f kg, volumetric %.1f kg -> %d kg, %.0f DA\n",
+               parcels[idx].id, zones[parcels[idx].zone].name, parcels[idx].weight, volumetric,
+               billed, zones[parcels[idx].zone].base + (billed - 1) * zones[parcels[idx].zone].perKg);
+    }
+    return 0;
+}

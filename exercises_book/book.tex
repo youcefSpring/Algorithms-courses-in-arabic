@@ -1,4 +1,4 @@
-\documentclass[11pt, oneside]{book}
+\documentclass[11pt, twoside, openright]{book}
 \input{style_book}
 
 \newcommand{\levelsection}[2]{%
@@ -14,10 +14,16 @@
 
 \setcounter{tocdepth}{1}
 
+% \chaprefs{key1,key2}: "further reading" line at the end of a chapter opener
+\newcommand{\chaprefs}[1]{%
+    \par\smallskip{\color{brandMuted}\small\faBookOpen\quad\textbf{للاستزادة:}
+    \textenglish{\cite{#1}}}\par}
+
 \begin{document}
 \input{chapters/cover}
 \frontmatter
-\tableofcontents
+{\setlength{\parskip}{0pt}\setlength{\lineskiplimit}{-\maxdimen}%
+ \renewcommand{\baselinestretch}{1.2}\selectfont\tableofcontents}
 \input{chapters/intro}
 \mainmatter
 
@@ -34,5 +40,9 @@
 \chapterfile{11}{الملفات}
 \chapterfile{12}{القوائم المتصلة}
 \chapterfile{13}{الأشجار الثنائية}
+
+\backmatter
+\input{chapters/references}
+\input{chapters/backcover}
 
 \end{document}

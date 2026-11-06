@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+void printReversed(char text[], int pos) {
+    if (text[pos] == '\0')
+        return;                        (*@\cmt{نهاية السلسلة}@*)
+    printReversed(text, pos + 1);      (*@\cmt{باقي السلسلة أولًا}@*)
+    putchar(text[pos]);
+}
+
+int main(void) {
+    char code[30];
+    scanf("%29s", code);
+    printReversed(code, 0);
+    putchar('\n');
+    return 0;
+}

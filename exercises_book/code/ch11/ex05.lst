@@ -1,0 +1,31 @@
+#include <stdio.h>
+
+int countChars(const char *path) {
+    FILE *file = fopen(path, "r");
+    int count = 0;
+    if (file == NULL) return -1;
+    while (fgetc(file) != EOF) count++;
+    fclose(file);
+    return count;
+}
+
+int main(void) {
+    FILE *source, *target;
+    int ch, copied = 0;
+    source = fopen("customers.txt", "w");
+    fprintf(source, "507;Amina;Oran\n508;Karim;Algiers\n509;Lina;Setif\n");
+    fclose(source);
+    source = fopen("customers.txt", "r");
+    target = fopen("customers.bak", "w");
+    if (source == NULL || target == NULL) return 1;
+    while ((ch = fgetc(source)) != EOF) {
+        fputc(ch, target);                    (*@\cmt{حرف بحرف}@*)
+        copied++;
+    }
+    fclose(source);
+    fclose(target);
+    printf("Copied %d bytes\n", copied);
+    printf("Original %d, backup %d -> %s\n", countChars("customers.txt"), countChars("customers.bak"),
+           countChars("customers.txt") == countChars("customers.bak") ? "OK" : "MISMATCH");
+    return 0;
+}

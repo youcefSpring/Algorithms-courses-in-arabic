@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+#define ROWS 7
+#define COLS 11
+
+char maze[ROWS][COLS + 1] = {"###########",
+                             "#S..#.....#",
+                             "#.#.#.###.#",
+                             "#.#...#...#",
+                             "#.#####.#.#",
+                             "#.......#E#",
+                             "###########"};
+
+int solve(int row, int col) {
+    if (maze[row][col] == 'E') return 1;                     (*@\cmt{وصلنا}@*)
+    if (maze[row][col] != '.' && maze[row][col] != 'S') return 0;
+    if (maze[row][col] == '.') maze[row][col] = '*';         (*@\cmt{جزء من المسار}@*)
+    if (solve(row, col + 1) || solve(row + 1, col) || solve(row, col - 1) || solve(row - 1, col))
+        return 1;
+    if (maze[row][col] == '*') maze[row][col] = 'x';         (*@\cmt{طريق مسدود}@*)
+    return 0;
+}
+
+int main(void) {
+    int row, steps = 0, col;
+    maze[1][1] = 'S';
+    if (solve(1, 1)) {
+        for (row = 0; row < ROWS; row++) {
+            for (col = 0; col < COLS; col++) {
+                if (maze[row][col] == 'x') maze[row][col] = '.';
+                if (maze[row][col] == '*') steps++;
+            }
+            printf("%s\n", maze[row]);
+        }
+        printf("Path found: %d cells\n", steps);
+    } else {
+        printf("no path\n");
+    }
+    return 0;
+}

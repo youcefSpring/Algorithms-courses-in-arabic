@@ -1,0 +1,791 @@
+@@
+title: عدد طرق ترتيب المنتجات في الواجهة
+level: easy
+domain: ec
+@ statement
+بكم طريقة يمكن ترتيب `count` منتجات في واجهة المتجر؟ الجواب هو `count!`. اكتب دالة **عودية** `factorial(count)` تعتمد على `count! = count × (count-1)!` مع الحالة الأساسية `0! = 1`.
+@ stdin
+6
+@ steps
+- الحالة الأساسية: إذا `count <= 1` نعيد 1.
+- الحالة العودية: `count * factorial(count - 1)`.
+@ flow
+in: count
+call: result = factorial(count)
+out: result
+@ code
+#include <stdio.h>
+
+long factorial(int count) {
+    if (count <= 1)
+        return 1;                          // الحالة الأساسية
+    return count * factorial(count - 1);   // الاستدعاء العودي
+}
+
+int main(void) {
+    int count, idx;
+    scanf("%d", &count);
+    for (idx = 1; idx <= count; idx++)
+        printf("%d products: %ld arrangements\n", idx, factorial(idx));
+    return 0;
+}
+
+@@
+title: مجموع أرقام رقم الطلبية عوديًا
+level: easy
+domain: ec
+@ statement
+اكتب دالة عودية `digitSum(number)` تحسب مجموع أرقام رقم الطلبية: آخر رقم + مجموع أرقام الباقي.
+@ stdin
+2026045
+@ steps
+- الحالة الأساسية: `number < 10` نعيد `number`.
+- العودية: `number % 10 + digitSum(number / 10)`.
+@ flow
+in: number
+call: sum = digitSum(number)
+out: sum
+@ code
+#include <stdio.h>
+
+int digitSum(long number) {
+    if (number < 10)
+        return (int)number;                      // رقم واحد
+    return number % 10 + digitSum(number / 10);  // آخر رقم + الباقي
+}
+
+int main(void) {
+    long number;
+    scanf("%ld", &number);
+    printf("Digit sum of %ld = %d\n", number, digitSum(number));
+    return 0;
+}
+
+@@
+title: القوة عوديًا لنمو المتابعين
+level: easy
+domain: ds
+@ statement
+عدد متابعي صفحة المتجر يتضاعف بنسبة `1.1` كل أسبوع. اكتب دالة عودية `power(base, exponent)` حيث `base^0 = 1` و `base^n = base × base^(n-1)`، واحسب عدد المتابعين بعد 4 و 8 و 12 أسبوعًا انطلاقًا من 2000.
+@ steps
+- الحالة الأساسية `exponent == 0`.
+- كل استدعاء ينقص الأس بواحد.
+@ flow
+for: weeks = 4 ; weeks <= 12 ; weeks = weeks + 4
+  call: followers = 2000 * power(1.1, weeks)
+  out: weeks, followers
+@ code
+#include <stdio.h>
+
+double power(double base, int exponent) {
+    if (exponent == 0)
+        return 1;
+    return base * power(base, exponent - 1);
+}
+
+int main(void) {
+    int weeks;
+    for (weeks = 4; weeks <= 12; weeks += 4)
+        printf("After %2d weeks: %.0f followers\n", weeks, 2000 * power(1.1, weeks));
+    return 0;
+}
+
+@@
+title: العد التنازلي لنهاية العرض
+level: easy
+domain: ec
+@ statement
+اكتب دالة عودية `countdown(hours)` تعرض الساعات المتبقية لنهاية التخفيضات من `hours` إلى 1 ثم تعرض "Sale over!"، ودالة `countUp` تعرضها تصاعديًا (الطباعة **بعد** الاستدعاء العودي).
+@ stdin
+5
+@ steps
+- `countdown`: نطبع ثم نستدعي بـ `hours - 1`.
+- `countUp`: نستدعي أولًا ثم نطبع: الترتيب ينعكس.
+@ flow
+in: hours
+call: countdown(hours)
+call: countUp(hours)
+@ code
+#include <stdio.h>
+
+void countdown(int hours) {
+    if (hours == 0) {
+        printf("Sale over!\n");
+        return;
+    }
+    printf("%d ", hours);              // نطبع قبل الاستدعاء
+    countdown(hours - 1);
+}
+
+void countUp(int hours) {
+    if (hours == 0) return;
+    countUp(hours - 1);                // نستدعي قبل الطباعة
+    printf("%d ", hours);
+}
+
+int main(void) {
+    int hours;
+    scanf("%d", &hours);
+    countdown(hours);
+    countUp(hours);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: مجموع سلة المشتريات عوديًا
+level: easy
+domain: ec
+@ statement
+اكتب دالة عودية `basketTotal(prices, size)` تحسب مجموع أسعار السلة: مجموع الجدول = آخر عنصر + مجموع العناصر التي قبله.
+@ steps
+- الحالة الأساسية: جدول فارغ (`size == 0`) مجموعه 0.
+- العودية: `prices[size - 1] + basketTotal(prices, size - 1)`.
+@ flow
+call: total = basketTotal(prices, 5)
+out: total
+@ code
+#include <stdio.h>
+
+double basketTotal(double prices[], int size) {
+    if (size == 0)
+        return 0;                                          // سلة فارغة
+    return prices[size - 1] + basketTotal(prices, size - 1);
+}
+
+int main(void) {
+    double prices[5] = {1200, 450, 3999, 89.5, 700};
+    printf("Basket total: %.2f DA\n", basketTotal(prices, 5));
+    printf("First 3 items: %.2f DA\n", basketTotal(prices, 3));
+    return 0;
+}
+
+@@
+title: عرض رمز المنتج معكوسًا عوديًا
+level: easy
+domain: ec
+@ statement
+اكتب دالة عودية `printReversed(text, pos)` تعرض السلسلة معكوسة: نستدعي الدالة على الحرف التالي **أولًا**، ثم نطبع الحرف الحالي.
+@ stdin
+SKU-7781
+@ steps
+- الحالة الأساسية: `text[pos] == '\0'` لا نطبع شيئًا.
+- الطباعة بعد الاستدعاء تعكس الترتيب.
+@ flow
+in: code
+call: printReversed(code, 0)
+@ code
+#include <stdio.h>
+
+void printReversed(char text[], int pos) {
+    if (text[pos] == '\0')
+        return;                        // نهاية السلسلة
+    printReversed(text, pos + 1);      // باقي السلسلة أولًا
+    putchar(text[pos]);
+}
+
+int main(void) {
+    char code[30];
+    scanf("%29s", code);
+    printReversed(code, 0);
+    putchar('\n');
+    return 0;
+}
+
+@@
+title: أغلى منتج عوديًا
+level: easy
+domain: ec
+@ statement
+اكتب دالة عودية `maxPrice(prices, size)` تعيد أكبر سعر: الأكبر بين آخر عنصر وأكبر عناصر الجزء المتبقي.
+@ steps
+- الحالة الأساسية: `size == 1` نعيد `prices[0]`.
+- `rest = maxPrice(prices, size - 1)` ثم نقارنه مع `prices[size - 1]`.
+@ flow
+call: best = maxPrice(prices, 6)
+out: best
+@ code
+#include <stdio.h>
+
+double maxPrice(double prices[], int size) {
+    double rest;
+    if (size == 1)
+        return prices[0];
+    rest = maxPrice(prices, size - 1);                 // أكبر الباقي
+    return prices[size - 1] > rest ? prices[size - 1] : rest;
+}
+
+int main(void) {
+    double prices[6] = {4500, 1200, 27000, 899, 12500, 650};
+    printf("Most expensive: %.0f DA\n", maxPrice(prices, 6));
+    return 0;
+}
+
+@@
+title: متتالية فيبوناتشي لنمو المشتركين
+level: easy
+domain: ds
+@ statement
+نموذج مبسط لنمو المشتركين: عدد الشهر `month` يساوي مجموع عددي الشهرين السابقين، مع `fib(1) = fib(2) = 1`. اكتب الدالة العودية `fib(month)` واعرض أول 12 حدًا.
+@ steps
+- حالتان أساسيتان: الشهر 1 والشهر 2.
+- كل استدعاء يولد استدعاءين: الطريقة بطيئة للقيم الكبيرة (سنحسنها لاحقًا).
+@ flow
+for: month = 1 ; month <= 12 ; month++
+  call: value = fib(month)
+  out: value
+@ code
+#include <stdio.h>
+
+long fib(int month) {
+    if (month <= 2)
+        return 1;                            // الشهران الأولان
+    return fib(month - 1) + fib(month - 2);  // استدعاءان عوديان
+}
+
+int main(void) {
+    int month;
+    for (month = 1; month <= 12; month++)
+        printf("%ld ", fib(month));
+    printf("\n");
+    return 0;
+}
+
+@@
+title: القاسم المشترك الأكبر عوديًا
+level: easy
+domain: ec
+@ statement
+اكتب صيغة **عودية** لخوارزمية إقليدس: `gcd(first, 0) = first` و `gcd(first, second) = gcd(second, first % second)`، واستعملها لتبسيط نسبة الطلبيات المرتجعة إلى المُسلّمة.
+@ stdin
+84 1260
+@ steps
+- الحالة الأساسية: `second == 0`.
+- النسبة المبسطة: `returned/g` إلى `delivered/g`.
+@ flow
+in: returned, delivered
+call: divisor = gcd(returned, delivered)
+out: returned / divisor, delivered / divisor
+@ code
+#include <stdio.h>
+
+int gcd(int first, int second) {
+    if (second == 0)
+        return first;
+    return gcd(second, first % second);
+}
+
+int main(void) {
+    int returned, delivered, divisor;
+    scanf("%d %d", &returned, &delivered);
+    divisor = gcd(returned, delivered);
+    printf("gcd = %d\n", divisor);
+    printf("Return ratio: %d / %d\n", returned / divisor, delivered / divisor);
+    return 0;
+}
+
+@@
+title: عدّ تكرار تقييم معين عوديًا
+level: easy
+domain: ds
+@ statement
+اكتب دالة عودية `countValue(ratings, size, target)` تعد عدد المرات التي ظهر فيها تقييم معين (من 1 إلى 5) في جدول التقييمات.
+@ steps
+- جدول فارغ: 0.
+- `(ratings[size-1] == target) + countValue(ratings, size - 1, target)`.
+@ flow
+for: star = 1 ; star <= 5 ; star++
+  call: count = countValue(ratings, 15, star)
+  out: star, count
+@ code
+#include <stdio.h>
+
+int countValue(int ratings[], int size, int target) {
+    if (size == 0)
+        return 0;
+    return (ratings[size - 1] == target) + countValue(ratings, size - 1, target);
+}
+
+int main(void) {
+    int ratings[15] = {5, 4, 5, 3, 5, 2, 4, 5, 1, 4, 5, 3, 4, 5, 4};
+    int star;
+    for (star = 1; star <= 5; star++)
+        printf("%d stars: %d\n", star, countValue(ratings, 15, star));
+    return 0;
+}
+
+@@
+title: القوة السريعة بالتربيع
+level: medium
+domain: ds
+@ statement
+حساب `base^exponent` بالضرب المتكرر يتطلب `exponent` عملية. اكتب دالة عودية `fastPower` تستعمل: `base^n = (base^(n/2))²` إذا كان `n` زوجيًا، و `base × base^(n-1)` إذا كان فرديًا، وعدّ عدد عمليات الضرب.
+@ steps
+- نحسب `half = fastPower(base, n / 2)` **مرة واحدة** ثم نعيد `half * half`.
+- عدد الضربات من رتبة `log2(n)`.
+- نستعمل جدولًا من خانة واحدة لعد الضربات.
+@ flow
+call: result = fastPower(1.01, exponent, counter)
+out: result, counter[0]
+@ code
+#include <stdio.h>
+
+double fastPower(double base, int exponent, int counter[]) {
+    double half;
+    if (exponent == 0) return 1;
+    if (exponent % 2 == 1) {
+        counter[0]++;
+        return base * fastPower(base, exponent - 1, counter);   // أس فردي
+    }
+    half = fastPower(base, exponent / 2, counter);              // نحسب النصف مرة واحدة
+    counter[0]++;
+    return half * half;
+}
+
+int main(void) {
+    int exponents[4] = {10, 100, 365, 1000}, counter[1], idx;
+    double result;
+    for (idx = 0; idx < 4; idx++) {
+        counter[0] = 0;
+        result = fastPower(1.01, exponents[idx], counter);
+        printf("1.01^%-4d = %14.4f with %2d multiplications (naive: %d)\n",
+               exponents[idx], result, counter[0], exponents[idx]);
+    }
+    return 0;
+}
+
+@@
+title: البحث الثنائي العودي في الأسعار
+level: medium
+domain: ec
+@ statement
+اكتب دالة عودية `search(prices, low, high, target)` تبحث عن سعر في جدول مرتب: نقارن بالعنصر الأوسط ثم نبحث عوديًا في النصف المناسب فقط. اعرض المجالات التي فُحصت في كل مستوى.
+@ stdin
+3200 700
+@ steps
+- الحالة الأساسية 1: `low > high` غير موجود (`-1`).
+- الحالة الأساسية 2: `prices[middle] == target`.
+- وإلا نستدعي على `[low, middle-1]` أو `[middle+1, high]`.
+@ flow
+in: target
+call: idx = search(prices, 0, 11, target)
+if: idx >= 0
+  out: idx
+else:
+  out: `"not found"`
+@ code
+#include <stdio.h>
+
+int search(double prices[], int low, int high, double target) {
+    int middle;
+    if (low > high) return -1;                  // مجال فارغ
+    middle = (low + high) / 2;
+    printf("  [%d..%d] middle %d\n", low, high, middle);
+    if (prices[middle] == target) return middle;
+    if (prices[middle] < target)
+        return search(prices, middle + 1, high, target);
+    return search(prices, low, middle - 1, target);
+}
+
+int main(void) {
+    double prices[12] = {99, 450, 560, 650, 899, 1200, 1500, 2300, 3200, 4100, 7800, 12500};
+    double target;
+    int query, idx;
+    for (query = 0; query < 2; query++) {
+        scanf("%lf", &target);
+        printf("Search %.0f:\n", target);
+        idx = search(prices, 0, 11, target);
+        if (idx >= 0) printf("  found at index %d\n", idx);
+        else printf("  not found\n");
+    }
+    return 0;
+}
+
+@@
+title: الرمز المتناظر عوديًا
+level: medium
+domain: ec
+@ statement
+اكتب دالة عودية `isPalindrome(text, left, right)` تتحقق من أن رمزًا متناظر: الحرفان الطرفيان متساويان **و** الجزء الداخلي متناظر. اختبرها على عدة رموز.
+@ steps
+- الحالة الأساسية: `left >= right` (حرف واحد أو لا شيء) → متناظر.
+- إذا `text[left] != text[right]` → غير متناظر.
+- وإلا نستدعي على `left + 1` و `right - 1`.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  do: length = طول codes[idx]
+  call: ok = isPalindrome(codes[idx], 0, length - 1)
+  out: codes[idx], ok
+@ code
+#include <stdio.h>
+
+int isPalindrome(char text[], int left, int right) {
+    if (left >= right) return 1;                     // انتهت المقارنات
+    if (text[left] != text[right]) return 0;
+    return isPalindrome(text, left + 1, right - 1);  // الجزء الداخلي
+}
+
+int main(void) {
+    char codes[4][20] = {"AB12321BA", "XY-77-YX", "RADAR", "SKU2026"};
+    int idx, length;
+    for (idx = 0; idx < 4; idx++) {
+        length = 0;
+        while (codes[idx][length] != '\0') length++;
+        printf("%-10s %s\n", codes[idx],
+               isPalindrome(codes[idx], 0, length - 1) ? "palindrome" : "no");
+    }
+    return 0;
+}
+
+@@
+title: التحويل إلى الثنائي عوديًا
+level: medium
+domain: ds
+@ statement
+اكتب دالة عودية `printBinary(number)` تعرض عددًا بالنظام الثنائي: نعرض أولًا التمثيل الثنائي لـ `number / 2`، ثم الرقم `number % 2`. اعرض معرّفات بعض الحساسات بالثنائي.
+@ steps
+- الحالة الأساسية: `number < 2` نطبع الرقم مباشرة.
+- الاستدعاء قبل الطباعة يجعل الأرقام تظهر من الأعلى إلى الأدنى.
+@ flow
+for: idx = 0 ; idx < 5 ; idx++
+  call: printBinary(ids[idx])
+@ code
+#include <stdio.h>
+
+void printBinary(int number) {
+    if (number < 2) {
+        printf("%d", number);
+        return;
+    }
+    printBinary(number / 2);           // الأرقام الأعلى أولًا
+    printf("%d", number % 2);
+}
+
+int main(void) {
+    int ids[5] = {5, 13, 64, 255, 2026}, idx;
+    for (idx = 0; idx < 5; idx++) {
+        printf("%4d = ", ids[idx]);
+        printBinary(ids[idx]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: لون المنتج بالست عشري عوديًا
+level: medium
+domain: ec
+@ statement
+يُخزَّن لون المنتج كعدد صحيح ويُعرض في الموقع بصيغة `#RRGGBB`. اكتب دالة عودية `printHex(number, digits)` تعرض العدد بالأساس 16 على `digits` خانة بالضبط (مع أصفار على اليسار).
+@ steps
+- نطبع أولًا `printHex(number / 16, digits - 1)` ثم رقم `number % 16`.
+- الرقم الست عشري: `"0123456789ABCDEF"[value]`.
+- الحالة الأساسية `digits == 0`.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  out: `"#"`
+  call: printHex(colors[idx], 6)
+@ code
+#include <stdio.h>
+
+void printHex(long number, int digits) {
+    char symbols[] = "0123456789ABCDEF";
+    if (digits == 0) return;
+    printHex(number / 16, digits - 1);       // الخانات الأعلى
+    putchar(symbols[number % 16]);
+}
+
+int main(void) {
+    long colors[4] = {16711680, 65280, 3368601, 16753920};
+    char names[4][8] = {"red", "green", "teal", "orange"};
+    int idx;
+    for (idx = 0; idx < 4; idx++) {
+        printf("%-7s %8ld -> #", names[idx], colors[idx]);
+        printHex(colors[idx], 6);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: فواصل الآلاف في المبالغ عوديًا
+level: medium
+domain: ec
+@ statement
+اكتب دالة عودية `printAmount(amount)` تعرض مبلغًا بفواصل الآلاف (`1,250,000`): نعرض عوديًا `amount / 1000` ثم فاصلة ثم آخر ثلاثة أرقام بالصيغة `%03ld`.
+@ stdin
+1250000 987 45000 2026000500
+@ steps
+- الحالة الأساسية: `amount < 1000` نطبعه دون أصفار.
+- الحالة العودية: `printAmount(amount / 1000)` ثم `,%03ld`.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  in: amount
+  call: printAmount(amount)
+@ code
+#include <stdio.h>
+
+void printAmount(long amount) {
+    if (amount < 1000) {
+        printf("%ld", amount);            // الجزء الأول دون أصفار
+        return;
+    }
+    printAmount(amount / 1000);
+    printf(",%03ld", amount % 1000);      // مجموعات من ثلاثة أرقام
+}
+
+int main(void) {
+    long amount;
+    int idx;
+    for (idx = 0; idx < 4; idx++) {
+        scanf("%ld", &amount);
+        printAmount(amount);
+        printf(" DA\n");
+    }
+    return 0;
+}
+
+@@
+title: الجذر الرقمي لرمز التحقق
+level: medium
+domain: ec
+@ statement
+**الجذر الرقمي** لعدد هو نتيجة جمع أرقامه بشكل متكرر حتى نحصل على رقم واحد. اكتب دالتين عوديتين: `digitSum` و `digitalRoot` (تستدعي نفسها على `digitSum` ما دامت النتيجة ≥ 10)، واعرض المراحل.
+@ stdin
+987654321
+@ steps
+- `digitalRoot(number)`: إذا `number < 10` نعيده، وإلا `digitalRoot(digitSum(number))`.
+- عودية متداخلة: دالة عودية تستدعي دالة عودية أخرى.
+@ flow
+in: number
+call: root = digitalRoot(number)
+out: root
+@ code
+#include <stdio.h>
+
+long digitSum(long number) {
+    if (number < 10) return number;
+    return number % 10 + digitSum(number / 10);
+}
+
+long digitalRoot(long number) {
+    if (number < 10) return number;
+    printf("%ld -> ", number);
+    return digitalRoot(digitSum(number));     // نكرر على مجموع الأرقام
+}
+
+int main(void) {
+    long number, root;
+    scanf("%ld", &number);
+    root = digitalRoot(number);
+    printf("%ld\n", root);
+    printf("Check: 1 + (%ld - 1) %% 9 = %ld\n", number, 1 + (number - 1) % 9);
+    return 0;
+}
+
+@@
+title: طول متتالية كولاتز
+level: medium
+domain: ds
+@ statement
+متتالية كولاتز: إذا كان العدد زوجيًا نقسمه على 2، وإلا نضربه في 3 ونضيف 1، حتى نصل إلى 1. اكتب دالة عودية `collatzLength(number)` تعيد عدد الخطوات، وجد العدد بين 1 و 1000 ذا أطول متتالية.
+@ steps
+- الحالة الأساسية: `number == 1` → 0 خطوة.
+- `1 + collatzLength(number / 2)` أو `1 + collatzLength(3 * number + 1)`.
+@ flow
+do: best = 1 ; bestLen = 0
+for: number = 1 ; number <= 1000 ; number++
+  call: len = collatzLength(number)
+  if: len > bestLen
+    do: best = number ; bestLen = len
+out: best, bestLen
+@ code
+#include <stdio.h>
+
+int collatzLength(long number) {
+    if (number == 1) return 0;
+    if (number % 2 == 0) return 1 + collatzLength(number / 2);
+    return 1 + collatzLength(3 * number + 1);
+}
+
+int main(void) {
+    int number, len, best = 1, bestLen = 0;
+    printf("27 needs %d steps\n", collatzLength(27));
+    for (number = 1; number <= 1000; number++) {
+        len = collatzLength(number);
+        if (len > bestLen) {
+            bestLen = len;
+            best = number;
+        }
+    }
+    printf("Longest under 1000: %d with %d steps\n", best, bestLen);
+    return 0;
+}
+
+@@
+title: أبراج هانوي لنقل الصناديق
+level: medium
+domain: ec
+@ statement
+في المخزن ثلاثة أماكن `A` و `B` و `C`، وكومة من `count` صناديق مختلفة الحجم في `A`. ننقل صندوقًا واحدًا في كل مرة، ولا يوضع صندوق كبير فوق صغير. اكتب الدالة العودية `hanoi(count, from, to, via)` لنقل الكومة إلى `C`.
+@ stdin
+3
+@ steps
+- ننقل `count - 1` صندوقًا من `from` إلى `via`.
+- ننقل الصندوق الأكبر من `from` إلى `to`.
+- ننقل `count - 1` صندوقًا من `via` إلى `to`.
+- العدد الكلي للنقلات `2^count - 1`.
+@ flow
+in: count
+call: hanoi(count, 'A', 'C', 'B')
+out: moves
+@ code
+#include <stdio.h>
+
+int moves = 0;
+
+void hanoi(int count, char from, char to, char via) {
+    if (count == 0) return;
+    hanoi(count - 1, from, via, to);           // نفرغ الطريق
+    moves++;
+    printf("Move %d: box %d from %c to %c\n", moves, count, from, to);
+    hanoi(count - 1, via, to, from);           // نعيد الكومة فوقه
+}
+
+int main(void) {
+    int count;
+    scanf("%d", &count);
+    hanoi(count, 'A', 'C', 'B');
+    printf("Total moves: %d\n", moves);
+    return 0;
+}
+
+@@
+title: فيبوناتشي بالتذكر وعدد الاستدعاءات
+level: medium
+domain: ds
+@ statement
+الدالة العودية الساذجة `fib` تعيد حساب نفس القيم آلاف المرات. اكتب نسخة **بالتذكر (memoization)** تحفظ كل نتيجة في جدول، وقارن عدد الاستدعاءات بين النسختين لـ `fib(30)`.
+@ steps
+- جدول `memo[]` مهيأ بـ 0 (= لم يُحسب بعد).
+- قبل الحساب: إذا `memo[month] != 0` نعيدها مباشرة.
+- عداد عام لكل نسخة.
+@ flow
+call: slowValue = fibSlow(30)
+call: fastValue = fibMemo(30)
+out: slowValue, slowCalls
+out: fastValue, fastCalls
+@ code
+#include <stdio.h>
+
+long slowCalls = 0, fastCalls = 0;
+long memo[100];
+
+long fibSlow(int month) {
+    slowCalls++;
+    if (month <= 2) return 1;
+    return fibSlow(month - 1) + fibSlow(month - 2);
+}
+
+long fibMemo(int month) {
+    fastCalls++;
+    if (month <= 2) return 1;
+    if (memo[month] != 0) return memo[month];          // محسوبة سابقًا
+    memo[month] = fibMemo(month - 1) + fibMemo(month - 2);
+    return memo[month];
+}
+
+int main(void) {
+    long slowValue = fibSlow(30), fastValue = fibMemo(30);
+    printf("Naive:    fib(30) = %ld with %ld calls\n", slowValue, slowCalls);
+    printf("Memoized: fib(30) = %ld with %ld calls\n", fastValue, fastCalls);
+    fastCalls = 0;
+    printf("fib(90) = %ld\n", fibMemo(90));
+    printf("calls for fib(90) after cache: %ld\n", fastCalls);
+    return 0;
+}
+
+@@
+title: عدد الحزم الممكنة بمثلث باسكال
+level: medium
+domain: ec
+@ statement
+بكم طريقة نختار `pick` منتجات من `total` منتج لتكوين حزمة؟ اكتب الدالة العودية `choose(total, pick) = choose(total-1, pick-1) + choose(total-1, pick)` مع التذكر في جدول ثنائي البعد، واعرض الأسطر الأولى من **مثلث باسكال**.
+@ steps
+- الحالتان الأساسيتان: `pick == 0` أو `pick == total` → 1.
+- إما أن المنتج الأخير في الحزمة (`pick - 1` من الباقي)، أو لا (`pick` من الباقي).
+- `memo[total][pick]` يمنع تكرار الحساب.
+@ flow
+for: total = 0 ; total <= 6 ; total++
+  for: pick = 0 ; pick <= total ; pick++
+    out: choose(total, pick)
+call: bundles = choose(20, 3)
+out: bundles
+@ code
+#include <stdio.h>
+
+long memo[60][60];
+
+long choose(int total, int pick) {
+    if (pick == 0 || pick == total) return 1;
+    if (memo[total][pick] != 0) return memo[total][pick];
+    memo[total][pick] = choose(total - 1, pick - 1) + choose(total - 1, pick);
+    return memo[total][pick];
+}
+
+int main(void) {
+    int total, pick;
+    for (total = 0; total <= 6; total++) {
+        printf("%*s", 2 * (6 - total), "");         // إزاحة لشكل المثلث
+        for (pick = 0; pick <= total; pick++)
+            printf("%4ld", choose(total, pick));
+        printf("\n");
+    }
+    printf("Bundles of 3 among 20 products: %ld\n", choose(20, 3));
+    printf("Bundles of 10 among 50 products: %ld\n", choose(50, 10));
+    return 0;
+}
+
+@@
+title: كل الحزم الممكنة من أربعة منتجات
+level: medium
+domain: ec
+@ statement
+اكتب دالة عودية `subsets(index, chosen)` تولّد **كل المجموعات الجزئية** لأربعة منتجات (16 حزمة)، وتعرض لكل حزمة محتواها وسعرها الإجمالي، وعدد الحزم التي لا يتجاوز سعرها 6000 دج.
+@ steps
+- لكل منتج قراران: نأخذه (`chosen[index] = 1`) أو لا نأخذه، ثم ننتقل إلى المنتج التالي.
+- الحالة الأساسية: `index == NB` → حزمة كاملة نعرضها.
+- عدد الحزم `2^NB`.
+@ flow
+call: subsets(0)
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+char names[NB][10] = {"Mouse", "Keyboard", "Headset", "Webcam"};
+double prices[NB] = {1500, 3200, 2800, 4100};
+int chosen[NB], affordable = 0;
+
+void subsets(int index) {
+    int idx;
+    double total = 0;
+    if (index == NB) {                         // حزمة كاملة
+        printf("{");
+        for (idx = 0; idx < NB; idx++)
+            if (chosen[idx]) { printf(" %s", names[idx]); total += prices[idx]; }
+        printf(" } = %.0f\n", total);
+        if (total <= 6000) affordable++;
+        return;
+    }
+    chosen[index] = 0;                         // دون المنتج
+    subsets(index + 1);
+    chosen[index] = 1;                         // مع المنتج
+    subsets(index + 1);
+}
+
+int main(void) {
+    subsets(0);
+    printf("Bundles up to 6000 DA: %d\n", affordable);
+    return 0;
+}

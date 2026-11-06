@@ -1,0 +1,9 @@
+v:home     -> now on home
+v:phones   -> now on phones
+v:galaxy   -> now on galaxy
+b          -> now on phones
+b          -> now on home
+v:laptops  -> now on laptops
+b          -> now on home
+f          -> now on laptops
+f          -> now on laptops

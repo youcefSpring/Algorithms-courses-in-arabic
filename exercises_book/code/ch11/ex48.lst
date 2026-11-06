@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("history.csv", "w"), *out;
+    double prices[8] = {3200, 3000, 3500, 2800, 3300, 3600, 2900, 3100};
+    double units[8] = {410, 455, 360, 500, 385, 345, 480, 430};
+    double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, slope, intercept, price, qty, sse = 0;
+    char header[40];
+    int week, count = 0, ch;
+    fprintf(file, "week,price,units\n");
+    for (week = 0; week < 8; week++) fprintf(file, "%d,%.0f,%.0f\n", week + 1, prices[week], units[week]);
+    fclose(file);
+    file = fopen("history.csv", "r");
+    fgets(header, 40, file);
+    while (fscanf(file, "%d,%lf,%lf", &week, &price, &qty) == 3) {        (*@\cmt{المرور الأول}@*)
+        sumX += price; sumY += qty; sumXY += price * qty; sumX2 += price * price;
+        count++;
+    }
+    slope = (count * sumXY - sumX * sumY) / (count * sumX2 - sumX * sumX);
+    intercept = (sumY - slope * sumX) / count;
+    rewind(file);                                                        (*@\cmt{من البداية}@*)
+    fgets(header, 40, file);
+    out = fopen("predictions.csv", "w");
+    fprintf(out, "week,price,units,predicted,error\n");
+    while (fscanf(file, "%d,%lf,%lf", &week, &price, &qty) == 3) {        (*@\cmt{المرور الثاني}@*)
+        fprintf(out, "%d,%.0f,%.0f,%.1f,%+.1f\n", week, price, qty, intercept + slope * price,
+                qty - (intercept + slope * price));
+        sse += (qty - intercept - slope * price) * (qty - intercept - slope * price);
+    }
+    fclose(file); fclose(out);
+    out = fopen("predictions.csv", "r");
+    while ((ch = fgetc(out)) != EOF) putchar(ch);
+    fclose(out);
+    printf("units = %.2f %+.4f * price, MSE = %.1f\n", intercept, slope, sse / count);
+    printf("Elasticity at mean: %.2f\n", slope * (sumX / count) / (sumY / count));
+    printf("Revenue-maximizing price: %.0f DA\n", -intercept / (2 * slope));
+    return 0;
+}

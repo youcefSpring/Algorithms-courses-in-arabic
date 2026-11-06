@@ -1,0 +1,3 @@
+receive -> invoice -> check -> pick -> pack -> label -> ship
+receive -> invoice -> check -> pick
+cycle detected: 3 task(s) blocked

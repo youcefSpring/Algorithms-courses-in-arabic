@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+#define SIZE 6
+
+int closed[SIZE][SIZE] = {{0, 0, 0, 0, 0, 0},
+                          {0, 1, 0, 0, 1, 0},
+                          {0, 0, 0, 0, 0, 0},
+                          {1, 0, 0, 1, 0, 0},
+                          {0, 0, 0, 0, 0, 1},
+                          {0, 0, 1, 0, 0, 0}};
+long memo[SIZE][SIZE];
+
+long paths(int row, int col) {
+    if (row >= SIZE || col >= SIZE || closed[row][col]) return 0;
+    if (row == SIZE - 1 && col == SIZE - 1) return 1;     // الوصول
+    if (memo[row][col] >= 0) return memo[row][col];
+    memo[row][col] = paths(row + 1, col) + paths(row, col + 1);
+    return memo[row][col];
+}
+
+int main(void) {
+    int row, col;
+    for (row = 0; row < SIZE; row++)
+        for (col = 0; col < SIZE; col++) memo[row][col] = -1;
+    printf("Paths with roadworks: %ld\n", paths(0, 0));
+    for (row = 0; row < SIZE; row++) {
+        for (col = 0; col < SIZE; col++)
+            printf("%4ld", closed[row][col] ? 0 : paths(row, col));
+        printf("\n");
+    }
+    return 0;
+}

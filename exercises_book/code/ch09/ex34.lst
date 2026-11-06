@@ -1,0 +1,42 @@
+#include <stdio.h>
+
+typedef struct { double posX, posY; } Point;
+typedef struct { Point low, high; } Rect;
+
+Rect boundingBox(Point points[], int size) {
+    Rect box;
+    int idx;
+    box.low = box.high = points[0];
+    for (idx = 1; idx < size; idx++) {
+        if (points[idx].posX < box.low.posX) box.low.posX = points[idx].posX;
+        if (points[idx].posY < box.low.posY) box.low.posY = points[idx].posY;
+        if (points[idx].posX > box.high.posX) box.high.posX = points[idx].posX;
+        if (points[idx].posY > box.high.posY) box.high.posY = points[idx].posY;
+    }
+    return box;
+}
+
+double overlap(Rect first, Rect second) {
+    double left = first.low.posX > second.low.posX ? first.low.posX : second.low.posX;
+    double right = first.high.posX < second.high.posX ? first.high.posX : second.high.posX;
+    double bottom = first.low.posY > second.low.posY ? first.low.posY : second.low.posY;
+    double top = first.high.posY < second.high.posY ? first.high.posY : second.high.posY;
+    if (right <= left || top <= bottom) return 0;           (*@\cmt{لا تقاطع}@*)
+    return (right - left) * (top - bottom);
+}
+
+void show(char label[], Rect box) {
+    printf("%s (%.0f,%.0f)-(%.0f,%.0f), area %.0f km2\n", label, box.low.posX, box.low.posY,
+           box.high.posX, box.high.posY,
+           (box.high.posX - box.low.posX) * (box.high.posY - box.low.posY));
+}
+
+int main(void) {
+    Point driverA[5] = {{2, 3}, {8, 1}, {5, 9}, {3, 6}, {7, 7}};
+    Point driverB[4] = {{6, 5}, {12, 4}, {10, 11}, {7, 8}};
+    Rect zoneA = boundingBox(driverA, 5), zoneB = boundingBox(driverB, 4);
+    show("Driver A:", zoneA);
+    show("Driver B:", zoneB);
+    printf("Shared area: %.0f km2\n", overlap(zoneA, zoneB));
+    return 0;
+}

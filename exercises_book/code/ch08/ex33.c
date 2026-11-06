@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+#define NB 9
+
+char names[NB][14] = {"Store", "Electronics", "Phones", "Laptops", "Home",
+                      "Kitchen", "Garden", "Accessories", "Chargers"};
+int parent[NB] = {-1, 0, 1, 1, 0, 4, 4, 1, 7};
+double own[NB] = {0, 1200, 8400, 6100, 300, 2500, 1800, 900, 1350};
+
+double totalSales(int node) {
+    double total = own[node];
+    int child;
+    for (child = 0; child < NB; child++)
+        if (parent[child] == node)
+            total += totalSales(child);           // مبيعات الفرع
+    return total;
+}
+
+void printTree(int node, int depth) {
+    int child;
+    printf("%*s%-*s %8.0f\n", 2 * depth, "", 16 - 2 * depth, names[node], totalSales(node));
+    for (child = 0; child < NB; child++)
+        if (parent[child] == node)
+            printTree(child, depth + 1);
+}
+
+int main(void) {
+    printTree(0, 0);
+    return 0;
+}

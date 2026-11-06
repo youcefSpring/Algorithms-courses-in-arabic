@@ -1,0 +1,4 @@
+sales = 89.72 + 11.47 * ads + 5.07 * discount
+Mean squared error: 7.13
+Forecast (ads 22, discount 10%): 392.7
+Forecast (ads 35, discount 0%):  491.2

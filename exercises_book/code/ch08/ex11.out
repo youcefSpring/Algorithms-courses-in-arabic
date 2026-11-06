@@ -1,0 +1,4 @@
+1.01^10   =         1.1046 with  5 multiplications (naive: 10)
+1.01^100  =         2.7048 with  9 multiplications (naive: 100)
+1.01^365  =        37.7834 with 14 multiplications (naive: 365)
+1.01^1000 =     20959.1556 with 15 multiplications (naive: 1000)

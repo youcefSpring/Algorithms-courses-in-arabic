@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+void writeList(const char *path, const int *values, int size) {
+    FILE *file = fopen(path, "w");
+    int idx;
+    for (idx = 0; idx < size; idx++) fprintf(file, "%d\n", values[idx]);
+    fclose(file);
+}
+
+int main(void) {
+    int north[5] = {1003, 1010, 1011, 1025, 1040}, south[4] = {1001, 1012, 1030, 1045};
+    FILE *fileA, *fileB, *out;
+    int valueA, valueB, hasA, hasB, written = 0;
+    writeList("north.txt", north, 5);
+    writeList("south.txt", south, 4);
+    fileA = fopen("north.txt", "r");
+    fileB = fopen("south.txt", "r");
+    out = fopen("all.txt", "w");
+    hasA = fscanf(fileA, "%d", &valueA) == 1;
+    hasB = fscanf(fileB, "%d", &valueB) == 1;
+    while (hasA || hasB) {
+        if (hasA && (!hasB || valueA <= valueB)) {
+            fprintf(out, "%d\n", valueA);
+            hasA = fscanf(fileA, "%d", &valueA) == 1;     // التالي من نفس الملف
+        } else {
+            fprintf(out, "%d\n", valueB);
+            hasB = fscanf(fileB, "%d", &valueB) == 1;
+        }
+        written++;
+    }
+    fclose(fileA); fclose(fileB); fclose(out);
+    out = fopen("all.txt", "r");
+    printf("%d orders:", written);
+    while (fscanf(out, "%d", &valueA) == 1) printf(" %d", valueA);
+    printf("\n");
+    fclose(out);
+    return 0;
+}

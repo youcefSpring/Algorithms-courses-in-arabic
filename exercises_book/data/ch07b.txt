@@ -1,0 +1,700 @@
+@@
+title: دالة رقم الفاتورة المتناظر
+level: medium
+domain: ec
+@ statement
+اكتب دالة `reverseNumber(number)` تعيد العدد مقلوب الأرقام، ودالة `isPalindrome(number)` تستعملها لتحديد الفواتير ذات الرقم المتناظر (تحصل على هدية).
+@ steps
+- قلب الأرقام: `reversed = reversed * 10 + number % 10` ثم `number /= 10`.
+- العدد متناظر إذا ساوى مقلوبه.
+@ flow
+for: idx = 0 ; idx < 6 ; idx++
+  call: rev = reverseNumber(invoices[idx])
+  if: isPalindrome(invoices[idx])
+    out: invoices[idx], `"gift!"`
+  else:
+    out: invoices[idx], rev
+@ code
+#include <stdio.h>
+
+long reverseNumber(long number) {
+    long reversed = 0;
+    while (number > 0) {
+        reversed = reversed * 10 + number % 10;   // آخر رقم ينتقل إلى اليسار
+        number /= 10;
+    }
+    return reversed;
+}
+
+int isPalindrome(long number) {
+    return reverseNumber(number) == number;
+}
+
+int main(void) {
+    long invoices[6] = {12321, 20452, 45654, 100001, 98760, 7};
+    int idx;
+    for (idx = 0; idx < 6; idx++) {
+        if (isPalindrome(invoices[idx]))
+            printf("Invoice %6ld: palindrome -> gift!\n", invoices[idx]);
+        else
+            printf("Invoice %6ld: reversed %ld\n", invoices[idx], reverseNumber(invoices[idx]));
+    }
+    return 0;
+}
+
+@@
+title: دالة رقم التحقق لرمز المنتج
+level: medium
+domain: ec
+@ statement
+رموز المنتجات EAN-13 تنتهي برقم تحقق. اكتب دالة `eanCheckDigit(code)` تحسبه من الأرقام الـ 12 الأولى: مجموع أرقام المواضع الفردية + 3 × مجموع أرقام المواضع الزوجية، ثم `(10 - مجموع % 10) % 10`، ودالة `eanValid` تتحقق من رمز كامل.
+@ stdin
+6131234567893 6131234567892
+@ steps
+- المواضع تُعد من 1 من اليسار: الموضع الفردي وزنه 1 والزوجي وزنه 3.
+- `eanValid` تقارن الرقم الثالث عشر بنتيجة `eanCheckDigit`.
+@ flow
+for: idx = 0 ; idx < 2 ; idx++
+  in: code
+  call: expected = eanCheckDigit(code)
+  if: code[12] - '0' == expected
+    out: `"valid"`
+  else:
+    out: `"invalid"`, expected
+@ code
+#include <stdio.h>
+
+int eanCheckDigit(char code[]) {
+    int pos, sum = 0;
+    for (pos = 0; pos < 12; pos++)
+        sum += (code[pos] - '0') * (pos % 2 == 0 ? 1 : 3);   // الأوزان 1 و 3
+    return (10 - sum % 10) % 10;
+}
+
+int eanValid(char code[]) {
+    return code[12] - '0' == eanCheckDigit(code);
+}
+
+int main(void) {
+    char code[20];
+    int idx;
+    for (idx = 0; idx < 2; idx++) {
+        scanf("%19s", code);
+        if (eanValid(code))
+            printf("%s: valid\n", code);
+        else
+            printf("%s: invalid (check digit should be %d)\n", code, eanCheckDigit(code));
+    }
+    return 0;
+}
+
+@@
+title: دالة عرض العدد بالنظام الثنائي
+level: medium
+domain: ds
+@ statement
+خصائص كل منتج مخزنة كأعلام في عدد واحد (البت 0: متوفر، 1: جديد، 2: تخفيض، 3: توصيل مجاني). اكتب دالة `printBinary(value, bits)` تعرض العدد بالثنائي، ودالة `hasFlag(value, bit)` تختبر بتًا معينًا.
+@ steps
+- البت رقم `bit` يُستخرج بـ `(value >> bit) & 1`.
+- نعرض من البت الأعلى إلى الأدنى.
+@ flow
+for: item = 0 ; item < 3 ; item++
+  call: printBinary(flags[item], 4)
+  for: bit = 0 ; bit < 4 ; bit++
+    if: hasFlag(flags[item], bit)
+      out: names[bit]
+@ code
+#include <stdio.h>
+
+void printBinary(int value, int bits) {
+    int bit;
+    for (bit = bits - 1; bit >= 0; bit--)
+        putchar(((value >> bit) & 1) ? '1' : '0');   // البت الأعلى أولًا
+}
+
+int hasFlag(int value, int bit) {
+    return (value >> bit) & 1;
+}
+
+int main(void) {
+    int flags[3] = {5, 11, 6};
+    char names[4][16] = {"in-stock", "new", "on-sale", "free-ship"};
+    int item, bit;
+    for (item = 0; item < 3; item++) {
+        printf("Product %d: %2d = ", item + 1, flags[item]);
+        printBinary(flags[item], 4);
+        printf(" ->");
+        for (bit = 0; bit < 4; bit++)
+            if (hasFlag(flags[item], bit))
+                printf(" %s", names[bit]);
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: دالة الوسيط لأسعار السوق
+level: medium
+domain: ds
+@ statement
+المتوسط يتأثر بالقيم الشاذة، لذلك نستعمل **الوسيط**. اكتب دالة `median(values, size)` تنسخ الجدول إلى جدول محلي، ترتبه، ثم تعيد العنصر الأوسط (أو متوسط العنصرين الأوسطين إذا كان العدد زوجيًا)، دون تغيير الجدول الأصلي.
+@ steps
+- ننسخ إلى `copy[]` المحلي لأن الترتيب يغير الجدول الممرر.
+- ترتيب بالإدراج، ثم: فردي `copy[size/2]`، زوجي `(copy[size/2-1] + copy[size/2]) / 2`.
+@ flow
+do: نسخ values إلى copy
+do: ترتيب copy بالإدراج
+if: size % 2 == 1
+  do: result = copy[size / 2]
+else:
+  do: result = (copy[size/2 - 1] + copy[size/2]) / 2
+out: result
+@ code
+#include <stdio.h>
+
+#define MAX 50
+
+double median(double values[], int size) {
+    double copy[MAX], key;
+    int idx, back;
+    for (idx = 0; idx < size; idx++) copy[idx] = values[idx];   // لا نغير الأصل
+    for (idx = 1; idx < size; idx++) {                          // ترتيب بالإدراج
+        key = copy[idx];
+        back = idx - 1;
+        while (back >= 0 && copy[back] > key) {
+            copy[back + 1] = copy[back];
+            back--;
+        }
+        copy[back + 1] = key;
+    }
+    if (size % 2 == 1) return copy[size / 2];
+    return (copy[size / 2 - 1] + copy[size / 2]) / 2;
+}
+
+int main(void) {
+    double phoneA[7] = {32000, 29500, 31000, 89000, 30500, 28900, 33000};
+    double phoneB[6] = {15000, 14500, 16200, 15800, 14900, 15300};
+    printf("Phone A median: %.0f DA (first value still %.0f)\n", median(phoneA, 7), phoneA[0]);
+    printf("Phone B median: %.0f DA\n", median(phoneB, 6));
+    return 0;
+}
+
+@@
+title: دالة المنوال للمقاس الأكثر طلبًا
+level: medium
+domain: ds
+@ statement
+اكتب دالة `mode(sizes, count)` تعيد **المقاس الأكثر تكرارًا** في طلبيات الأحذية (المقاسات بين 35 و 46)، ودالة `printHistogram` تعرض تكرار كل مقاس بالنجوم.
+@ steps
+- جدول عدادات `freq[12]` حيث فهرس المقاس `size - 35`.
+- المنوال = المقاس ذو أكبر عداد.
+@ flow
+do: freq[*] = 0
+for: idx = 0 ; idx < count ; idx++
+  do: freq[sizes[idx] - 35]++
+do: best = فهرس أكبر freq
+out: best + 35
+@ code
+#include <stdio.h>
+
+void countSizes(int sizes[], int count, int freq[]) {
+    int idx;
+    for (idx = 0; idx < 12; idx++) freq[idx] = 0;
+    for (idx = 0; idx < count; idx++) freq[sizes[idx] - 35]++;   // مقاس -> فهرس
+}
+
+int mode(int sizes[], int count) {
+    int freq[12], idx, best = 0;
+    countSizes(sizes, count, freq);
+    for (idx = 1; idx < 12; idx++)
+        if (freq[idx] > freq[best]) best = idx;
+    return best + 35;
+}
+
+void printHistogram(int sizes[], int count) {
+    int freq[12], idx, star;
+    countSizes(sizes, count, freq);
+    for (idx = 0; idx < 12; idx++)
+        if (freq[idx] > 0) {
+            printf("%d | ", idx + 35);
+            for (star = 0; star < freq[idx]; star++) putchar('*');
+            printf(" %d\n", freq[idx]);
+        }
+}
+
+int main(void) {
+    int sizes[18] = {42, 41, 43, 42, 40, 44, 42, 39, 41, 42, 43, 45, 41, 42, 38, 43, 42, 41};
+    printHistogram(sizes, 18);
+    printf("Most ordered size: %d\n", mode(sizes, 18));
+    return 0;
+}
+
+@@
+title: دالة معامل الارتباط بين الإعلان والمبيعات
+level: medium
+domain: ds
+@ statement
+اكتب دالة `correlation(first, second, size)` تحسب **معامل ارتباط بيرسون** بين ميزانية الإعلان والمبيعات خلال 8 أسابيع، مستعملة دالتي `mean` و `mySqrt` (نيوتن).
+@ steps
+- `cov = Σ (first - meanF)(second - meanS)`، `varF = Σ (first - meanF)²`، `varS = Σ (second - meanS)²`.
+- `r = cov / sqrt(varF * varS)`؛ القيمة قرب 1 تعني ارتباطًا موجبًا قويًا.
+@ flow
+call: meanF = mean(first, size)
+call: meanS = mean(second, size)
+for: idx = 0 ; idx < size ; idx++
+  do: cov += dF * dS ; varF += dF² ; varS += dS²
+call: r = cov / mySqrt(varF * varS)
+out: r
+@ code
+#include <stdio.h>
+
+double mean(double values[], int size) {
+    double total = 0;
+    int idx;
+    for (idx = 0; idx < size; idx++) total += values[idx];
+    return total / size;
+}
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    if (value <= 0) return 0;
+    for (iter = 0; iter < 60; iter++)
+        guess = (guess + value / guess) / 2;      // نيوتن
+    return guess;
+}
+
+double correlation(double first[], double second[], int size) {
+    double meanF = mean(first, size), meanS = mean(second, size);
+    double cov = 0, varF = 0, varS = 0, devF, devS;
+    int idx;
+    for (idx = 0; idx < size; idx++) {
+        devF = first[idx] - meanF;
+        devS = second[idx] - meanS;
+        cov += devF * devS;
+        varF += devF * devF;
+        varS += devS * devS;
+    }
+    return cov / mySqrt(varF * varS);
+}
+
+int main(void) {
+    double ads[8] = {10, 15, 8, 20, 25, 12, 30, 18};
+    double sales[8] = {210, 260, 190, 330, 370, 240, 420, 300};
+    double returns[8] = {12, 9, 14, 10, 7, 15, 8, 11};
+    printf("r(ads, sales)   = %.4f\n", correlation(ads, sales, 8));
+    printf("r(ads, returns) = %.4f\n", correlation(ads, returns, 8));
+    return 0;
+}
+
+@@
+title: دوال الفاتورة المركبة
+level: medium
+domain: ec
+@ statement
+قسّم حساب الفاتورة إلى دوال صغيرة: `subtotal` (مجموع الأسعار × الكميات)، `discount` (10% فوق 20000 دج)، `tax` (19% بعد الخصم)، `shipping` (500 دج أو مجاني فوق 30000 دج)، ثم `printInvoice` التي تستدعيها كلها.
+@ steps
+- كل دالة مسؤولة عن قاعدة واحدة: أسهل للفهم والتعديل.
+- `printInvoice` تستدعي الدوال بالترتيب وتعرض كل سطر.
+@ flow
+call: base = subtotal(prices, qty, 4)
+call: off = discount(base)
+call: vat = tax(base - off)
+call: ship = shipping(base - off)
+out: base, off, vat, ship, base - off + vat + ship
+@ code
+#include <stdio.h>
+
+double subtotal(double prices[], int qty[], int size) {
+    double total = 0;
+    int idx;
+    for (idx = 0; idx < size; idx++) total += prices[idx] * qty[idx];
+    return total;
+}
+
+double discount(double amount) { return amount > 20000 ? amount * 0.10 : 0; }
+double tax(double amount)      { return amount * 0.19; }
+double shipping(double amount) { return amount > 30000 ? 0 : 500; }
+
+void printInvoice(double prices[], int qty[], int size) {
+    double base = subtotal(prices, qty, size);
+    double off = discount(base);
+    double net = base - off;                       // المبلغ بعد الخصم
+    printf("Subtotal : %10.2f\n", base);
+    printf("Discount : %10.2f\n", -off);
+    printf("VAT 19%%  : %10.2f\n", tax(net));
+    printf("Shipping : %10.2f\n", shipping(net));
+    printf("TOTAL    : %10.2f DA\n", net + tax(net) + shipping(net));
+}
+
+int main(void) {
+    double prices[4] = {4500, 1200, 899, 6000};
+    int qty[4] = {2, 3, 4, 1};
+    printInvoice(prices, qty, 4);
+    return 0;
+}
+
+@@
+title: دالة القسط الشهري للشراء بالتقسيط
+level: medium
+domain: ec
+@ statement
+يتيح المتجر الشراء بالتقسيط. اكتب دالة `monthlyPayment(amount, annualRate, months)` بالصيغة `amount * r / (1 - (1 + r)^-months)` حيث `r = annualRate / 12 / 100`، مع دالة `power` مكتوبة يدويًا. اعرض القسط والتكلفة الكلية لثلاث مدد.
+@ stdin
+120000 9
+@ steps
+- `(1 + r)^-months = 1 / power(1 + r, months)`.
+- إذا كانت النسبة 0: القسط = `amount / months`.
+- التكلفة الإضافية = `payment * months - amount`.
+@ flow
+in: amount, rate
+for: idx = 0 ; idx < 3 ; idx++
+  call: pay = monthlyPayment(amount, rate, durations[idx])
+  out: durations[idx], pay, pay * durations[idx] - amount
+@ code
+#include <stdio.h>
+
+double power(double base, int exponent) {
+    double result = 1;
+    while (exponent-- > 0) result *= base;
+    return result;
+}
+
+double monthlyPayment(double amount, double annualRate, int months) {
+    double monthly = annualRate / 12 / 100;
+    if (monthly == 0) return amount / months;
+    return amount * monthly / (1 - 1 / power(1 + monthly, months));
+}
+
+int main(void) {
+    double amount, rate, pay;
+    int durations[3] = {6, 12, 24}, idx;
+    scanf("%lf %lf", &amount, &rate);
+    for (idx = 0; idx < 3; idx++) {
+        pay = monthlyPayment(amount, rate, durations[idx]);
+        printf("%2d months: %9.2f DA/month, extra cost %8.2f DA\n",
+               durations[idx], pay, pay * durations[idx] - amount);
+    }
+    return 0;
+}
+
+@@
+title: دالة رسم مخطط الأعمدة النصي
+level: medium
+domain: ds
+@ statement
+اكتب دالة `printBar(label, value, maxValue, width)` ترسم عمودًا أفقيًا متناسبًا مع القيمة، ودالة `maxOf(values, size)`، ثم ارسم مبيعات كل فئة منتجات بعرض أقصى 30 حرفًا.
+@ steps
+- طول العمود = `value * width / maxValue` (تناسب).
+- `maxOf` تعطي القيمة المرجعية للعمود الأطول.
+@ flow
+call: top = maxOf(sales, 5)
+for: idx = 0 ; idx < 5 ; idx++
+  call: printBar(names[idx], sales[idx], top, 30)
+@ code
+#include <stdio.h>
+
+int maxOf(int values[], int size) {
+    int idx, best = values[0];
+    for (idx = 1; idx < size; idx++)
+        if (values[idx] > best) best = values[idx];
+    return best;
+}
+
+void printBar(char label[], int value, int maxValue, int width) {
+    int len = value * width / maxValue, col;          // طول متناسب
+    printf("%-11s|", label);
+    for (col = 0; col < len; col++) putchar('#');
+    printf(" %d\n", value);
+}
+
+int main(void) {
+    char names[5][12] = {"Phones", "Laptops", "Audio", "Accessories", "Gaming"};
+    int sales[5] = {420, 185, 260, 510, 140};
+    int top = maxOf(sales, 5), idx;
+    for (idx = 0; idx < 5; idx++)
+        printBar(names[idx], sales[idx], top, 30);
+    return 0;
+}
+
+@@
+title: دالة البحث الثنائي في الكتالوج
+level: medium
+domain: ec
+@ statement
+الكتالوج مرتب حسب رمز المنتج. اكتب دالة `binarySearch(codes, size, target, steps)` تعيد فهرس الرمز أو `-1`، وتكتب في `steps[0]` عدد المقارنات المنجزة، ثم قارنها بالبحث التسلسلي.
+@ stdin
+7720 1015 9999
+@ steps
+- `low = 0`, `high = size - 1`؛ `middle = (low + high) / 2`.
+- إذا كان الهدف أكبر من `codes[middle]`: `low = middle + 1`، وإذا كان أصغر: `high = middle - 1`.
+- نمرر جدولًا من خانة واحدة `steps[]` لنستطيع إعادة قيمة ثانية.
+@ flow
+do: low = 0 ; high = size - 1
+while: low <= high
+  do: middle = (low + high) / 2 ; steps[0]++
+  if: codes[middle] == target
+    out: middle
+  else:
+    if: codes[middle] < target
+      do: low = middle + 1
+    else:
+      do: high = middle - 1
+out: -1
+@ code
+#include <stdio.h>
+
+int binarySearch(int codes[], int size, int target, int steps[]) {
+    int low = 0, high = size - 1, middle;
+    steps[0] = 0;
+    while (low <= high) {
+        middle = (low + high) / 2;
+        steps[0]++;                            // مقارنة إضافية
+        if (codes[middle] == target) return middle;
+        if (codes[middle] < target) low = middle + 1;   // النصف الأيمن
+        else high = middle - 1;                          // النصف الأيسر
+    }
+    return -1;
+}
+
+int main(void) {
+    int codes[16], steps[1], idx, query, target, found;
+    for (idx = 0; idx < 16; idx++) codes[idx] = 1015 + idx * 447;   // كتالوج مرتب
+    for (query = 0; query < 3; query++) {
+        scanf("%d", &target);
+        found = binarySearch(codes, 16, target, steps);
+        printf("Code %d: index %d after %d comparisons (linear: %d)\n",
+               target, found, steps[0], found >= 0 ? found + 1 : 16);
+    }
+    return 0;
+}
+
+@@
+title: دالة تحويل درجة الحرارة لمخزن التبريد
+level: medium
+domain: ds
+@ statement
+حساسات المخزن المبرد ترسل القراءات بالفهرنهايت. اكتب دالة `toCelsius(fahrenheit)` ودالة `status(celsius)` تعيد رمزًا: `'L'` أقل من 2°، `'O'` بين 2° و 8°، `'H'` أكثر من 8°، ثم اعرض تقريرًا وعدد الإنذارات.
+@ steps
+- `celsius = (fahrenheit - 32) * 5 / 9`.
+- `status` تعيد `char`، و `main` تعد القراءات خارج المجال.
+@ flow
+for: idx = 0 ; idx < 8 ; idx++
+  call: temp = toCelsius(readings[idx])
+  call: code = status(temp)
+  if: code != 'O'
+    do: alarms++
+  out: temp, code
+out: alarms
+@ code
+#include <stdio.h>
+
+double toCelsius(double fahrenheit) {
+    return (fahrenheit - 32) * 5 / 9;
+}
+
+char status(double celsius) {
+    if (celsius < 2) return 'L';          // بارد جدًا
+    if (celsius <= 8) return 'O';         // مقبول
+    return 'H';                           // ساخن
+}
+
+int main(void) {
+    double readings[8] = {38.5, 41.0, 44.6, 47.3, 35.1, 39.2, 42.8, 50.0};
+    double temp;
+    int idx, alarms = 0;
+    char code;
+    for (idx = 0; idx < 8; idx++) {
+        temp = toCelsius(readings[idx]);
+        code = status(temp);
+        if (code != 'O') alarms++;
+        printf("%5.1f F = %5.2f C [%c]\n", readings[idx], temp, code);
+    }
+    printf("Alarms: %d\n", alarms);
+    return 0;
+}
+
+@@
+title: دالة تقييم المنتج بالنجوم
+level: medium
+domain: ec
+@ statement
+اكتب دالة `printStars(rating)` تعرض تقييمًا عشريًا من 5 على شكل نجوم: `*` لكل نجمة كاملة، `+` لنصف نجمة (إذا كان الجزء العشري ≥ 0.5)، و `.` للباقي. ثم دالة `weightedRating` تحسب التقييم من عدد الأصوات لكل نجمة.
+@ steps
+- `weightedRating = (1*v1 + 2*v2 + ... + 5*v5) / (v1 + ... + v5)`.
+- النجوم الكاملة `(int) rating`، ونصف نجمة إذا `rating - full >= 0.5`.
+@ flow
+for: item = 0 ; item < 3 ; item++
+  call: rating = weightedRating(votes[item])
+  call: printStars(rating)
+  out: rating
+@ code
+#include <stdio.h>
+
+double weightedRating(int votes[]) {
+    int star, total = 0, weighted = 0;
+    for (star = 0; star < 5; star++) {
+        weighted += (star + 1) * votes[star];   // وزن كل نجمة
+        total += votes[star];
+    }
+    return total ? (double)weighted / total : 0;
+}
+
+void printStars(double rating) {
+    int full = (int)rating, pos;
+    int half = rating - full >= 0.5;
+    for (pos = 0; pos < 5; pos++) {
+        if (pos < full) putchar('*');
+        else if (pos == full && half) putchar('+');
+        else putchar('.');
+    }
+}
+
+int main(void) {
+    int votes[3][5] = {{2, 3, 10, 40, 45}, {20, 15, 10, 5, 2}, {1, 4, 30, 25, 5}};
+    char names[3][12] = {"Earbuds", "Cable", "Mouse"};
+    double rating;
+    int item;
+    for (item = 0; item < 3; item++) {
+        rating = weightedRating(votes[item]);
+        printf("%-8s ", names[item]);
+        printStars(rating);
+        printf(" %.2f\n", rating);
+    }
+    return 0;
+}
+
+@@
+title: دالة الوقت المتوقع للتوصيل
+level: medium
+domain: ec
+@ statement
+اكتب دالة `addHours(day, hour, extra)` تضيف عددًا من الساعات إلى لحظة (يوم من الأسبوع 0..6 وساعة 0..23) وتعرض اللحظة الناتجة، ودالة `dayName(day)` تعرض اسم اليوم. استعملهما لحساب موعد وصول ثلاث طلبيات.
+@ steps
+- نحول اللحظة إلى ساعات منذ بداية الأسبوع: `day * 24 + hour + extra`.
+- اليوم الجديد `(total / 24) % 7`، والساعة `total % 24`.
+- `dayName` تطبع من جدول أسماء.
+@ flow
+for: order = 0 ; order < 3 ; order++
+  call: addHours(days[order], hours[order], delays[order])
+@ code
+#include <stdio.h>
+
+void dayName(int day) {
+    char names[7][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    printf("%s", names[day]);
+}
+
+void addHours(int day, int hour, int extra) {
+    int total = day * 24 + hour + extra;      // ساعات منذ بداية الأسبوع
+    dayName(day);
+    printf(" %02dh + %2dh -> ", hour, extra);
+    dayName((total / 24) % 7);
+    printf(" %02dh\n", total % 24);
+}
+
+int main(void) {
+    int days[3] = {1, 4, 6}, hours[3] = {9, 16, 22}, delays[3] = {48, 30, 72};
+    int order;
+    for (order = 0; order < 3; order++)
+        addHours(days[order], hours[order], delays[order]);
+    return 0;
+}
+
+@@
+title: دالة المتوسط المتحرك للمبيعات
+level: medium
+domain: ds
+@ statement
+اكتب دالة `movingAverage(values, size, window, result)` تحسب **المتوسط المتحرك** على نافذة من `window` يومًا لتنعيم المبيعات اليومية، وتعيد عدد القيم المحسوبة. قارن بين نافذة 3 ونافذة 5.
+@ steps
+- أول متوسط هو متوسط أول `window` قيمة.
+- كل متوسط تالٍ: نضيف القيمة الجديدة ونطرح القيمة الخارجة من النافذة (مجموع منزلق).
+- عدد النتائج `size - window + 1`.
+@ flow
+do: sum = مجموع أول window قيمة
+do: result[0] = sum / window
+for: idx = window ; idx < size ; idx++
+  do: sum = sum + values[idx] - values[idx - window]
+  do: result[idx - window + 1] = sum / window
+@ code
+#include <stdio.h>
+
+int movingAverage(double values[], int size, int window, double result[]) {
+    double sum = 0;
+    int idx;
+    for (idx = 0; idx < window; idx++) sum += values[idx];
+    result[0] = sum / window;
+    for (idx = window; idx < size; idx++) {
+        sum += values[idx] - values[idx - window];   // النافذة تنزلق بخانة
+        result[idx - window + 1] = sum / window;
+    }
+    return size - window + 1;
+}
+
+void printSeries(char label[], double values[], int size) {
+    int idx;
+    printf("%s", label);
+    for (idx = 0; idx < size; idx++) printf(" %5.1f", values[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    double sales[10] = {50, 72, 41, 66, 90, 58, 63, 95, 70, 81};
+    double smooth[10];
+    int count;
+    printSeries("raw  :", sales, 10);
+    count = movingAverage(sales, 10, 3, smooth);
+    printSeries("MA(3):", smooth, count);
+    count = movingAverage(sales, 10, 5, smooth);
+    printSeries("MA(5):", smooth, count);
+    return 0;
+}
+
+@@
+title: دالة عمر الزبون وشريحته
+level: medium
+domain: ds
+@ statement
+اكتب دالة `ageAt(birthDay, birthMonth, birthYear, day, month, year)` تحسب العمر بالسنوات الكاملة في تاريخ معين، ودالة `segment(age)` تعيد رقم الشريحة التسويقية (0: أقل من 18، 1: 18-24، 2: 25-39، 3: 40-59، 4: 60 فأكثر). احسب عدد الزبائن في كل شريحة.
+@ steps
+- العمر = فرق السنوات، ناقص 1 إذا لم يحل عيد الميلاد بعد في السنة الحالية.
+- `segment` سلسلة من `if` تعيد رقمًا، و `main` تزيد عداد الشريحة.
+@ flow
+for: idx = 0 ; idx < 8 ; idx++
+  call: age = ageAt(birth[idx], 6, 11, 2026)
+  call: group = segment(age)
+  do: counts[group]++
+out: counts
+@ code
+#include <stdio.h>
+
+int ageAt(int birthDay, int birthMonth, int birthYear, int day, int month, int year) {
+    int age = year - birthYear;
+    if (month < birthMonth || (month == birthMonth && day < birthDay))
+        age--;                                   // عيد الميلاد لم يحل بعد
+    return age;
+}
+
+int segment(int age) {
+    if (age < 18) return 0;
+    if (age < 25) return 1;
+    if (age < 40) return 2;
+    if (age < 60) return 3;
+    return 4;
+}
+
+int main(void) {
+    int birth[8][3] = {{12, 3, 2001}, {30, 11, 2008}, {6, 11, 1990}, {7, 11, 1967},
+                       {1, 1, 1958}, {15, 8, 2004}, {20, 12, 1986}, {9, 2, 2010}};
+    char labels[5][8] = {"<18", "18-24", "25-39", "40-59", "60+"};
+    int counts[5] = {0}, idx, age;
+    for (idx = 0; idx < 8; idx++) {
+        age = ageAt(birth[idx][0], birth[idx][1], birth[idx][2], 6, 11, 2026);
+        counts[segment(age)]++;
+        printf("Customer %d: %2d years\n", idx + 1, age);
+    }
+    for (idx = 0; idx < 5; idx++)
+        printf("%-6s %d\n", labels[idx], counts[idx]);
+    return 0;
+}

@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+void mergeRec(int first[], int sizeA, int second[], int sizeB, int out[]) {
+    int idx;
+    if (sizeA == 0) { for (idx = 0; idx < sizeB; idx++) out[idx] = second[idx]; return; }
+    if (sizeB == 0) { for (idx = 0; idx < sizeA; idx++) out[idx] = first[idx]; return; }
+    if (first[0] <= second[0]) {
+        out[0] = first[0];
+        mergeRec(first + 1, sizeA - 1, second, sizeB, out + 1);    (*@\cmt{باقي الأولى}@*)
+    } else {
+        out[0] = second[0];
+        mergeRec(first, sizeA, second + 1, sizeB - 1, out + 1);    (*@\cmt{باقي الثانية}@*)
+    }
+}
+
+int main(void) {
+    int supplierA[5] = {450, 900, 1500, 3200, 7800};
+    int supplierB[6] = {300, 899, 1200, 2500, 4100, 9900};
+    int merged[11], idx;
+    mergeRec(supplierA, 5, supplierB, 6, merged);
+    for (idx = 0; idx < 11; idx++) printf("%d ", merged[idx]);
+    printf("\n");
+    return 0;
+}

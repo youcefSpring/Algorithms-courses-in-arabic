@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBC 5
+#define NBP 8
+#define NBR 14
+
+int main(void) {
+    int ratings[NBR][3] = {{0, 1, 5}, {0, 4, 3}, {1, 0, 4}, {1, 2, 5}, {1, 7, 2}, {2, 1, 4},
+                           {2, 4, 5}, {2, 6, 4}, {3, 3, 5}, {3, 5, 4}, {4, 0, 3}, {4, 2, 4},
+                           {4, 7, 5}, {0, 6, 2}};          // (زبون، منتج، نجوم)
+    int query[NBP] = {0, 5, 0, 0, 4, 0, 0, 0};             // الزبون الجديد
+    int *rowStart = malloc((NBC + 1) * sizeof(int)), *fill = malloc(NBC * sizeof(int));
+    int *columns = malloc(NBR * sizeof(int)), *values = malloc(NBR * sizeof(int));
+    int row, idx, pos, best = 0, score, bestScore = -1, suggestion = -1, top = 0;
+    for (row = 0; row <= NBC; row++) rowStart[row] = 0;
+    for (idx = 0; idx < NBR; idx++) rowStart[ratings[idx][0] + 1]++;
+    for (row = 0; row < NBC; row++) rowStart[row + 1] += rowStart[row];   // مجاميع تراكمية
+    for (row = 0; row < NBC; row++) fill[row] = rowStart[row];
+    for (idx = 0; idx < NBR; idx++) {
+        pos = fill[ratings[idx][0]]++;
+        columns[pos] = ratings[idx][1];
+        values[pos] = ratings[idx][2];
+    }
+    printf("Stored %d of %d cells (%.0f%%)\n", NBR, NBC * NBP, 100.0 * NBR / (NBC * NBP));
+    for (row = 0; row < NBC; row++) {
+        score = 0;
+        for (idx = rowStart[row]; idx < rowStart[row + 1]; idx++)
+            score += values[idx] * query[columns[idx]];     // جداء سلمي متناثر
+        printf("customer %d: similarity %d\n", row, score);
+        if (score > bestScore) { bestScore = score; best = row; }
+    }
+    for (idx = rowStart[best]; idx < rowStart[best + 1]; idx++)
+        if (query[columns[idx]] == 0 && values[idx] > top) { top = values[idx]; suggestion = columns[idx]; }
+    printf("Nearest customer %d -> recommend product %d (%d stars)\n", best, suggestion, top);
+    free(rowStart); free(fill); free(columns); free(values);
+    return 0;
+}

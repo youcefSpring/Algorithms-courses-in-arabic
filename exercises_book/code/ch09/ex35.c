@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+typedef struct { char name[14]; char category; double price, rating; int stock; } Product;
+typedef struct { char category; double minPrice, maxPrice, minRating; int inStockOnly; } Filter;
+
+int matches(Product item, Filter filter) {
+    if (filter.category != '*' && item.category != filter.category) return 0;
+    if (item.price < filter.minPrice || item.price > filter.maxPrice) return 0;
+    if (item.rating < filter.minRating) return 0;
+    if (filter.inStockOnly && item.stock == 0) return 0;
+    return 1;                                        // كل الشروط محققة
+}
+
+int main(void) {
+    Product items[8] = {{"Galaxy A", 'P', 38000, 4.3, 5}, {"Redmi 13", 'P', 27500, 4.1, 0},
+                        {"iPhone", 'P', 165000, 4.7, 2}, {"ThinkPad", 'L', 95000, 4.5, 3},
+                        {"IdeaPad", 'L', 72000, 3.9, 6}, {"Earbuds", 'A', 5400, 4.6, 20},
+                        {"Charger", 'A', 2200, 3.5, 0}, {"Hub", 'A', 3100, 4.2, 8}};
+    Filter filters[3] = {{'P', 0, 50000, 4.0, 0}, {'*', 3000, 100000, 4.2, 1}, {'A', 0, 10000, 0, 1}};
+    int filt, idx;
+    for (filt = 0; filt < 3; filt++) {
+        printf("Filter %d:", filt + 1);
+        for (idx = 0; idx < 8; idx++)
+            if (matches(items[idx], filters[filt])) printf(" %s;", items[idx].name);
+        printf("\n");
+    }
+    return 0;
+}

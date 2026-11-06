@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+const double *findPrice(const double *low, const double *high, double target) {
+    const double *middle;
+    while (low <= high) {
+        middle = low + (high - low) / 2;          // لا نجمع مؤشرين
+        if (*middle == target) return middle;
+        if (*middle < target) low = middle + 1;
+        else high = middle - 1;
+    }
+    return NULL;
+}
+
+int main(void) {
+    double prices[10] = {99, 450, 650, 899, 1200, 1500, 2300, 3200, 4100, 7800};
+    const double *found;
+    double target;
+    int query;
+    for (query = 0; query < 2; query++) {
+        scanf("%lf", &target);
+        found = findPrice(prices, prices + 9, target);
+        if (found != NULL) printf("%.0f found at index %d\n", target, (int)(found - prices));
+        else printf("%.0f not found\n", target);
+    }
+    return 0;
+}

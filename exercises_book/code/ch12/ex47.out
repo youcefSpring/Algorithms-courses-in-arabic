@@ -1,0 +1,3 @@
+original: Phone->Case Case->Phone Charger->Phone Laptop->Mouse Mouse->-
+clone:    Phone->Case Case->Phone Charger->Phone Laptop->Mouse Mouse->-
+clone links stay inside clone: yes

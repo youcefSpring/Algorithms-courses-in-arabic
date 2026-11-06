@@ -1,0 +1,29 @@
+#include <stdio.h>
+
+void minMaxNormalize(double values[], double normalized[], int size) {
+    double low = values[0], high = values[0];
+    int idx;
+    for (idx = 1; idx < size; idx++) {
+        if (values[idx] < low) low = values[idx];
+        if (values[idx] > high) high = values[idx];
+    }
+    for (idx = 0; idx < size; idx++)
+        normalized[idx] = high == low ? 0 : (values[idx] - low) / (high - low);
+}
+
+void printRow(char label[], double values[], int size) {
+    int idx;
+    printf("%s", label);
+    for (idx = 0; idx < size; idx++) printf(" %.3f", values[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    double prices[5] = {1200, 450, 3900, 2600, 900}, agesD[5] = {19, 34, 52, 27, 41};
+    double result[5];
+    minMaxNormalize(prices, result, 5);
+    printRow("prices:", result, 5);
+    minMaxNormalize(agesD, result, 5);           // نفس الدالة لعمود آخر
+    printRow("ages:  ", result, 5);
+    return 0;
+}

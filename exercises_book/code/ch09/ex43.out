@@ -1,0 +1,11 @@
+a1  cart: P1 x1
+a2  cart: P1 x1 P2 x1
+a1  cart: P1 x2 P2 x1
+r2  cart: P1 x2
+u   cart: P1 x2 P2 x1
+u   cart: P1 x1 P2 x1
+u   cart: P1 x1
+y   cart: P1 x1 P2 x1
+y   cart: P1 x2 P2 x1
+a3  cart: P1 x2 P2 x1 P3 x1
+u   cart: P1 x2 P2 x1

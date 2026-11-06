@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+int freed = 0;
+
+Tree *insert(Tree *node, int code) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->code = code; node->left = node->right = NULL; }
+    else if (code < node->code) node->left = insert(node->left, code);
+    else node->right = insert(node->right, code);
+    return node;
+}
+
+void freeTree(Tree *node) {
+    if (node == NULL) return;
+    freeTree(node->left);                 (*@\cmt{الأبناء أولًا}@*)
+    freeTree(node->right);
+    printf("free %d\n", node->code);
+    free(node);                           (*@\cmt{ثم الأب}@*)
+    freed++;
+}
+
+int main(void) {
+    int codes[6] = {50, 30, 70, 20, 40, 80}, idx;
+    Tree *root = NULL;
+    for (idx = 0; idx < 6; idx++) root = insert(root, codes[idx]);
+    freeTree(root);
+    root = NULL;
+    printf("%d nodes freed\n", freed);
+    return 0;
+}

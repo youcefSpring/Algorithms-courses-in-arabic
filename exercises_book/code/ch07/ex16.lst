@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+int textLength(char text[]) {
+    int len = 0;
+    while (text[len] != '\0')
+        len++;
+    return len;
+}
+
+int textCompare(char first[], char second[]) {
+    int pos = 0;
+    while (first[pos] != '\0' && first[pos] == second[pos])
+        pos++;
+    return first[pos] - second[pos];        (*@\cmt{أول اختلاف يحدد النتيجة}@*)
+}
+
+int main(void) {
+    char user[30], password[30];
+    scanf("%29s %29s", user, password);
+    printf("Password length: %d\n", textLength(password));
+    printf("compare(\"apple\", \"apply\") = %d\n", textCompare("apple", "apply"));
+    if (textCompare(user, "admin") == 0 && textLength(password) >= 8
+        && textCompare(password, "shop2026") == 0)
+        printf("Access granted\n");
+    else
+        printf("Access denied\n");
+    return 0;
+}

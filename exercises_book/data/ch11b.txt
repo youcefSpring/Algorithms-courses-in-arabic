@@ -1,0 +1,826 @@
+@@
+title: إعادة بناء الرصيد من دفتر العمليات
+level: medium
+domain: ec
+@ statement
+تسجل المحفظة كل عملية في ملف **يُضاف إليه فقط** (`ledger.txt`) بالصيغة `type amount` (`D` إيداع، `W` سحب، `F` رسوم). لا نخزن الرصيد أبدًا: نعيد حسابه **بإعادة تشغيل** الدفتر من البداية. أضف عمليات على دفعتين ثم أعد بناء الرصيد بعد كل دفعة.
+@ steps
+- `appendOp` تفتح بـ `"a"` وتكتب سطرًا.
+- `replay` تقرأ كل الأسطر وتطبقها بالترتيب.
+- الرصيد مشتق دائمًا من الدفتر: لا تناقض ممكن.
+@ flow
+call: appendOp('D', 5000) ; appendOp('W', 1200) ; appendOp('F', 50)
+call: balance = replay()
+out: balance
+call: appendOp('D', 2500) ; appendOp('W', 4000)
+call: balance = replay()
+out: balance
+@ code
+#include <stdio.h>
+
+void appendOp(char type, double amount) {
+    FILE *file = fopen("ledger.txt", "a");
+    fprintf(file, "%c %.2f\n", type, amount);
+    fclose(file);
+}
+
+double replay(int *count) {
+    FILE *file = fopen("ledger.txt", "r");
+    char type;
+    double amount, balance = 0;
+    *count = 0;
+    if (file == NULL) return 0;
+    while (fscanf(file, " %c %lf", &type, &amount) == 2) {
+        if (type == 'D') balance += amount;
+        else balance -= amount;                      // W أو F
+        (*count)++;
+    }
+    fclose(file);
+    return balance;
+}
+
+int main(void) {
+    FILE *file = fopen("ledger.txt", "w");          // دفتر جديد
+    int count;
+    double balance;
+    fclose(file);
+    appendOp('D', 5000); appendOp('W', 1200); appendOp('F', 50);
+    balance = replay(&count);
+    printf("After %d ops: %.2f DA\n", count, balance);
+    appendOp('D', 2500); appendOp('W', 4000);
+    balance = replay(&count);
+    printf("After %d ops: %.2f DA\n", count, balance);
+    return 0;
+}
+
+@@
+title: تشفير ملف الزبائن بمفتاح XOR
+level: medium
+domain: ec
+@ statement
+قبل إرسال ملف الزبائن نشفّره بعملية **XOR** مع مفتاح يتكرر: `out = in ^ key[pos % keyLen]`. اكتب دالة `xorFile(source, target, key)` تعمل بالملفات الثنائية، شفّر الملف ثم فك تشفيره بنفس الدالة وتحقق من التطابق.
+@ steps
+- XOR مرتين بنفس المفتاح يعيد القيمة الأصلية.
+- نقرأ ونكتب بايتًا ببايت بالوضعين `"rb"` و `"wb"`.
+- التحقق: مقارنة الملفين بايتًا ببايت.
+@ flow
+call: xorFile("clients.txt", "clients.enc", key)
+call: xorFile("clients.enc", "clients.dec", key)
+call: same = compareFiles("clients.txt", "clients.dec")
+out: same
+@ code
+#include <stdio.h>
+
+void xorFile(const char *source, const char *target, const char *key) {
+    FILE *input = fopen(source, "rb"), *output = fopen(target, "wb");
+    int ch, keyLen = 0;
+    long pos = 0;
+    while (key[keyLen] != '\0') keyLen++;
+    while ((ch = fgetc(input)) != EOF)
+        fputc(ch ^ key[pos++ % keyLen], output);     // المفتاح يتكرر
+    fclose(input);
+    fclose(output);
+}
+
+int compareFiles(const char *first, const char *second) {
+    FILE *fileA = fopen(first, "rb"), *fileB = fopen(second, "rb");
+    int chA, chB, same = 1;
+    do {
+        chA = fgetc(fileA);
+        chB = fgetc(fileB);
+        if (chA != chB) same = 0;
+    } while (chA != EOF && chB != EOF && same);
+    fclose(fileA);
+    fclose(fileB);
+    return same;
+}
+
+int main(void) {
+    FILE *file = fopen("clients.txt", "w");
+    int ch, shown = 0;
+    fprintf(file, "507;Amina;0550123456\n508;Karim;0661987654\n");
+    fclose(file);
+    xorFile("clients.txt", "clients.enc", "K3y!");
+    printf("Encrypted bytes (hex): ");
+    file = fopen("clients.enc", "rb");
+    while ((ch = fgetc(file)) != EOF && shown++ < 12) printf("%02X ", ch);
+    fclose(file);
+    xorFile("clients.enc", "clients.dec", "K3y!");    // نفس العملية تفك التشفير
+    printf("...\nDecrypted identical to original: %s\n", compareFiles("clients.txt", "clients.dec") ? "yes" : "no");
+    return 0;
+}
+
+@@
+title: أطول سطر في ملف الأوصاف
+level: medium
+domain: ds
+@ statement
+لضبط عرض عمود الأوصاف في واجهة الإدارة، ابحث عن **أطول سطر** في الملف، ورقمه، وطوله، ومتوسط أطوال الأسطر. اقرأ حرفًا بحرف لكي لا يُقيدك حجم مخزن `fgets`.
+@ steps
+- عداد طول السطر الحالي يرجع إلى 0 عند كل `'\n'`.
+- عند نهاية السطر: نقارن بالأطول ونجمع للمتوسط.
+- نعالج السطر الأخير إذا لم ينته بـ `'\n'`.
+@ flow
+while: (ch = fgetc(file)) != EOF
+  if: ch == '\n'
+    do: line++ ; إنهاء السطر الحالي
+  else:
+    do: current++
+out: longestLine, longest, total / lines
+@ code
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("descriptions.txt", "w");
+    int ch, current = 0, line = 0, longest = -1, longestLine = 0, total = 0;
+    fprintf(file, "Wireless mouse 2.4 GHz\nMechanical keyboard with blue switches and RGB lighting\n");
+    fprintf(file, "USB-C cable 1m\n27 inch 4K IPS monitor, HDR10, 60 Hz, adjustable stand\nHub");
+    fclose(file);
+    file = fopen("descriptions.txt", "r");
+    while (1) {
+        ch = fgetc(file);
+        if (ch == '\n' || (ch == EOF && current > 0)) {   // نهاية سطر
+            line++;
+            total += current;
+            if (current > longest) { longest = current; longestLine = line; }
+            current = 0;
+        } else if (ch != EOF) {
+            current++;
+        }
+        if (ch == EOF) break;
+    }
+    fclose(file);
+    printf("%d lines, longest is line %d (%d chars), average %.1f\n",
+           line, longestLine, longest, (double)total / line);
+    return 0;
+}
+
+@@
+title: آخر أسطر السجل بمخزن دائري
+level: medium
+domain: ds
+@ statement
+اكتب أمرًا يشبه `tail -n 4`: يعرض **آخر 4 أسطر** من سجل طويل دون تحميله كله، بالاحتفاظ بآخر 4 أسطر فقط في **مخزن دائري** من الأسطر أثناء القراءة.
+@ steps
+- `ring[NBL][LEN]` و `next` فهرس الكتابة الدائري.
+- كل سطر جديد يُكتب في `ring[next]` ثم `next = (next + 1) % NBL`.
+- في النهاية نطبع ابتداءً من `next` (الأقدم) إذا امتلأ المخزن.
+@ flow
+while: fgets(ring[next]) != NULL
+  do: next = (next + 1) % NBL ; count++
+do: start = count < NBL ? 0 : next
+for: idx = 0 ; idx < min(count, NBL) ; idx++
+  out: ring[(start + idx) % NBL]
+@ code
+#include <stdio.h>
+
+#define NBL 4
+#define LEN 60
+
+int main(void) {
+    FILE *file = fopen("access.log", "w");
+    char ring[NBL][LEN];
+    int hour, next = 0, count = 0, idx, start, shown;
+    for (hour = 0; hour < 24; hour++)
+        fprintf(file, "%02d:00 visits=%d orders=%d\n", hour, 100 + hour * 13 % 70, hour * 7 % 11);
+    fclose(file);
+    file = fopen("access.log", "r");
+    while (fgets(ring[next], LEN, file) != NULL) {
+        next = (next + 1) % NBL;                  // نكتب فوق الأقدم
+        count++;
+    }
+    fclose(file);
+    start = count < NBL ? 0 : next;
+    shown = count < NBL ? count : NBL;
+    printf("Last %d of %d lines:\n", shown, count);
+    for (idx = 0; idx < shown; idx++) printf("%s", ring[(start + idx) % NBL]);
+    return 0;
+}
+
+@@
+title: مقارنة نسختين من قائمة الأسعار
+level: medium
+domain: ec
+@ statement
+قارن ملفي الأسعار `prices_v1.txt` و `prices_v2.txt` **سطرًا بسطر** (مثل `diff` مبسط)، واعرض رقم كل سطر مختلف مع النسختين، والأسطر الزائدة في أحد الملفين.
+@ steps
+- نقرأ سطرًا من كل ملف في كل دورة.
+- `sameLine` تقارن السلسلتين.
+- إذا انتهى أحد الملفين قبل الآخر: الأسطر الباقية "مضافة" أو "محذوفة".
+@ flow
+while: endA == 0 || endB == 0
+  do: endA = fgets(lineA) == NULL ; endB = fgets(lineB) == NULL
+  if: !endA && !endB && lineA != lineB
+    out: number, lineA, lineB
+  else:
+    if: endA != endB
+      out: سطر زائد
+@ code
+#include <stdio.h>
+
+int sameLine(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first == *second;
+}
+
+int main(void) {
+    FILE *fileA = fopen("prices_v1.txt", "w"), *fileB = fopen("prices_v2.txt", "w");
+    char lineA[80], lineB[80];
+    int endA = 0, endB = 0, number = 0, changes = 0;
+    fprintf(fileA, "Mouse 1500\nKeyboard 3200\nMonitor 32000\nCable 450\n");
+    fprintf(fileB, "Mouse 1500\nKeyboard 2990\nMonitor 32000\nCable 500\nHub 3100\nWebcam 4100\n");
+    fclose(fileA); fclose(fileB);
+    fileA = fopen("prices_v1.txt", "r");
+    fileB = fopen("prices_v2.txt", "r");
+    while (1) {
+        endA = fgets(lineA, 80, fileA) == NULL;
+        endB = fgets(lineB, 80, fileB) == NULL;
+        if (endA && endB) break;
+        number++;
+        if (!endA && !endB && !sameLine(lineA, lineB)) {
+            printf("line %d changed:\n  - %s  + %s", number, lineA, lineB);
+            changes++;
+        } else if (endA && !endB) {
+            printf("line %d added:   + %s", number, lineB);
+            changes++;
+        } else if (!endA && endB) {
+            printf("line %d removed: - %s", number, lineA);
+            changes++;
+        }
+    }
+    fclose(fileA); fclose(fileB);
+    printf("%d difference(s)\n", changes);
+    return 0;
+}
+
+@@
+title: تقرير بأعمدة ثابتة العرض من CSV
+level: medium
+domain: ds
+@ statement
+حوّل ملف `team.csv` (`name,city,sales`) إلى تقرير نصي بأعمدة **ثابتة العرض** في `team_report.txt` مع إطار وسطر مجموع، حيث يُقص الاسم الطويل إلى 10 حروف مع `.` في النهاية.
+@ steps
+- `%-10s` محاذاة يسارًا و `%10.2f` محاذاة يمينًا.
+- القص: ننسخ 9 حروف ونضع `.` إذا كان الاسم أطول من 10.
+- نفكك كل سطر يدويًا عند الفواصل.
+@ flow
+do: fgets(header)
+while: fgets(line) != NULL
+  do: تقسيم line إلى name, city, sales
+  do: قص name إلى 10
+  do: fprintf(report, أعمدة ثابتة)
+do: fprintf(report, المجموع)
+@ code
+#include <stdio.h>
+
+double toDouble(const char *text) {
+    double value = 0, scale = 1;
+    while (*text >= '0' && *text <= '9') value = value * 10 + (*text++ - '0');
+    if (*text == '.') for (text++; *text >= '0' && *text <= '9'; text++) value += (*text - '0') * (scale /= 10);
+    return value;
+}
+
+int main(void) {
+    FILE *input = fopen("team.csv", "w"), *report;
+    char line[100], *fields[3], shortName[12];
+    double total = 0;
+    int pos, count, len, ch;
+    fprintf(input, "name,city,sales\nRania Belkacem,Oran,820000\nHakim,Algiers,640000.5\n");
+    fprintf(input, "Selma Ait-Mohand,Tizi Ouzou,910000\nOmar,Setif,505000\n");
+    fclose(input);
+    input = fopen("team.csv", "r");
+    report = fopen("team_report.txt", "w");
+    fgets(line, 100, input);                                 // العناوين
+    fprintf(report, "+------------+------------+--------------+\n");
+    fprintf(report, "| %-10s | %-10s | %12s |\n", "Name", "City", "Sales");
+    fprintf(report, "+------------+------------+--------------+\n");
+    while (fgets(line, 100, input) != NULL) {
+        fields[0] = line;
+        for (pos = 0, count = 1; line[pos] != '\n' && line[pos] != '\0'; pos++)
+            if (line[pos] == ',') { line[pos] = '\0'; fields[count++] = line + pos + 1; }
+        line[pos] = '\0';
+        for (len = 0; fields[0][len] != '\0'; len++) {}
+        for (pos = 0; pos < 10 && pos < len; pos++) shortName[pos] = fields[0][pos];
+        if (len > 10) shortName[9] = '.';                    // قص الاسم الطويل
+        shortName[pos] = '\0';
+        fprintf(report, "| %-10s | %-10.10s | %12.2f |\n", shortName, fields[1], toDouble(fields[2]));
+        total += toDouble(fields[2]);
+    }
+    fprintf(report, "+------------+------------+--------------+\n");
+    fprintf(report, "| %-23s | %12.2f |\n", "TOTAL", total);
+    fclose(input);
+    fclose(report);
+    report = fopen("team_report.txt", "r");
+    while ((ch = fgetc(report)) != EOF) putchar(ch);
+    fclose(report);
+    return 0;
+}
+
+@@
+title: البحث في السجل دون اعتبار حجم الحروف
+level: medium
+domain: ds
+@ statement
+اكتب أمرًا يشبه `grep -in`: يبحث عن كلمة في ملف سجل **دون اعتبار حجم الحروف**، ويعرض كل سطر مطابق مسبوقًا برقمه، وعدد الأسطر المطابقة في النهاية.
+@ stdin
+refund
+@ steps
+- `lower(ch)` يحول الحرف إلى صغير للمقارنة فقط (السطر يُعرض كما هو).
+- `containsIgnoreCase(line, word)`: لكل موضع نقارن الحروف بعد التحويل.
+@ flow
+in: word
+while: fgets(line) != NULL
+  do: number++
+  if: containsIgnoreCase(line, word)
+    out: number, line
+    do: matches++
+out: matches
+@ code
+#include <stdio.h>
+
+char lower(char ch) { return (ch >= 'A' && ch <= 'Z') ? ch - 'A' + 'a' : ch; }
+
+int containsIgnoreCase(const char *line, const char *word) {
+    const char *start, *left, *right;
+    for (start = line; *start != '\0'; start++) {
+        for (left = start, right = word; *right != '\0' && lower(*left) == lower(*right); left++, right++) {}
+        if (*right == '\0') return 1;
+    }
+    return 0;
+}
+
+int main(void) {
+    FILE *file = fopen("support.log", "w");
+    char word[30], line[120];
+    int number = 0, matches = 0;
+    fprintf(file, "#101 customer asks about delivery time\n#102 REFUND requested: item broken\n");
+    fprintf(file, "#103 password reset\n#104 partial Refund approved for #102\n#105 invoice copy\n");
+    fprintf(file, "#106 refunds policy question\n");
+    fclose(file);
+    scanf("%29s", word);
+    file = fopen("support.log", "r");
+    while (fgets(line, 120, file) != NULL) {
+        number++;
+        if (containsIgnoreCase(line, word)) {
+            printf("%d: %s", number, line);
+            matches++;
+        }
+    }
+    fclose(file);
+    printf("%d matching line(s) for \"%s\"\n", matches, word);
+    return 0;
+}
+
+@@
+title: قراءة مصفوفة من ملف وكتابة منقولتها
+level: medium
+domain: ds
+@ statement
+ملف `matrix.txt` يبدأ بعدد الأسطر والأعمدة ثم القيم (مبيعات منتج × شهر). اقرأ المصفوفة، اكتب **منقولتها** في `transposed.txt` بنفس الصيغة، ثم أعد قراءة الملف الجديد للتحقق وعرضه.
+@ steps
+- الصيغة: `rows cols` ثم `rows` سطرًا من `cols` قيمة.
+- المنقولة: `cols` سطرًا من `rows` قيمة: `matrix[col][row]`.
+- دالة `printFile` تعرض أي ملف نصي.
+@ flow
+in: rows, cols من الملف
+do: قراءة matrix
+do: fprintf(out, cols, rows)
+for: col = 0 ; col < cols ; col++
+  for: row = 0 ; row < rows ; row++
+    do: fprintf(out, matrix[row][col])
+@ code
+#include <stdio.h>
+
+void printFile(const char *path) {
+    FILE *file = fopen(path, "r");
+    int ch;
+    while ((ch = fgetc(file)) != EOF) putchar(ch);
+    fclose(file);
+}
+
+int main(void) {
+    FILE *file = fopen("matrix.txt", "w");
+    int matrix[10][10], rows, cols, row, col;
+    fprintf(file, "3 4\n120 95 140 180\n80 60 75 90\n200 210 190 250\n");
+    fclose(file);
+    file = fopen("matrix.txt", "r");
+    fscanf(file, "%d %d", &rows, &cols);
+    for (row = 0; row < rows; row++)
+        for (col = 0; col < cols; col++) fscanf(file, "%d", &matrix[row][col]);
+    fclose(file);
+    file = fopen("transposed.txt", "w");
+    fprintf(file, "%d %d\n", cols, rows);              // الأبعاد تتبادل
+    for (col = 0; col < cols; col++) {
+        for (row = 0; row < rows; row++) fprintf(file, "%d%c", matrix[row][col], row < rows - 1 ? ' ' : '\n');
+    }
+    fclose(file);
+    printf("--- transposed.txt ---\n");
+    printFile("transposed.txt");
+    return 0;
+}
+
+@@
+title: عدد الزوار المختلفين في سجل الدخول
+level: medium
+domain: ds
+@ statement
+كل سطر في سجل الدخول `hits.log` يحتوي على عنوان IP وصفحة. احسب عدد **الزوار المختلفين** (عناوين IP فريدة)، وعدد الزيارات لكل زائر، والزائر الأكثر نشاطًا.
+@ steps
+- `fscanf(file, "%s %s", ip, page)`.
+- جدول عناوين فريدة مع عدادات (بحث يدوي).
+@ flow
+while: fscanf(file, ip, page) == 2
+  do: idx = البحث عن ip في visitors
+  if: idx < 0
+    do: إضافة ip
+  do: hits[idx]++
+out: nbVisitors, الزائر الأكثر نشاطًا
+@ code
+#include <stdio.h>
+
+int sameText(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first == *second;
+}
+
+int main(void) {
+    FILE *file = fopen("hits.log", "w");
+    char visitors[30][20], ip[20], page[40];
+    int hits[30], nb = 0, idx, top = 0, total = 0, letter;
+    fprintf(file, "41.200.3.7 /home\n105.98.1.20 /phones\n41.200.3.7 /phones\n197.112.5.9 /home\n");
+    fprintf(file, "41.200.3.7 /cart\n105.98.1.20 /cart\n41.200.3.7 /checkout\n154.121.0.4 /home\n");
+    fclose(file);
+    file = fopen("hits.log", "r");
+    while (fscanf(file, "%19s %39s", ip, page) == 2) {
+        for (idx = 0; idx < nb && !sameText(visitors[idx], ip); idx++) {}
+        if (idx == nb) {                                    // زائر جديد
+            for (letter = 0; (visitors[nb][letter] = ip[letter]) != '\0'; letter++) {}
+            hits[nb++] = 0;
+        }
+        hits[idx]++;
+        total++;
+    }
+    fclose(file);
+    for (idx = 0; idx < nb; idx++) {
+        printf("%-12s %d hits\n", visitors[idx], hits[idx]);
+        if (hits[idx] > hits[top]) top = idx;
+    }
+    printf("%d hits from %d unique visitors; most active %s\n", total, nb, visitors[top]);
+    return 0;
+}
+
+@@
+title: المجموع اليومي من سجل مؤرخ
+level: medium
+domain: ds
+@ statement
+سجل المبيعات مرتب زمنيًا بأسطر `YYYY-MM-DD HH:MM amount`. احسب **مجموع كل يوم** بمرور واحد: نجمع ما دام التاريخ نفسه، وعند تغيره نكتب سطر اليوم السابق في `daily.txt`. اعرض النتيجة واليوم الأفضل.
+@ steps
+- نقارن تاريخ السطر الحالي بالتاريخ المحفوظ `currentDay`.
+- عند التغير: نكتب `currentDay total` ونعيد الضبط.
+- لا ننسى كتابة اليوم الأخير بعد الحلقة.
+@ flow
+while: fscanf(file, day, time, amount) == 3
+  if: day != currentDay && hasDay
+    do: fprintf(out, currentDay, total) ; total = 0
+  do: currentDay = day ; total += amount
+do: fprintf(out, currentDay, total)
+@ code
+#include <stdio.h>
+
+int sameText(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first == *second;
+}
+
+void copyText(char *target, const char *source) { while ((*target++ = *source++) != '\0') {} }
+
+int main(void) {
+    FILE *file = fopen("timeline.log", "w"), *out;
+    char day[12], time[8], currentDay[12] = "", bestDay[12] = "";
+    double amount, total = 0, best = -1;
+    int hasDay = 0;
+    fprintf(file, "2026-11-01 09:14 1200\n2026-11-01 13:40 4500\n2026-11-01 20:02 890\n");
+    fprintf(file, "2026-11-02 10:30 32000\n2026-11-03 08:05 450\n2026-11-03 18:45 3100\n2026-11-03 22:10 2600\n");
+    fclose(file);
+    file = fopen("timeline.log", "r");
+    out = fopen("daily.txt", "w");
+    while (fscanf(file, "%11s %7s %lf", day, time, &amount) == 3) {
+        if (hasDay && !sameText(day, currentDay)) {          // يوم جديد
+            fprintf(out, "%s %.2f\n", currentDay, total);
+            if (total > best) { best = total; copyText(bestDay, currentDay); }
+            total = 0;
+        }
+        copyText(currentDay, day);
+        hasDay = 1;
+        total += amount;
+    }
+    fprintf(out, "%s %.2f\n", currentDay, total);              // اليوم الأخير
+    if (total > best) { best = total; copyText(bestDay, currentDay); }
+    fclose(file);
+    fclose(out);
+    out = fopen("daily.txt", "r");
+    while (fscanf(out, "%11s %lf", day, &amount) == 2) printf("%s: %9.2f DA\n", day, amount);
+    fclose(out);
+    printf("Best day: %s\n", bestDay);
+    return 0;
+}
+
+@@
+title: حفظ جلسة السلة واستعادتها
+level: medium
+domain: ec
+@ statement
+عند إغلاق التطبيق نحفظ السلة في ملف ثنائي: **رأس** (رقم إصدار الصيغة وعدد العناصر) ثم العناصر. عند الفتح نستعيدها بعد التحقق من الإصدار. اكتب `saveCart` و `loadCart` واختبر الحفظ والاستعادة، ثم محاولة تحميل ملف بإصدار قديم.
+@ steps
+- الرأس هيكل `Header { int version; int count; }`.
+- `loadCart` ترفض الملف إذا اختلف الإصدار أو إذا كان العدد غير منطقي.
+- نكتب الرأس ثم العناصر بـ `fwrite`.
+@ flow
+call: saveCart("cart.bin", cart, 3)
+call: count = loadCart("cart.bin", restored)
+out: restored
+do: كتابة ملف بإصدار 1
+call: loadCart("old.bin", restored)
+out: رفض
+@ code
+#include <stdio.h>
+
+#define VERSION 2
+
+typedef struct { int version; int count; } Header;
+typedef struct { int code; int qty; double price; } Item;
+
+void saveCart(const char *path, const Item *items, int count) {
+    FILE *file = fopen(path, "wb");
+    Header header = {VERSION, count};
+    fwrite(&header, sizeof(Header), 1, file);          // الرأس أولًا
+    fwrite(items, sizeof(Item), count, file);
+    fclose(file);
+}
+
+int loadCart(const char *path, Item *items, int capacity) {
+    FILE *file = fopen(path, "rb");
+    Header header;
+    int count;
+    if (file == NULL) return -1;
+    if (fread(&header, sizeof(Header), 1, file) != 1 || header.version != VERSION
+        || header.count < 0 || header.count > capacity) {
+        fclose(file);
+        return -1;                                     // ملف غير متوافق
+    }
+    count = (int)fread(items, sizeof(Item), header.count, file);
+    fclose(file);
+    return count;
+}
+
+int main(void) {
+    Item cart[3] = {{101, 2, 1500}, {205, 1, 32000}, {330, 4, 450}}, restored[10];
+    Header oldHeader = {1, 3};
+    FILE *file;
+    int count, idx;
+    saveCart("cart.bin", cart, 3);
+    count = loadCart("cart.bin", restored, 10);
+    printf("Restored %d items:", count);
+    for (idx = 0; idx < count; idx++) printf(" %d x%d", restored[idx].code, restored[idx].qty);
+    printf("\n");
+    file = fopen("old.bin", "wb");
+    fwrite(&oldHeader, sizeof(Header), 1, file);
+    fwrite(cart, sizeof(Item), 3, file);
+    fclose(file);
+    printf("Old format file: %s\n", loadCart("old.bin", restored, 10) < 0 ? "rejected" : "loaded");
+    return 0;
+}
+
+@@
+title: ضغط ملف بالترميز الطولي وفك ضغطه
+level: medium
+domain: ds
+@ statement
+ملفات حالة المخزون اليومية تحتوي على تكرارات طويلة (`AAAAAABBBCC...`). اكتب `encodeFile` التي تكتب كل سلسلة متكررة كزوج (العدد بايت، الحرف) في ملف ثنائي (بحد أقصى 255 للعدد)، و `decodeFile` التي تعيد الأصل، ثم قارن الأحجام وتحقق من التطابق.
+@ steps
+- نقرأ الحرف الأول ثم نعد التكرارات حتى يتغير الحرف أو يبلغ العداد 255.
+- فك الضغط: لكل زوج نكتب الحرف `count` مرة.
+@ flow
+do: prev = fgetc(input) ; run = 1
+while: (ch = fgetc(input)) != EOF
+  if: ch == prev && run < 255
+    do: run++
+  else:
+    do: fputc(run) ; fputc(prev) ; prev = ch ; run = 1
+do: fputc(run) ; fputc(prev)
+@ code
+#include <stdio.h>
+
+long encodeFile(const char *source, const char *target) {
+    FILE *input = fopen(source, "rb"), *output = fopen(target, "wb");
+    int ch, prev = fgetc(input), run = 1;
+    long written = 0;
+    while (prev != EOF) {
+        ch = fgetc(input);
+        if (ch == prev && run < 255) {
+            run++;
+        } else {
+            fputc(run, output);                     // (العدد، الحرف)
+            fputc(prev, output);
+            written += 2;
+            prev = ch;
+            run = 1;
+        }
+    }
+    fclose(input);
+    fclose(output);
+    return written;
+}
+
+long decodeFile(const char *source, const char *target) {
+    FILE *input = fopen(source, "rb"), *output = fopen(target, "wb");
+    int run, ch, rep;
+    long written = 0;
+    while ((run = fgetc(input)) != EOF && (ch = fgetc(input)) != EOF)
+        for (rep = 0; rep < run; rep++) { fputc(ch, output); written++; }
+    fclose(input);
+    fclose(output);
+    return written;
+}
+
+int main(void) {
+    FILE *file = fopen("status.txt", "wb");
+    int idx;
+    for (idx = 0; idx < 300; idx++) fputc(idx < 120 ? 'A' : idx < 125 ? 'B' : idx < 290 ? 'A' : 'C', file);
+    fclose(file);
+    printf("encoded size: %ld bytes (original 300)\n", encodeFile("status.txt", "status.rle"));
+    printf("decoded size: %ld bytes\n", decodeFile("status.rle", "status.out"));
+    file = fopen("status.rle", "rb");
+    printf("pairs:");
+    while ((idx = fgetc(file)) != EOF) printf(" %d%c", idx, fgetc(file));
+    printf("\n");
+    fclose(file);
+    return 0;
+}
+
+@@
+title: عدّ الرموز المتتالية في ملف مرتب
+level: medium
+domain: ec
+@ statement
+ملف `sold_codes.txt` يحتوي على رموز المنتجات المباعة **مرتبة** (رمز في كل سطر). اكتب أمرًا يشبه `uniq -c`: يكتب في `summary.txt` كل رمز مع عدد مرات ظهوره المتتالية، ثم اعرض أكثر 3 منتجات مبيعًا.
+@ steps
+- بما أن الملف مرتب: كل الظهورات لرمز واحد متتالية؛ لا نحتاج إلى جدول بحث.
+- عند تغير الرمز نكتب `previous count`.
+@ flow
+do: hasPrev = fscanf(input, previous) == 1 ; count = 1
+while: fscanf(input, code) == 1
+  if: code == previous
+    do: count++
+  else:
+    do: fprintf(out, previous, count) ; previous = code ; count = 1
+do: fprintf(out, previous, count)
+@ code
+#include <stdio.h>
+
+int main(void) {
+    FILE *input = fopen("sold_codes.txt", "w"), *out;
+    int sold[16] = {101, 101, 101, 102, 205, 205, 205, 205, 205, 330, 330, 412, 412, 412, 500, 500};
+    int previous, code, count, idx, codes[16], counts[16], nb = 0, rank, best, used[16] = {0};
+    for (idx = 0; idx < 16; idx++) fprintf(input, "%d\n", sold[idx]);
+    fclose(input);
+    input = fopen("sold_codes.txt", "r");
+    out = fopen("summary.txt", "w");
+    if (fscanf(input, "%d", &previous) == 1) {
+        count = 1;
+        while (fscanf(input, "%d", &code) == 1) {
+            if (code == previous) count++;
+            else { fprintf(out, "%d %d\n", previous, count); previous = code; count = 1; }
+        }
+        fprintf(out, "%d %d\n", previous, count);        // المجموعة الأخيرة
+    }
+    fclose(input);
+    fclose(out);
+    out = fopen("summary.txt", "r");
+    while (fscanf(out, "%d %d", &codes[nb], &counts[nb]) == 2) { printf("%7d %d\n", counts[nb], codes[nb]); nb++; }
+    fclose(out);
+    printf("Top 3:");
+    for (rank = 0; rank < 3; rank++) {
+        for (best = -1, idx = 0; idx < nb; idx++)
+            if (!used[idx] && (best < 0 || counts[idx] > counts[best])) best = idx;
+        used[best] = 1;
+        printf(" %d(%d)", codes[best], counts[best]);
+    }
+    printf("\n");
+    return 0;
+}
+
+@@
+title: تنظيف ملف بيانات ناقص
+level: medium
+domain: ds
+@ statement
+ملف التصدير `raw.csv` فيه أسطر سيئة: حقول فارغة، عدد حقول خاطئ، أو مبلغ غير رقمي. اكتب برنامج **تنظيف** ينقل الأسطر الصالحة فقط إلى `clean.csv`، ويكتب الأسطر المرفوضة مع سبب الرفض في `rejected.txt`، ثم يعرض ملخصًا.
+@ steps
+- السطر الصالح: 4 حقول بالضبط، لا حقل فارغ، والحقل الأخير رقمي (أرقام ونقطة واحدة على الأكثر).
+- نحتفظ بنسخة من السطر قبل تقسيمه في مكانه.
+@ flow
+while: fgets(line) != NULL
+  do: copy = line ; تقسيم line
+  if: عدد الحقول != 4
+    do: fprintf(rejected, "fields", copy)
+  else:
+    if: يوجد حقل فارغ أو المبلغ غير رقمي
+      do: fprintf(rejected, السبب, copy)
+    else:
+      do: fputs(copy, clean)
+@ code
+#include <stdio.h>
+
+int isNumber(const char *text) {
+    int dots = 0, digits = 0;
+    for (; *text != '\0'; text++) {
+        if (*text == '.') dots++;
+        else if (*text >= '0' && *text <= '9') digits++;
+        else return 0;
+    }
+    return digits > 0 && dots <= 1;
+}
+
+int main(void) {
+    FILE *input = fopen("raw.csv", "w"), *clean, *rejected;
+    char line[100], copy[100], *fields[8], *reason;
+    int pos, count, idx, kept = 0, dropped = 0, ch;
+    fprintf(input, "7781,Amina,Oran,12500\n7782,Karim,,3200\n7783,Lina,Setif,89x0\n");
+    fprintf(input, "7784,Omar,Annaba\n7785,Sara,Blida,4500.50\n7786,Nadir,Oran,1.2.3\n7787,Rania,Bejaia,780\n");
+    fclose(input);
+    input = fopen("raw.csv", "r");
+    clean = fopen("clean.csv", "w");
+    rejected = fopen("rejected.txt", "w");
+    while (fgets(line, 100, input) != NULL) {
+        for (pos = 0; (copy[pos] = line[pos]) != '\0'; pos++) {}   // نسخة قبل التقسيم
+        fields[0] = line;
+        for (pos = 0, count = 1; line[pos] != '\n' && line[pos] != '\0'; pos++)
+            if (line[pos] == ',' && count < 8) { line[pos] = '\0'; fields[count++] = line + pos + 1; }
+        line[pos] = '\0';
+        reason = NULL;
+        if (count != 4) reason = "wrong field count";
+        for (idx = 0; idx < count && reason == NULL; idx++) if (fields[idx][0] == '\0') reason = "empty field";
+        if (reason == NULL && !isNumber(fields[3])) reason = "bad amount";
+        if (reason != NULL) { fprintf(rejected, "%-18s | %s", reason, copy); dropped++; }
+        else { fputs(copy, clean); kept++; }
+    }
+    fclose(input); fclose(clean); fclose(rejected);
+    printf("kept %d, rejected %d\n--- rejected.txt ---\n", kept, dropped);
+    rejected = fopen("rejected.txt", "r");
+    while ((ch = fgetc(rejected)) != EOF) putchar(ch);
+    fclose(rejected);
+    return 0;
+}
+
+@@
+title: فهرس الأسطر للوصول المباشر
+level: medium
+domain: ds
+@ statement
+أسطر الملف النصي مختلفة الطول، فلا يمكن حساب موضع السطر رقم `k`. ابنِ **فهرسًا**: مرور أول يحفظ موضع بداية كل سطر بـ `ftell`، ثم نصل إلى أي سطر مباشرة بـ `fseek` دون قراءة ما قبله. أجب عن طلبات أسطر بترتيب عشوائي.
+@ stdin
+4 7 2 9 1
+@ steps
+- قبل قراءة كل سطر: `offsets[count++] = ftell(file)`.
+- للوصول إلى السطر `k`: `fseek(file, offsets[k - 1], SEEK_SET)` ثم `fgets`.
+@ flow
+while: true
+  do: offset = ftell(file)
+  if: fgets(line) == NULL
+    do: الخروج
+  do: offsets[count++] = offset
+for: query = 0 ; query < 5 ; query++
+  in: lineNo
+  do: fseek(file, offsets[lineNo - 1], SEEK_SET) ; fgets(line)
+  out: lineNo, offsets[lineNo - 1], line
+@ code
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("products.txt", "w");
+    const char *names[10] = {"Mouse", "Mechanical keyboard RGB", "USB cable", "Monitor 27 inch 4K",
+                             "Hub", "Webcam full HD", "Laptop stand aluminium", "SSD 1TB",
+                             "Wireless charger 15W", "Earbuds"};
+    long offsets[20], offset;
+    char line[80];
+    int idx, count = 0, query, lineNo;
+    for (idx = 0; idx < 10; idx++) fprintf(file, "%d %s\n", 101 + idx, names[idx]);
+    fclose(file);
+    file = fopen("products.txt", "r");
+    while (1) {                                       // بناء الفهرس
+        offset = ftell(file);
+        if (fgets(line, 80, file) == NULL) break;
+        offsets[count++] = offset;
+    }
+    printf("Indexed %d lines\n", count);
+    for (query = 0; query < 5; query++) {
+        scanf("%d", &lineNo);
+        fseek(file, offsets[lineNo - 1], SEEK_SET);   // قفز مباشر
+        fgets(line, 80, file);
+        printf("line %d @%3ld: %s", lineNo, offsets[lineNo - 1], line);
+    }
+    fclose(file);
+    return 0;
+}

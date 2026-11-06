@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+int splitCsv(char *line, char *fields[], int maxFields) {
+    int count = 0;
+    char *ptr = line;
+    fields[count++] = ptr;                       (*@\cmt{الحقل الأول}@*)
+    for (; *ptr != '\0'; ptr++)
+        if (*ptr == ';' && count < maxFields) {
+            *ptr = '\0';                         (*@\cmt{نهاية الحقل الحالي}@*)
+            fields[count++] = ptr + 1;           (*@\cmt{بداية التالي}@*)
+        }
+    return count;
+}
+
+int main(void) {
+    char lines[3][60] = {"7781;Amina;Oran;12500;paid", "7782;Karim;;3200;", "7783;Lina;Setif;;pending"};
+    char *fields[6];
+    int idx, count, field;
+    for (idx = 0; idx < 3; idx++) {
+        count = splitCsv(lines[idx], fields, 6);
+        printf("%d fields:", count);
+        for (field = 0; field < count; field++)
+            printf(" [%s]", *fields[field] != '\0' ? fields[field] : "-");
+        printf("\n");
+    }
+    return 0;
+}

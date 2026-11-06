@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char op; double value; struct Tree *left, *right; } Tree;
+
+Tree *nodes[50];
+char ops[50];
+int nodeTop = 0, opTop = 0;
+
+int priority(char op) { return (op == '*' || op == '/') ? 2 : (op == '+' || op == '-') ? 1 : 0; }
+
+void reduce(void) {
+    Tree *node = malloc(sizeof(Tree));
+    node->op = ops[--opTop];
+    node->right = nodes[--nodeTop];                  (*@\cmt{الترتيب مهم: الأيمن أولًا}@*)
+    node->left = nodes[--nodeTop];
+    node->value = 0;
+    nodes[nodeTop++] = node;
+}
+
+double evaluate(const Tree *node) {
+    double left, right;
+    if (node->op == 0) return node->value;
+    left = evaluate(node->left);
+    right = evaluate(node->right);
+    return node->op == '+' ? left + right : node->op == '-' ? left - right
+         : node->op == '*' ? left * right : left / right;
+}
+
+void postfix(const Tree *node) {
+    if (node->op == 0) { printf("%g ", node->value); return; }
+    postfix(node->left);
+    postfix(node->right);
+    printf("%c ", node->op);
+}
+
+int height(const Tree *node) { int lh, rh; if (!node) return 0; lh = height(node->left); rh = height(node->right); return 1 + (lh > rh ? lh : rh); }
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    char formula[100], ch;
+    Tree *leaf;
+    int pos;
+    scanf("%99s", formula);
+    for (pos = 0; formula[pos] != '\0'; pos++) {
+        ch = formula[pos];
+        if (ch >= '0' && ch <= '9') {
+            leaf = malloc(sizeof(Tree));
+            leaf->op = 0; leaf->left = leaf->right = NULL; leaf->value = 0;
+            while (formula[pos] >= '0' && formula[pos] <= '9') leaf->value = leaf->value * 10 + (formula[pos++] - '0');
+            pos--;
+            nodes[nodeTop++] = leaf;
+        } else if (ch == '(') {
+            ops[opTop++] = ch;
+        } else if (ch == ')') {
+            while (ops[opTop - 1] != '(') reduce();
+            opTop--;                                       (*@\cmt{نحذف '('}@*)
+        } else {
+            while (opTop > 0 && priority(ops[opTop - 1]) >= priority(ch)) reduce();   (*@\cmt{الأولوية}@*)
+            ops[opTop++] = ch;
+        }
+    }
+    while (opTop > 0) reduce();
+    printf("formula: %s\npostfix: ", formula);
+    postfix(nodes[0]);
+    printf("\nvalue:   %.2f DA\ntree height: %d\n", evaluate(nodes[0]), height(nodes[0]));
+    freeTree(nodes[0]);
+    return 0;
+}

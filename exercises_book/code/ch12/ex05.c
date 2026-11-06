@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; struct Node *next; } Node;
+
+void pushBack(Node **head, Node **tail, int number) {
+    Node *node = malloc(sizeof(Node));
+    node->number = number;
+    node->next = NULL;
+    if (*head == NULL) *head = *tail = node;      // أول عقدة
+    else { (*tail)->next = node; *tail = node; }  // بعد الأخيرة مباشرة
+}
+
+int main(void) {
+    Node *head = NULL, *tail = NULL, *walk, *next;
+    int idx;
+    for (idx = 0; idx < 5; idx++) pushBack(&head, &tail, 7781 + idx);
+    for (walk = head; walk != NULL; walk = walk->next) printf("#%d -> ", walk->number);
+    printf("NULL\nhead #%d, tail #%d\n", head->number, tail->number);
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}

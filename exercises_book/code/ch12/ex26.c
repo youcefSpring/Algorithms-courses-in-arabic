@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { char name[10]; double rating; struct Node *next; } Node;
+
+Node *insertionSort(Node *head) {
+    Node *sorted = NULL, *node, *walk;
+    while (head != NULL) {
+        node = head;                          // نفصل العقدة الأولى
+        head = head->next;
+        if (sorted == NULL || node->rating > sorted->rating) {
+            node->next = sorted;
+            sorted = node;
+        } else {
+            walk = sorted;
+            while (walk->next != NULL && walk->next->rating >= node->rating) walk = walk->next;
+            node->next = walk->next;
+            walk->next = node;
+        }
+    }
+    return sorted;
+}
+
+int main(void) {
+    const char *names[6] = {"Mouse", "Hub", "Laptop", "Cable", "Monitor", "Webcam"};
+    double ratings[6] = {4.7, 4.3, 4.2, 3.6, 4.4, 3.9};
+    Node *head = NULL, *node, *walk, *next;
+    int idx, pos;
+    for (idx = 5; idx >= 0; idx--) {
+        node = malloc(sizeof(Node));
+        for (pos = 0; (node->name[pos] = names[idx][pos]) != '\0'; pos++) {}
+        node->rating = ratings[idx];
+        node->next = head;
+        head = node;
+    }
+    head = insertionSort(head);
+    for (walk = head; walk != NULL; walk = walk->next) printf("%s(%.1f) ", walk->name, walk->rating);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}

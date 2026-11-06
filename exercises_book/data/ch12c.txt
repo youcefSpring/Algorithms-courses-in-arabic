@@ -1,0 +1,662 @@
+@@
+title: الترتيب بالدمج للقوائم المتصلة
+level: hard
+domain: ec
+@ statement
+الترتيب بالدمج هو الأنسب للقوائم المتصلة (لا يحتاج إلى وصول عشوائي ولا ذاكرة إضافية). اكتب `mergeSort(head)` العودية: نقسم القائمة إلى نصفين بالمؤشرين السريع والبطيء، نرتب كل نصف، ثم ندمجهما بإعادة الربط. رتّب 12 طلبية حسب المبلغ.
+@ steps
+- الحالة الأساسية: قائمة فارغة أو بعقدة واحدة.
+- التقسيم: `slow` يتوقف قبل المنتصف؛ `second = slow->next; slow->next = NULL;`.
+- الدمج بعقدة حارسة كما في دمج قائمتين مرتبتين.
+@ flow
+if: head == NULL || head->next == NULL
+  out: head
+else:
+  do: تقسيم القائمة إلى first و second
+  call: first = mergeSort(first)
+  call: second = mergeSort(second)
+  call: head = merge(first, second)
+  out: head
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int number; double amount; struct Node *next; } Node;
+
+Node *merge(Node *first, Node *second) {
+    Node dummy, *tail = &dummy;
+    while (first != NULL && second != NULL) {
+        if (first->amount <= second->amount) { tail->next = first; first = first->next; }
+        else { tail->next = second; second = second->next; }
+        tail = tail->next;
+    }
+    tail->next = first != NULL ? first : second;
+    return dummy.next;
+}
+
+Node *mergeSort(Node *head) {
+    Node *slow, *fast, *second;
+    if (head == NULL || head->next == NULL) return head;
+    slow = head;
+    fast = head->next;
+    while (fast != NULL && fast->next != NULL) { slow = slow->next; fast = fast->next->next; }
+    second = slow->next;                        // النصف الثاني
+    slow->next = NULL;                          // نقطع القائمة
+    return merge(mergeSort(head), mergeSort(second));
+}
+
+int main(void) {
+    double amounts[12] = {4500, 1200, 899, 27000, 650, 3200, 12500, 99, 7800, 2300, 560, 4100};
+    Node *head = NULL, *node, *walk, *next;
+    int idx;
+    for (idx = 11; idx >= 0; idx--) {
+        node = malloc(sizeof(Node)); node->number = 7781 + idx; node->amount = amounts[idx];
+        node->next = head; head = node;
+    }
+    head = mergeSort(head);
+    for (walk = head; walk != NULL; walk = walk->next) printf("#%d:%.0f ", walk->number, walk->amount);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: ذاكرة تخزين مؤقت LRU لصفحات المنتجات
+level: hard
+domain: ec
+@ statement
+الخادم يحتفظ بآخر **3 صفحات منتجات** مولدة في ذاكرة مؤقتة. عند الطلب: إذا كانت الصفحة موجودة (**إصابة**) ننقلها إلى المقدمة، وإلا (**إخفاق**) نولدها ونضعها في المقدمة ونطرد **الأقل استعمالًا مؤخرًا** (الذيل). اكتب ذلك بقائمة **مزدوجة** + جدول فهرسة مباشر `slots[code]` يعطي العقدة في وقت ثابت.
+@ stdin
+5 2 5 7 9 2 5 9 9 1
+@ steps
+- `slots[code]` مؤشر على العقدة أو `NULL`: البحث في وقت ثابت.
+- القائمة المزدوجة تسمح بفصل أي عقدة ونقلها إلى الرأس في وقت ثابت.
+- عند الامتلاء نطرد `tail` ونمسح `slots[tail->code]`.
+@ flow
+while: scanf(code) == 1
+  if: slots[code] != NULL
+    do: hits++ ; فصل العقدة ونقلها إلى الرأس
+  else:
+    do: misses++ ; إنشاء عقدة في الرأس
+    if: size > CAP
+      do: طرد tail ; slots[tail->code] = NULL
+  out: القائمة
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CAP 3
+#define MAXCODE 100
+
+typedef struct Node { int code; struct Node *prev, *next; } Node;
+
+Node *head = NULL, *tail = NULL, *slots[MAXCODE];
+int size = 0;
+
+void detach(Node *node) {
+    if (node->prev) node->prev->next = node->next; else head = node->next;
+    if (node->next) node->next->prev = node->prev; else tail = node->prev;
+}
+
+void pushFront(Node *node) {
+    node->prev = NULL;
+    node->next = head;
+    if (head) head->prev = node; else tail = node;
+    head = node;
+}
+
+int main(void) {
+    Node *node, *walk;
+    int code, hits = 0, misses = 0;
+    while (scanf("%d", &code) == 1) {
+        node = slots[code];
+        if (node != NULL) {                            // إصابة
+            hits++;
+            detach(node);
+            pushFront(node);
+            printf("get %d: HIT  |", code);
+        } else {                                       // إخفاق
+            misses++;
+            node = malloc(sizeof(Node));
+            node->code = code;
+            pushFront(node);
+            slots[code] = node;
+            if (++size > CAP) {                        // طرد الأقل استعمالًا
+                walk = tail;
+                detach(walk);
+                slots[walk->code] = NULL;
+                printf("get %d: MISS evict %d |", code, walk->code);
+                free(walk);
+                size--;
+            } else {
+                printf("get %d: MISS |", code);
+            }
+        }
+        for (walk = head; walk != NULL; walk = walk->next) printf(" %d", walk->code);
+        printf("\n");
+    }
+    printf("hits %d, misses %d, hit rate %.0f%%\n", hits, misses, 100.0 * hits / (hits + misses));
+    while (head != NULL) { node = head; detach(node); free(node); }
+    return 0;
+}
+
+@@
+title: سحب الفائز بقائمة دائرية
+level: hard
+domain: ec
+@ statement
+في سحب ترويجي يجلس `count` مشاركين في دائرة، ونحذف كل `step`-ـي مشارك حتى يبقى واحد هو الفائز (**مسألة يوسيفوس**). حاكِ ذلك بقائمة دائرية مع تحرير المحذوفين، ثم تحقق بالصيغة التكرارية `J(n) = (J(n-1) + step) % n`.
+@ stdin
+7 3
+@ steps
+- نبني القائمة الدائرية ونحتفظ بالعقدة **السابقة** للمشارك الحالي.
+- نتقدم `step - 1` خطوات، ثم نحذف `prev->next`.
+- نتوقف عندما تشير العقدة إلى نفسها.
+@ flow
+in: count, step
+do: بناء القائمة الدائرية ; prev = الذيل
+while: prev->next != prev
+  for: idx = 1 ; idx < step ; idx++
+    do: prev = prev->next
+  do: out = prev->next ; prev->next = out->next ; free(out)
+out: الفائز prev->id
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int id; struct Node *next; } Node;
+
+int main(void) {
+    Node *head = NULL, *tail = NULL, *node, *prev, *out;
+    int count, step, idx, survivor = 0, size;
+    scanf("%d %d", &count, &step);
+    for (idx = 1; idx <= count; idx++) {
+        node = malloc(sizeof(Node));
+        node->id = idx;
+        node->next = NULL;
+        if (head == NULL) head = node; else tail->next = node;
+        tail = node;
+    }
+    tail->next = head;                              // نغلق الدائرة
+    prev = tail;
+    printf("Eliminated:");
+    while (prev->next != prev) {
+        for (idx = 1; idx < step; idx++) prev = prev->next;
+        out = prev->next;                           // المشارك رقم step
+        prev->next = out->next;
+        printf(" %d", out->id);
+        free(out);
+    }
+    printf("\nWinner: participant %d\n", prev->id);
+    for (size = 2; size <= count; size++) survivor = (survivor + step) % size;   // صيغة يوسيفوس
+    printf("Formula check: %d\n", survivor + 1);
+    free(prev);
+    return 0;
+}
+
+@@
+title: جداء كثيري حدود بالقوائم
+level: hard
+domain: ds
+@ statement
+الإيراد = السعر × الكمية، وكلاهما كثير حدود بدلالة الزمن. اكتب `multiplyPoly(first, second)`: لكل زوج من الحدود نضرب المعاملين ونجمع الأسين، وندرج الناتج في قائمة النتيجة **مرتبة تنازليًا** مع **جمع الحدود المتشابهة** وحذف المعدومة.
+@ steps
+- `addTerm(&result, coef, power)`: نبحث عن موضع الأس؛ إن وُجد نجمع المعاملين (ونحذف العقدة إذا أصبح 0)، وإلا ندرج عقدة جديدة.
+- حلقتان متداخلتان على حدود كثيري الحدود.
+@ flow
+for: termA = first ; termA != NULL ; termA = termA->next
+  for: termB = second ; termB != NULL ; termB = termB->next
+    call: addTerm(&result, termA->coef * termB->coef, termA->power + termB->power)
+out: result
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Term { double coef; int power; struct Term *next; } Term;
+
+void addTerm(Term **poly, double coef, int power) {
+    Term **link = poly, *node;
+    while (*link != NULL && (*link)->power > power) link = &(*link)->next;
+    if (*link != NULL && (*link)->power == power) {
+        (*link)->coef += coef;                           // حد متشابه
+        if ((*link)->coef == 0) { node = *link; *link = node->next; free(node); }
+        return;
+    }
+    if (coef == 0) return;
+    node = malloc(sizeof(Term));
+    node->coef = coef;
+    node->power = power;
+    node->next = *link;                                  // إدراج مرتب
+    *link = node;
+}
+
+Term *multiplyPoly(const Term *first, const Term *second) {
+    Term *result = NULL;
+    const Term *termA, *termB;
+    for (termA = first; termA != NULL; termA = termA->next)
+        for (termB = second; termB != NULL; termB = termB->next)
+            addTerm(&result, termA->coef * termB->coef, termA->power + termB->power);
+    return result;
+}
+
+void printPoly(const char *label, const Term *poly) {
+    printf("%s", label);
+    for (; poly != NULL; poly = poly->next) printf(" %+g t^%d", poly->coef, poly->power);
+    printf("\n");
+}
+
+void freePoly(Term *poly) { Term *next; for (; poly != NULL; poly = next) { next = poly->next; free(poly); } }
+
+int main(void) {
+    Term *price = NULL, *quantity = NULL, *revenue;
+    addTerm(&price, 3000, 0); addTerm(&price, -50, 1);                   // السعر ينخفض
+    addTerm(&quantity, 200, 0); addTerm(&quantity, 15, 1); addTerm(&quantity, -0.5, 2);
+    revenue = multiplyPoly(price, quantity);
+    printPoly("price(t)   =", price);
+    printPoly("quantity(t)=", quantity);
+    printPoly("revenue(t) =", revenue);
+    freePoly(price); freePoly(quantity); freePoly(revenue);
+    return 0;
+}
+
+@@
+title: شبكة الإحالات بقوائم الجوار والبحث بالعرض
+level: hard
+domain: ds
+@ statement
+كل زبون قد يُحيل زبائن آخرين (رابط إحالة في الاتجاهين = صداقة). نمثل الشبكة بـ **قوائم جوار**: لكل زبون قائمة متصلة بجيرانه. اكتب `addEdge` و **البحث بالعرض** (BFS) بطابور لحساب **درجة الانفصال** بين زبون مصدر وكل الآخرين، وعدد المكونات المتصلة.
+@ steps
+- `adjacency[node]` رأس قائمة الجيران؛ `addEdge(a, b)` تدرج b في قائمة a و a في قائمة b.
+- BFS: نبدأ من المصدر بمسافة 0، ونعالج الطابور: كل جار غير مزار يأخذ مسافة +1.
+- المكونات: نكرر BFS من كل عقدة غير مزارة.
+@ flow
+for: idx = 0 ; idx < NBE ; idx++
+  call: addEdge(edges[idx][0], edges[idx][1])
+do: dist[*] = -1 ; dist[source] = 0 ; enqueue(source)
+while: الطابور غير فارغ
+  do: current = dequeue
+  for: edge = adjacency[current] ; edge != NULL ; edge = edge->next
+    if: dist[edge->to] == -1
+      do: dist[edge->to] = dist[current] + 1 ; enqueue(edge->to)
+out: dist
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBN 9
+
+typedef struct Edge { int to; struct Edge *next; } Edge;
+
+Edge *adjacency[NBN];
+
+void addEdge(int from, int to) {
+    Edge *edge = malloc(sizeof(Edge));
+    edge->to = to; edge->next = adjacency[from]; adjacency[from] = edge;
+    edge = malloc(sizeof(Edge));
+    edge->to = from; edge->next = adjacency[to]; adjacency[to] = edge;   // الاتجاهان
+}
+
+void bfs(int source, int dist[]) {
+    int queue[NBN], front = 0, rear = 0, current;
+    Edge *edge;
+    dist[source] = 0;
+    queue[rear++] = source;
+    while (front < rear) {
+        current = queue[front++];
+        for (edge = adjacency[current]; edge != NULL; edge = edge->next)
+            if (dist[edge->to] == -1) {
+                dist[edge->to] = dist[current] + 1;   // مستوى إضافي
+                queue[rear++] = edge->to;
+            }
+    }
+}
+
+int main(void) {
+    int edges[9][2] = {{0, 1}, {0, 2}, {1, 3}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {1, 2}, {5, 2}};
+    int dist[NBN], node, components = 0;
+    Edge *edge, *next;
+    for (node = 0; node < 9; node++) addEdge(edges[node][0], edges[node][1]);
+    for (node = 0; node < NBN; node++) dist[node] = -1;
+    bfs(0, dist);
+    printf("Degrees of separation from customer 0:\n");
+    for (node = 1; node < NBN; node++)
+        if (dist[node] >= 0) printf("  customer %d: %d\n", node, dist[node]);
+        else printf("  customer %d: unreachable\n", node);
+    for (node = 0; node < NBN; node++) dist[node] = -1;
+    for (node = 0; node < NBN; node++)
+        if (dist[node] == -1) { bfs(node, dist); components++; }
+    printf("Connected groups: %d\n", components);
+    for (node = 0; node < NBN; node++)
+        for (edge = adjacency[node]; edge != NULL; edge = next) { next = edge->next; free(edge); }
+    return 0;
+}
+
+@@
+title: مجمع عقد يعيد استعمال الذاكرة
+level: hard
+domain: ec
+@ statement
+السلة تضيف وتحذف عناصر آلاف المرات؛ استدعاء `malloc`/`free` لكل عملية مكلف. نبني **مجمع عقد**: نحجز كتلة واحدة من 8 عقد ونربطها في **قائمة حرة**. `allocNode` تسحب من القائمة الحرة و `releaseNode` تعيد العقدة إليها. نفّذ سيناريو إضافة وحذف وعدّ استدعاءات `malloc`.
+@ steps
+- عند الإنشاء: `pool = malloc(CAP * sizeof(Node))` ثم ربط `pool[idx].next = &pool[idx + 1]`.
+- `allocNode`: `node = freeList; freeList = node->next;`.
+- `releaseNode`: `node->next = freeList; freeList = node;`.
+- نفس العقدة تُستعمل لعناصر مختلفة عبر الزمن.
+@ flow
+do: pool = malloc(CAP عقدة) ; ربطها في freeList
+for: step = 0 ; step < 12 ; step++
+  if: إضافة
+    call: node = allocNode() ; إدراج في السلة
+  else:
+    call: releaseNode(حذف من السلة)
+out: عدد استدعاءات malloc = 1
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CAP 8
+
+typedef struct Node { int code; struct Node *next; } Node;
+
+Node *freeList = NULL;
+int mallocCalls = 0;
+
+void initPool(Node *pool) {
+    int idx;
+    for (idx = 0; idx < CAP - 1; idx++) pool[idx].next = &pool[idx + 1];   // سلسلة حرة
+    pool[CAP - 1].next = NULL;
+    freeList = pool;
+}
+
+Node *allocNode(void) {
+    Node *node = freeList;
+    if (node != NULL) freeList = node->next;
+    return node;                                  // NULL إذا امتلأ المجمع
+}
+
+void releaseNode(Node *node) {
+    node->next = freeList;                        // تعود إلى القائمة الحرة
+    freeList = node;
+}
+
+int freeCount(void) { int count = 0; Node *walk; for (walk = freeList; walk != NULL; walk = walk->next) count++; return count; }
+
+int main(void) {
+    Node *pool = malloc(CAP * sizeof(Node)), *cart = NULL, *node;
+    int script[12] = {101, 205, 330, 0, 412, 0, 0, 500, 618, 701, 0, 802}, step;   // 0 = حذف الرأس
+    mallocCalls++;
+    initPool(pool);
+    for (step = 0; step < 12; step++) {
+        if (script[step] != 0) {
+            node = allocNode();
+            node->code = script[step];
+            node->next = cart;
+            cart = node;
+            printf("add %d at slot %d", node->code, (int)(node - pool));
+        } else {
+            node = cart;
+            cart = cart->next;
+            printf("remove %d, slot %d freed", node->code, (int)(node - pool));
+            releaseNode(node);
+        }
+        printf("   (free slots %d)\n", freeCount());
+    }
+    printf("malloc calls: %d for %d operations\n", mallocCalls, step);
+    free(pool);
+    return 0;
+}
+
+@@
+title: نسخ قائمة بروابط التوصية
+level: hard
+domain: ec
+@ statement
+كل منتج في قائمة العرض يحتوي، إضافة إلى `next`، على مؤشر `related` نحو منتج آخر في **نفس القائمة** (منتج موصى به) أو `NULL`. اكتب `cloneList(head)` تنسخ القائمة نسخة عميقة بحيث تشير روابط `related` في النسخة إلى عقد **النسخة**، بتقنية التشبيك: (1) ندرج كل نسخة بعد أصلها، (2) نضبط `related`، (3) نفصل القائمتين.
+@ steps
+- المرحلة 1: `A → A' → B → B' → ...`.
+- المرحلة 2: `copy->related = original->related ? original->related->next : NULL`.
+- المرحلة 3: نعيد ربط الأصل والنسخة كقائمتين منفصلتين.
+@ flow
+for: walk = head ; walk != NULL ; walk = copy->next
+  do: copy = malloc ; copy->next = walk->next ; walk->next = copy
+for: walk = head ; walk != NULL ; walk = walk->next->next
+  do: walk->next->related = walk->related ? walk->related->next : NULL
+do: فصل القائمتين
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { char name[10]; struct Node *next, *related; } Node;
+
+Node *cloneList(Node *head) {
+    Node *walk, *copy, *cloneHead;
+    int pos;
+    for (walk = head; walk != NULL; walk = copy->next) {          // 1) تشبيك
+        copy = malloc(sizeof(Node));
+        for (pos = 0; (copy->name[pos] = walk->name[pos]) != '\0'; pos++) {}
+        copy->next = walk->next;
+        walk->next = copy;
+    }
+    for (walk = head; walk != NULL; walk = walk->next->next)       // 2) روابط التوصية
+        walk->next->related = walk->related != NULL ? walk->related->next : NULL;
+    cloneHead = head != NULL ? head->next : NULL;
+    for (walk = head; walk != NULL; walk = walk->next) {           // 3) الفصل
+        copy = walk->next;
+        walk->next = copy->next;
+        copy->next = copy->next != NULL ? copy->next->next : NULL;
+    }
+    return cloneHead;
+}
+
+void show(const char *label, Node *head, Node *other) {
+    Node *walk;
+    printf("%s", label);
+    for (walk = head; walk != NULL; walk = walk->next) {
+        printf(" %s->%s", walk->name, walk->related ? walk->related->name : "-");
+        if (walk->related != NULL && other != NULL && walk->related == other) printf("(!)");
+    }
+    printf("\n");
+}
+
+int main(void) {
+    Node items[5] = {{"Phone", NULL, NULL}, {"Case", NULL, NULL}, {"Charger", NULL, NULL},
+                     {"Laptop", NULL, NULL}, {"Mouse", NULL, NULL}};
+    Node *clone, *walk, *next, *inside;
+    int idx, independent = 1;
+    for (idx = 0; idx < 4; idx++) items[idx].next = &items[idx + 1];
+    items[0].related = &items[1]; items[1].related = &items[0];
+    items[2].related = &items[0]; items[3].related = &items[4];
+    clone = cloneList(&items[0]);
+    show("original:", &items[0], NULL);
+    show("clone:   ", clone, NULL);
+    for (walk = clone; walk != NULL; walk = walk->next)            // هل تشير النسخة إلى الأصل؟
+        for (inside = &items[0]; inside != NULL; inside = inside->next)
+            if (walk->related == inside) independent = 0;
+    printf("clone links stay inside clone: %s\n", independent ? "yes" : "no");
+    for (walk = clone; walk != NULL; walk = next) { next = walk->next; free(walk); }
+    return 0;
+}
+
+@@
+title: تسطيح شجرة الأقسام متعددة المستويات
+level: hard
+domain: ec
+@ statement
+قائمة الأقسام متعددة المستويات: كل عقدة لها `next` (القسم التالي في نفس المستوى) و `child` (قائمة الأقسام الفرعية). لإنشاء قائمة منسدلة في الموقع، اكتب `flatten(head)` تحول البنية إلى **قائمة واحدة** بترتيب العمق أولًا (القسم ثم فروعه ثم القسم التالي)، **في مكانها** ودون عودية، مع تسجيل عمق كل قسم للإزاحة.
+@ steps
+- نمر على القائمة؛ عند عقدة لها `child`: نجد ذيل قائمة الأبناء، نربطه بـ `node->next`، ثم `node->next = child` و `child = NULL`.
+- العمق: كل ابن عمقه عمق الأب + 1 (نضبطه قبل الربط).
+@ flow
+for: walk = head ; walk != NULL ; walk = walk->next
+  if: walk->child != NULL
+    do: ضبط عمق الأبناء ; tail = ذيل قائمة الأبناء
+    do: tail->next = walk->next ; walk->next = walk->child ; walk->child = NULL
+out: القائمة المسطحة مع الإزاحة
+@ code
+#include <stdio.h>
+
+typedef struct Cat { char name[14]; int depth; struct Cat *next, *child; } Cat;
+
+void flatten(Cat *head) {
+    Cat *walk, *tail;
+    for (walk = head; walk != NULL; walk = walk->next) {
+        if (walk->child == NULL) continue;
+        for (tail = walk->child; ; tail = tail->next) {
+            tail->depth = walk->depth + 1;             // عمق الأبناء
+            if (tail->next == NULL) break;
+        }
+        tail->next = walk->next;                       // الأبناء قبل الإخوة
+        walk->next = walk->child;
+        walk->child = NULL;
+    }
+}
+
+int main(void) {
+    Cat nodes[11] = {{"Electronics", 0, 0, 0}, {"Phones", 0, 0, 0}, {"Android", 0, 0, 0},
+                     {"iOS", 0, 0, 0}, {"Computers", 0, 0, 0}, {"Laptops", 0, 0, 0},
+                     {"Gaming", 0, 0, 0}, {"Office", 0, 0, 0}, {"Home", 0, 0, 0},
+                     {"Kitchen", 0, 0, 0}, {"Garden", 0, 0, 0}};
+    Cat *walk;
+    nodes[0].next = &nodes[8];                                   // المستوى 0
+    nodes[0].child = &nodes[1]; nodes[1].next = &nodes[4];       // Electronics
+    nodes[1].child = &nodes[2]; nodes[2].next = &nodes[3];       // Phones
+    nodes[4].child = &nodes[5];                                  // Computers
+    nodes[5].child = &nodes[6]; nodes[6].next = &nodes[7];       // Laptops
+    nodes[8].child = &nodes[9]; nodes[9].next = &nodes[10];      // Home
+    flatten(&nodes[0]);
+    for (walk = &nodes[0]; walk != NULL; walk = walk->next)
+        printf("%*s%s\n", 2 * walk->depth, "", walk->name);
+    return 0;
+}
+
+@@
+title: إعادة ترتيب العرض بالتناوب
+level: hard
+domain: ec
+@ statement
+القائمة مرتبة من الأكثر مبيعًا إلى الأقل `L0, L1, ..., Ln`. لتنويع الصفحة نعيد ترتيبها **بالتناوب** `L0, Ln, L1, Ln-1, L2, ...` في مكانها: نجد المنتصف، نقلب النصف الثاني، ثم ندمج النصفين بالتناوب.
+@ steps
+- المنتصف بالمؤشرين؛ نقطع بعده.
+- قلب النصف الثاني في مكانه.
+- الدمج: `first->next = second; second->next = nextFirst;` ونتقدم.
+@ flow
+do: slow = منتصف القائمة
+do: second = reverse(slow->next) ; slow->next = NULL
+do: first = head
+while: second != NULL
+  do: nextFirst = first->next ; nextSecond = second->next
+  do: first->next = second ; second->next = nextFirst
+  do: first = nextFirst ; second = nextSecond
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { int rank; struct Node *next; } Node;
+
+Node *reverse(Node *head) {
+    Node *prev = NULL, *next;
+    while (head != NULL) { next = head->next; head->next = prev; prev = head; head = next; }
+    return prev;
+}
+
+void reorder(Node *head) {
+    Node *slow = head, *fast = head, *first, *second, *nextFirst, *nextSecond;
+    if (head == NULL) return;
+    while (fast->next != NULL && fast->next->next != NULL) { slow = slow->next; fast = fast->next->next; }
+    second = reverse(slow->next);               // النصف الثاني مقلوبًا
+    slow->next = NULL;
+    for (first = head; second != NULL; first = nextFirst, second = nextSecond) {
+        nextFirst = first->next;
+        nextSecond = second->next;
+        first->next = second;                   // تناوب
+        second->next = nextFirst;
+    }
+}
+
+void runCase(int size) {
+    Node *head = NULL, *node, *walk, *next;
+    int idx;
+    for (idx = size - 1; idx >= 0; idx--) { node = malloc(sizeof(Node)); node->rank = idx; node->next = head; head = node; }
+    reorder(head);
+    printf("%d items:", size);
+    for (walk = head; walk != NULL; walk = walk->next) printf(" L%d", walk->rank);
+    printf("\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->next; free(walk); }
+}
+
+int main(void) {
+    runCase(8);
+    runCase(7);
+    runCase(2);
+    return 0;
+}
+
+@@
+title: ترتيب مهام تجهيز الطلبية طوبولوجيًا
+level: hard
+domain: ec
+@ statement
+تجهيز الطلبية يتكون من مهام مترابطة (لا يمكن التغليف قبل الفحص، ولا الشحن قبل الفوترة والتغليف...). المهام عقد، والاعتماديات أسهم في **قوائم جوار**. اكتب **ترتيبًا طوبولوجيًا** بخوارزمية **كان**: نبدأ بالمهام التي لا تعتمد على شيء، ونزيل أسهمها تدريجيًا. اكشف أيضًا الاعتماديات الدائرية.
+@ steps
+- `inDegree[task]` = عدد المهام التي يجب أن تسبقها.
+- طابور المهام ذات `inDegree == 0`؛ عند إخراج مهمة ننقص `inDegree` لكل تابع لها.
+- إذا أخرجنا أقل من كل المهام فهناك حلقة.
+@ flow
+do: حساب inDegree من قوائم الجوار
+do: إدخال كل مهمة inDegree == 0 في الطابور
+while: الطابور غير فارغ
+  do: task = dequeue ; out: task ; done++
+  for: arc = adjacency[task] ; arc != NULL ; arc = arc->next
+    do: inDegree[arc->to]--
+    if: inDegree[arc->to] == 0
+      do: enqueue(arc->to)
+if: done < NBT
+  out: `"cycle detected"`
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBT 7
+
+typedef struct Arc { int to; struct Arc *next; } Arc;
+
+const char *names[NBT] = {"receive", "check", "pick", "invoice", "pack", "label", "ship"};
+
+int topoSort(Arc *adjacency[], int order[]) {
+    int inDegree[NBT] = {0}, queue[NBT], front = 0, rear = 0, task, done = 0;
+    Arc *arc;
+    for (task = 0; task < NBT; task++)
+        for (arc = adjacency[task]; arc != NULL; arc = arc->next) inDegree[arc->to]++;
+    for (task = 0; task < NBT; task++) if (inDegree[task] == 0) queue[rear++] = task;
+    while (front < rear) {
+        task = queue[front++];
+        order[done++] = task;
+        for (arc = adjacency[task]; arc != NULL; arc = arc->next)
+            if (--inDegree[arc->to] == 0) queue[rear++] = arc->to;    // كل ما قبلها أنجز
+    }
+    return done;
+}
+
+void addArc(Arc *adjacency[], int from, int to) {
+    Arc *arc = malloc(sizeof(Arc));
+    arc->to = to; arc->next = adjacency[from]; adjacency[from] = arc;
+}
+
+void runCase(int deps[][2], int nbDeps) {
+    Arc *adjacency[NBT] = {NULL}, *arc, *next;
+    int order[NBT], done, idx;
+    for (idx = 0; idx < nbDeps; idx++) addArc(adjacency, deps[idx][0], deps[idx][1]);
+    done = topoSort(adjacency, order);
+    for (idx = 0; idx < done; idx++) printf("%s%s", names[order[idx]], idx < done - 1 ? " -> " : "\n");
+    if (done < NBT) printf("cycle detected: %d task(s) blocked\n", NBT - done);
+    for (idx = 0; idx < NBT; idx++)
+        for (arc = adjacency[idx]; arc != NULL; arc = next) { next = arc->next; free(arc); }
+}
+
+int main(void) {
+    int deps[8][2] = {{0, 1}, {1, 2}, {0, 3}, {2, 4}, {3, 5}, {4, 5}, {5, 6}, {3, 6}};
+    int badDeps[8][2] = {{0, 1}, {1, 2}, {0, 3}, {2, 4}, {3, 5}, {4, 5}, {5, 6}, {6, 4}};
+    runCase(deps, 8);
+    runCase(badDeps, 8);
+    return 0;
+}

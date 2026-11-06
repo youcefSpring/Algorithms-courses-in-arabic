@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int code; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int code) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->code = code; node->left = node->right = NULL; }
+    else if (code < node->code) node->left = insert(node->left, code);
+    else node->right = insert(node->right, code);
+    return node;
+}
+
+Tree *search(Tree *node, int code, int *steps) {
+    *steps = 0;
+    while (node != NULL) {
+        (*steps)++;
+        if (code == node->code) return node;
+        node = code < node->code ? node->left : node->right;   // فرع واحد فقط
+    }
+    return NULL;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int codes[9] = {5120, 2045, 7781, 1001, 3310, 6400, 9002, 1500, 4400}, idx, code, steps;
+    Tree *root = NULL;
+    for (idx = 0; idx < 9; idx++) root = insert(root, codes[idx]);
+    for (idx = 0; idx < 2; idx++) {
+        scanf("%d", &code);
+        printf("Code %d: %s after %d node(s)\n", code,
+               search(root, code, &steps) != NULL ? "found" : "not found", steps);
+    }
+    freeTree(root);
+    return 0;
+}

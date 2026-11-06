@@ -1,0 +1,39 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الملف}: بيانات تبقى بعد انتهاء البرنامج. نصل إليه عبر مؤشر \code{FILE *file = fopen(path, mode);}
+    \item \textbf{الأوضاع}: \code{"r"} قراءة، \code{"w"} كتابة (يمسح المحتوى)، \code{"a"} إضافة في النهاية، \code{"r+"} قراءة وكتابة، ونضيف \code{b} للملفات الثنائية.
+    \item \textbf{ملف نصي}: أسطر مقروءة (\code{fprintf}، \code{fscanf}، \code{fgets}). \textbf{ملف ثنائي}: نسخة من الذاكرة (\code{fwrite}، \code{fread}).
+    \item \textbf{الموضع}: \code{fseek} للقفز، \code{ftell} لمعرفة الموضع، \code{rewind} للعودة إلى البداية.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[node distance=6mm,
+    stp/.style={draw=#1, fill=#1!10, very thick, rounded corners=4pt,
+        minimum height=1cm, text width=2.5cm, align=center, font=\small}]
+    \node[stp=brandTeal] (o) {\textbf{فتح}\\ \code{fopen}};
+    \node[stp=brandOrange, left=of o] (t) {\textbf{تحقق}\\ \code{file != NULL}};
+    \node[stp=tealDeep, left=of t] (r) {\textbf{قراءة / كتابة}\\ \code{fscanf} \code{fprintf}};
+    \node[stp=brandMuted, left=of r] (c) {\textbf{إغلاق}\\ \code{fclose}};
+    \draw[sahm] (o) -- (t); \draw[sahm] (t) -- (r); \draw[sahm] (r) -- (c);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{الدالة} & \ras{القيمة المعادة عند النهاية أو الفشل} \\ \hline
+\code{fgetc(file)} & \code{EOF} (لذلك نخزن النتيجة في \code{int} لا في \code{char}) \\ \hline
+\code{fscanf(file, ...)} & عدد القيم المقروءة فعلًا، أو \code{EOF} \\ \hline
+\code{fgets(line, size, file)} & \code{NULL} (السطر المقروء يحتفظ بـ \code{'\textbackslash n'}) \\ \hline
+\code{fread(buf, size, count, file)} & عدد العناصر المقروءة (أقل من \code{count} في النهاية) \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad برامج هذا الفصل مستقلة}
+كل برنامج ينشئ ملفاته بنفسه ثم يقرؤها، لذلك يمكن تنفيذه مباشرة وإعادة إنتاج نتائجه.
+لا تنسَ \code{fclose}: البيانات المكتوبة قد تبقى في الذاكرة المؤقتة ولا تصل إلى القرص قبل الإغلاق.
+\end{obox}
+
+\chaprefs{kr,deitel,iso}
+\insertstats{11}

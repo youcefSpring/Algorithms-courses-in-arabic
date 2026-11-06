@@ -1,0 +1,692 @@
+@@
+title: الجدول الديناميكي الكامل
+level: hard
+domain: ec
+@ statement
+اكتب نوعًا `Vector` كامل الوظائف لسجل الطلبيات: `vecInit`، `vecPush` (إضافة في النهاية مع مضاعفة السعة)، `vecInsert(vec, pos, value)` (إدراج مع إزاحة)، `vecRemove(vec, pos)`، و `vecFree`. عدّ عدد العناصر المنسوخة الكلي لإظهار أن تكلفة الإضافة **مستهلكة ثابتة**.
+@ steps
+- `grow` تحجز ضعف السعة، تنسخ، وتحرر القديم.
+- الإدراج: نتأكد من السعة، نزيح `[pos, size)` بخانة يمينًا من النهاية، ثم نكتب.
+- الحذف: نزيح يسارًا وننقص الحجم.
+@ flow
+call: vecInit(&orders, 1)
+for: idx = 0 ; idx < 1000 ; idx++
+  call: vecPush(&orders, idx)
+out: orders.size, orders.capacity, copies / size
+call: vecInsert(&orders, 0, -1)
+call: vecRemove(&orders, 500)
+call: vecFree(&orders)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { int *data; int size, capacity; long copies; } Vector;
+
+void vecInit(Vector *vec, int capacity) {
+    vec->data = malloc(capacity * sizeof(int));
+    vec->size = 0;
+    vec->capacity = capacity;
+    vec->copies = 0;
+}
+
+void grow(Vector *vec) {
+    int *bigger = malloc(2 * vec->capacity * sizeof(int)), idx;
+    for (idx = 0; idx < vec->size; idx++) bigger[idx] = vec->data[idx];
+    vec->copies += vec->size;
+    free(vec->data);
+    vec->data = bigger;
+    vec->capacity *= 2;                               // مضاعفة
+}
+
+void vecPush(Vector *vec, int value) {
+    if (vec->size == vec->capacity) grow(vec);
+    vec->data[vec->size++] = value;
+}
+
+void vecInsert(Vector *vec, int pos, int value) {
+    int idx;
+    if (vec->size == vec->capacity) grow(vec);
+    for (idx = vec->size; idx > pos; idx--) vec->data[idx] = vec->data[idx - 1];   // إزاحة يمينًا
+    vec->data[pos] = value;
+    vec->size++;
+}
+
+void vecRemove(Vector *vec, int pos) {
+    int idx;
+    for (idx = pos; idx < vec->size - 1; idx++) vec->data[idx] = vec->data[idx + 1];
+    vec->size--;
+}
+
+void vecFree(Vector *vec) { free(vec->data); vec->data = NULL; vec->size = vec->capacity = 0; }
+
+int main(void) {
+    Vector orders;
+    int idx;
+    vecInit(&orders, 1);
+    for (idx = 0; idx < 1000; idx++) vecPush(&orders, 7000 + idx);
+    printf("size %d, capacity %d\n", orders.size, orders.capacity);
+    printf("copies %ld -> %.2f per push (amortized constant)\n", orders.copies,
+           (double)orders.copies / orders.size);
+    vecInsert(&orders, 0, 6999);
+    vecRemove(&orders, 500);
+    printf("first %d, at 500: %d, last %d, size %d\n", orders.data[0], orders.data[500],
+           orders.data[orders.size - 1], orders.size);
+    vecFree(&orders);
+    return 0;
+}
+
+@@
+title: مصفوفة التقييمات المتناثرة CSR
+level: hard
+domain: ds
+@ statement
+أغلب خانات مصفوفة (زبون × منتج) فارغة. صيغة **CSR** تخزن فقط القيم غير المعدومة في ثلاثة جداول ديناميكية: `values`، `columns`، و `rowStart` (بداية كل سطر). ابنِ CSR من قائمة تقييمات، ثم احسب لزبون جديد **التشابه** (جداء سلمي) مع كل زبون، واقترح منتجًا من أقربهم.
+@ steps
+- نعد التقييمات لكل زبون، ثم `rowStart[row+1] = rowStart[row] + count[row]`.
+- نملأ `values` و `columns` في مواضعها.
+- الجداء السلمي لسطر `row`: `Σ values[idx] * query[columns[idx]]` لـ `idx` من `rowStart[row]` إلى `rowStart[row+1]`.
+@ flow
+do: حساب rowStart من عدد تقييمات كل زبون
+do: ملء values و columns
+for: row = 0 ; row < NBC ; row++
+  do: score = Σ values * query[columns]
+out: أقرب زبون ومنتج مقترح لم يقيّمه الزبون الجديد
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBC 5
+#define NBP 8
+#define NBR 14
+
+int main(void) {
+    int ratings[NBR][3] = {{0, 1, 5}, {0, 4, 3}, {1, 0, 4}, {1, 2, 5}, {1, 7, 2}, {2, 1, 4},
+                           {2, 4, 5}, {2, 6, 4}, {3, 3, 5}, {3, 5, 4}, {4, 0, 3}, {4, 2, 4},
+                           {4, 7, 5}, {0, 6, 2}};          // (زبون، منتج، نجوم)
+    int query[NBP] = {0, 5, 0, 0, 4, 0, 0, 0};             // الزبون الجديد
+    int *rowStart = malloc((NBC + 1) * sizeof(int)), *fill = malloc(NBC * sizeof(int));
+    int *columns = malloc(NBR * sizeof(int)), *values = malloc(NBR * sizeof(int));
+    int row, idx, pos, best = 0, score, bestScore = -1, suggestion = -1, top = 0;
+    for (row = 0; row <= NBC; row++) rowStart[row] = 0;
+    for (idx = 0; idx < NBR; idx++) rowStart[ratings[idx][0] + 1]++;
+    for (row = 0; row < NBC; row++) rowStart[row + 1] += rowStart[row];   // مجاميع تراكمية
+    for (row = 0; row < NBC; row++) fill[row] = rowStart[row];
+    for (idx = 0; idx < NBR; idx++) {
+        pos = fill[ratings[idx][0]]++;
+        columns[pos] = ratings[idx][1];
+        values[pos] = ratings[idx][2];
+    }
+    printf("Stored %d of %d cells (%.0f%%)\n", NBR, NBC * NBP, 100.0 * NBR / (NBC * NBP));
+    for (row = 0; row < NBC; row++) {
+        score = 0;
+        for (idx = rowStart[row]; idx < rowStart[row + 1]; idx++)
+            score += values[idx] * query[columns[idx]];     // جداء سلمي متناثر
+        printf("customer %d: similarity %d\n", row, score);
+        if (score > bestScore) { bestScore = score; best = row; }
+    }
+    for (idx = rowStart[best]; idx < rowStart[best + 1]; idx++)
+        if (query[columns[idx]] == 0 && values[idx] > top) { top = values[idx]; suggestion = columns[idx]; }
+    printf("Nearest customer %d -> recommend product %d (%d stars)\n", best, suggestion, top);
+    free(rowStart); free(fill); free(columns); free(values);
+    return 0;
+}
+
+@@
+title: منشئ النصوص لتوليد الفاتورة
+level: hard
+domain: ec
+@ statement
+لتوليد نص الفاتورة سطرًا بسطر دون معرفة طوله مسبقًا، اكتب نوع `Builder` (مؤشر، طول، سعة) ودوال `appendText` و `appendNumber` (تحويل عدد صحيح إلى نص يدويًا) و `appendChar`، مع مضاعفة السعة عند الحاجة. ابنِ الفاتورة ثم اطبعها مرة واحدة.
+@ steps
+- كل إضافة تتأكد أولًا من السعة: `ensure(builder, extra)`.
+- `appendNumber`: نستخرج الأرقام في جدول مؤقت بالترتيب المعكوس ثم نضيفها.
+- النص يبقى منتهيًا بـ `'\0'` بعد كل إضافة.
+@ flow
+call: init(&invoice, 8)
+for: idx = 0 ; idx < 4 ; idx++
+  call: appendText(name) ; appendChar(' ') ; appendNumber(qty * price) ; appendChar('\n')
+call: appendText("TOTAL ") ; appendNumber(total)
+out: invoice.text, invoice.length, invoice.capacity
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { char *text; int length, capacity, grows; } Builder;
+
+void init(Builder *builder, int capacity) {
+    builder->text = malloc(capacity);
+    builder->text[0] = '\0';
+    builder->length = 0;
+    builder->capacity = capacity;
+    builder->grows = 0;
+}
+
+void ensure(Builder *builder, int extra) {
+    char *bigger;
+    int idx;
+    while (builder->length + extra + 1 > builder->capacity) {
+        bigger = malloc(2 * builder->capacity);
+        for (idx = 0; idx <= builder->length; idx++) bigger[idx] = builder->text[idx];
+        free(builder->text);
+        builder->text = bigger;
+        builder->capacity *= 2;
+        builder->grows++;
+    }
+}
+
+void appendChar(Builder *builder, char ch) {
+    ensure(builder, 1);
+    builder->text[builder->length++] = ch;
+    builder->text[builder->length] = '\0';
+}
+
+void appendText(Builder *builder, const char *text) {
+    while (*text != '\0') appendChar(builder, *text++);
+}
+
+void appendNumber(Builder *builder, long value) {
+    char digits[20];
+    int count = 0;
+    if (value == 0) digits[count++] = '0';
+    while (value > 0) { digits[count++] = (char)('0' + value % 10); value /= 10; }   // معكوس
+    while (count > 0) appendChar(builder, digits[--count]);
+}
+
+int main(void) {
+    const char *names[4] = {"Mouse      x2", "Keyboard   x1", "Monitor    x1", "USB cable  x5"};
+    long amounts[4] = {3000, 3200, 32000, 2250}, total = 0;
+    Builder invoice;
+    int idx;
+    init(&invoice, 8);
+    appendText(&invoice, "INVOICE #7781\n");
+    for (idx = 0; idx < 4; idx++) {
+        appendText(&invoice, names[idx]);
+        appendText(&invoice, "  ");
+        appendNumber(&invoice, amounts[idx]);
+        appendText(&invoice, " DA\n");
+        total += amounts[idx];
+    }
+    appendText(&invoice, "TOTAL ");
+    appendNumber(&invoice, total);
+    appendText(&invoice, " DA\n");
+    printf("%s", invoice.text);
+    printf("[%d chars, capacity %d, %d grows]\n", invoice.length, invoice.capacity, invoice.grows);
+    free(invoice.text);
+    return 0;
+}
+
+@@
+title: جدول تجزئة بالسلاسل لعد الكلمات
+level: hard
+domain: ds
+@ statement
+لعدّ تكرار الكلمات في التعليقات بسرعة، اكتب **جدول تجزئة بالسلاسل**: كل خانة رأس لقائمة عقد محجوزة بـ `malloc` (الكلمة، العداد، المؤشر على التالية). أدرج كل كلمة (أو زد عدادها)، ثم اعرض الكلمات التي ظهرت أكثر من مرة وطول أطول سلسلة، وحرر كل العقد.
+@ steps
+- `hashWord` (djb2) ثم `% SIZE` لتحديد الخانة.
+- البحث في القائمة؛ إذا لم توجد الكلمة نحجز عقدة جديدة ونضعها في رأس القائمة.
+- التحرير: لكل خانة نمر على القائمة ونحرر العقدة بعد حفظ التالية.
+@ flow
+while: توجد كلمة أخرى في النص
+  do: slot = hashWord(word) % SIZE
+  do: node = البحث في table[slot]
+  if: node != NULL
+    do: node->count++
+  else:
+    do: node = malloc ; node->next = table[slot] ; table[slot] = node
+out: الكلمات المتكررة
+do: تحرير كل القوائم
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SIZE 13
+
+typedef struct Node { char word[16]; int count; struct Node *next; } Node;
+
+unsigned long hashWord(const char *word) {
+    unsigned long hash = 5381;
+    while (*word != '\0') hash = hash * 33 + (unsigned char)*word++;
+    return hash;
+}
+
+int sameWord(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first == *second;
+}
+
+int main(void) {
+    char text[] = "fast delivery good price fast service good quality fast refund "
+                  "bad packaging good support price ok";
+    Node *table[SIZE] = {NULL}, *node, *next;
+    char word[16];
+    int pos = 0, len, slot, chain, longest = 0, distinct = 0;
+    while (text[pos] != '\0') {
+        while (text[pos] == ' ') pos++;
+        for (len = 0; text[pos] != ' ' && text[pos] != '\0' && len < 15; pos++) word[len++] = text[pos];
+        word[len] = '\0';
+        if (len == 0) continue;
+        slot = (int)(hashWord(word) % SIZE);
+        for (node = table[slot]; node != NULL && !sameWord(node->word, word); node = node->next) {}
+        if (node != NULL) {
+            node->count++;
+        } else {
+            node = malloc(sizeof(Node));                     // عقدة جديدة في رأس السلسلة
+            for (len = 0; (node->word[len] = word[len]) != '\0'; len++) {}
+            node->count = 1;
+            node->next = table[slot];
+            table[slot] = node;
+            distinct++;
+        }
+    }
+    printf("%d distinct words. Repeated:", distinct);
+    for (slot = 0; slot < SIZE; slot++) {
+        chain = 0;
+        for (node = table[slot]; node != NULL; node = node->next) {
+            chain++;
+            if (node->count > 1) printf(" %s(%d)", node->word, node->count);
+        }
+        if (chain > longest) longest = chain;
+    }
+    printf("\nLongest chain: %d\n", longest);
+    for (slot = 0; slot < SIZE; slot++)
+        for (node = table[slot]; node != NULL; node = next) {
+            next = node->next;                               // نحفظ التالي قبل التحرير
+            free(node);
+        }
+    return 0;
+}
+
+@@
+title: الترتيب بالكومة لمؤشرات المنتجات
+level: hard
+domain: ec
+@ statement
+رتّب جدولًا **ديناميكيًا من المؤشرات** على هياكل منتجات حسب الإيراد (السعر × المبيعات) بخوارزمية **الترتيب بالكومة** (heap sort): نبني كومة عظمى في المكان، ثم ننقل الجذر إلى النهاية ونعيد ترميم الكومة. التعقيد `n log n` دون ذاكرة إضافية.
+@ steps
+- `siftDown(view, root, size)`: ننزل العنصر ما دام أحد أبنائه أكبر منه.
+- البناء: `siftDown` لكل عقدة داخلية من `size/2 - 1` إلى 0.
+- الاستخراج: نبدل `view[0]` مع `view[end]`، ثم `siftDown(view, 0, end)`.
+@ flow
+do: view = malloc(NB مؤشرات) ; view[idx] = &items[idx]
+for: root = NB / 2 - 1 ; root >= 0 ; root--
+  call: siftDown(view, root, NB)
+for: end = NB - 1 ; end > 0 ; end--
+  do: تبديل view[0] و view[end]
+  call: siftDown(view, 0, end)
+out: view
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NB 8
+
+typedef struct { char name[12]; double price; int sold; } Product;
+
+double revenue(const Product *item) { return item->price * item->sold; }
+
+void siftDown(Product **view, int root, int size) {
+    int child;
+    Product *tmp;
+    while (2 * root + 1 < size) {
+        child = 2 * root + 1;
+        if (child + 1 < size && revenue(view[child + 1]) > revenue(view[child])) child++;
+        if (revenue(view[root]) >= revenue(view[child])) return;
+        tmp = view[root]; view[root] = view[child]; view[child] = tmp;   // ننزل
+        root = child;
+    }
+}
+
+int main(void) {
+    Product items[NB] = {{"Phone", 32000, 40}, {"Case", 900, 310}, {"Laptop", 89000, 12},
+                         {"Earbuds", 5400, 95}, {"Charger", 2200, 150}, {"Watch", 15000, 28},
+                         {"Cable", 450, 600}, {"Tablet", 41000, 18}};
+    Product **view = malloc(NB * sizeof(Product *)), *tmp;
+    int idx, root, end;
+    for (idx = 0; idx < NB; idx++) view[idx] = &items[idx];
+    for (root = NB / 2 - 1; root >= 0; root--) siftDown(view, root, NB);   // بناء الكومة
+    printf("Top revenue: %s\n", view[0]->name);
+    for (end = NB - 1; end > 0; end--) {
+        tmp = view[0]; view[0] = view[end]; view[end] = tmp;            // الأكبر إلى النهاية
+        siftDown(view, 0, end);
+    }
+    for (idx = NB - 1; idx >= 0; idx--)
+        printf("%-8s %10.0f DA\n", view[idx]->name, revenue(view[idx]));
+    free(view);
+    return 0;
+}
+
+@@
+title: مصفوفة التشابه بين المنتجات
+level: hard
+domain: ds
+@ statement
+لاقتراح "منتجات مشابهة"، احسب **تشابه جيب التمام** بين كل زوج من المنتجات من مصفوفة المشتريات (زبون × منتج، 0 أو عدد المرات). احجز مصفوفة التشابه `NBP × NBP` ديناميكيًا في كتلة واحدة، واستغل **التناظر** لحساب النصف فقط، ثم اعرض لكل منتج أقرب منتج إليه.
+@ steps
+- `cos(a, b) = Σ buy[c][a]·buy[c][b] / (‖a‖·‖b‖)`.
+- نحسب الخانة `[a][b]` لـ `b > a` فقط ثم ننسخها في `[b][a]`.
+- الجذر بطريقة نيوتن؛ القطر = 1.
+@ flow
+do: sim = malloc(NBP * NBP)
+for: first = 0 ; first < NBP ; first++
+  for: second = first + 1 ; second < NBP ; second++
+    do: sim[first][second] = sim[second][first] = cos(first, second)
+for: first = 0 ; first < NBP ; first++
+  out: أقرب منتج
+do: free(sim)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBC 6
+#define NBP 5
+
+double mySqrt(double value) {
+    double guess = value > 1 ? value : 1;
+    int iter;
+    if (value <= 0) return 0;
+    for (iter = 0; iter < 50; iter++) guess = (guess + value / guess) / 2;
+    return guess;
+}
+
+int main(void) {
+    int buy[NBC][NBP] = {{2, 1, 0, 0, 1}, {1, 1, 0, 1, 0}, {0, 0, 3, 1, 0},
+                         {0, 1, 2, 2, 0}, {3, 2, 0, 0, 1}, {0, 0, 1, 2, 1}};
+    char names[NBP][10] = {"Phone", "Case", "Laptop", "Mouse", "Charger"};
+    double *sim = malloc(NBP * NBP * sizeof(double)), dot, normA, normB;
+    int first, second, client, best;
+    for (first = 0; first < NBP; first++) {
+        sim[first * NBP + first] = 1;
+        for (second = first + 1; second < NBP; second++) {
+            dot = normA = normB = 0;
+            for (client = 0; client < NBC; client++) {
+                dot += buy[client][first] * buy[client][second];
+                normA += buy[client][first] * buy[client][first];
+                normB += buy[client][second] * buy[client][second];
+            }
+            sim[first * NBP + second] = sim[second * NBP + first] = dot / (mySqrt(normA) * mySqrt(normB));
+        }
+    }
+    for (first = 0; first < NBP; first++) {
+        best = first == 0 ? 1 : 0;
+        for (second = 0; second < NBP; second++)
+            if (second != first && sim[first * NBP + second] > sim[first * NBP + best]) best = second;
+        printf("%-8s ->", names[first]);
+        for (second = 0; second < NBP; second++) printf(" %.2f", sim[first * NBP + second]);
+        printf("  similar: %s\n", names[best]);
+    }
+    free(sim);
+    return 0;
+}
+
+@@
+title: أطول تسلسل مشترك بين سجلي تصفح
+level: hard
+domain: ds
+@ statement
+سجل تصفح زبون هو تسلسل من رموز الصفحات. لقياس تشابه سلوك زبونين، اقرأ التسلسلين بطولين يحددهما المدخل، واحجز جدول البرمجة الديناميكية **بالحجم المضبوط** `(lenA+1) × (lenB+1)` في كتلة واحدة، واحسب **LCS** ثم أعد بناء التسلسل المشترك.
+@ stdin
+9 HPCPKCOPT
+8 HSPCKPOT
+@ steps
+- الخانة `(row, col)` في الموضع `row * (lenB + 1) + col`.
+- نفس معادلة LCS: تطابق → قطري + 1، وإلا الأكبر من الأعلى واليسار.
+- نحرر الجداول الثلاثة في النهاية.
+@ flow
+in: lenA, first, lenB, second
+do: table = malloc((lenA + 1) * (lenB + 1))
+for: row = 1 ; row <= lenA ; row++
+  for: col = 1 ; col <= lenB ; col++
+    do: تطبيق معادلة LCS
+do: إعادة البناء
+out: LCS
+do: free(table)
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int lenA, lenB, row, col, width, size;
+    char *first, *second, *common;
+    int *table;
+    scanf("%d", &lenA);
+    first = malloc(lenA + 1);
+    scanf("%s", first);
+    scanf("%d", &lenB);
+    second = malloc(lenB + 1);
+    scanf("%s", second);
+    width = lenB + 1;
+    table = malloc((lenA + 1) * width * sizeof(int));        // جدول بالحجم المضبوط
+    for (row = 0; row <= lenA; row++)
+        for (col = 0; col <= lenB; col++) {
+            if (row == 0 || col == 0) table[row * width + col] = 0;
+            else if (first[row - 1] == second[col - 1])
+                table[row * width + col] = table[(row - 1) * width + col - 1] + 1;
+            else
+                table[row * width + col] = table[(row - 1) * width + col] > table[row * width + col - 1]
+                                         ? table[(row - 1) * width + col] : table[row * width + col - 1];
+        }
+    size = table[lenA * width + lenB];
+    common = malloc(size + 1);
+    common[size] = '\0';
+    row = lenA; col = lenB;
+    while (row > 0 && col > 0) {
+        if (first[row - 1] == second[col - 1]) { common[--size] = first[row - 1]; row--; col--; }
+        else if (table[(row - 1) * width + col] >= table[row * width + col - 1]) row--;
+        else col--;
+    }
+    printf("A: %s\nB: %s\nCommon path: %s (%d pages)\n", first, second, common,
+           table[lenA * width + lenB]);
+    printf("Similarity: %.2f\n", 2.0 * table[lenA * width + lenB] / (lenA + lenB));
+    free(first); free(second); free(common); free(table);
+    return 0;
+}
+
+@@
+title: الترتيب بالأساس لأرقام الطلبيات
+level: hard
+domain: ec
+@ statement
+أرقام الطلبيات أعداد صحيحة من 6 أرقام. **الترتيب بالأساس** (radix sort) يرتبها دون مقارنات: نرتب حسب رقم الآحاد، ثم العشرات، ثم المئات... بترتيب **مستقر** بالعد في كل مرحلة. احجز جدول الإخراج ديناميكيًا وبدّل المؤشرين بين المراحل.
+@ steps
+- لكل رقم `digit = (value / place) % 10`: نعد التكرارات `count[10]`.
+- المواضع التراكمية تحدد مكان كل مجموعة؛ نكتب من النهاية للحفاظ على الاستقرار.
+- نبدل `source` و `target` (مؤشران) بدل النسخ.
+@ flow
+do: target = malloc(NB)
+for: place = 1 ; place <= 100000 ; place = place * 10
+  do: عد الأرقام وحساب المواضع التراكمية
+  for: idx = NB - 1 ; idx >= 0 ; idx--
+    do: target[--count[digit]] = source[idx]
+  do: تبديل source و target
+out: source
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NB 10
+
+int main(void) {
+    long orders[NB] = {482019, 102345, 993201, 482001, 100045, 777310, 102344, 560120, 999999, 100000};
+    long *source = orders, *target = malloc(NB * sizeof(long)), *tmp;
+    long place;
+    int count[10], idx, digit, pass = 0;
+    for (place = 1; place <= 100000; place *= 10) {
+        for (digit = 0; digit < 10; digit++) count[digit] = 0;
+        for (idx = 0; idx < NB; idx++) count[(source[idx] / place) % 10]++;
+        for (digit = 1; digit < 10; digit++) count[digit] += count[digit - 1];   // مواضع تراكمية
+        for (idx = NB - 1; idx >= 0; idx--)                                      // من النهاية: مستقر
+            target[--count[(source[idx] / place) % 10]] = source[idx];
+        tmp = source; source = target; target = tmp;                             // تبديل المؤشرين
+        pass++;
+    }
+    printf("%d passes, 0 comparisons\n", pass);
+    for (idx = 0; idx < NB; idx++) printf("%ld ", source[idx]);
+    printf("\n");
+    free(source == orders ? target : source);       // نحرر الكتلة المحجوزة فقط
+    return 0;
+}
+
+@@
+title: محاكاة مدير الذاكرة بالملاءمة الأولى
+level: hard
+domain: ds
+@ statement
+كيف يعمل `malloc` من الداخل؟ حاكِ مديرًا بسيطًا على "ساحة" من 64 خانة: جدول كتل (البداية، الحجم، حرة أم لا). `allocate(size)` تختار **أول كتلة حرة كافية** وتقسمها، و `release(start)` تحرر الكتلة و**تدمجها** مع الكتل الحرة المجاورة. اعرض خريطة الذاكرة بعد كل عملية.
+@ steps
+- في البداية كتلة حرة واحدة `[0, 64)`.
+- التقسيم: الكتلة الحرة `size` تصبح مستعملة، والباقي كتلة حرة جديدة (إزاحة جدول الكتل).
+- الدمج: بعد التحرير نوحد كل كتلتين حرتين متتاليتين.
+- التجزئة: قد يوجد مجموع حر كافٍ دون كتلة واحدة كافية.
+@ flow
+while: توجد عملية أخرى في السيناريو
+  if: حجز
+    call: start = allocate(size)
+  else:
+    call: release(start)
+  call: printMap()
+@ code
+#include <stdio.h>
+
+#define ARENA 64
+#define MAXB 20
+
+typedef struct { int start, size, isFree; } Block;
+
+Block blocks[MAXB];
+int nbBlocks = 1;
+
+int allocate(int size) {
+    int idx, move;
+    for (idx = 0; idx < nbBlocks; idx++)
+        if (blocks[idx].isFree && blocks[idx].size >= size) {          // الملاءمة الأولى
+            if (blocks[idx].size > size) {                             // تقسيم
+                for (move = nbBlocks; move > idx + 1; move--) blocks[move] = blocks[move - 1];
+                blocks[idx + 1].start = blocks[idx].start + size;
+                blocks[idx + 1].size = blocks[idx].size - size;
+                blocks[idx + 1].isFree = 1;
+                nbBlocks++;
+            }
+            blocks[idx].size = size;
+            blocks[idx].isFree = 0;
+            return blocks[idx].start;
+        }
+    return -1;                                                         // لا توجد كتلة كافية
+}
+
+void release(int start) {
+    int idx, move;
+    for (idx = 0; idx < nbBlocks; idx++) if (blocks[idx].start == start) blocks[idx].isFree = 1;
+    for (idx = 0; idx < nbBlocks - 1; ) {
+        if (blocks[idx].isFree && blocks[idx + 1].isFree) {            // دمج المتجاورتين
+            blocks[idx].size += blocks[idx + 1].size;
+            for (move = idx + 1; move < nbBlocks - 1; move++) blocks[move] = blocks[move + 1];
+            nbBlocks--;
+        } else {
+            idx++;
+        }
+    }
+}
+
+void printMap(const char *label) {
+    int idx, cell, freeTotal = 0;
+    printf("%-12s|", label);
+    for (idx = 0; idx < nbBlocks; idx++) {
+        for (cell = 0; cell < blocks[idx].size; cell++) putchar(blocks[idx].isFree ? '.' : (idx % 2 ? '=' : '#'));   // رمزان بالتناوب لتمييز الكتل
+        if (blocks[idx].isFree) freeTotal += blocks[idx].size;
+    }
+    printf("| free %d\n", freeTotal);
+}
+
+int main(void) {
+    int cart, wish, logs, report;
+    blocks[0].start = 0; blocks[0].size = ARENA; blocks[0].isFree = 1;
+    cart = allocate(16);   printMap("alloc 16");
+    wish = allocate(8);    printMap("alloc 8");
+    logs = allocate(20);   printMap("alloc 20");
+    release(wish);         printMap("free 8");
+    report = allocate(4);  printMap("alloc 4");
+    release(cart);         printMap("free 16");
+    printf("alloc 24 -> %d (40 cells free, but largest hole is 20)\n", allocate(24));
+    release(logs);         printMap("free 20");
+    printf("alloc 24 -> start %d\n", allocate(24));
+    printMap("final");
+    (void)report;
+    return 0;
+}
+
+@@
+title: تجميع نقاط التوصيل بخوارزمية K-means
+level: hard
+domain: ds
+@ statement
+نريد تقسيم نقاط التوصيل (إحداثيات ثنائية البعد، عددها يُقرأ) إلى `groups` منطقة لسائقين. احجز ديناميكيًا جداول النقاط والمراكز والإسنادات، وطبّق **K-means**: إسناد كل نقطة إلى أقرب مركز ثم تحديث المراكز، حتى الاستقرار. اعرض المراكز وعدد النقاط ومجموع مربعات المسافات (SSE).
+@ stdin
+12 3
+2 3 3 4 2 5 9 8 10 9 8 9 15 2 16 3 14 1 3 3 9 10 15 3
+@ steps
+- المراكز الابتدائية: أول `groups` نقاط مختلفة (للتبسيط).
+- مسافة مربعة لتفادي الجذر.
+- نتوقف عندما لا يتغير أي إسناد.
+@ flow
+in: nbPoints, groups
+do: حجز points و centers و assign و sums
+dowhile: changed > 0
+  do: changed = 0
+  for: idx = 0 ; idx < nbPoints ; idx++
+    do: best = أقرب مركز ; إذا تغير: changed++
+  do: centers = متوسط نقاط كل مجموعة
+out: centers, counts, SSE
+do: تحرير الجداول
+@ code
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct { double posX, posY; } Point;
+
+double dist2(Point first, Point second) {
+    return (first.posX - second.posX) * (first.posX - second.posX)
+         + (first.posY - second.posY) * (first.posY - second.posY);
+}
+
+int main(void) {
+    int nbPoints, groups, idx, group, best, changed, iterations = 0, *assign, *counts;
+    Point *points, *centers, *sums;
+    double sse = 0;
+    scanf("%d %d", &nbPoints, &groups);
+    points = malloc(nbPoints * sizeof(Point));
+    assign = malloc(nbPoints * sizeof(int));
+    centers = malloc(groups * sizeof(Point));
+    sums = malloc(groups * sizeof(Point));
+    counts = malloc(groups * sizeof(int));
+    for (idx = 0; idx < nbPoints; idx++) { scanf("%lf %lf", &points[idx].posX, &points[idx].posY); assign[idx] = -1; }
+    centers[0] = points[0]; centers[1] = points[3]; centers[2] = points[6];   // بداية متباعدة
+    do {
+        changed = 0;
+        for (idx = 0; idx < nbPoints; idx++) {
+            best = 0;
+            for (group = 1; group < groups; group++)
+                if (dist2(points[idx], centers[group]) < dist2(points[idx], centers[best])) best = group;
+            if (best != assign[idx]) { assign[idx] = best; changed++; }
+        }
+        for (group = 0; group < groups; group++) { sums[group].posX = sums[group].posY = 0; counts[group] = 0; }
+        for (idx = 0; idx < nbPoints; idx++) {
+            sums[assign[idx]].posX += points[idx].posX;
+            sums[assign[idx]].posY += points[idx].posY;
+            counts[assign[idx]]++;
+        }
+        for (group = 0; group < groups; group++)
+            if (counts[group] > 0) {
+                centers[group].posX = sums[group].posX / counts[group];
+                centers[group].posY = sums[group].posY / counts[group];
+            }
+        iterations++;
+    } while (changed > 0);
+    for (idx = 0; idx < nbPoints; idx++) sse += dist2(points[idx], centers[assign[idx]]);
+    printf("Converged in %d iterations\n", iterations);
+    for (group = 0; group < groups; group++)
+        printf("Zone %d: center (%.2f, %.2f), %d stops\n", group + 1, centers[group].posX,
+               centers[group].posY, counts[group]);
+    printf("SSE = %.3f\n", sse);
+    free(points); free(assign); free(centers); free(sums); free(counts);
+    return 0;
+}

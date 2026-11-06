@@ -1,0 +1,31 @@
+#include <stdio.h>
+
+int ageAt(int birthDay, int birthMonth, int birthYear, int day, int month, int year) {
+    int age = year - birthYear;
+    if (month < birthMonth || (month == birthMonth && day < birthDay))
+        age--;                                   (*@\cmt{عيد الميلاد لم يحل بعد}@*)
+    return age;
+}
+
+int segment(int age) {
+    if (age < 18) return 0;
+    if (age < 25) return 1;
+    if (age < 40) return 2;
+    if (age < 60) return 3;
+    return 4;
+}
+
+int main(void) {
+    int birth[8][3] = {{12, 3, 2001}, {30, 11, 2008}, {6, 11, 1990}, {7, 11, 1967},
+                       {1, 1, 1958}, {15, 8, 2004}, {20, 12, 1986}, {9, 2, 2010}};
+    char labels[5][8] = {"<18", "18-24", "25-39", "40-59", "60+"};
+    int counts[5] = {0}, idx, age;
+    for (idx = 0; idx < 8; idx++) {
+        age = ageAt(birth[idx][0], birth[idx][1], birth[idx][2], 6, 11, 2026);
+        counts[segment(age)]++;
+        printf("Customer %d: %2d years\n", idx + 1, age);
+    }
+    for (idx = 0; idx < 5; idx++)
+        printf("%-6s %d\n", labels[idx], counts[idx]);
+    return 0;
+}

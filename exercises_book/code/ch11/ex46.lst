@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+int main(void) {
+    FILE *orders = fopen("orders.txt", "w"), *bank = fopen("bank.txt", "w"), *report;
+    int refO, refB, hasOrder, hasBank, matched = 0, issues = 0, ch;
+    double amountO, amountB, missing = 0;
+    fprintf(orders, "7781 12500\n7782 3200\n7783 899.5\n7785 45000\n7786 1500\n7788 2200\n");
+    fprintf(bank, "7781 12500\n7783 899.5\n7784 650\n7785 44000\n7786 1500\n7788 2200\n7790 300\n");
+    fclose(orders); fclose(bank);
+    orders = fopen("orders.txt", "r");
+    bank = fopen("bank.txt", "r");
+    report = fopen("reconciliation.txt", "w");
+    hasOrder = fscanf(orders, "%d %lf", &refO, &amountO) == 2;
+    hasBank = fscanf(bank, "%d %lf", &refB, &amountB) == 2;
+    while (hasOrder || hasBank) {
+        if (hasOrder && hasBank && refO == refB) {
+            if (amountO == amountB) matched++;
+            else { fprintf(report, "%d MISMATCH  expected %.2f got %.2f\n", refO, amountO, amountB); issues++; missing += amountO - amountB; }
+            hasOrder = fscanf(orders, "%d %lf", &refO, &amountO) == 2;
+            hasBank = fscanf(bank, "%d %lf", &refB, &amountB) == 2;
+        } else if (hasOrder && (!hasBank || refO < refB)) {            (*@\cmt{لا دفع لهذه الطلبية}@*)
+            fprintf(report, "%d UNPAID    %.2f\n", refO, amountO);
+            issues++;
+            missing += amountO;
+            hasOrder = fscanf(orders, "%d %lf", &refO, &amountO) == 2;
+        } else {                                                       (*@\cmt{دفع دون طلبية}@*)
+            fprintf(report, "%d UNKNOWN   payment %.2f\n", refB, amountB);
+            issues++;
+            hasBank = fscanf(bank, "%d %lf", &refB, &amountB) == 2;
+        }
+    }
+    fclose(orders); fclose(bank); fclose(report);
+    report = fopen("reconciliation.txt", "r");
+    while ((ch = fgetc(report)) != EOF) putchar(ch);
+    fclose(report);
+    printf("%d matched, %d issues, %.2f DA not received\n", matched, issues, missing);
+    return 0;
+}

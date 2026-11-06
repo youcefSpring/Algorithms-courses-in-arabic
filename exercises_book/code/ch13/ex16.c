@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+int floorPrice(const Tree *node, int budget) {
+    int best = -1;
+    while (node != NULL) {
+        if (node->price <= budget) { best = node->price; node = node->right; }   // مرشح، نبحث عن أقرب
+        else node = node->left;
+    }
+    return best;
+}
+
+int ceilPrice(const Tree *node, int budget) {
+    int best = -1;
+    while (node != NULL) {
+        if (node->price >= budget) { best = node->price; node = node->left; }
+        else node = node->right;
+    }
+    return best;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int prices[9] = {4500, 1200, 32000, 899, 3200, 12500, 450, 89000, 6800}, idx, count, budget;
+    Tree *root = NULL;
+    for (idx = 0; idx < 9; idx++) root = insert(root, prices[idx]);
+    scanf("%d", &count);
+    for (idx = 0; idx < count; idx++) {
+        scanf("%d", &budget);
+        printf("budget %6d: best under %6d, next above %6d\n", budget,
+               floorPrice(root, budget), ceilPrice(root, budget));
+    }
+    freeTree(root);
+    return 0;
+}

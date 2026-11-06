@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Trie { struct Trie *child[26]; int isWord, popularity; } Trie;
+
+Trie *newTrie(void) {
+    Trie *node = malloc(sizeof(Trie));
+    int idx;
+    for (idx = 0; idx < 26; idx++) node->child[idx] = NULL;
+    node->isWord = 0;
+    node->popularity = 0;
+    return node;
+}
+
+void insertWord(Trie *root, const char *word, int popularity) {
+    for (; *word != '\0'; word++) {
+        if (root->child[*word - 'a'] == NULL) root->child[*word - 'a'] = newTrie();
+        root = root->child[*word - 'a'];                (*@\cmt{حرف واحد في كل مستوى}@*)
+    }
+    root->isWord = 1;
+    root->popularity = popularity;
+}
+
+char bestWord[32];
+int bestScore;
+
+void collect(const Trie *node, char *buffer, int depth) {
+    int idx, pos;
+    if (node->isWord) {
+        buffer[depth] = '\0';
+        printf(" %s", buffer);
+        if (node->popularity > bestScore) {
+            bestScore = node->popularity;
+            for (pos = 0; (bestWord[pos] = buffer[pos]) != '\0'; pos++) {}
+        }
+    }
+    for (idx = 0; idx < 26; idx++)
+        if (node->child[idx] != NULL) {
+            buffer[depth] = (char)('a' + idx);
+            collect(node->child[idx], buffer, depth + 1);
+        }
+}
+
+void freeTrie(Trie *node) { int idx; for (idx = 0; idx < 26; idx++) if (node->child[idx]) freeTrie(node->child[idx]); free(node); }
+
+int main(void) {
+    const char *words[10] = {"mouse", "monitor", "modem", "mousepad", "charger", "cable",
+                             "chair", "camera", "microphone", "motherboard"};
+    int popularity[10] = {950, 720, 130, 410, 880, 990, 300, 560, 610, 240};
+    Trie *root = newTrie(), *node;
+    char prefix[32], buffer[32];
+    int idx, nbQueries, query, depth;
+    for (idx = 0; idx < 10; idx++) insertWord(root, words[idx], popularity[idx]);
+    scanf("%d", &nbQueries);
+    for (query = 0; query < nbQueries; query++) {
+        scanf("%31s", prefix);
+        for (node = root, depth = 0; node != NULL && prefix[depth] != '\0'; depth++) {
+            buffer[depth] = prefix[depth];
+            node = node->child[prefix[depth] - 'a'];
+        }
+        printf("\"%s\" ->", prefix);
+        if (node == NULL) { printf(" no suggestion\n"); continue; }
+        bestScore = -1;
+        collect(node, buffer, depth);
+        printf("\n   top: %s (%d)\n", bestWord, bestScore);
+    }
+    freeTrie(root);
+    return 0;
+}

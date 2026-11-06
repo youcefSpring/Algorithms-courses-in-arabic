@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+#define NB 6
+#define MAXLEN 24
+
+int main(void) {
+    char pattern[] = "TV-*-202?";
+    char codes[NB][MAXLEN] = {"TV-SAM-2024", "TV-LG-OLED-2025", "PC-HP-2024",
+                              "TV--2023", "TV-SONY-2019", "TV-TCL-20245"};
+    int match[MAXLEN][MAXLEN];
+    int item, row, col, patLen = 0, codeLen;
+    char pchar;
+    while (pattern[patLen] != '\0') patLen++;
+    printf("Pattern %s\n", pattern);
+    for (item = 0; item < NB; item++) {
+        codeLen = 0;
+        while (codes[item][codeLen] != '\0') codeLen++;
+        match[0][0] = 1;
+        for (col = 1; col <= codeLen; col++) match[0][col] = 0;   // نمط فارغ
+        for (row = 1; row <= patLen; row++) {
+            pchar = pattern[row - 1];
+            for (col = 0; col <= codeLen; col++) {
+                if (pchar == '*')
+                    match[row][col] = match[row - 1][col] || (col > 0 && match[row][col - 1]);
+                else
+                    match[row][col] = col > 0 && match[row - 1][col - 1] &&
+                                      (pchar == '?' || pchar == codes[item][col - 1]);
+            }
+        }
+        printf("  %-16s %s\n", codes[item], match[patLen][codeLen] ? "MATCH" : "-");
+    }
+    return 0;
+}

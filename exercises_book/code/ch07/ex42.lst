@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+#define MAX 32
+
+void mergeRuns(double source[], double target[], int left, int middle, int right) {
+    int first = left, second = middle, out = left;
+    while (first < middle && second < right)          (*@\cmt{نأخذ الأصغر من الجزأين}@*)
+        target[out++] = source[first] <= source[second] ? source[first++] : source[second++];
+    while (first < middle) target[out++] = source[first++];
+    while (second < right) target[out++] = source[second++];
+}
+
+void printArray(double values[], int size) {
+    int idx;
+    for (idx = 0; idx < size; idx++) printf("%.0f ", values[idx]);
+    printf("\n");
+}
+
+void mergeSort(double values[], int size) {
+    double buffer[MAX];
+    int width, left, middle, right, idx;
+    for (width = 1; width < size; width *= 2) {
+        for (left = 0; left < size; left += 2 * width) {
+            middle = left + width < size ? left + width : size;
+            right = left + 2 * width < size ? left + 2 * width : size;
+            mergeRuns(values, buffer, left, middle, right);
+        }
+        for (idx = 0; idx < size; idx++) values[idx] = buffer[idx];
+        printf("width %2d: ", width);
+        printArray(values, size);
+    }
+}
+
+int main(void) {
+    double prices[12] = {450, 12500, 899, 3200, 27000, 650, 1500, 99, 7800, 2300, 560, 4100};
+    printf("start   : ");
+    printArray(prices, 12);
+    mergeSort(prices, 12);
+    return 0;
+}

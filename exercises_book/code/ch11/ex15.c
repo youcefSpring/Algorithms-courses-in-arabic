@@ -1,0 +1,36 @@
+#include <stdio.h>
+
+typedef struct { int code; char name[12]; int stock; } Product;
+
+void updateStock(const char *path, int idx, int delta) {
+    FILE *file = fopen(path, "r+b");                  // قراءة وكتابة
+    Product item;
+    if (file == NULL) return;
+    fseek(file, idx * (long)sizeof(Product), SEEK_SET);
+    fread(&item, sizeof(Product), 1, file);
+    item.stock += delta;
+    fseek(file, idx * (long)sizeof(Product), SEEK_SET);   // نعود إلى بداية السجل
+    fwrite(&item, sizeof(Product), 1, file);
+    fclose(file);
+    printf("record %d (%s): stock %+d -> %d\n", idx, item.name, delta, item.stock);
+}
+
+void show(const char *path) {
+    FILE *file = fopen(path, "rb");
+    Product item;
+    while (fread(&item, sizeof(Product), 1, file) == 1) printf("[%d %s %d] ", item.code, item.name, item.stock);
+    printf("\n");
+    fclose(file);
+}
+
+int main(void) {
+    Product items[4] = {{101, "Mouse", 12}, {102, "Keyboard", 5}, {103, "Monitor", 3}, {104, "Cable", 40}};
+    FILE *file = fopen("stock.bin", "wb");
+    fwrite(items, sizeof(Product), 4, file);
+    fclose(file);
+    show("stock.bin");
+    updateStock("stock.bin", 2, -1);
+    updateStock("stock.bin", 0, 20);
+    show("stock.bin");
+    return 0;
+}

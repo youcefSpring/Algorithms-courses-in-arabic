@@ -1,0 +1,52 @@
+#include <stdio.h>
+
+double mean(double values[], int size) {
+    double total = 0;
+    int idx;
+    for (idx = 0; idx < size; idx++) total += values[idx];
+    return total / size;
+}
+
+double fitSlope(double xs[], double ys[], int size) {
+    double meanX = mean(xs, size), meanY = mean(ys, size), num = 0, den = 0;
+    int idx;
+    for (idx = 0; idx < size; idx++) {
+        num += (xs[idx] - meanX) * (ys[idx] - meanY);
+        den += (xs[idx] - meanX) * (xs[idx] - meanX);
+    }
+    return num / den;
+}
+
+double fitIntercept(double xs[], double ys[], int size, double slope) {
+    return mean(ys, size) - slope * mean(xs, size);   (*@\cmt{المستقيم يمر بالنقطة المتوسطة}@*)
+}
+
+double predict(double value, double slope, double intercept) {
+    return slope * value + intercept;
+}
+
+double rSquared(double xs[], double ys[], int size, double slope, double intercept) {
+    double meanY = mean(ys, size), ssRes = 0, ssTot = 0, err;
+    int idx;
+    for (idx = 0; idx < size; idx++) {
+        err = ys[idx] - predict(xs[idx], slope, intercept);
+        ssRes += err * err;                               (*@\cmt{خطأ النموذج}@*)
+        ssTot += (ys[idx] - meanY) * (ys[idx] - meanY);   (*@\cmt{التشتت الكلي}@*)
+    }
+    return 1 - ssRes / ssTot;
+}
+
+int main(void) {
+    double ads[8] = {10, 15, 8, 20, 25, 12, 30, 18};
+    double sales[8] = {210, 260, 190, 330, 370, 240, 420, 300};
+    double budgets[3] = {5, 22, 40};
+    double slope = fitSlope(ads, sales, 8);
+    double intercept = fitIntercept(ads, sales, 8, slope);
+    int idx;
+    printf("sales = %.3f * ads + %.3f\n", slope, intercept);
+    printf("R^2 = %.4f\n", rSquared(ads, sales, 8, slope, intercept));
+    for (idx = 0; idx < 3; idx++)
+        printf("Budget %4.0f -> predicted sales %.1f\n", budgets[idx],
+               predict(budgets[idx], slope, intercept));
+    return 0;
+}

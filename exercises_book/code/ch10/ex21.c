@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int loadScores(double **result, int *count) {
+    int idx;
+    scanf("%d", count);
+    *result = malloc(*count * sizeof(double));   // نكتب العنوان في متغير المستدعي
+    if (*result == NULL) return 0;
+    for (idx = 0; idx < *count; idx++) scanf("%lf", &(*result)[idx]);
+    return 1;
+}
+
+int main(void) {
+    double *scores = NULL, total = 0, key;
+    int count = 0, idx, back;
+    if (!loadScores(&scores, &count)) return 1;
+    for (idx = 0; idx < count; idx++) total += scores[idx];
+    for (idx = 1; idx < count; idx++) {           // ترتيب بالإدراج
+        key = scores[idx];
+        for (back = idx - 1; back >= 0 && scores[back] > key; back--) scores[back + 1] = scores[back];
+        scores[back + 1] = key;
+    }
+    printf("%d scores, mean %.2f, median %.2f\n", count, total / count, scores[count / 2]);
+    free(scores);
+    return 0;
+}

@@ -1,0 +1,4 @@
+preorder:  ABDEGCFH
+inorder:   DBGEACHF
+postorder: DGEBHFCA
+root A, left child B, right child C

@@ -1,0 +1,4 @@
+Trained on 3 fake / 4 real reviews, vocabulary 20
+"best product ever buy now": F -12.96 R -17.92 -> FAKE
+"battery lasts two days ok": F -18.62 R -15.72 -> real
+"amazing deal buy best fast": F -14.06 R -17.92 -> FAKE

@@ -1,0 +1,14 @@
+if pages <= 3:
+  if cart <= 2:
+    -> no buy
+  else:
+    -> BUY
+else:
+  if pages <= 6:
+    if pages <= 5:
+      -> BUY
+    else:
+      -> no buy
+  else:
+    -> BUY
+training accuracy: 14/14

@@ -1,0 +1,48 @@
+#include <stdio.h>
+
+long encodeFile(const char *source, const char *target) {
+    FILE *input = fopen(source, "rb"), *output = fopen(target, "wb");
+    int ch, prev = fgetc(input), run = 1;
+    long written = 0;
+    while (prev != EOF) {
+        ch = fgetc(input);
+        if (ch == prev && run < 255) {
+            run++;
+        } else {
+            fputc(run, output);                     (*@\cmt{(العدد، الحرف)}@*)
+            fputc(prev, output);
+            written += 2;
+            prev = ch;
+            run = 1;
+        }
+    }
+    fclose(input);
+    fclose(output);
+    return written;
+}
+
+long decodeFile(const char *source, const char *target) {
+    FILE *input = fopen(source, "rb"), *output = fopen(target, "wb");
+    int run, ch, rep;
+    long written = 0;
+    while ((run = fgetc(input)) != EOF && (ch = fgetc(input)) != EOF)
+        for (rep = 0; rep < run; rep++) { fputc(ch, output); written++; }
+    fclose(input);
+    fclose(output);
+    return written;
+}
+
+int main(void) {
+    FILE *file = fopen("status.txt", "wb");
+    int idx;
+    for (idx = 0; idx < 300; idx++) fputc(idx < 120 ? 'A' : idx < 125 ? 'B' : idx < 290 ? 'A' : 'C', file);
+    fclose(file);
+    printf("encoded size: %ld bytes (original 300)\n", encodeFile("status.txt", "status.rle"));
+    printf("decoded size: %ld bytes\n", decodeFile("status.rle", "status.out"));
+    file = fopen("status.rle", "rb");
+    printf("pairs:");
+    while ((idx = fgetc(file)) != EOF) printf(" %d%c", idx, fgetc(file));
+    printf("\n");
+    fclose(file);
+    return 0;
+}

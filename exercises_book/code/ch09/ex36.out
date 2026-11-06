@@ -1,0 +1,9 @@
+Day  1 D 10000.00 ok       balance 10000.00
+Day  3 P 4500.00 ok       balance  5500.00
+Day  4 P 7000.00 REFUSED  balance  5500.00
+Day  6 R 1200.00 ok       balance  6700.00
+Day  9 P 6200.00 ok       balance   500.00
+Day 12 D 5000.00 ok       balance  5500.00
+Day 15 P 3300.00 ok       balance  2200.00
+Day 20 P 1800.00 ok       balance   400.00
+Lowest balance: 400.00 DA

@@ -1,0 +1,46 @@
+#include <stdio.h>
+
+#define WIDTH 24
+
+int main(void) {
+    char text[] = "Wireless noise cancelling headphones with long battery life and fast charging case";
+    int start[40], len[40], nbWords = 0, pos = 0;
+    int first, last, lineLen, letters, gaps, spaces, word, gap, extra, col;
+    while (text[pos] != '\0') {                         // استخراج الكلمات
+        while (text[pos] == ' ') pos++;
+        if (text[pos] == '\0') break;
+        start[nbWords] = pos;
+        while (text[pos] != ' ' && text[pos] != '\0') pos++;
+        len[nbWords] = pos - start[nbWords];
+        nbWords++;
+    }
+    printf("+------------------------+\n");
+    for (first = 0; first < nbWords; first = last + 1) {
+        last = first;
+        lineLen = len[first];
+        letters = len[first];
+        while (last + 1 < nbWords && lineLen + 1 + len[last + 1] <= WIDTH) {
+            last++;
+            lineLen += 1 + len[last];
+            letters += len[last];
+        }
+        gaps = last - first;
+        spaces = WIDTH - letters;
+        col = 0;
+        putchar('|');
+        for (word = first; word <= last; word++) {
+            for (pos = 0; pos < len[word]; pos++) putchar(text[start[word] + pos]);
+            col += len[word];
+            if (word < last) {
+                if (last == nbWords - 1) extra = 1;     // السطر الأخير: فراغ واحد
+                else extra = spaces / gaps + (word - first < spaces % gaps ? 1 : 0);
+                for (gap = 0; gap < extra; gap++) putchar(' ');
+                col += extra;
+            }
+        }
+        while (col++ < WIDTH) putchar(' ');             // إكمال السطر
+        printf("|\n");
+    }
+    printf("+------------------------+\n");
+    return 0;
+}

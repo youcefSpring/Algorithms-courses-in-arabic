@@ -1,0 +1,43 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{السلسلة النصية} في \en{C}: جدول من \code{char} ينتهي بالحرف الخاص \code{'\textbackslash 0'}.
+    \item \textbf{التصريح}: \code{char name[20] = "Laptop";} يحجز \en{20} خانة، منها \en{7} مستعملة (\en{6} حروف + \code{'\textbackslash 0'}).
+    \item \textbf{الطول} هو عدد الحروف قبل \code{'\textbackslash 0'}، ونحسبه بحلقة.
+    \item كل حرف عدد صحيح (رمز \en{ASCII}): \code{'A'} = \en{65}، \code{'a'} = \en{97}، \code{'0'} = \en{48}.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    khana/.style={draw=brandTeal, fill=white, very thick, minimum width=1.05cm,
+        minimum height=0.85cm, font=\bfseries}]
+    \foreach \v [count=\i from 0] in {L,a,p,t,o,p} {
+        \node[khana] (k\i) at (-1.05*\i, 0) {\code{'\v'}};
+        \node[font=\scriptsize, below=2pt of k\i] {\en{\i}};
+    }
+    \node[khana, fill=brandOrange!20, draw=brandOrange] (k6) at (-6.3,0) {\code{'\textbackslash 0'}};
+    \node[font=\scriptsize, below=2pt of k6] {\en{6}};
+    \foreach \i in {7,8} \node[khana, draw=brandMuted!50, fill=codeGrey] at (-1.05*\i, 0) {\code{?}};
+    \node[font=\small\bfseries, lawn=brandOrange] at (1.3,0) {\code{name}};
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{العملية} & \ras{الفكرة (دون دوال جاهزة)} \\ \hline
+الطول & \code{while (text[len] != '\textbackslash 0') len++;} \\ \hline
+النسخ & حرفًا بحرف ثم نضع \code{'\textbackslash 0'} في النهاية \\ \hline
+المقارنة & نقارن الحروف حتى أول اختلاف أو نهاية إحدى السلسلتين \\ \hline
+حرف كبير & \code{ch - 'a' + 'A'} إذا كان \code{ch} بين \code{'a'} و\code{'z'} \\ \hline
+رقم إلى عدد & \code{value = value * 10 + (ch - '0')} \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad لا تنسَ \code{'\textbackslash 0'}}
+كل سلسلة نبنيها بأنفسنا يجب أن تنتهي بـ \code{'\textbackslash 0'}، وإلا طبع \code{printf} حروفًا عشوائية بعدها.
+والجدول يجب أن يتسع لعدد الحروف \textbf{زائد واحد}.
+\end{obox}
+
+\chaprefs{kr,king,sedgewick}
+\insertstats{06}

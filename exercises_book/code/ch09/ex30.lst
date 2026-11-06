@@ -1,0 +1,35 @@
+#include <stdio.h>
+
+#define NB 20
+#define NBB 5
+
+typedef struct { double low, high; int count; } Bucket;
+
+int main(void) {
+    double values[NB] = {1200, 4500, 3100, 890, 7600, 2300, 5400, 1500, 9800, 3300,
+                         2700, 450, 6100, 3900, 2100, 1800, 4200, 3600, 2900, 5100};
+    Bucket buckets[NBB];
+    double low = values[0], high = values[0], width;
+    int idx, bin, star;
+    for (idx = 1; idx < NB; idx++) {
+        if (values[idx] < low) low = values[idx];
+        if (values[idx] > high) high = values[idx];
+    }
+    width = (high - low) / NBB;
+    for (bin = 0; bin < NBB; bin++) {
+        buckets[bin].low = low + bin * width;
+        buckets[bin].high = low + (bin + 1) * width;
+        buckets[bin].count = 0;
+    }
+    for (idx = 0; idx < NB; idx++) {
+        bin = (int)((values[idx] - low) / width);
+        if (bin == NBB) bin = NBB - 1;               (*@\cmt{القيمة العظمى}@*)
+        buckets[bin].count++;
+    }
+    for (bin = 0; bin < NBB; bin++) {
+        printf("%6.0f-%6.0f | ", buckets[bin].low, buckets[bin].high);
+        for (star = 0; star < buckets[bin].count; star++) putchar('*');
+        printf(" %d\n", buckets[bin].count);
+    }
+    return 0;
+}

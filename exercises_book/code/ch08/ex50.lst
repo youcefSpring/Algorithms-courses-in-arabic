@@ -1,0 +1,52 @@
+#include <stdio.h>
+
+#define NBW 12
+
+char dict[NBW][10] = {"free", "shipping", "ship", "ping", "for", "summer", "sale",
+                      "sum", "mer", "fors", "um", "s"};
+char tag[60];
+int length, choice[60];
+long ways[60];
+
+int matchAt(int start, int word) {
+    int pos = 0;
+    while (dict[word][pos] != '\0') {
+        if (tag[start + pos] != dict[word][pos]) return 0;
+        pos++;
+    }
+    return pos;                                      (*@\cmt{طول الكلمة المطابقة}@*)
+}
+
+long countWays(int start) {
+    int word, len;
+    long total = 0, sub;
+    if (start == length) return 1;
+    if (ways[start] >= 0) return ways[start];
+    choice[start] = -1;
+    for (word = 0; word < NBW; word++) {
+        len = matchAt(start, word);
+        if (len > 0) {
+            sub = countWays(start + len);
+            if (sub > 0 && choice[start] < 0) choice[start] = word;
+            total += sub;
+        }
+    }
+    ways[start] = total;
+    return total;
+}
+
+int main(void) {
+    int start;
+    long total;
+    scanf("%59s", tag);
+    for (length = 0; tag[length] != '\0'; length++) ways[length] = -1;
+    total = countWays(0);
+    printf("#%s: %ld possible splits\n", tag, total);
+    if (total > 0) {
+        printf("First split:");
+        for (start = 0; start < length; start += matchAt(start, choice[start]))
+            printf(" %s", dict[choice[start]]);
+        printf("\n");
+    }
+    return 0;
+}

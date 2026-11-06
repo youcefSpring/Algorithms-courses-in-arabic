@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+void printLine(char symbol, int width) {
+    int col;
+    for (col = 0; col < width; col++)
+        putchar(symbol);
+    putchar('\n');                    // لا قيمة معادة
+}
+
+int main(void) {
+    printLine('=', 30);
+    printf("  INVOICE #2045  - TechShop\n");
+    printLine('-', 30);
+    printf("  Total: 12500.00 DA\n");
+    printLine('=', 30);
+    return 0;
+}

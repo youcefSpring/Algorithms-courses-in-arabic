@@ -1,0 +1,68 @@
+#include <stdio.h>
+
+#define ARENA 64
+#define MAXB 20
+
+typedef struct { int start, size, isFree; } Block;
+
+Block blocks[MAXB];
+int nbBlocks = 1;
+
+int allocate(int size) {
+    int idx, move;
+    for (idx = 0; idx < nbBlocks; idx++)
+        if (blocks[idx].isFree && blocks[idx].size >= size) {          (*@\cmt{الملاءمة الأولى}@*)
+            if (blocks[idx].size > size) {                             (*@\cmt{تقسيم}@*)
+                for (move = nbBlocks; move > idx + 1; move--) blocks[move] = blocks[move - 1];
+                blocks[idx + 1].start = blocks[idx].start + size;
+                blocks[idx + 1].size = blocks[idx].size - size;
+                blocks[idx + 1].isFree = 1;
+                nbBlocks++;
+            }
+            blocks[idx].size = size;
+            blocks[idx].isFree = 0;
+            return blocks[idx].start;
+        }
+    return -1;                                                         (*@\cmt{لا توجد كتلة كافية}@*)
+}
+
+void release(int start) {
+    int idx, move;
+    for (idx = 0; idx < nbBlocks; idx++) if (blocks[idx].start == start) blocks[idx].isFree = 1;
+    for (idx = 0; idx < nbBlocks - 1; ) {
+        if (blocks[idx].isFree && blocks[idx + 1].isFree) {            (*@\cmt{دمج المتجاورتين}@*)
+            blocks[idx].size += blocks[idx + 1].size;
+            for (move = idx + 1; move < nbBlocks - 1; move++) blocks[move] = blocks[move + 1];
+            nbBlocks--;
+        } else {
+            idx++;
+        }
+    }
+}
+
+void printMap(const char *label) {
+    int idx, cell, freeTotal = 0;
+    printf("%-12s|", label);
+    for (idx = 0; idx < nbBlocks; idx++) {
+        for (cell = 0; cell < blocks[idx].size; cell++) putchar(blocks[idx].isFree ? '.' : (idx % 2 ? '=' : '#'));   (*@\cmt{رمزان بالتناوب لتمييز الكتل}@*)
+        if (blocks[idx].isFree) freeTotal += blocks[idx].size;
+    }
+    printf("| free %d\n", freeTotal);
+}
+
+int main(void) {
+    int cart, wish, logs, report;
+    blocks[0].start = 0; blocks[0].size = ARENA; blocks[0].isFree = 1;
+    cart = allocate(16);   printMap("alloc 16");
+    wish = allocate(8);    printMap("alloc 8");
+    logs = allocate(20);   printMap("alloc 20");
+    release(wish);         printMap("free 8");
+    report = allocate(4);  printMap("alloc 4");
+    release(cart);         printMap("free 16");
+    printf("alloc 24 -> %d (40 cells free, but largest hole is 20)\n", allocate(24));
+    release(logs);         printMap("free 20");
+    printf("alloc 24 -> start %d\n", allocate(24));
+    printMap("final");
+    (void)report;
+    return 0;
+}

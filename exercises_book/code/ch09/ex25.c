@@ -1,0 +1,31 @@
+#include <stdio.h>
+
+#define NB 8
+
+typedef struct { int start, end; } Window;
+
+int main(void) {
+    Window windows[NB] = {{14, 16}, {9, 11}, {10, 12}, {18, 20}, {15, 17}, {8, 9}, {19, 21}, {13, 14}};
+    Window key, current;
+    int idx, back, busy = 0;
+    for (idx = 1; idx < NB; idx++) {                 // ترتيب حسب البداية
+        key = windows[idx];
+        for (back = idx - 1; back >= 0 && windows[back].start > key.start; back--)
+            windows[back + 1] = windows[back];
+        windows[back + 1] = key;
+    }
+    current = windows[0];
+    for (idx = 1; idx < NB; idx++) {
+        if (windows[idx].start <= current.end) {     // تداخل أو تلامس
+            if (windows[idx].end > current.end) current.end = windows[idx].end;
+        } else {
+            printf("Shift %02dh-%02dh\n", current.start, current.end);
+            busy += current.end - current.start;
+            current = windows[idx];
+        }
+    }
+    printf("Shift %02dh-%02dh\n", current.start, current.end);
+    busy += current.end - current.start;
+    printf("Driver works %d hours\n", busy);
+    return 0;
+}

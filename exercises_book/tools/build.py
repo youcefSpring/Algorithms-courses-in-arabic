@@ -108,7 +108,8 @@ def text_to_tex(s, codecmd=r"\code"):
     for i, p in enumerate(parts):
         if i % 2 == 1 and len(p) > 42 and codecmd == r"\code":
             # too long to stay inline (cannot wrap): own centered line
-            out.append(r"\par{\centering\small" + codecmd + "{" + esc_code(p) + r"}\par}")
+            size = r"\scriptsize" if len(p) > 70 else r"\small"
+            out.append(r"\par{\centering" + size + codecmd + "{" + esc_code(p) + r"}\par}")
         elif i % 2 == 1:
             out.append(codecmd + "{" + esc_code(p) + "}")
         else:

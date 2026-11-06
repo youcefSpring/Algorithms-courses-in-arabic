@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+#define LEN 5
+
+char code[LEN + 1];
+int count = 0;
+
+void generate(int pos, int previous) {
+    if (pos == LEN) {
+        code[LEN] = '\0';
+        printf("%s ", code);
+        if (++count % 7 == 0) printf("\n");
+        return;
+    }
+    code[pos] = '0';
+    generate(pos + 1, 0);
+    if (previous == 0) {                 // 1 مسموح فقط بعد 0
+        code[pos] = '1';
+        generate(pos + 1, 1);
+    }
+}
+
+int main(void) {
+    generate(0, 0);
+    printf("\n%d valid codes of length %d\n", count, LEN);
+    return 0;
+}

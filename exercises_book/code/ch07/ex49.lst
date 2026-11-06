@@ -1,0 +1,54 @@
+#include <stdio.h>
+
+int daysInMonth(int month, int year) {
+    int days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (month == 2 && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)) return 29;
+    return days[month - 1];
+}
+
+int dayOfWeek(int day, int month, int year) {    (*@\cmt{\cen{0} = السبت، \cen{6} = الجمعة}@*)
+    int century, yearOfCentury;
+    if (month < 3) { month += 12; year--; }
+    century = year / 100;
+    yearOfCentury = year % 100;
+    return (day + 13 * (month + 1) / 5 + yearOfCentury + yearOfCentury / 4
+            + century / 4 + 5 * century) % 7;
+}
+
+long dayNumber(int day, int month, int year) {
+    long total = 0;
+    int walk;
+    for (walk = 2000; walk < year; walk++) total += 365 + (daysInMonth(2, walk) == 29);
+    for (walk = 1; walk < month; walk++) total += daysInMonth(walk, year);
+    return total + day - 1;
+}
+
+void addBusinessDays(int date[], int count) {
+    int weekday;
+    while (count > 0) {
+        date[0]++;                                   (*@\cmt{اليوم التالي}@*)
+        if (date[0] > daysInMonth(date[1], date[2])) {
+            date[0] = 1;
+            if (++date[1] > 12) { date[1] = 1; date[2]++; }
+        }
+        weekday = dayOfWeek(date[0], date[1], date[2]);
+        if (weekday != 6 && weekday != 0) count--;   (*@\cmt{نتخطى الجمعة والسبت}@*)
+    }
+}
+
+int main(void) {
+    char names[7][4] = {"Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"};
+    int orders[3][3] = {{27, 11, 2026}, {29, 12, 2026}, {25, 2, 2028}};
+    int delays[3] = {3, 5, 4}, date[3], order;
+    for (order = 0; order < 3; order++) {
+        date[0] = orders[order][0]; date[1] = orders[order][1]; date[2] = orders[order][2];
+        printf("%s %02d/%02d/%d + %d business days -> ", names[dayOfWeek(date[0], date[1], date[2])],
+               date[0], date[1], date[2], delays[order]);
+        addBusinessDays(date, delays[order]);
+        printf("%s %02d/%02d/%d\n", names[dayOfWeek(date[0], date[1], date[2])],
+               date[0], date[1], date[2]);
+    }
+    printf("Days between 01/03/2026 and 06/11/2026: %ld\n",
+           dayNumber(6, 11, 2026) - dayNumber(1, 3, 2026));
+    return 0;
+}

@@ -1,0 +1,31 @@
+#include <stdio.h>
+
+#define ROWS 6
+#define COLS 10
+
+char plan[ROWS][COLS + 1] = {"..##......",
+                             "..##.####.",
+                             "####.#..#.",
+                             "....##..#.",
+                             ".##.######",
+                             ".#........"};
+
+int fill(int row, int col) {
+    if (row < 0 || row >= ROWS || col < 0 || col >= COLS || plan[row][col] != '.')
+        return 0;
+    plan[row][col] = 'o';                         // تمت زيارتها
+    return 1 + fill(row + 1, col) + fill(row - 1, col)
+             + fill(row, col + 1) + fill(row, col - 1);
+}
+
+int main(void) {
+    int row, col, zones = 0;
+    for (row = 0; row < ROWS; row++)
+        for (col = 0; col < COLS; col++)
+            if (plan[row][col] == '.') {
+                zones++;
+                printf("Zone %d from (%d,%d): %d cells\n", zones, row, col, fill(row, col));
+            }
+    for (row = 0; row < ROWS; row++) printf("%s\n", plan[row]);
+    return 0;
+}

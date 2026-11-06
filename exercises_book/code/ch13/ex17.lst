@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *newTree(int price, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->price = price; node->left = left; node->right = right;
+    return node;
+}
+
+int isValid(const Tree *node, long low, long high) {
+    if (node == NULL) return 1;
+    if (node->price <= low || node->price >= high) return 0;     (*@\cmt{خارج المجال المسموح}@*)
+    return isValid(node->left, low, node->price) && isValid(node->right, node->price, high);
+}
+
+int localCheck(const Tree *node) {                                (*@\cmt{اختبار ناقص}@*)
+    if (node == NULL) return 1;
+    if (node->left && node->left->price > node->price) return 0;
+    if (node->right && node->right->price < node->price) return 0;
+    return localCheck(node->left) && localCheck(node->right);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *good = newTree(30, newTree(20, newTree(10, NULL, NULL), newTree(25, NULL, NULL)), newTree(40, NULL, NULL));
+    Tree *bad = newTree(30, newTree(20, newTree(10, NULL, NULL), newTree(35, NULL, NULL)), newTree(40, NULL, NULL));
+    printf("tree 1: local %s, full %s\n", localCheck(good) ? "ok" : "bad", isValid(good, -1000000, 1000000) ? "VALID" : "INVALID");
+    printf("tree 2: local %s, full %s\n", localCheck(bad) ? "ok" : "bad", isValid(bad, -1000000, 1000000) ? "VALID" : "INVALID");
+    freeTree(good);
+    freeTree(bad);
+    return 0;
+}

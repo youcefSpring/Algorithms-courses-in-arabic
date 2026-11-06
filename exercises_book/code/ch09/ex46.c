@@ -1,0 +1,42 @@
+#include <stdio.h>
+
+#define NB 12
+
+typedef struct { double values[3]; int bought; } Visitor;
+
+double gini(int buyers, int total) {
+    double ratio;
+    if (total == 0) return 0;
+    ratio = (double)buyers / total;
+    return 1 - ratio * ratio - (1 - ratio) * (1 - ratio);
+}
+
+int main(void) {
+    Visitor visitors[NB] = {{{30, 2, 0}, 0}, {{240, 8, 5}, 1}, {{95, 4, 1}, 0}, {{310, 6, 7}, 1},
+                            {{60, 3, 2}, 0}, {{180, 9, 4}, 1}, {{150, 5, 0}, 0}, {{20, 1, 0}, 0},
+                            {{200, 4, 6}, 1}, {{130, 7, 3}, 1}, {{110, 6, 4}, 0}, {{270, 3, 4}, 1}};
+    char names[3][10] = {"duration", "pages", "photos"};
+    int feat, cand, idx, nLeft, nRight, buyLeft, buyRight, bestFeat = 0, correct = 0;
+    double threshold, score, bestGini = 2, bestThreshold = 0;
+    for (feat = 0; feat < 3; feat++)
+        for (cand = 0; cand < NB; cand++) {
+            threshold = visitors[cand].values[feat];
+            nLeft = nRight = buyLeft = buyRight = 0;
+            for (idx = 0; idx < NB; idx++) {
+                if (visitors[idx].values[feat] < threshold) { nLeft++; buyLeft += visitors[idx].bought; }
+                else { nRight++; buyRight += visitors[idx].bought; }
+            }
+            score = (nLeft * gini(buyLeft, nLeft) + nRight * gini(buyRight, nRight)) / NB;
+            if (score < bestGini) {                      // أنقى تقسيم
+                bestGini = score;
+                bestFeat = feat;
+                bestThreshold = threshold;
+            }
+        }
+    for (idx = 0; idx < NB; idx++)
+        correct += (visitors[idx].values[bestFeat] >= bestThreshold) == visitors[idx].bought;
+    printf("Rule: buyer if %s >= %.0f\n", names[bestFeat], bestThreshold);
+    printf("Weighted Gini: %.4f\n", bestGini);
+    printf("Training accuracy: %d/%d\n", correct, NB);
+    return 0;
+}

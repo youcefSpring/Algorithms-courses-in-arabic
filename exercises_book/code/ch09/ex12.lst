@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+#define NB 6
+
+typedef struct {
+    int code;
+    char name[20];
+    double price;
+} Product;
+
+int main(void) {
+    Product items[NB] = {{101, "Monitor", 32000}, {102, "Mouse", 1500}, {103, "Laptop", 89000},
+                         {104, "Keyboard", 3200}, {105, "Webcam", 4100}, {106, "Cable", 450}};
+    Product tmp;
+    int pos, idx, minIdx;
+    for (pos = 0; pos < NB - 1; pos++) {
+        minIdx = pos;
+        for (idx = pos + 1; idx < NB; idx++)
+            if (items[idx].price < items[minIdx].price) minIdx = idx;
+        tmp = items[pos];                 (*@\cmt{تبديل الهيكلين كاملين}@*)
+        items[pos] = items[minIdx];
+        items[minIdx] = tmp;
+    }
+    for (idx = 0; idx < NB; idx++)
+        printf("%d %-9s %9.2f\n", items[idx].code, items[idx].name, items[idx].price);
+    return 0;
+}

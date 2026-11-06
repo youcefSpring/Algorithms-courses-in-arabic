@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("products.txt", "w");
+    char name[30];
+    double price, total = 0;
+    int qty;
+    fprintf(file, "Mouse 1500 12\nKeyboard 3200 5\nMonitor 32000 3\nCable 450 40\n");
+    fclose(file);
+    file = fopen("products.txt", "r");
+    if (file == NULL) return 1;
+    while (fscanf(file, "%29s %lf %d", name, &price, &qty) == 3) {   (*@\cmt{\cen{3} قيم مقروءة}@*)
+        printf("%-9s %9.2f\n", name, price * qty);
+        total += price * qty;
+    }
+    fclose(file);
+    printf("Stock value: %.2f DA\n", total);
+    return 0;
+}

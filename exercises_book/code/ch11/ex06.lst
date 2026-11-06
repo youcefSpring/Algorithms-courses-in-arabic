@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("reviews.txt", "w");
+    int ch, chars = 0, words = 0, lines = 0, inWord = 0;
+    fprintf(file, "Great phone, fast delivery.\nBattery could be better\n");
+    fprintf(file, "  Excellent   value for money!\n");
+    fclose(file);
+    file = fopen("reviews.txt", "r");
+    if (file == NULL) return 1;
+    while ((ch = fgetc(file)) != EOF) {
+        chars++;
+        if (ch == '\n') lines++;
+        if (ch == ' ' || ch == '\n' || ch == '\t') {
+            inWord = 0;
+        } else if (!inWord) {
+            words++;                          (*@\cmt{بداية كلمة جديدة}@*)
+            inWord = 1;
+        }
+    }
+    fclose(file);
+    printf("%d lines, %d words, %d chars\n", lines, words, chars);
+    return 0;
+}

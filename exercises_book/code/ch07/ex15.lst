@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+void sortPrices(double prices[], int size) {
+    int pass, idx;
+    double tmp;
+    for (pass = 0; pass < size - 1; pass++)
+        for (idx = 0; idx < size - 1 - pass; idx++)
+            if (prices[idx] > prices[idx + 1]) {
+                tmp = prices[idx];                (*@\cmt{تبديل}@*)
+                prices[idx] = prices[idx + 1];
+                prices[idx + 1] = tmp;
+            }
+}
+
+void printPrices(double prices[], int size) {
+    int idx;
+    for (idx = 0; idx < size; idx++)
+        printf("%.0f ", prices[idx]);
+    printf("\n");
+}
+
+int main(void) {
+    double prices[7] = {4500, 1200, 899, 27000, 650, 3200, 12500};
+    printf("Before: ");
+    printPrices(prices, 7);
+    sortPrices(prices, 7);                        (*@\cmt{يعدل الجدول الأصلي}@*)
+    printf("After:  ");
+    printPrices(prices, 7);
+    return 0;
+}

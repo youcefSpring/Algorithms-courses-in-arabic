@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+double square(double value) {
+    return value * value;
+}
+
+int main(void) {
+    double real[5] = {120, 135, 128, 150, 142};
+    double predicted[5] = {118, 130, 133, 147, 145};
+    double sse = 0;
+    int day;
+    for (day = 0; day < 5; day++)
+        sse += square(real[day] - predicted[day]);   // الخطأ مرفوع للمربع
+    printf("Sum of squared errors: %.1f\n", sse);
+    printf("Mean squared error:    %.1f\n", sse / 5);
+    return 0;
+}

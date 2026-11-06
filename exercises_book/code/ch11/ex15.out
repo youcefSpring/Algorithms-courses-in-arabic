@@ -1,0 +1,4 @@
+[101 Mouse 12] [102 Keyboard 5] [103 Monitor 3] [104 Cable 40] 
+record 2 (Monitor): stock -1 -> 2
+record 0 (Mouse): stock +20 -> 32
+[101 Mouse 32] [102 Keyboard 5] [103 Monitor 2] [104 Cable 40] 

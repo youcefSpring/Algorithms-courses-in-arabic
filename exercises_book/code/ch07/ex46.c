@@ -1,0 +1,42 @@
+#include <stdio.h>
+
+double demand(double price) {
+    return 120 / (1 + 0.04 * price * price);
+}
+
+double profit(double price) {
+    return (price - 2) * demand(price) - 40;
+}
+
+double bisection(double low, double high, double tolerance) {
+    double middle;
+    int steps = 0;
+    while (high - low > tolerance) {
+        middle = (low + high) / 2;
+        if (profit(low) * profit(middle) <= 0) high = middle;   // الجذر في النصف الأيسر
+        else low = middle;
+        steps++;
+    }
+    printf("Bisection: %d steps\n", steps);
+    return (low + high) / 2;
+}
+
+double bestPrice(double low, double high) {
+    double third1, third2;
+    while (high - low > 1e-6) {
+        third1 = low + (high - low) / 3;
+        third2 = high - (high - low) / 3;
+        if (profit(third1) < profit(third2)) low = third1;    // القمة ليست في الثلث الأيسر
+        else high = third2;
+    }
+    return (low + high) / 2;
+}
+
+int main(void) {
+    double breakEven = bisection(2, 6, 1e-6);
+    double best = bestPrice(2, 20);
+    printf("Break-even price: %.4f thousand DA (profit %.6f)\n", breakEven, profit(breakEven));
+    printf("Best price: %.4f thousand DA, max profit %.3f\n", best, profit(best));
+    printf("Demand at best price: %.1f units\n", demand(best));
+    return 0;
+}

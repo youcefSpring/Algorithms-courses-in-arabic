@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int unique(int *codes, int size) {
+    int *write = codes, *read;
+    if (size == 0) return 0;
+    for (read = codes + 1; read < codes + size; read++)
+        if (*read != *write)
+            *++write = *read;            // عنصر جديد: نتقدم ثم ننسخ
+    return (int)(write - codes) + 1;
+}
+
+int main(void) {
+    int codes[14] = {101, 101, 105, 110, 110, 110, 204, 204, 330, 412, 412, 412, 412, 500};
+    int size = unique(codes, 14), idx;
+    printf("%d distinct codes:", size);
+    for (idx = 0; idx < size; idx++) printf(" %d", codes[idx]);
+    printf("\n");
+    return 0;
+}

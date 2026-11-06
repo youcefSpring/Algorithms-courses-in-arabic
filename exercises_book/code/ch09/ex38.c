@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+typedef struct { char name[12]; double prices[10]; } History;
+
+double largestDrop(History item, int weeks[]) {
+    double peak = item.prices[0], best = 0;
+    int week, peakWeek = 0;
+    weeks[0] = weeks[1] = 0;
+    for (week = 1; week < 10; week++) {
+        if (peak - item.prices[week] > best) {
+            best = peak - item.prices[week];
+            weeks[0] = peakWeek;
+            weeks[1] = week;
+        }
+        if (item.prices[week] > peak) { peak = item.prices[week]; peakWeek = week; }   // قمة جديدة
+    }
+    return best;
+}
+
+int main(void) {
+    History items[3] = {{"Phone", {32000, 33500, 31000, 34500, 30000, 29000, 31500, 28000, 29500, 30500}},
+                        {"Laptop", {89000, 87000, 91000, 90500, 88000, 92000, 95000, 94000, 93000, 96000}},
+                        {"Earbuds", {5400, 5200, 5000, 4800, 4600, 4500, 4400, 4300, 4200, 4100}}};
+    int idx, weeks[2];
+    double drop;
+    for (idx = 0; idx < 3; idx++) {
+        drop = largestDrop(items[idx], weeks);
+        printf("%-8s largest drop %6.0f DA (week %d -> week %d, -%.1f%%)\n", items[idx].name,
+               drop, weeks[0] + 1, weeks[1] + 1, 100 * drop / items[idx].prices[weeks[0]]);
+    }
+    return 0;
+}

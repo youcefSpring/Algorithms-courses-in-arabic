@@ -1,0 +1,43 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الهيكل} \code{struct}: نوع جديد يجمع \textbf{حقولًا} من أنواع مختلفة تصف كيانًا واحدًا (منتج، زبون، طلبية).
+    \item \textbf{التعريف}: \code{typedef struct \{ int code; double price; \} Product;}
+    \item \textbf{الوصول إلى الحقل} بالنقطة: \code{item.price}، وفي هيكل متداخل: \code{order.client.name}.
+    \item \textbf{الإسناد} \code{copy = item;} ينسخ كل الحقول، بما فيها الجداول الداخلية.
+    \item \textbf{التعداد} \code{enum}: أسماء لقيم صحيحة ثابتة (\code{PENDING}، \code{PAID}، ...).
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    fld/.style={draw=brandTeal, fill=white, thick, minimum width=2.4cm,
+        minimum height=0.65cm, font=\small},
+    lbl/.style={font=\small\bfseries, lawn=tealDeep}]
+    \node[draw=brandOrange, fill=brandOrange!10, very thick, rounded corners=4pt,
+        minimum width=3cm, minimum height=3.4cm] (box) at (0,0) {};
+    \node[font=\small\bfseries, lawn=brandOrange] at (0,1.95) {\code{Product item}};
+    \foreach \v/\n [count=\i from 0] in {2045/code, Laptop/name, 89000/price, 4/stock} {
+        \node[fld] at (0, 1.05-0.72*\i) {\en{\v}};
+        \node[lbl, anchor=west] at (1.4, 1.05-0.72*\i) {\code{.\n}};
+    }
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{الاستعمال} & \ras{مثال} \\ \hline
+جدول من الهياكل & \code{Product items[50];} ثم \code{items[idx].price} \\ \hline
+تمرير إلى دالة & بالقيمة (نسخة)؛ لتعديله نمرر جدولًا من خانة واحدة \code{Cart cart[]} \\ \hline
+إعادة عدة نتائج & الدالة تعيد هيكلًا: \code{Summary describe(...)} \\ \hline
+بنى المعطيات & مكدس، طابور، كومة، جدول تجزئة: هيكل = جدول + عدادات \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad المقارنة غير مباشرة}
+لا يمكن مقارنة هيكلين بـ \code{==}: نقارن الحقول واحدًا واحدًا، أو نكتب دالة مقارنة مثل
+\code{compareDates(first, second)}.
+\end{obox}
+
+\chaprefs{king,deitel,weiss,islr}
+\insertstats{09}

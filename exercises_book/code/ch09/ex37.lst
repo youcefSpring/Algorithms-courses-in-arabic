@@ -1,0 +1,35 @@
+#include <stdio.h>
+
+#define NB 4
+
+typedef struct { char name[10]; double values[4]; double score; } Supplier;
+
+int main(void) {
+    Supplier list[NB] = {{"AlphaTec", {1200, 5, 2.0, 4.1}, 0}, {"BetaCom", {1050, 9, 3.5, 3.8}, 0},
+                         {"Gamma", {1350, 3, 0.8, 4.6}, 0}, {"Delta", {1100, 6, 1.5, 4.0}, 0}};
+    double weights[4] = {0.40, 0.25, 0.20, 0.15};
+    int lowerBetter[4] = {1, 1, 1, 0};
+    double low, high, norm;
+    Supplier tmp;
+    int crit, idx, pass;
+    for (crit = 0; crit < 4; crit++) {
+        low = high = list[0].values[crit];
+        for (idx = 1; idx < NB; idx++) {
+            if (list[idx].values[crit] < low) low = list[idx].values[crit];
+            if (list[idx].values[crit] > high) high = list[idx].values[crit];
+        }
+        for (idx = 0; idx < NB; idx++) {
+            norm = lowerBetter[crit] ? (high - list[idx].values[crit]) / (high - low)
+                                     : (list[idx].values[crit] - low) / (high - low);
+            list[idx].score += weights[crit] * norm;          (*@\cmt{مساهمة المعيار}@*)
+        }
+    }
+    for (pass = 0; pass < NB - 1; pass++)
+        for (idx = 0; idx < NB - 1 - pass; idx++)
+            if (list[idx].score < list[idx + 1].score) {
+                tmp = list[idx]; list[idx] = list[idx + 1]; list[idx + 1] = tmp;
+            }
+    for (idx = 0; idx < NB; idx++)
+        printf("%d. %-9s score %.3f\n", idx + 1, list[idx].name, list[idx].score);
+    return 0;
+}

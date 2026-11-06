@@ -1,0 +1,6 @@
+to 1:  7 km via 0 1
+to 2:  9 km via 0 2
+to 3: 20 km via 0 2 3
+to 4: 20 km via 0 2 5 4
+to 5: 11 km via 0 2 5
+to 6: 25 km via 0 2 5 4 6

@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+#define NB 15
+
+int calls = 0;
+
+int partition(double values[], int low, int high) {
+    double pivot = values[high], tmp;
+    int store = low, idx;
+    for (idx = low; idx < high; idx++)
+        if (values[idx] < pivot) {
+            tmp = values[idx]; values[idx] = values[store]; values[store] = tmp;
+            store++;
+        }
+    tmp = values[store]; values[store] = values[high]; values[high] = tmp;
+    return store;                                  (*@\cmt{الموضع النهائي للمحور}@*)
+}
+
+double quickSelect(double values[], int low, int high, int rank) {
+    int pivotPos;
+    calls++;
+    if (low == high) return values[low];
+    pivotPos = partition(values, low, high);
+    if (rank == pivotPos) return values[pivotPos];
+    if (rank < pivotPos) return quickSelect(values, low, pivotPos - 1, rank);
+    return quickSelect(values, pivotPos + 1, high, rank);   (*@\cmt{جهة واحدة فقط}@*)
+}
+
+int main(void) {
+    double prices[NB] = {32000, 29500, 31000, 89000, 30500, 28900, 33000, 27500,
+                         35000, 30000, 29900, 31500, 120000, 30800, 28000};
+    double median, low, high;
+    median = quickSelect(prices, 0, NB - 1, NB / 2);
+    printf("Median price: %.0f DA (%d calls)\n", median, calls);
+    low = quickSelect(prices, 0, NB - 1, 3);
+    high = quickSelect(prices, 0, NB - 1, NB - 4);
+    printf("4th lowest: %.0f, 4th highest: %.0f\n", low, high);
+    return 0;
+}

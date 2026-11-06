@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+double toDouble(const char *text) {
+    double value = 0, scale = 1;
+    while (*text >= '0' && *text <= '9') value = value * 10 + (*text++ - '0');
+    if (*text == '.') for (text++; *text >= '0' && *text <= '9'; text++) value += (*text - '0') * (scale /= 10);
+    return value;
+}
+
+int main(void) {
+    FILE *input = fopen("team.csv", "w"), *report;
+    char line[100], *fields[3], shortName[12];
+    double total = 0;
+    int pos, count, len, ch;
+    fprintf(input, "name,city,sales\nRania Belkacem,Oran,820000\nHakim,Algiers,640000.5\n");
+    fprintf(input, "Selma Ait-Mohand,Tizi Ouzou,910000\nOmar,Setif,505000\n");
+    fclose(input);
+    input = fopen("team.csv", "r");
+    report = fopen("team_report.txt", "w");
+    fgets(line, 100, input);                                 (*@\cmt{العناوين}@*)
+    fprintf(report, "+------------+------------+--------------+\n");
+    fprintf(report, "| %-10s | %-10s | %12s |\n", "Name", "City", "Sales");
+    fprintf(report, "+------------+------------+--------------+\n");
+    while (fgets(line, 100, input) != NULL) {
+        fields[0] = line;
+        for (pos = 0, count = 1; line[pos] != '\n' && line[pos] != '\0'; pos++)
+            if (line[pos] == ',') { line[pos] = '\0'; fields[count++] = line + pos + 1; }
+        line[pos] = '\0';
+        for (len = 0; fields[0][len] != '\0'; len++) {}
+        for (pos = 0; pos < 10 && pos < len; pos++) shortName[pos] = fields[0][pos];
+        if (len > 10) shortName[9] = '.';                    (*@\cmt{قص الاسم الطويل}@*)
+        shortName[pos] = '\0';
+        fprintf(report, "| %-10s | %-10.10s | %12.2f |\n", shortName, fields[1], toDouble(fields[2]));
+        total += toDouble(fields[2]);
+    }
+    fprintf(report, "+------------+------------+--------------+\n");
+    fprintf(report, "| %-23s | %12.2f |\n", "TOTAL", total);
+    fclose(input);
+    fclose(report);
+    report = fopen("team_report.txt", "r");
+    while ((ch = fgetc(report)) != EOF) putchar(ch);
+    fclose(report);
+    return 0;
+}

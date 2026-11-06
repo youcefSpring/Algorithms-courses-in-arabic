@@ -1,0 +1,36 @@
+#include <stdio.h>
+
+void appendOp(char type, double amount) {
+    FILE *file = fopen("ledger.txt", "a");
+    fprintf(file, "%c %.2f\n", type, amount);
+    fclose(file);
+}
+
+double replay(int *count) {
+    FILE *file = fopen("ledger.txt", "r");
+    char type;
+    double amount, balance = 0;
+    *count = 0;
+    if (file == NULL) return 0;
+    while (fscanf(file, " %c %lf", &type, &amount) == 2) {
+        if (type == 'D') balance += amount;
+        else balance -= amount;                      // W أو F
+        (*count)++;
+    }
+    fclose(file);
+    return balance;
+}
+
+int main(void) {
+    FILE *file = fopen("ledger.txt", "w");          // دفتر جديد
+    int count;
+    double balance;
+    fclose(file);
+    appendOp('D', 5000); appendOp('W', 1200); appendOp('F', 50);
+    balance = replay(&count);
+    printf("After %d ops: %.2f DA\n", count, balance);
+    appendOp('D', 2500); appendOp('W', 4000);
+    balance = replay(&count);
+    printf("After %d ops: %.2f DA\n", count, balance);
+    return 0;
+}

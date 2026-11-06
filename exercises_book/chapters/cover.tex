@@ -1,37 +1,96 @@
+% Front cover (elegant, print-ready: full bleed background, no page number)
 \begin{titlepage}
+\thispagestyle{empty}
 \begin{tikzpicture}[remember picture, overlay]
-    \fill[brandLight] (current page.south west) rectangle (current page.north east);
-    \fill[brandDark] (current page.north west) rectangle ([yshift=-9cm]current page.north east);
-    \draw[brandTeal, line width=2pt, opacity=0.5]
-        ([xshift=-2cm, yshift=3cm]current page.south east) circle (5cm);
-    \draw[brandOrange, line width=1pt, opacity=0.5]
-        ([xshift=-2cm, yshift=3cm]current page.south east) circle (6cm);
-    \draw[brandTeal, line width=1pt, opacity=0.4]
-        ([xshift=3cm, yshift=-2cm]current page.north west) circle (7cm);
-    % small flowchart motif
-    \begin{scope}[shift={([xshift=4.2cm, yshift=7.5cm]current page.south west)}, scale=0.9]
-        \node[fterm, minimum width=1.6cm] (a) at (0,3.2) {بداية};
-        \node[fio, text width=1.4cm] (b) at (0,2.1) {\fc{n}};
-        \node[fdec, text width=1cm] (c) at (0,0.8) {\fc{i<n}};
-        \node[fproc, text width=1.6cm] (d) at (0,-0.6) {\fc{s=s+p[i]}};
-        \node[fterm, minimum width=1.6cm] (e) at (2.6,-0.6) {نهاية};
-        \draw[sahm] (a) -- (b); \draw[sahm] (b) -- (c); \draw[sahm] (c) -- (d);
-        \draw[sahm] (c.east) -| (e.north);
-        \draw[sahm] (d.south) -- ++(0,-0.4) -- ++(-1.6,0) |- (c.west);
+    % paper
+    \fill[coverPaper] (current page.south west) rectangle (current page.north east);
+    % spine-side band (right side for an Arabic book)
+    \fill[coverInk] ([xshift=-2.1cm]current page.north east) rectangle (current page.south east);
+    \fill[coverGold] ([xshift=-2.25cm]current page.north east) rectangle ([xshift=-2.1cm]current page.south east);
+    % vertical band text
+    \node[rotate=90, font=\khatt\bfseries\large, lawn=coverPaper]
+        at ([xshift=-1.05cm, yshift=-14.85cm]current page.north east)
+        {الخوارزميات ولغة \en{C}\quad{\tiny\faCircle}\quad كتاب التمارين المحلولة};
+    % fine double frame
+    \draw[coverInk!70, line width=0.6pt]
+        ([xshift=1.2cm, yshift=1.2cm]current page.south west) rectangle
+        ([xshift=-3.0cm, yshift=-1.2cm]current page.north east);
+    \draw[coverGold, line width=0.3pt]
+        ([xshift=1.35cm, yshift=1.35cm]current page.south west) rectangle
+        ([xshift=-3.15cm, yshift=-1.35cm]current page.north east);
+
+    % ---- top label
+    \node[anchor=north, font=\khatt\bfseries\large, lawn=coverGold!80!black]
+        at ([xshift=-0.9cm, yshift=-3.0cm]current page.north)
+        {سلسلة أساسيات البرمجة};
+    \draw[coverGold, line width=0.8pt]
+        ([xshift=-3.4cm, yshift=-3.85cm]current page.north) --
+        ([xshift=1.6cm, yshift=-3.85cm]current page.north);
+    \fill[coverGold] ([xshift=-0.9cm, yshift=-3.85cm]current page.north) circle (2.2pt);
+
+    % ---- title
+    \node[anchor=north, align=center, font=\khatt\bfseries, lawn=coverInk]
+        at ([xshift=-0.9cm, yshift=-4.6cm]current page.north)
+        {\fontsize{34}{44}\selectfont الخوارزميات ولغة \en{C}\\[0.35cm]
+         \fontsize{26}{34}\selectfont كتاب التمارين المحلولة};
+    \node[anchor=north, align=center, font=\Large, lawn=coverInk!75]
+        at ([xshift=-0.9cm, yshift=-9.4cm]current page.north)
+        {\en{650} تمرينًا محلولًا بالتفصيل من التجارة الإلكترونية وعلم البيانات};
+
+    % ---- central emblem: a refined flowchart in a circle
+    \begin{scope}[shift={([xshift=-0.9cm, yshift=-15.6cm]current page.north)}]
+        \fill[white] (0,0) circle (3.3cm);
+        \draw[coverGold, line width=1pt] (0,0) circle (3.3cm);
+        \draw[coverInk!40, line width=0.4pt] (0,0) circle (3.1cm);
+        \node[fterm, fill=coverInk, draw=coverInk, minimum width=1.5cm, minimum height=0.55cm] (ca) at (0,2.2) {بداية};
+        \node[fio, text width=1.3cm, draw=coverGold!90!black, fill=coverGold!15] (cb) at (0,1.2) {\fc{price}};
+        \node[fdec, text width=0.9cm, draw=coverInk!80, fill=coverPaper] (cc) at (0,-0.15) {\fc{i<n}};
+        \node[fproc, text width=1.7cm, draw=coverInk!80, fill=brandTeal!10] (cd) at (0,-1.55) {\fc{sum+=p[i]}};
+        \node[fterm, fill=coverInk, draw=coverInk, minimum width=1.3cm, minimum height=0.55cm] (ce) at (2.1,-1.55) {نهاية};
+        \draw[sahm, coverInk!70] (ca) -- (cb); \draw[sahm, coverInk!70] (cb) -- (cc);
+        \draw[sahm, coverInk!70] (cc) -- (cd);
+        \draw[sahm, coverInk!70] (cc.east) -| (ce.north);
+        \draw[sahm, coverInk!70] (cd.south) -- ++(0,-0.35) -- ++(-1.55,0) |- (cc.west);
     \end{scope}
-    \node[anchor=north east, align=right] at ([xshift=-1.8cm, yshift=-2.2cm]current page.north east) {%
-        {\color{brandTeal}\khatt\bfseries\Large الخوارزميات ولغة \en{C}}\\[0.6cm]
-        {\color{white}\khatt\bfseries\fontsize{40}{48}\selectfont كتاب التمارين المحلولة}\\[0.5cm]
-        {\color{brandOrange}\Large \en{650} تمرينًا من التجارة الإلكترونية وعلم البيانات}};
-    \node[anchor=north east, align=right, text width=11cm] at ([xshift=-1.8cm, yshift=-11cm]current page.north east) {%
-        \color{brandDark}\large
-        \faCheckCircle\ \textbf{\en{13} فصلًا}: من المتغيرات إلى الأشجار الثنائية\\[3pt]
-        \faCheckCircle\ لكل فصل \textbf{\en{50} تمرينًا}: \en{10} سهلة، \en{30} متوسطة، \en{10} صعبة\\[3pt]
-        \faCheckCircle\ لكل تمرين: نص، خطوات الحل، برنامج \en{C} مشروح، نتيجة التنفيذ، ومخطط انسيابي\\[3pt]
-        \faCheckCircle\ دون أي دالة جاهزة: كل خوارزمية مكتوبة يدويًا};
-    \node[anchor=south east, align=right] at ([xshift=-1.8cm, yshift=2.5cm]current page.south east) {%
-        \color{brandMuted}\large
-        \textbf{الأستاذ:} \teacher\\[4pt]
-        \textbf{الفئة:} \audience};
+
+    % ---- three key figures
+    \begin{scope}[shift={([xshift=-0.9cm, yshift=-21.0cm]current page.north)}]
+        \foreach \x/\num/\lbl in {4.2/13/فصلًا, 0/650/تمرينًا, -4.2/3/مستويات} {
+            \node[font=\fontsize{22}{24}\selectfont\bfseries, lawn=coverInk] at (\x,0.25) {\en{\num}};
+            \node[font=\khatt\large, lawn=coverGold!80!black] at (\x,-0.6) {\lbl};
+        }
+        \draw[coverGold!70, line width=0.4pt] (2.1,0.6) -- (2.1,-0.9);
+        \draw[coverGold!70, line width=0.4pt] (-2.1,0.6) -- (-2.1,-0.9);
+    \end{scope}
+
+    % ---- author
+    \node[anchor=south, align=center, lawn=coverInk]
+        at ([xshift=-0.9cm, yshift=2.3cm]current page.south) {%
+        {\khatt\bfseries\LARGE\color{coverInk}\teacher}\\[4pt]
+        {\large\color{coverInk!70}\audience\quad{\tiny\faCircle}\quad\en{2026}}};
 \end{tikzpicture}
 \end{titlepage}
+
+% ---- copyright / legal page (verso of the cover)
+\thispagestyle{empty}
+\null\vfill
+\begin{minipage}{\linewidth}
+\small\color{brandDark}
+{\khatt\bfseries\large الخوارزميات ولغة \en{C}: كتاب التمارين المحلولة}\par
+\vspace{4pt}
+\textbf{تأليف:} \teacher\par
+\textbf{الطبعة:} الأولى، \en{2026}\par
+\textbf{ردمك} \en{(ISBN)}: \en{\bookISBN}\par
+\textbf{الإيداع القانوني:} \en{\bookDepot}\par
+\vspace{8pt}
+{\color{brandMuted!60}\rule{\linewidth}{0.4pt}}\par
+\vspace{4pt}
+\copyright\ \en{2026} \teacher. جميع الحقوق محفوظة للمؤلف.
+لا يجوز نسخ أي جزء من هذا الكتاب أو نشره أو تخزينه أو نقله بأي وسيلة كانت،
+إلكترونية أو ميكانيكية، بالتصوير أو التسجيل أو غير ذلك، دون إذن كتابي مسبق من المؤلف،
+باستثناء الاقتباسات القصيرة لأغراض التعليم والنقد مع ذكر المصدر.\par
+\vspace{4pt}
+جميع البرامج الواردة في الكتاب تُرجمت بالمترجم \en{gcc} وفق المعيار \en{C99}
+ونُفّذت، والنتائج المعروضة هي نتائج التنفيذ الحقيقية. أسماء المنتجات والمتاجر في التمارين خيالية.
+\end{minipage}
+\clearpage

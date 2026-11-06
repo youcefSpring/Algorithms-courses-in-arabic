@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node { char word[12]; int count; struct Node *next; } Node;
+
+int compareText(const char *first, const char *second) {
+    while (*first != '\0' && *first == *second) { first++; second++; }
+    return *first - *second;
+}
+
+int main(void) {
+    const char *tags[12] = {"wireless", "usb", "gaming", "usb", "rgb", "wireless", "fast",
+                            "gaming", "usb", "audio", "rgb", "usb"};
+    Node *head = NULL, **link, *node, *next;
+    int idx, pos;
+    for (idx = 0; idx < 12; idx++) {
+        link = &head;
+        while (*link != NULL && compareText((*link)->word, tags[idx]) < 0) link = &(*link)->next;
+        if (*link != NULL && compareText((*link)->word, tags[idx]) == 0) {
+            (*link)->count++;                                  // موجودة
+        } else {
+            node = malloc(sizeof(Node));                       // إدراج في مكانها
+            for (pos = 0; (node->word[pos] = tags[idx][pos]) != '\0'; pos++) {}
+            node->count = 1;
+            node->next = *link;
+            *link = node;
+        }
+    }
+    for (node = head; node != NULL; node = node->next) printf("%-9s %d\n", node->word, node->count);
+    for (node = head; node != NULL; node = next) { next = node->next; free(node); }
+    return 0;
+}

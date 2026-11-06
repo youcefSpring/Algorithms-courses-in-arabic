@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+#define NB 12
+
+int comparisons = 0;
+
+void quickSort(int prices[], int low, int high) {
+    int pivot, left = low, right = high, tmp;
+    if (low >= high) return;
+    pivot = prices[(low + high) / 2];
+    while (left <= right) {
+        while (++comparisons && prices[left] < pivot) left++;
+        while (++comparisons && prices[right] > pivot) right--;
+        if (left <= right) {
+            tmp = prices[left]; prices[left] = prices[right]; prices[right] = tmp;
+            left++;
+            right--;
+        }
+    }
+    printf("pivot %5d on [%2d..%2d] -> [%2d..%2d] | [%2d..%2d]\n",
+           pivot, low, high, low, right, left, high);
+    quickSort(prices, low, right);             // الجزء الأصغر من المحور
+    quickSort(prices, left, high);             // الجزء الأكبر
+}
+
+int main(void) {
+    int prices[NB] = {4500, 1200, 899, 27000, 650, 3200, 12500, 99, 7800, 2300, 560, 4100};
+    int idx;
+    quickSort(prices, 0, NB - 1);
+    for (idx = 0; idx < NB; idx++) printf("%d ", prices[idx]);
+    printf("\n%d comparisons\n", comparisons);
+    return 0;
+}

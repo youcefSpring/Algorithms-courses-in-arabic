@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char symbol; long weight; struct Tree *left, *right; } Tree;
+
+long totalBits = 0;
+
+Tree *newTree(char symbol, long weight, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->symbol = symbol; node->weight = weight; node->left = left; node->right = right;
+    return node;
+}
+
+void printCodes(const Tree *node, char *code, int depth) {
+    if (node->left == NULL) {                              // ورقة
+        code[depth] = '\0';
+        printf("  %c  weight %5ld  code %-5s (%d bits)\n", node->symbol, node->weight, code, depth);
+        totalBits += node->weight * depth;
+        return;
+    }
+    code[depth] = '0'; printCodes(node->left, code, depth + 1);
+    code[depth] = '1'; printCodes(node->right, code, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    char symbols[5] = {'D', 'S', 'P', 'C', 'R'};
+    long counts[5] = {6200, 1800, 1300, 450, 250}, total = 0;
+    Tree *forest[5];
+    char code[10];
+    int nbTrees = 5, idx, first, second, tmp;
+    for (idx = 0; idx < 5; idx++) { forest[idx] = newTree(symbols[idx], counts[idx], NULL, NULL); total += counts[idx]; }
+    while (nbTrees > 1) {
+        first = 0; second = 1;
+        if (forest[second]->weight < forest[first]->weight) { tmp = first; first = second; second = tmp; }
+        for (idx = 2; idx < nbTrees; idx++) {               // أصغر وزنين
+            if (forest[idx]->weight < forest[first]->weight) { second = first; first = idx; }
+            else if (forest[idx]->weight < forest[second]->weight) second = idx;
+        }
+        forest[first] = newTree('*', forest[first]->weight + forest[second]->weight, forest[first], forest[second]);
+        forest[second] = forest[--nbTrees];                 // نزيل الثانية
+    }
+    printCodes(forest[0], code, 0);
+    printf("Huffman: %ld bits, fixed 3-bit: %ld bits\n", totalBits, total * 3);
+    printf("Average %.3f bits/symbol, saving %.1f%%\n", (double)totalBits / total,
+           100.0 * (1 - (double)totalBits / (total * 3)));
+    freeTree(forest[0]);
+    return 0;
+}

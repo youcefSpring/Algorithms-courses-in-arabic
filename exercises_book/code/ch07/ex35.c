@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+int binarySearch(int codes[], int size, int target, int steps[]) {
+    int low = 0, high = size - 1, middle;
+    steps[0] = 0;
+    while (low <= high) {
+        middle = (low + high) / 2;
+        steps[0]++;                            // مقارنة إضافية
+        if (codes[middle] == target) return middle;
+        if (codes[middle] < target) low = middle + 1;   // النصف الأيمن
+        else high = middle - 1;                          // النصف الأيسر
+    }
+    return -1;
+}
+
+int main(void) {
+    int codes[16], steps[1], idx, query, target, found;
+    for (idx = 0; idx < 16; idx++) codes[idx] = 1015 + idx * 447;   // كتالوج مرتب
+    for (query = 0; query < 3; query++) {
+        scanf("%d", &target);
+        found = binarySearch(codes, 16, target, steps);
+        printf("Code %d: index %d after %d comparisons (linear: %d)\n",
+               target, found, steps[0], found >= 0 ? found + 1 : 16);
+    }
+    return 0;
+}

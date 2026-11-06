@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { const char *text; struct Tree *left, *right; } Tree;
+
+Tree *newTree(const char *text, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    node->text = text; node->left = left; node->right = right;
+    return node;
+}
+
+const Tree *steps[10];
+char answers[10];
+int ruleCount = 0;
+
+void printRules(const Tree *node, int depth) {
+    int idx;
+    if (node->left == NULL && node->right == NULL) {          // ورقة: قرار
+        printf("R%d: IF", ++ruleCount);
+        for (idx = 0; idx < depth; idx++)
+            printf("%s %s%s", idx ? " AND" : "", answers[idx] == 'N' ? "NOT " : "", steps[idx]->text);
+        printf(" THEN %s\n", node->text);
+        return;
+    }
+    steps[depth] = node;
+    answers[depth] = 'Y';
+    printRules(node->left, depth + 1);
+    answers[depth] = 'N';
+    printRules(node->right, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree("loyal",
+        newTree("cart>10000", newTree("15% off", NULL, NULL), newTree("5% off", NULL, NULL)),
+        newTree("first_order", newTree("free shipping", NULL, NULL),
+                newTree("cart>20000", newTree("5% off", NULL, NULL), newTree("no discount", NULL, NULL))));
+    printRules(root, 0);
+    freeTree(root);
+    return 0;
+}

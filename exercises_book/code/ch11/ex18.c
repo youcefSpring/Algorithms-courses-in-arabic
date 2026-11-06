@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+int main(void) {
+    FILE *file = fopen("stock.txt", "w");
+    int codes[20], qty[20], nb = 0, code, delta, idx, applied = 0;
+    fprintf(file, "101 12\n102 5\n103 3\n104 40\n");
+    fclose(file);
+    file = fopen("moves.txt", "w");
+    fprintf(file, "101 -4\n103 -5\n104 +10\n102 -5\n105 +3\n101 +20\n");
+    fclose(file);
+    file = fopen("stock.txt", "r");
+    while (nb < 20 && fscanf(file, "%d %d", &codes[nb], &qty[nb]) == 2) nb++;
+    fclose(file);
+    file = fopen("moves.txt", "r");
+    while (fscanf(file, "%d %d", &code, &delta) == 2) {    // %d يقبل الإشارة +
+        for (idx = 0; idx < nb && codes[idx] != code; idx++) {}
+        if (idx < nb && qty[idx] + delta >= 0) {
+            qty[idx] += delta;
+            applied++;
+        } else {
+            printf("rejected: %d %+d\n", code, delta);
+        }
+    }
+    fclose(file);
+    file = fopen("stock_new.txt", "w");
+    for (idx = 0; idx < nb; idx++) fprintf(file, "%d %d\n", codes[idx], qty[idx]);
+    fclose(file);
+    printf("%d moves applied. New stock:\n", applied);
+    file = fopen("stock_new.txt", "r");
+    while (fscanf(file, "%d %d", &code, &delta) == 2) printf("  %d: %d\n", code, delta);
+    fclose(file);
+    return 0;
+}

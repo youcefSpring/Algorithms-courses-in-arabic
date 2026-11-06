@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { char name[12]; struct Tree *left, *right; } Tree;
+
+Tree *newTree(const char *name, Tree *left, Tree *right) {
+    Tree *node = malloc(sizeof(Tree));
+    int pos;
+    for (pos = 0; (node->name[pos] = name[pos]) != '\0'; pos++) {}
+    node->left = left; node->right = right;
+    return node;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = newTree("Store",
+        newTree("Tech", newTree("Phones", newTree("Android", NULL, NULL), NULL), newTree("Laptops", NULL, NULL)),
+        newTree("Home", newTree("Kitchen", NULL, NULL), newTree("Garden", NULL, newTree("Tools", NULL, NULL))));
+    Tree *queue[32], *node;
+    int front = 0, rear = 0, levelSize, idx, level = 0;
+    queue[rear++] = root;
+    while (front < rear) {
+        levelSize = rear - front;                    // عقد المستوى الحالي
+        printf("level %d (%d):", level, levelSize);
+        for (idx = 0; idx < levelSize; idx++) {
+            node = queue[front++];
+            printf(" %s", node->name);
+            if (node->left) queue[rear++] = node->left;
+            if (node->right) queue[rear++] = node->right;
+        }
+        printf("\n");
+        level++;
+    }
+    freeTree(root);
+    return 0;
+}

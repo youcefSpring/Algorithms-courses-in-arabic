@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *head = NULL, *prev = NULL;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void flatten(Tree *node) {
+    Tree *right;
+    if (node == NULL) return;
+    flatten(node->left);
+    right = node->right;                      // نحفظه قبل الكتابة فوقه
+    if (prev == NULL) head = node; else prev->right = node;
+    node->left = NULL;
+    prev = node;
+    flatten(right);
+}
+
+int main(void) {
+    int prices[8] = {4500, 1200, 32000, 899, 3200, 12500, 89000, 6800}, idx;
+    Tree *root = NULL, *walk, *next;
+    for (idx = 0; idx < 8; idx++) root = insert(root, prices[idx]);
+    flatten(root);
+    prev->right = NULL;
+    for (walk = head; walk != NULL; walk = walk->right) printf("%d -> ", walk->price);
+    printf("NULL\n");
+    for (walk = head; walk != NULL; walk = next) { next = walk->right; free(walk); }
+    return 0;
+}

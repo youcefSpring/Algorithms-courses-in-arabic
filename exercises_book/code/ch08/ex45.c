@@ -1,0 +1,50 @@
+#include <stdio.h>
+
+char formula[100];
+int pos = 0;
+
+double expression(void);
+
+double factor(void) {
+    double value = 0, scale = 1;
+    if (formula[pos] == '(') {
+        pos++;                                     // (
+        value = expression();                      // عودية غير مباشرة
+        pos++;                                     // )
+        return value;
+    }
+    while (formula[pos] >= '0' && formula[pos] <= '9')
+        value = value * 10 + (formula[pos++] - '0');
+    if (formula[pos] == '.') {
+        pos++;
+        while (formula[pos] >= '0' && formula[pos] <= '9') {
+            scale /= 10;
+            value += (formula[pos++] - '0') * scale;
+        }
+    }
+    return value;
+}
+
+double term(void) {
+    double value = factor();
+    while (formula[pos] == '*' || formula[pos] == '/') {
+        if (formula[pos++] == '*') value *= factor();
+        else value /= factor();
+    }
+    return value;
+}
+
+double expression(void) {
+    double value = term();
+    while (formula[pos] == '+' || formula[pos] == '-') {
+        if (formula[pos++] == '+') value += term();
+        else value -= term();
+    }
+    return value;
+}
+
+int main(void) {
+    scanf("%99s", formula);
+    printf("%s = %.2f DA\n", formula, expression());
+    return 0;
+}

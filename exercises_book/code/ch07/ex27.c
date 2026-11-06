@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int eanCheckDigit(char code[]) {
+    int pos, sum = 0;
+    for (pos = 0; pos < 12; pos++)
+        sum += (code[pos] - '0') * (pos % 2 == 0 ? 1 : 3);   // الأوزان 1 و 3
+    return (10 - sum % 10) % 10;
+}
+
+int eanValid(char code[]) {
+    return code[12] - '0' == eanCheckDigit(code);
+}
+
+int main(void) {
+    char code[20];
+    int idx;
+    for (idx = 0; idx < 2; idx++) {
+        scanf("%19s", code);
+        if (eanValid(code))
+            printf("%s: valid\n", code);
+        else
+            printf("%s: invalid (check digit should be %d)\n", code, eanCheckDigit(code));
+    }
+    return 0;
+}

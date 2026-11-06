@@ -1,0 +1,816 @@
+@@
+title: أقصر جولة توصيل بالتباديل
+level: medium
+domain: ec
+@ statement
+يبدأ السائق من المستودع (0) ويزور 4 زبائن ثم يعود. اكتب دالة عودية `permute(depth)` تولد **كل الترتيبات** الممكنة للزبائن (24 ترتيبًا)، وتحسب طول كل جولة من مصفوفة المسافات، وتحتفظ بأقصرها.
+@ steps
+- `order[]` يحتوي الزبائن 1..4؛ عند المستوى `depth` نبدل `order[depth]` مع كل عنصر بعده، نستدعي `permute(depth + 1)`، ثم نعيد التبديل (**التراجع**).
+- الحالة الأساسية `depth == NB`: نحسب الطول `0 → order[0] → ... → order[3] → 0`.
+@ flow
+call: permute(0)
+out: bestOrder, bestLength
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+int dist[NB + 1][NB + 1] = {{0, 12, 18, 9, 22},
+                            {12, 0, 7, 14, 11},
+                            {18, 7, 0, 10, 6},
+                            {9, 14, 10, 0, 15},
+                            {22, 11, 6, 15, 0}};
+int order[NB] = {1, 2, 3, 4}, bestOrder[NB], bestLength = 100000, tours = 0;
+
+void permute(int depth) {
+    int idx, tmp, length;
+    if (depth == NB) {                                    // ترتيب كامل
+        length = dist[0][order[0]] + dist[order[NB - 1]][0];
+        for (idx = 0; idx < NB - 1; idx++) length += dist[order[idx]][order[idx + 1]];
+        tours++;
+        if (length < bestLength) {
+            bestLength = length;
+            for (idx = 0; idx < NB; idx++) bestOrder[idx] = order[idx];
+        }
+        return;
+    }
+    for (idx = depth; idx < NB; idx++) {
+        tmp = order[depth]; order[depth] = order[idx]; order[idx] = tmp;
+        permute(depth + 1);
+        tmp = order[depth]; order[depth] = order[idx]; order[idx] = tmp;   // تراجع
+    }
+}
+
+int main(void) {
+    int idx;
+    permute(0);
+    printf("%d tours tested\nBest: 0", tours);
+    for (idx = 0; idx < NB; idx++) printf(" -> %d", bestOrder[idx]);
+    printf(" -> 0 = %d km\n", bestLength);
+    return 0;
+}
+
+@@
+title: عدد طرق دفع مبلغ بالقطع النقدية
+level: medium
+domain: ec
+@ statement
+بكم طريقة يمكن دفع مبلغ باستعمال قطع 5 و 10 و 20 و 50 و 100 دج (الترتيب لا يهم)؟ اكتب دالة عودية `ways(amount, coinIndex)`: إما نستعمل القطعة الحالية مرة أخرى، أو ننتقل إلى القطعة التالية. أضف التذكر لتسريعها.
+@ stdin
+100 500
+@ steps
+- `ways(0, ...) = 1` (دفعنا المبلغ بالضبط)، و `ways(سالب, ...) = 0`، و `ways(..., NB) = 0`.
+- `ways(amount, idx) = ways(amount - coins[idx], idx) + ways(amount, idx + 1)`.
+- `memo[amount][idx]` يحفظ النتائج (-1 = غير محسوبة).
+@ flow
+in: amount
+call: count = ways(amount, 0)
+out: count
+@ code
+#include <stdio.h>
+
+#define NB 5
+
+int coins[NB] = {5, 10, 20, 50, 100};
+long memo[1001][NB];
+
+long ways(int amount, int coinIndex) {
+    if (amount == 0) return 1;                       // مبلغ مدفوع بالضبط
+    if (amount < 0 || coinIndex == NB) return 0;
+    if (memo[amount][coinIndex] >= 0) return memo[amount][coinIndex];
+    memo[amount][coinIndex] = ways(amount - coins[coinIndex], coinIndex)   // نستعمل القطعة
+                            + ways(amount, coinIndex + 1);                 // ننتقل إلى التالية
+    return memo[amount][coinIndex];
+}
+
+int main(void) {
+    int amount, query, row, col;
+    for (row = 0; row <= 1000; row++)
+        for (col = 0; col < NB; col++) memo[row][col] = -1;
+    for (query = 0; query < 2; query++) {
+        scanf("%d", &amount);
+        printf("%d DA can be paid in %ld ways\n", amount, ways(amount, 0));
+    }
+    return 0;
+}
+
+@@
+title: أقل عدد من القطع لإرجاع الباقي
+level: medium
+domain: ec
+@ statement
+آلة الدفع الذاتي تملك قطع 1 و 7 و 10 و 25 دج. الطريقة الجشعة (أكبر قطعة أولًا) ليست دائمًا الأفضل. اكتب دالة عودية بالتذكر `minCoins(amount)` تعيد أقل عدد من القطع، وقارنها بالطريقة الجشعة.
+@ stdin
+14 31 63
+@ steps
+- `minCoins(0) = 0`؛ وإلا `1 + min(minCoins(amount - coin))` على كل قطعة لا تتجاوز المبلغ.
+- `memo[amount]` يحفظ النتيجة.
+- الجشعة: نأخذ أكبر قطعة ممكنة في كل مرة.
+@ flow
+in: amount
+call: best = minCoins(amount)
+do: greedy = عدد القطع بالطريقة الجشعة
+out: best, greedy
+@ code
+#include <stdio.h>
+
+#define NB 4
+
+int coins[NB] = {25, 10, 7, 1};
+int memo[200];
+
+int minCoins(int amount) {
+    int idx, candidate, best = 100000;
+    if (amount == 0) return 0;
+    if (memo[amount] > 0) return memo[amount];
+    for (idx = 0; idx < NB; idx++)
+        if (coins[idx] <= amount) {
+            candidate = 1 + minCoins(amount - coins[idx]);   // نجرب كل قطعة
+            if (candidate < best) best = candidate;
+        }
+    memo[amount] = best;
+    return best;
+}
+
+int greedy(int amount) {
+    int idx, count = 0;
+    for (idx = 0; idx < NB; idx++)
+        while (amount >= coins[idx]) { amount -= coins[idx]; count++; }
+    return count;
+}
+
+int main(void) {
+    int amount, query;
+    for (query = 0; query < 3; query++) {
+        scanf("%d", &amount);
+        printf("%3d DA: optimal %d coins, greedy %d coins\n", amount, minCoins(amount), greedy(amount));
+    }
+    return 0;
+}
+
+@@
+title: عدد مسارات التوصيل في شبكة الشوارع
+level: medium
+domain: ec
+@ statement
+المدينة شبكة 6×6 من التقاطعات. ينطلق الدراج من الزاوية العليا اليسرى نحو السفلى اليمنى متحركًا **يمينًا أو نزولًا** فقط، وبعض التقاطعات مغلقة بالأشغال. اكتب دالة عودية بالتذكر `paths(row, col)` تعد المسارات الممكنة.
+@ steps
+- `paths(row, col) = paths(row + 1, col) + paths(row, col + 1)`.
+- خارج الشبكة أو تقاطع مغلق: 0؛ نقطة الوصول: 1.
+- `memo[row][col]` (-1 = غير محسوب).
+@ flow
+call: total = paths(0, 0)
+out: total
+@ code
+#include <stdio.h>
+
+#define SIZE 6
+
+int closed[SIZE][SIZE] = {{0, 0, 0, 0, 0, 0},
+                          {0, 1, 0, 0, 1, 0},
+                          {0, 0, 0, 0, 0, 0},
+                          {1, 0, 0, 1, 0, 0},
+                          {0, 0, 0, 0, 0, 1},
+                          {0, 0, 1, 0, 0, 0}};
+long memo[SIZE][SIZE];
+
+long paths(int row, int col) {
+    if (row >= SIZE || col >= SIZE || closed[row][col]) return 0;
+    if (row == SIZE - 1 && col == SIZE - 1) return 1;     // الوصول
+    if (memo[row][col] >= 0) return memo[row][col];
+    memo[row][col] = paths(row + 1, col) + paths(row, col + 1);
+    return memo[row][col];
+}
+
+int main(void) {
+    int row, col;
+    for (row = 0; row < SIZE; row++)
+        for (col = 0; col < SIZE; col++) memo[row][col] = -1;
+    printf("Paths with roadworks: %ld\n", paths(0, 0));
+    for (row = 0; row < SIZE; row++) {
+        for (col = 0; col < SIZE; col++)
+            printf("%4ld", closed[row][col] ? 0 : paths(row, col));
+        printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: أصغر وأكبر سعر بالتقسيم
+level: medium
+domain: ds
+@ statement
+اكتب دالة عودية بطريقة **فرّق تسد** `minMax(prices, low, high, result)` تقسم الجدول إلى نصفين، تجد الأصغر والأكبر في كل نصف، ثم تجمع النتيجتين. عدّ المقارنات وقارنها بـ `2(n-1)` للطريقة العادية.
+@ steps
+- عنصر واحد: هو الأصغر والأكبر (0 مقارنة)؛ عنصران: مقارنة واحدة.
+- وإلا: `minMax` للنصف الأيسر والأيمن، ثم مقارنتان للدمج.
+- `result[0]` الأصغر و `result[1]` الأكبر.
+@ flow
+call: minMax(prices, 0, 15, result)
+out: result[0], result[1], comparisons
+@ code
+#include <stdio.h>
+
+int comparisons = 0;
+
+void minMax(double prices[], int low, int high, double result[]) {
+    double left[2], right[2];
+    int middle;
+    if (low == high) {
+        result[0] = result[1] = prices[low];
+        return;
+    }
+    if (high == low + 1) {
+        comparisons++;
+        if (prices[low] < prices[high]) { result[0] = prices[low]; result[1] = prices[high]; }
+        else { result[0] = prices[high]; result[1] = prices[low]; }
+        return;
+    }
+    middle = (low + high) / 2;
+    minMax(prices, low, middle, left);          // النصف الأيسر
+    minMax(prices, middle + 1, high, right);    // النصف الأيمن
+    comparisons += 2;
+    result[0] = left[0] < right[0] ? left[0] : right[0];
+    result[1] = left[1] > right[1] ? left[1] : right[1];
+}
+
+int main(void) {
+    double prices[16] = {4500, 1200, 899, 27000, 650, 3200, 12500, 99,
+                         7800, 2300, 560, 4100, 1500, 18900, 740, 3100};
+    double result[2];
+    minMax(prices, 0, 15, result);
+    printf("Min %.0f, max %.0f\n", result[0], result[1]);
+    printf("Comparisons: %d (simple method: %d)\n", comparisons, 2 * (16 - 1));
+    return 0;
+}
+
+@@
+title: صرف بطاقة الهدية بالضبط
+level: medium
+domain: ec
+@ statement
+لدى الزبون بطاقة هدية بقيمة محددة ويريد صرفها **بالضبط** دون باقٍ. اكتب دالة عودية `canSpend(index, remaining)` تحدد إن كانت توجد مجموعة من المنتجات (كل منتج مرة واحدة) مجموع أسعارها يساوي القيمة، وتعرض أحد الحلول.
+@ stdin
+4700 5000
+@ steps
+- `remaining == 0`: وجدنا حلًا. `index == NB` أو `remaining < 0`: لا حل في هذا الفرع.
+- نجرب أخذ المنتج `index` (نعلمه في `taken`)، وإن فشلنا نجرب عدم أخذه.
+@ flow
+in: card
+call: ok = canSpend(0, card)
+if: ok
+  out: المنتجات المأخوذة
+else:
+  out: `"impossible"`
+@ code
+#include <stdio.h>
+
+#define NB 7
+
+int prices[NB] = {1200, 3500, 899, 2100, 650, 1750, 4100};
+int taken[NB];
+
+int canSpend(int index, int remaining) {
+    if (remaining == 0) return 1;                     // صرفنا البطاقة بالضبط
+    if (index == NB || remaining < 0) return 0;
+    taken[index] = 1;
+    if (canSpend(index + 1, remaining - prices[index])) return 1;   // نأخذ المنتج
+    taken[index] = 0;
+    return canSpend(index + 1, remaining);                          // لا نأخذه
+}
+
+int main(void) {
+    int card, query, idx;
+    for (query = 0; query < 2; query++) {
+        scanf("%d", &card);
+        for (idx = 0; idx < NB; idx++) taken[idx] = 0;
+        printf("Card %d DA: ", card);
+        if (canSpend(0, card)) {
+            for (idx = 0; idx < NB; idx++)
+                if (taken[idx]) printf("%d ", prices[idx]);
+            printf("\n");
+        } else {
+            printf("impossible\n");
+        }
+    }
+    return 0;
+}
+
+@@
+title: تجزئة الكمية إلى دفعات
+level: medium
+domain: ec
+@ statement
+بكم طريقة يمكن تقسيم شحنة من `total` وحدة إلى دفعات (الترتيب لا يهم)؟ مثلًا 4 = 4 = 3+1 = 2+2 = 2+1+1 = 1+1+1+1 (5 طرق). اكتب الدالة العودية `partitions(total, largest)` حيث `largest` أكبر حجم دفعة مسموح.
+@ stdin
+4 10 30
+@ steps
+- `partitions(0, ...) = 1`؛ `largest == 0` أو `total < 0`: 0.
+- إما نستعمل دفعة بحجم `largest`: `partitions(total - largest, largest)`، أو لا نستعمل هذا الحجم: `partitions(total, largest - 1)`.
+@ flow
+for: query = 0 ; query < 3 ; query++
+  in: total
+  call: count = partitions(total, total)
+  out: total, count
+@ code
+#include <stdio.h>
+
+long memo[101][101];
+
+long partitions(int total, int largest) {
+    if (total == 0) return 1;
+    if (total < 0 || largest == 0) return 0;
+    if (memo[total][largest] > 0) return memo[total][largest];
+    memo[total][largest] = partitions(total - largest, largest)   // دفعة بحجم largest
+                         + partitions(total, largest - 1);         // دفعات أصغر فقط
+    return memo[total][largest];
+}
+
+int main(void) {
+    int total, query;
+    for (query = 0; query < 3; query++) {
+        scanf("%d", &total);
+        printf("%d units: %ld ways\n", total, partitions(total, total));
+    }
+    printf("30 units with batches of at most 5: %ld ways\n", partitions(30, 5));
+    return 0;
+}
+
+@@
+title: أعداد كاتالان وأشجار القرار
+level: medium
+domain: ds
+@ statement
+عدد أشجار القرار الثنائية المختلفة التي يمكن بناؤها بـ `nodes` عقدة هو **عدد كاتالان** `C(n) = Σ C(left) × C(n-1-left)` لـ `left` من 0 إلى `n-1`. اكتب الدالة العودية بالتذكر واعرض الأعداد من 0 إلى 15.
+@ steps
+- `C(0) = 1` (شجرة فارغة).
+- نختار الجذر، ثم `left` عقدة يسارًا و `n - 1 - left` يمينًا: نضرب عدد الإمكانيات.
+@ flow
+for: nodes = 0 ; nodes <= 15 ; nodes++
+  call: value = catalan(nodes)
+  out: nodes, value
+@ code
+#include <stdio.h>
+
+long memo[40];
+
+long catalan(int nodes) {
+    long total = 0;
+    int left;
+    if (nodes <= 1) return 1;
+    if (memo[nodes] != 0) return memo[nodes];
+    for (left = 0; left < nodes; left++)
+        total += catalan(left) * catalan(nodes - 1 - left);   // يسار × يمين
+    memo[nodes] = total;
+    return total;
+}
+
+int main(void) {
+    int nodes;
+    for (nodes = 0; nodes <= 15; nodes++) {
+        printf("C(%2d) = %-9ld", nodes, catalan(nodes));
+        if (nodes % 4 == 3) printf("\n");
+    }
+    return 0;
+}
+
+@@
+title: مساحة المنطقة الحرة في المخزن
+level: medium
+domain: ec
+@ statement
+مخطط المخزن شبكة: `#` رف، `.` ممر حر. اكتب دالة عودية `fill(row, col)` (**ملء الفيضان**) تعد خانات المنطقة الحرة المتصلة انطلاقًا من خانة معينة (الحركة أفقية وعمودية)، وتعلمها بـ `o`، ثم عدّ عدد المناطق المنفصلة.
+@ steps
+- إذا كانت الخانة خارج الشبكة أو ليست `.`: نعيد 0.
+- نعلمها بـ `o` (لكي لا نعدها مرتين) ثم `1 + fill` للجيران الأربعة.
+- كل خانة `.` باقية بعد ملء منطقة هي بداية منطقة جديدة.
+@ flow
+for: row = 0 ; row < ROWS ; row++
+  for: col = 0 ; col < COLS ; col++
+    if: plan[row][col] == '.'
+      call: size = fill(row, col)
+      do: zones++
+      out: zones, size
+@ code
+#include <stdio.h>
+
+#define ROWS 6
+#define COLS 10
+
+char plan[ROWS][COLS + 1] = {"..##......",
+                             "..##.####.",
+                             "####.#..#.",
+                             "....##..#.",
+                             ".##.######",
+                             ".#........"};
+
+int fill(int row, int col) {
+    if (row < 0 || row >= ROWS || col < 0 || col >= COLS || plan[row][col] != '.')
+        return 0;
+    plan[row][col] = 'o';                         // تمت زيارتها
+    return 1 + fill(row + 1, col) + fill(row - 1, col)
+             + fill(row, col + 1) + fill(row, col - 1);
+}
+
+int main(void) {
+    int row, col, zones = 0;
+    for (row = 0; row < ROWS; row++)
+        for (col = 0; col < COLS; col++)
+            if (plan[row][col] == '.') {
+                zones++;
+                printf("Zone %d from (%d,%d): %d cells\n", zones, row, col, fill(row, col));
+            }
+    for (row = 0; row < ROWS; row++) printf("%s\n", plan[row]);
+    return 0;
+}
+
+@@
+title: مسار الروبوت في متاهة المخزن
+level: medium
+domain: ec
+@ statement
+روبوت جمع الطلبيات يبحث عن طريق من `S` إلى `E` في المخزن (`#` جدار). اكتب دالة عودية `solve(row, col)` بطريقة **التراجع**: نعلم الخانة كجزء من المسار `*`، نجرب الاتجاهات الأربعة، وإذا فشلت كلها نزيل العلامة.
+@ steps
+- الحالة الأساسية: الوصول إلى `E` → نجاح.
+- خانة غير صالحة (جدار، خارج، أو زرناها): فشل.
+- عند الفشل في كل الاتجاهات نتراجع: نعلم الخانة بـ `x` (طريق مسدود) لكي لا نزورها مجددًا.
+@ flow
+call: found = solve(startRow, startCol)
+if: found
+  out: المتاهة مع المسار
+else:
+  out: `"no path"`
+@ code
+#include <stdio.h>
+
+#define ROWS 7
+#define COLS 11
+
+char maze[ROWS][COLS + 1] = {"###########",
+                             "#S..#.....#",
+                             "#.#.#.###.#",
+                             "#.#...#...#",
+                             "#.#####.#.#",
+                             "#.......#E#",
+                             "###########"};
+
+int solve(int row, int col) {
+    if (maze[row][col] == 'E') return 1;                     // وصلنا
+    if (maze[row][col] != '.' && maze[row][col] != 'S') return 0;
+    if (maze[row][col] == '.') maze[row][col] = '*';         // جزء من المسار
+    if (solve(row, col + 1) || solve(row + 1, col) || solve(row, col - 1) || solve(row - 1, col))
+        return 1;
+    if (maze[row][col] == '*') maze[row][col] = 'x';         // طريق مسدود
+    return 0;
+}
+
+int main(void) {
+    int row, steps = 0, col;
+    maze[1][1] = 'S';
+    if (solve(1, 1)) {
+        for (row = 0; row < ROWS; row++) {
+            for (col = 0; col < COLS; col++) {
+                if (maze[row][col] == 'x') maze[row][col] = '.';
+                if (maze[row][col] == '*') steps++;
+            }
+            printf("%s\n", maze[row]);
+        }
+        printf("Path found: %d cells\n", steps);
+    } else {
+        printf("no path\n");
+    }
+    return 0;
+}
+
+@@
+title: مبيعات شجرة الأقسام
+level: medium
+domain: ds
+@ statement
+أقسام المتجر شجرة: كل قسم له أب (`parent[]`، والجذر أبوه -1) ومبيعات خاصة به. اكتب دالة عودية `totalSales(node)` تعيد مبيعات القسم **مع كل الأقسام التابعة له**، ودالة `printTree(node, depth)` تعرض الشجرة مع الإزاحة.
+@ steps
+- مبيعات قسم = مبيعاته الخاصة + `totalSales` لكل ابن (الأبناء: العقد التي `parent == node`).
+- `printTree` تطبع القسم بإزاحة `2 * depth` ثم تستدعي نفسها على الأبناء بـ `depth + 1`.
+@ flow
+call: printTree(0, 0)
+@ code
+#include <stdio.h>
+
+#define NB 9
+
+char names[NB][14] = {"Store", "Electronics", "Phones", "Laptops", "Home",
+                      "Kitchen", "Garden", "Accessories", "Chargers"};
+int parent[NB] = {-1, 0, 1, 1, 0, 4, 4, 1, 7};
+double own[NB] = {0, 1200, 8400, 6100, 300, 2500, 1800, 900, 1350};
+
+double totalSales(int node) {
+    double total = own[node];
+    int child;
+    for (child = 0; child < NB; child++)
+        if (parent[child] == node)
+            total += totalSales(child);           // مبيعات الفرع
+    return total;
+}
+
+void printTree(int node, int depth) {
+    int child;
+    printf("%*s%-*s %8.0f\n", 2 * depth, "", 16 - 2 * depth, names[node], totalSales(node));
+    for (child = 0; child < NB; child++)
+        if (parent[child] == node)
+            printTree(child, depth + 1);
+}
+
+int main(void) {
+    printTree(0, 0);
+    return 0;
+}
+
+@@
+title: الجذر التربيعي بالتنصيف العودي
+level: medium
+domain: ds
+@ statement
+اكتب دالة عودية `rootBisect(value, low, high)` تجد الجذر التربيعي: نحسب المنتصف `middle`؛ إذا كان `middle²` أكبر من القيمة نبحث في `[low, middle]`، وإلا في `[middle, high]`، حتى يصبح طول المجال أقل من `1e-9`.
+@ steps
+- الحالة الأساسية: `high - low < 1e-9`.
+- المجال الابتدائي `[0, max(1, value)]`.
+- كل استدعاء يقسم المجال على 2.
+@ flow
+for: idx = 0 ; idx < 4 ; idx++
+  call: root = rootBisect(values[idx], 0, max(1, values[idx]))
+  out: values[idx], root
+@ code
+#include <stdio.h>
+
+int depthReached = 0;
+
+double rootBisect(double value, double low, double high) {
+    double middle = (low + high) / 2;
+    depthReached++;
+    if (high - low < 1e-9) return middle;            // دقة كافية
+    if (middle * middle > value)
+        return rootBisect(value, low, middle);
+    return rootBisect(value, middle, high);
+}
+
+int main(void) {
+    double values[4] = {2, 0.25, 144, 1000000}, root;
+    int idx;
+    for (idx = 0; idx < 4; idx++) {
+        depthReached = 0;
+        root = rootBisect(values[idx], 0, values[idx] > 1 ? values[idx] : 1);
+        printf("sqrt(%.2f) = %.8f (%d calls)\n", values[idx], root, depthReached);
+    }
+    return 0;
+}
+
+@@
+title: قلب السلسلة في مكانها عوديًا
+level: medium
+domain: ec
+@ statement
+اكتب دالة عودية `reverseInPlace(text, left, right)` تقلب السلسلة **داخل نفس الجدول**: تبدل الحرفين الطرفيين ثم تستدعي نفسها على الجزء الداخلي. استعملها لقلب كل كلمة من جملة على حدة.
+@ steps
+- الحالة الأساسية `left >= right`.
+- لقلب كل كلمة: نجد بداية الكلمة ونهايتها ثم نستدعي الدالة على هذا المجال.
+@ flow
+do: start = 0
+for: pos = 0 ; pos <= length ; pos++
+  if: text[pos] == ' ' || text[pos] == '\0'
+    call: reverseInPlace(text, start, pos - 1)
+    do: start = pos + 1
+out: text
+@ code
+#include <stdio.h>
+
+void reverseInPlace(char text[], int left, int right) {
+    char tmp;
+    if (left >= right) return;
+    tmp = text[left];                 // تبديل الطرفين
+    text[left] = text[right];
+    text[right] = tmp;
+    reverseInPlace(text, left + 1, right - 1);
+}
+
+int main(void) {
+    char text[] = "fast delivery for every order";
+    int pos, start = 0, length = 0;
+    while (text[length] != '\0') length++;
+    reverseInPlace(text, 0, length - 1);
+    printf("Whole: %s\n", text);
+    reverseInPlace(text, 0, length - 1);          // نعيدها كما كانت
+    for (pos = 0; pos <= length; pos++)
+        if (text[pos] == ' ' || text[pos] == '\0') {
+            reverseInPlace(text, start, pos - 1);  // كل كلمة على حدة
+            start = pos + 1;
+        }
+    printf("Words: %s\n", text);
+    return 0;
+}
+
+@@
+title: حساب كثير الحدود بطريقة هورنر العودية
+level: medium
+domain: ds
+@ statement
+نموذج التكلفة كثير حدود `cost(q) = 0.002q³ - 0.5q² + 60q + 1500`. اكتب دالة عودية `horner(coeffs, degree, value)` تحسب `p(q) = a0 + q·(a1 + q·(a2 + ...))` بعدد ضربات يساوي الدرجة فقط، واحسب التكلفة المتوسطة لعدة كميات.
+@ steps
+- `coeffs[0]` الحد الثابت، `coeffs[degree]` معامل أعلى درجة.
+- `horner(coeffs, idx) = coeffs[idx] + value * horner(coeffs, idx + 1)`، والحالة الأساسية `idx == degree`.
+@ flow
+for: idx = 0 ; idx < 5 ; idx++
+  call: cost = horner(coeffs, 0, 3, quantities[idx])
+  out: quantities[idx], cost, cost / quantities[idx]
+@ code
+#include <stdio.h>
+
+double horner(double coeffs[], int index, int degree, double value) {
+    if (index == degree) return coeffs[degree];
+    return coeffs[index] + value * horner(coeffs, index + 1, degree, value);
+}
+
+int main(void) {
+    double coeffs[4] = {1500, 60, -0.5, 0.002};   // a0 + a1 q + a2 q^2 + a3 q^3
+    double quantities[5] = {10, 50, 100, 150, 200}, cost;
+    int idx;
+    for (idx = 0; idx < 5; idx++) {
+        cost = horner(coeffs, 0, 3, quantities[idx]);
+        printf("q = %3.0f: cost %9.2f, per unit %7.2f\n",
+               quantities[idx], cost, cost / quantities[idx]);
+    }
+    return 0;
+}
+
+@@
+title: دمج قائمتين مرتبتين عوديًا
+level: medium
+domain: ec
+@ statement
+لدينا قائمتا أسعار مرتبتان من مورّدين. اكتب دالة عودية `mergeRec(first, sizeA, second, sizeB, out)` تدمجهما في قائمة مرتبة واحدة: نأخذ الأصغر من رأسي القائمتين ثم ندمج الباقي عوديًا.
+@ steps
+- إذا انتهت إحدى القائمتين ننسخ الأخرى.
+- وإلا نضع الأصغر في `out[0]` ونستدعي الدالة على القائمتين مع تقدم القائمة التي أُخذ منها العنصر، و `out + 1`.
+@ flow
+call: mergeRec(supplierA, 5, supplierB, 6, merged)
+out: merged
+@ code
+#include <stdio.h>
+
+void mergeRec(int first[], int sizeA, int second[], int sizeB, int out[]) {
+    int idx;
+    if (sizeA == 0) { for (idx = 0; idx < sizeB; idx++) out[idx] = second[idx]; return; }
+    if (sizeB == 0) { for (idx = 0; idx < sizeA; idx++) out[idx] = first[idx]; return; }
+    if (first[0] <= second[0]) {
+        out[0] = first[0];
+        mergeRec(first + 1, sizeA - 1, second, sizeB, out + 1);    // باقي الأولى
+    } else {
+        out[0] = second[0];
+        mergeRec(first, sizeA, second + 1, sizeB - 1, out + 1);    // باقي الثانية
+    }
+}
+
+int main(void) {
+    int supplierA[5] = {450, 900, 1500, 3200, 7800};
+    int supplierB[6] = {300, 899, 1200, 2500, 4100, 9900};
+    int merged[11], idx;
+    mergeRec(supplierA, 5, supplierB, 6, merged);
+    for (idx = 0; idx < 11; idx++) printf("%d ", merged[idx]);
+    printf("\n");
+    return 0;
+}
+
+@@
+title: رموز ثنائية دون واحدين متتاليين
+level: medium
+domain: ds
+@ statement
+نظام قراءة البطاقات يرفض الرموز الثنائية التي تحتوي على `11`. اكتب دالة عودية `generate(pos, previous)` تعرض كل الرموز الصالحة بطول 5، وعدّها (يجب أن يكون العدد من متتالية فيبوناتشي).
+@ steps
+- في كل موضع نضع `0` دائمًا، ونضع `1` فقط إذا كان الرقم السابق `0`.
+- الحالة الأساسية `pos == LEN`: نطبع الرمز.
+@ flow
+call: generate(0, 0)
+out: count
+@ code
+#include <stdio.h>
+
+#define LEN 5
+
+char code[LEN + 1];
+int count = 0;
+
+void generate(int pos, int previous) {
+    if (pos == LEN) {
+        code[LEN] = '\0';
+        printf("%s ", code);
+        if (++count % 7 == 0) printf("\n");
+        return;
+    }
+    code[pos] = '0';
+    generate(pos + 1, 0);
+    if (previous == 0) {                 // 1 مسموح فقط بعد 0
+        code[pos] = '1';
+        generate(pos + 1, 1);
+    }
+}
+
+int main(void) {
+    generate(0, 0);
+    printf("\n%d valid codes of length %d\n", count, LEN);
+    return 0;
+}
+
+@@
+title: اختيار ثلاثة منتجات ضمن الميزانية
+level: medium
+domain: ec
+@ statement
+اكتب دالة عودية `combine(start, picked, spent)` تولد كل **التوافيق** لثلاثة منتجات من ستة (20 توفيقة) دون تكرار ودون اعتبار الترتيب، وتعرض فقط التي لا يتجاوز مجموعها ميزانية 9000 دج.
+@ steps
+- نختار المنتج التالي من `start` فما بعد فقط (لتفادي التكرار).
+- الحالة الأساسية `picked == 3`.
+- **التقليم**: إذا تجاوز `spent` الميزانية نتوقف عن التوسيع.
+@ flow
+call: combine(0, 0, 0)
+out: valid
+@ code
+#include <stdio.h>
+
+#define NB 6
+#define PICK 3
+#define BUDGET 9000
+
+char names[NB][10] = {"Mouse", "Keyboard", "Headset", "Webcam", "Hub", "Stand"};
+int prices[NB] = {1500, 3200, 2800, 4100, 2200, 1900};
+int chosen[PICK], valid = 0;
+
+void combine(int start, int picked, int spent) {
+    int idx;
+    if (spent > BUDGET) return;                   // تقليم
+    if (picked == PICK) {
+        valid++;
+        for (idx = 0; idx < PICK; idx++) printf("%-9s", names[chosen[idx]]);
+        printf("= %d\n", spent);
+        return;
+    }
+    for (idx = start; idx < NB; idx++) {
+        chosen[picked] = idx;
+        combine(idx + 1, picked + 1, spent + prices[idx]);
+    }
+}
+
+int main(void) {
+    combine(0, 0, 0);
+    printf("%d bundles within %d DA\n", valid, BUDGET);
+    return 0;
+}
+
+@@
+title: عمق التداخل في ملف إعدادات
+level: medium
+domain: ds
+@ statement
+ملف إعدادات المتجر يستعمل الأقواس `{}` و `[]` بشكل متداخل. اكتب دالة عودية `parse(text, pos, depth, closing)` تمر على النص، وعند كل قوس فتح تستدعي نفسها بعمق أكبر، وتعيد الموضع بعد قوس الغلق المطابق. احسب **أقصى عمق** وتحقق من صحة التوازن.
+@ steps
+- الدالة تعالج كتلة كاملة: تتقدم حتى تجد قوس الغلق المطابق لقوسها.
+- عند قوس فتح: `pos = parse(text, pos + 1, depth + 1, closing)` حيث `closing` قوس الغلق المنتظر.
+- قوس غلق غير مطابق أو نهاية مبكرة: خطأ (`-1`).
+@ flow
+call: end = parse(config, 0, 0, '\0')
+if: end >= 0
+  out: maxDepth
+else:
+  out: `"unbalanced"`
+@ code
+#include <stdio.h>
+
+int maxDepth = 0;
+
+int parse(char text[], int pos, int depth, char closing) {
+    char ch;
+    if (depth > maxDepth) maxDepth = depth;
+    while (text[pos] != '\0') {
+        ch = text[pos];
+        if (ch == '{' || ch == '[') {
+            pos = parse(text, pos + 1, depth + 1, ch == '{' ? '}' : ']');   // كتلة داخلية
+            if (pos < 0) return -1;
+        } else if (ch == '}' || ch == ']') {
+            return ch == closing ? pos + 1 : -1;     // يجب أن يطابق قوس الفتح
+        } else {
+            pos++;
+        }
+    }
+    return closing == '\0' ? pos : -1;               // نهاية النص
+}
+
+int main(void) {
+    char good[] = "{shop:{name:x,cats:[{id:1,tags:[a,b]},{id:2}]},pay:[cash]}";
+    char bad[] = "{shop:{cats:[{id:1]}}";
+    int end;
+    end = parse(good, 0, 0, '\0');
+    printf("Config 1: %s, max depth %d\n", end >= 0 ? "balanced" : "unbalanced", maxDepth);
+    maxDepth = 0;
+    end = parse(bad, 0, 0, '\0');
+    printf("Config 2: %s\n", end >= 0 ? "balanced" : "unbalanced");
+    return 0;
+}

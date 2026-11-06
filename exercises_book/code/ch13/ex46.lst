@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NBS 14
+#define MAXD 3
+
+typedef struct Tree { int feature, label; double threshold; struct Tree *left, *right; } Tree;
+
+double data[NBS][2] = {{2, 0}, {3, 1}, {8, 0}, {9, 2}, {4, 3}, {10, 1}, {1, 1}, {7, 3},
+                       {6, 0}, {5, 2}, {9, 0}, {3, 2}, {8, 3}, {2, 3}};      // (pages, cart)
+int labels[NBS] = {0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1};
+const char *names[2] = {"pages", "cart"};
+
+double gini(const int *samples, int count) {
+    int idx, buyers = 0;
+    double ratio;
+    if (count == 0) return 0;
+    for (idx = 0; idx < count; idx++) buyers += labels[samples[idx]];
+    ratio = (double)buyers / count;
+    return 2 * ratio * (1 - ratio);
+}
+
+Tree *grow(const int *samples, int count, int depth) {
+    Tree *node = malloc(sizeof(Tree));
+    int left[NBS], right[NBS], nLeft, nRight, feat, cand, idx, buyers = 0;
+    double score, bestScore = gini(samples, count), threshold;
+    for (idx = 0; idx < count; idx++) buyers += labels[samples[idx]];
+    node->label = buyers * 2 >= count;                         (*@\cmt{صنف الأغلبية}@*)
+    node->feature = -1;
+    node->left = node->right = NULL;
+    if (buyers == 0 || buyers == count || depth == MAXD) return node;
+    for (feat = 0; feat < 2; feat++)
+        for (cand = 0; cand < count; cand++) {
+            threshold = data[samples[cand]][feat];
+            for (nLeft = nRight = 0, idx = 0; idx < count; idx++)
+                if (data[samples[idx]][feat] <= threshold) left[nLeft++] = samples[idx]; else right[nRight++] = samples[idx];
+            if (nLeft == 0 || nRight == 0) continue;
+            score = (nLeft * gini(left, nLeft) + nRight * gini(right, nRight)) / count;
+            if (score < bestScore - 1e-12) { bestScore = score; node->feature = feat; node->threshold = threshold; }
+        }
+    if (node->feature < 0) return node;                         (*@\cmt{لا تحسين}@*)
+    for (nLeft = nRight = 0, idx = 0; idx < count; idx++)
+        if (data[samples[idx]][node->feature] <= node->threshold) left[nLeft++] = samples[idx]; else right[nRight++] = samples[idx];
+    node->left = grow(left, nLeft, depth + 1);                  (*@\cmt{بناء عودي}@*)
+    node->right = grow(right, nRight, depth + 1);
+    return node;
+}
+
+void show(const Tree *node, int depth) {
+    if (node->feature < 0) { printf("%*s-> %s\n", 2 * depth, "", node->label ? "BUY" : "no buy"); return; }
+    printf("%*sif %s <= %.0f:\n", 2 * depth, "", names[node->feature], node->threshold);
+    show(node->left, depth + 1);
+    printf("%*selse:\n", 2 * depth, "");
+    show(node->right, depth + 1);
+}
+
+int predict(const Tree *node, const double *row) {
+    while (node->feature >= 0) node = row[node->feature] <= node->threshold ? node->left : node->right;
+    return node->label;
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    int samples[NBS], idx, correct = 0;
+    Tree *root;
+    for (idx = 0; idx < NBS; idx++) samples[idx] = idx;
+    root = grow(samples, NBS, 0);
+    show(root, 0);
+    for (idx = 0; idx < NBS; idx++) correct += predict(root, data[idx]) == labels[idx];
+    printf("training accuracy: %d/%d\n", correct, NBS);
+    freeTree(root);
+    return 0;
+}

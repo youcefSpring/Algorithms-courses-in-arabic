@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree { int price; struct Tree *left, *right; } Tree;
+
+Tree *insert(Tree *node, int price) {
+    if (node == NULL) { node = malloc(sizeof(Tree)); node->price = price; node->left = node->right = NULL; }
+    else if (price < node->price) node->left = insert(node->left, price);
+    else node->right = insert(node->right, price);
+    return node;
+}
+
+void printSideways(const Tree *node, int depth) {
+    if (node == NULL) return;
+    printSideways(node->right, depth + 1);            // الأكبر في الأعلى
+    printf("%*s%d\n", 6 * depth, "", node->price);
+    printSideways(node->left, depth + 1);
+}
+
+void freeTree(Tree *node) { if (node) { freeTree(node->left); freeTree(node->right); free(node); } }
+
+int main(void) {
+    Tree *root = NULL;
+    int count, idx, price;
+    scanf("%d", &count);
+    for (idx = 0; idx < count; idx++) { scanf("%d", &price); root = insert(root, price); }
+    printSideways(root, 0);
+    freeTree(root);
+    return 0;
+}

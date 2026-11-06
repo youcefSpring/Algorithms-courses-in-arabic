@@ -1843,7 +1843,7 @@
 \end{statement}
 \parthead{\faListOl}{خطوات الحل}
 \begin{stepsbox}\begin{enumerate}
-\item \code{amount1} هو الوسيط إذا كان بين \code{amount2} و\code{amount3}: \par{\centering\small\code{(amount2 <= amount1 \&\& amount1 <= amount3) || (amount3 <= amount1 \&\& amount1 <= amount2)}\par}.
+\item \code{amount1} هو الوسيط إذا كان بين \code{amount2} و\code{amount3}: \par{\centering\scriptsize\code{(amount2 <= amount1 \&\& amount1 <= amount3) || (amount3 <= amount1 \&\& amount1 <= amount2)}\par}.
 \item نفس الاختبار لـ \code{amount2}، وإلا فالوسيط \code{amount3}.
 \end{enumerate}\end{stepsbox}
 \parthead{\faCode}{البرنامج بلغة \en{C}}
@@ -2158,7 +2158,7 @@
 
 \exhead{2.41}{3}{يوم الأسبوع لتاريخ ما}{\faTag\ تجارة إلكترونية}
 \begin{statement}
-لتخطيط الحملات نحتاج يوم الأسبوع لأي تاريخ. اكتب برنامجًا يطبق \textbf{صيغة زيلر}: نعتبر جانفي وفيفري الشهرين \en{13} و\en{14} من السنة السابقة، ثم \par{\centering\small\code{weekday = (day + 13(month+1)/5 + yearInCentury + yearInCentury/4 + century/4 + 5J) \% 7}\par} حيث \code{yearInCentury = year \% 100} و\code{century = year / 100}، و\code{weekday = 0} يعني السبت.
+لتخطيط الحملات نحتاج يوم الأسبوع لأي تاريخ. اكتب برنامجًا يطبق \textbf{صيغة زيلر}: نعتبر جانفي وفيفري الشهرين \en{13} و\en{14} من السنة السابقة، ثم \par{\centering\scriptsize\code{weekday = (day + 13(month+1)/5 + yearInCentury + yearInCentury/4 + century/4 + 5J) \% 7}\par} حيث \code{yearInCentury = year \% 100} و\code{century = year / 100}، و\code{weekday = 0} يعني السبت.
 \end{statement}
 \parthead{\faListOl}{خطوات الحل}
 \begin{stepsbox}\begin{enumerate}

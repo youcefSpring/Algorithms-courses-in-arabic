@@ -1,0 +1,3 @@
+Rule: buyer if duration >= 180
+Weighted Gini: 0.1429
+Training accuracy: 11/12

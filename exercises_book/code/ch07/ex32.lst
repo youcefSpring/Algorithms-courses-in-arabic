@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+double subtotal(double prices[], int qty[], int size) {
+    double total = 0;
+    int idx;
+    for (idx = 0; idx < size; idx++) total += prices[idx] * qty[idx];
+    return total;
+}
+
+double discount(double amount) { return amount > 20000 ? amount * 0.10 : 0; }
+double tax(double amount)      { return amount * 0.19; }
+double shipping(double amount) { return amount > 30000 ? 0 : 500; }
+
+void printInvoice(double prices[], int qty[], int size) {
+    double base = subtotal(prices, qty, size);
+    double off = discount(base);
+    double net = base - off;                       (*@\cmt{المبلغ بعد الخصم}@*)
+    printf("Subtotal : %10.2f\n", base);
+    printf("Discount : %10.2f\n", -off);
+    printf("VAT 19%%  : %10.2f\n", tax(net));
+    printf("Shipping : %10.2f\n", shipping(net));
+    printf("TOTAL    : %10.2f DA\n", net + tax(net) + shipping(net));
+}
+
+int main(void) {
+    double prices[4] = {4500, 1200, 899, 6000};
+    int qty[4] = {2, 3, 4, 1};
+    printInvoice(prices, qty, 4);
+    return 0;
+}

@@ -1,0 +1,17 @@
+{ } = 0
+{ Webcam } = 4100
+{ Headset } = 2800
+{ Headset Webcam } = 6900
+{ Keyboard } = 3200
+{ Keyboard Webcam } = 7300
+{ Keyboard Headset } = 6000
+{ Keyboard Headset Webcam } = 10100
+{ Mouse } = 1500
+{ Mouse Webcam } = 5600
+{ Mouse Headset } = 4300
+{ Mouse Headset Webcam } = 8400
+{ Mouse Keyboard } = 4700
+{ Mouse Keyboard Webcam } = 8800
+{ Mouse Keyboard Headset } = 7500
+{ Mouse Keyboard Headset Webcam } = 11600
+Bundles up to 6000 DA: 9

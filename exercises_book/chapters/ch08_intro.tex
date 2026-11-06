@@ -1,0 +1,45 @@
+\begin{tbox}{\faLightbulb\quad تعريفات}
+\begin{itemize}
+    \item \textbf{الدالة العودية}: دالة تستدعي نفسها على مسألة \textbf{أصغر} من نفس النوع.
+    \item \textbf{الحالة الأساسية}: حالة صغيرة نعرف جوابها مباشرة وتوقف الاستدعاءات (مثلًا \code{0! = 1}).
+    \item \textbf{الحالة العودية}: تقرّب المسألة من الحالة الأساسية (\code{count * factorial(count - 1)}).
+    \item \textbf{التذكر} \en{(memoization)}: حفظ النتائج المحسوبة في جدول لتفادي إعادة حسابها.
+    \item \textbf{التراجع} \en{(backtracking)}: نجرب اختيارًا، ونستدعي عوديًا، ثم \textbf{نلغي} الاختيار إذا فشل.
+\end{itemize}
+\end{tbox}
+
+\begin{center}
+\begin{tikzpicture}[node distance=4mm,
+    call/.style={draw=brandTeal, fill=brandTeal!10, very thick, rounded corners=3pt,
+        minimum width=2.6cm, minimum height=0.7cm, font=\small}]
+    \node[call] (a) {\code{factorial(4)}};
+    \node[call, below=of a] (b) {\code{factorial(3)}};
+    \node[call, below=of b] (c) {\code{factorial(2)}};
+    \node[call, below=of c, draw=brandOrange, fill=brandOrange!15] (d) {\code{factorial(1) = 1}};
+    \draw[sahm] (a) -- (b); \draw[sahm] (b) -- (c); \draw[sahm] (c) -- (d);
+    \draw[sahm, brandOrange] (d.west) to[bend left=40] node[left, font=\scriptsize] {\en{2}} (c.west);
+    \draw[sahm, brandOrange] (c.west) to[bend left=40] node[left, font=\scriptsize] {\en{6}} (b.west);
+    \draw[sahm, brandOrange] (b.west) to[bend left=40] node[left, font=\scriptsize] {\en{24}} (a.west);
+    \node[right=8mm of b, text width=6cm, font=\small] {الاستدعاءات تنزل حتى الحالة الأساسية،
+        ثم تصعد النتائج (بالبرتقالي) وكل مستوى يكمل حسابه.};
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabularx}{0.95\linewidth}{|c|X|}
+\hline
+\ras{النمط} & \ras{أمثلة في هذا الفصل} \\ \hline
+عودية بسيطة & المضروب، مجموع الأرقام، القوة، البحث الثنائي \\ \hline
+فرّق تسد & الترتيب بالدمج، الترتيب السريع، أقرب زوج من النقاط \\ \hline
+التذكر & فيبوناتشي، عدد طرق الدفع، مسارات الشبكة \\ \hline
+التراجع & التباديل، الملكات، السودوكو، المتاهة \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{obox}{\faExclamationTriangle\quad لا تنسَ الحالة الأساسية}
+دالة عودية دون حالة أساسية (أو لا تقترب منها) تستدعي نفسها إلى ما لا نهاية حتى تمتلئ
+\textbf{مكدس الاستدعاءات} ويتوقف البرنامج \en{(stack overflow)}.
+\end{obox}
+
+\chaprefs{clrs,skiena,wirth}
+\insertstats{08}

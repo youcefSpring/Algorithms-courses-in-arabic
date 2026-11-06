@@ -1,0 +1,31 @@
+#include <stdio.h>
+
+typedef struct {
+    char name[16];
+    int stock;
+    double dailySales;
+    int leadDays;
+} Item;
+
+int needsRestock(Item item) {
+    return item.stock < item.dailySales * (item.leadDays + 3);   (*@\cmt{نقطة إعادة الطلب}@*)
+}
+
+int orderQuantity(Item item) {
+    return (int)(item.dailySales * 30 - item.stock + 0.5);
+}
+
+int main(void) {
+    Item items[5] = {{"Phone case", 40, 6.5, 4}, {"Charger", 120, 5.0, 7},
+                     {"Earbuds", 15, 2.2, 10}, {"Cable", 300, 12.0, 3},
+                     {"Power bank", 9, 1.5, 5}};
+    int idx, count = 0;
+    for (idx = 0; idx < 5; idx++)
+        if (needsRestock(items[idx])) {
+            printf("Reorder %-11s stock %3d -> order %3d units\n", items[idx].name,
+                   items[idx].stock, orderQuantity(items[idx]));
+            count++;
+        }
+    printf("%d product(s) to reorder\n", count);
+    return 0;
+}
